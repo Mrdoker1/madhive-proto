@@ -2,6 +2,9 @@
 
 import React, { useState } from 'react';
 import { IconCalendar, IconArrowRight } from '@tabler/icons-react';
+import { DateRange, Calendar } from 'react-date-range';
+import 'react-date-range/dist/styles.css'; // main css file
+import 'react-date-range/dist/theme/default.css'; // theme css file
 
 interface DateRangeInputProps {
   label?: string;
@@ -25,36 +28,44 @@ const DateRangeInput: React.FC<DateRangeInputProps> = ({
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [focused, setFocused] = useState(false);
+  
+  // Состояние для react-date-range
+  const [dateRange, setDateRange] = useState([
+    {
+      startDate: new Date(),
+      endDate: new Date(),
+      key: 'selection'
+    }
+  ]);
 
-  const formatDateInput = (value: string) => {
-    const cleaned = value.replace(/[^\d/]/g, '');
+  // Состояние для независимых календарей
+  const [leftCalendarDate, setLeftCalendarDate] = useState(new Date());
+  const [rightCalendarDate, setRightCalendarDate] = useState(() => {
+    const date = new Date();
+    date.setMonth(date.getMonth() + 1);
+    return date;
+  });
+
+  const formatDateFromObj = (date: Date | null) => {
+    if (!date) return '';
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${month}/${day}/${year}`;
+  };
+
+  const handleDateRangeChange = (ranges: any) => {
+    const selection = ranges.selection;
+    setDateRange([selection]);
     
-    if (cleaned.length >= 2 && cleaned.length <= 4) {
-      return cleaned.replace(/(\d{2})(\d)/, '$1/$2');
-    }
-    if (cleaned.length >= 5) {
-      return cleaned.replace(/(\d{2})(\d{2})(\d)/, '$1/$2/$3');
-    }
-    return cleaned;
-  };
-
-  const handleStartDateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const formatted = formatDateInput(event.target.value);
-    if (formatted.length <= 10) {
-      setStartDate(formatted);
-      if (onChange) {
-        onChange(formatted, endDate);
-      }
-    }
-  };
-
-  const handleEndDateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const formatted = formatDateInput(event.target.value);
-    if (formatted.length <= 10) {
-      setEndDate(formatted);
-      if (onChange) {
-        onChange(startDate, formatted);
-      }
+    const formattedStartDate = formatDateFromObj(selection.startDate);
+    const formattedEndDate = formatDateFromObj(selection.endDate);
+    
+    setStartDate(formattedStartDate);
+    setEndDate(formattedEndDate);
+    
+    if (onChange) {
+      onChange(formattedStartDate, formattedEndDate);
     }
   };
 
@@ -131,7 +142,7 @@ const DateRangeInput: React.FC<DateRangeInputProps> = ({
           type="text"
           placeholder="MM/DD/YYYY"
           value={startDate}
-          onChange={handleStartDateChange}
+          readOnly
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
           className="flex-1 border-none outline-none bg-transparent"
@@ -156,7 +167,7 @@ const DateRangeInput: React.FC<DateRangeInputProps> = ({
           type="text"
           placeholder="MM/DD/YYYY"
           value={endDate}
-          onChange={handleEndDateChange}
+          readOnly
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
           className="flex-1 border-none outline-none bg-transparent"
@@ -167,6 +178,19 @@ const DateRangeInput: React.FC<DateRangeInputProps> = ({
             paddingRight: '12px',
             textAlign: 'left'
           }}
+        />
+      </div>
+
+      {/* React Date Range Calendar */}
+      <div className="mt-4 w-full">
+        <DateRange
+          ranges={dateRange}
+          onChange={handleDateRangeChange}
+          months={2}
+          direction="horizontal"
+          moveRangeOnFirstSelection={false}
+          rangeColors={['#291036']}
+          showDateDisplay={false}
         />
       </div>
 

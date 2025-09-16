@@ -53,6 +53,53 @@ body {
   font-family: 'Inter', Arial, Helvetica, sans-serif;
 }
 
+/* Simple react-date-range styles */
+.rdrCalendarWrapper {
+  background: #ffffff !important;
+  border: none !important;
+  font-family: 'Inter', Arial, Helvetica, sans-serif !important;
+  width: 100% !important;
+}
+
+.rdrDateRangeWrapper {
+  width: 100% !important;
+}
+
+.rdrMonths {
+  width: 100% !important;
+  display: flex !important;
+}
+
+.rdrMonth {
+  flex: 1 !important;
+  width: 50% !important;
+}
+
+.rdrDateDisplayWrapper,
+.rdrDefinedRangesWrapper {
+  display: none !important;
+}
+
+.rdrInRange .rdrDayNumber {
+  background: #D7CEDA !important;
+  color: #000000 !important;
+}
+
+.rdrStartEdge .rdrDayNumber,
+.rdrEndEdge .rdrDayNumber,
+.rdrSelected .rdrDayNumber {
+  background: #291036 !important;
+  color: white !important;
+}
+
+.rdrDayHovered .rdrDayNumber {
+  background: rgba(42, 16, 55, 0.1) !important;
+}
+
+.rdrCalendarWrapper * {
+  border-radius: 0 !important;
+}
+
 @layer utilities {
   .text-balance {
     text-wrap: balance;
