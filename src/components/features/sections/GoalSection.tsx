@@ -26,22 +26,12 @@ const GoalSection: React.FC<GoalSectionProps> = ({
           minRows={4}
           maxRows={8}
           autosize
-          size="md"
           styles={{
             root: {
               width: '100%'
             },
             input: {
-              fontSize: '14px',
-              padding: '12px 16px',
-              lineHeight: '1.5',
               resize: 'vertical'
-            },
-            label: {
-              fontSize: '14px',
-              fontWeight: 500,
-              marginBottom: '8px',
-              color: 'var(--foreground)'
             }
           }}
         />

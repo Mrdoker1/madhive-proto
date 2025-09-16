@@ -15,30 +15,25 @@ const theme = createTheme({
           label: {
             fontSize: '14px',
             fontWeight: 500,
-            color: '#374151',
+            color: 'var(--form-label-color)',
             marginBottom: '8px'
           },
           input: {
             fontSize: '14px',
             padding: '12px 16px',
-            border: '1px solid #D1D5DB',
+            border: '1px solid var(--form-input-border)',
             borderRadius: '6px'
           },
           dropdown: {
             backgroundColor: '#FFFFFF',
-            border: '1px solid #D1D5DB'
+            border: '1px solid var(--form-input-border)',
+            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
           },
           option: {
             color: '#374151',
             fontSize: '14px',
-            '&[data-selected]': {
-              backgroundColor: '#291036',
-              color: '#FFFFFF'
-            },
-            '&[data-hovered]': {
-              backgroundColor: '#F3F4F6',
-              color: '#374151'
-            }
+            backgroundColor: '#FFFFFF',
+            padding: '8px 12px'
           }
         }
       }
@@ -49,14 +44,78 @@ const theme = createTheme({
           label: {
             fontSize: '14px',
             fontWeight: 500,
-            color: '#374151',
+            color: 'var(--form-label-color)',
             marginBottom: '8px'
           },
           input: {
             fontSize: '14px',
             padding: '12px 16px',
-            border: '1px solid #D1D5DB',
+            border: '1px solid var(--form-input-border)',
+            borderRadius: '6px',
+            '&::placeholder': {
+              color: 'var(--form-placeholder)'
+            }
+          }
+        }
+      }
+    },
+    Textarea: {
+      defaultProps: {
+        styles: {
+          label: {
+            fontSize: '14px',
+            fontWeight: 500,
+            color: 'var(--form-label-color)',
+            marginBottom: '8px'
+          },
+          input: {
+            fontSize: '14px',
+            padding: '12px 16px',
+            border: '1px solid var(--form-input-border)',
+            borderRadius: '6px',
+            lineHeight: '1.5',
+            '&::placeholder': {
+              color: 'var(--form-placeholder)'
+            }
+          }
+        }
+      }
+    },
+    Button: {
+      defaultProps: {
+        styles: {
+          root: {
+            fontSize: '14px',
+            fontWeight: 500,
             borderRadius: '6px'
+          }
+        }
+      }
+    },
+    Card: {
+      defaultProps: {
+        styles: {
+          root: {
+            backgroundColor: 'var(--background)',
+            border: '1px solid var(--border-color)',
+            borderRadius: '8px',
+            boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)'
+          }
+        }
+      }
+    },
+    Alert: {
+      defaultProps: {
+        styles: {
+          root: {
+            borderRadius: '6px'
+          },
+          title: {
+            fontSize: '14px',
+            fontWeight: 600
+          },
+          message: {
+            fontSize: '14px'
           }
         }
       }

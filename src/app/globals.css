@@ -18,6 +18,14 @@
   --hover-background: rgba(0, 0, 0, 0.02);
   --active-background: rgba(0, 0, 0, 0.05);
   
+  /* Form colors */
+  --form-label-color: #374151;
+  --form-input-border: #D1D5DB;
+  --form-input-hover: #F3F4F6;
+  --form-placeholder: #9CA3AF;
+  --form-error: #EF4444;
+  --form-success: #10B981;
+  
   /* Breadcrumbs colors */
   --breadcrumbs-background: #F3F2EB;
   --breadcrumbs-completed: #33CC33;
@@ -98,6 +106,11 @@ body {
 
 .rdrCalendarWrapper * {
   border-radius: 0 !important;
+}
+
+.mantine-Select-option:hover {
+  background-color: #F3F4F6 !important;
+  color: #374151 !important;
 }
 
 @layer utilities {

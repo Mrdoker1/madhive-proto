@@ -42,20 +42,12 @@ const TotalBudgetSection: React.FC<TotalBudgetSectionProps> = ({
               style={{ color: '#9CA3AF' }} // Тусклый серый цвет
             />
           }
-          size="md"
           styles={{
             root: {
               width: '100%'
             },
             input: {
-              fontSize: '14px',
-              padding: '12px 16px 12px 44px', // Дополнительный отступ слева для иконки
-            },
-            label: {
-              fontSize: '14px',
-              fontWeight: 500,
-              marginBottom: '8px',
-              color: 'var(--foreground)'
+              paddingLeft: '44px', // Дополнительный отступ слева для иконки
             }
           }}
         />

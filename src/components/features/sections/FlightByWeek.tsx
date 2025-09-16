@@ -284,7 +284,7 @@ const FlightByWeek: React.FC<FlightByWeekProps> = ({
                   maxWidth: '60px',
                   height: `${containerHeight}px`,
                   backgroundColor: week.isLocked ? '#F0F0F0' : '#F5F5F5',
-                  borderRadius: '4px',
+                  borderRadius: '4px 4px 0 0',
                   border: `1px solid ${week.isLocked ? '#D1D5DB' : '#E6E3E8'}`,
                   minHeight: '15px',
                   opacity: week.isLocked ? 0.6 : 1
@@ -379,7 +379,7 @@ const FlightByWeek: React.FC<FlightByWeekProps> = ({
                   className="absolute bottom-0 left-0 right-0 w-full h-full transition-none"
                   style={{
                     backgroundColor: week.isLocked ? '#9CA3AF' : '#291036',
-                    borderRadius: '4px'
+                    borderRadius: '4px 4px 0 0'
                   }}
                 />
                 
