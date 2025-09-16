@@ -183,6 +183,14 @@ const DateRangeInput: React.FC<DateRangeInputProps> = ({
 
       {/* React Date Range Calendar */}
       <div className="mt-4 w-full">
+        <style jsx>{`
+          :global(.rdrNextPrevButton) {
+            background: rgba(41, 16, 54, 0.1) !important;
+          }
+          :global(.rdrNextPrevButton:hover) {
+            background: rgba(41, 16, 54, 0.2) !important;
+          }
+        `}</style>
         <DateRange
           ranges={dateRange}
           onChange={handleDateRangeChange}
