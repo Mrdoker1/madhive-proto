@@ -7,6 +7,7 @@ import { BreadcrumbStep } from "@/components/ui/Breadcrumbs";
 import GeneralDetailsSection from "@/components/features/sections/GeneralDetailsSection";
 import TotalBudgetSection from "@/components/features/sections/TotalBudgetSection";
 import GoalSection from "@/components/features/sections/GoalSection";
+import FlightRangeSection from "@/components/features/sections/FlightRangeSection";
 import NextButton from "@/components/ui/NextButton";
 
 export default function NewCampaignPage() {
@@ -75,13 +76,13 @@ export default function NewCampaignPage() {
               <GoalSection />
             </SectionWrapper>
 
-              {/* Flight Range Section */}
-              <SectionWrapper 
-                id="flight-range" 
-                title="Flight Range *"
-              >
-                <div>Контент секции Flight Range</div>
-              </SectionWrapper>
+            {/* Flight Range Section */}
+            <SectionWrapper 
+              id="flight-range" 
+              title="Flight Range *"
+            >
+              <FlightRangeSection />
+            </SectionWrapper>
               
               </div>
             </div>

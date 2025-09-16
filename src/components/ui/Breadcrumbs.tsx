@@ -35,7 +35,7 @@ const Breadcrumbs: React.FC<BreadcrumbsProps> = ({ steps }) => {
       case 'current':
         return (
           <div
-            className="rounded-full border-2 flex items-center justify-center"
+            className="rounded-full border-1 flex items-center justify-center"
             style={{ 
               width: '16px',
               height: '16px',
@@ -49,7 +49,7 @@ const Breadcrumbs: React.FC<BreadcrumbsProps> = ({ steps }) => {
       case 'pending':
         return (
           <div
-            className="rounded-full border-2"
+            className="rounded-full border-1"
             style={{ 
               width: '16px',
               height: '16px',
