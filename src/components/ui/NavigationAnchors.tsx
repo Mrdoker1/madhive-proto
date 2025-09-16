@@ -67,7 +67,7 @@ const NavigationAnchors: React.FC<NavigationAnchorsProps> = ({
     : 'flex space-x-6';
 
   return (
-    <nav className={`${containerClass} ${className}`}>
+    <nav className={`${containerClass} ${className}`} style={{ display: 'flex', gap: '16px',}}>
       {items.map((item) => (
         <button
           key={item.id}
@@ -80,7 +80,6 @@ const NavigationAnchors: React.FC<NavigationAnchorsProps> = ({
             color: activeAnchor === item.id ? activeColor : textColor,
             background: 'none',
             border: 'none',
-            padding: orientation === 'vertical' ? '8px 0 16px 0' : '8px 4px 16px 4px',
             cursor: 'pointer'
           }}
         >
@@ -94,7 +93,7 @@ const NavigationAnchors: React.FC<NavigationAnchorsProps> = ({
                   backgroundColor: activeColor,
                   width: '100%',
                   height: '3px',
-                  bottom: '-8px',
+                  bottom: '-4px',
                   left: '0'
                 }}
               />
