@@ -5,6 +5,8 @@ import NavigationAnchors, { AnchorItem } from "@/components/ui/NavigationAnchors
 import SectionWrapper from "@/components/ui/SectionWrapper";
 import { BreadcrumbStep } from "@/components/ui/Breadcrumbs";
 import GeneralDetailsSection from "@/components/features/sections/GeneralDetailsSection";
+import TotalBudgetSection from "@/components/features/sections/TotalBudgetSection";
+import GoalSection from "@/components/features/sections/GoalSection";
 import NextButton from "@/components/ui/NextButton";
 
 export default function NewCampaignPage() {
@@ -57,21 +59,21 @@ export default function NewCampaignPage() {
                 <GeneralDetailsSection />
               </SectionWrapper>
 
-              {/* Total Budget Section */}
-              <SectionWrapper 
-                id="total-budget" 
-                title="Total Budget *"
-              >
-                <div>Контент секции Total Budget</div>
-              </SectionWrapper>
+            {/* Total Budget Section */}
+            <SectionWrapper 
+              id="total-budget" 
+              title="Total Budget *"
+            >
+              <TotalBudgetSection />
+            </SectionWrapper>
 
-              {/* Goal Section */}
-              <SectionWrapper 
-                id="goal" 
-                title="Goal *"
-              >
-                <div>Контент секции Goal</div>
-              </SectionWrapper>
+            {/* Goal Section */}
+            <SectionWrapper 
+              id="goal" 
+              title="Goal *"
+            >
+              <GoalSection />
+            </SectionWrapper>
 
               {/* Flight Range Section */}
               <SectionWrapper 
