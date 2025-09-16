@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { TextInput } from '@mantine/core';
-import { IconCurrencyDollar, IconLock, IconLockOpen } from '@tabler/icons-react';
+import { TextInput, Tooltip } from '@mantine/core';
+import { IconCurrencyDollar, IconLock, IconLockOpen, IconInfoCircle } from '@tabler/icons-react';
 
 interface WeekData {
   id: string;
@@ -37,6 +37,7 @@ const FlightByWeek: React.FC<FlightByWeekProps> = ({
   const [totalAllocated, setTotalAllocated] = useState(0);
   const [dragState, setDragState] = useState<{[key: string]: number}>({});
   const [isDragging, setIsDragging] = useState(false);
+  const [showBudgetTooltip, setShowBudgetTooltip] = useState(false);
 
   // Функция для переключения блокировки недели
   const toggleWeekLock = (weekId: string) => {
@@ -191,7 +192,14 @@ const FlightByWeek: React.FC<FlightByWeekProps> = ({
             {weeks.length} weeks total
           </span>
           <div style={{ fontSize: '14px' }}>
-            <span style={{ color: '#666' }}>Total Budget: </span>
+            <Tooltip
+              label="Set a total budget to enable weekly distribution"
+              position="bottom"
+              withArrow
+              opened={showBudgetTooltip}
+            >
+              <span style={{ color: '#666' }}>Total Budget: </span>
+            </Tooltip>
             <span style={{ 
               color: '#291036',
               fontWeight: 500
@@ -293,6 +301,16 @@ const FlightByWeek: React.FC<FlightByWeekProps> = ({
                 onMouseDown={(e) => {
                   // Запрещаем drag для заблокированных недель
                   if (week.isLocked) {
+                    return;
+                  }
+
+                  // Проверяем, есть ли бюджет
+                  if (totalBudget === 0) {
+                    // Показываем тултип на 2 секунды
+                    setShowBudgetTooltip(true);
+                    setTimeout(() => {
+                      setShowBudgetTooltip(false);
+                    }, 2000);
                     return;
                   }
                   
