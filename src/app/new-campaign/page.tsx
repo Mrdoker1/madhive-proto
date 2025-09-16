@@ -33,65 +33,65 @@ export default function NewCampaignPage() {
   return (
     <>
       <PageLayout breadcrumbs={breadcrumbSteps} title="Campaign Information">
-      <div style={{ backgroundColor: '#FDFCFA', paddingTop: '32px', paddingBottom: '96px', paddingLeft: '32px', paddingRight: '32px' }}>
-        <div style={{ display: 'flex', justifyContent: 'center', maxWidth: '1200px', margin: '0 auto' }}>
-          {/* Левая колонка с навигацией */}
-          <div className="w-64" style={{ paddingRight: '20px', position: 'sticky', top: '32px', height: 'fit-content' }}>
-            <NavigationAnchors 
-              items={anchorItems}
-              orientation="vertical"
-              activeColor="#2A1037"
-              textColor="#666666"
-              className="space-y-6"
-            />
-          </div>
-          {/* Основной контент */}
-          <div style={{ paddingLeft: '20px', width: '100%', maxWidth: '960px' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '40px' }}>
-            
-            {/* General Details Section */}
-            <SectionWrapper 
-              id="general-details" 
-              title="General Details"
-            >
-              <GeneralDetailsSection />
-            </SectionWrapper>
+        <div style={{ backgroundColor: '#FDFCFA', paddingTop: '32px', paddingBottom: '96px', paddingLeft: '32px', paddingRight: '32px' }}>
+          <div style={{ display: 'flex', justifyContent: 'center', margin: '0 auto' }}>
+            {/* Левая колонка с навигацией */}
+            <div className="w-64" style={{ paddingRight: '20px', position: 'sticky', top: '32px', height: 'fit-content' }}>
+              <NavigationAnchors 
+                items={anchorItems}
+                orientation="vertical"
+                activeColor="#2A1037"
+                textColor="#666666"
+                className="space-y-6"
+              />
+            </div>
+            {/* Основной контент */}
+            <div style={{ paddingLeft: '20px', width: '100%', maxWidth: '960px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '40px' }}>
+              
+              {/* General Details Section */}
+              <SectionWrapper 
+                id="general-details" 
+                title="General Details"
+              >
+                <GeneralDetailsSection />
+              </SectionWrapper>
 
-            {/* Total Budget Section */}
-            <SectionWrapper 
-              id="total-budget" 
-              title="Total Budget *"
-            >
-              <div>Контент секции Total Budget</div>
-            </SectionWrapper>
+              {/* Total Budget Section */}
+              <SectionWrapper 
+                id="total-budget" 
+                title="Total Budget *"
+              >
+                <div>Контент секции Total Budget</div>
+              </SectionWrapper>
 
-            {/* Goal Section */}
-            <SectionWrapper 
-              id="goal" 
-              title="Goal *"
-            >
-              <div>Контент секции Goal</div>
-            </SectionWrapper>
+              {/* Goal Section */}
+              <SectionWrapper 
+                id="goal" 
+                title="Goal *"
+              >
+                <div>Контент секции Goal</div>
+              </SectionWrapper>
 
-            {/* Flight Range Section */}
-            <SectionWrapper 
-              id="flight-range" 
-              title="Flight Range *"
-            >
-              <div>Контент секции Flight Range</div>
-            </SectionWrapper>
-            
+              {/* Flight Range Section */}
+              <SectionWrapper 
+                id="flight-range" 
+                title="Flight Range *"
+              >
+                <div>Контент секции Flight Range</div>
+              </SectionWrapper>
+              
+              </div>
             </div>
           </div>
         </div>
-      </div>
-      <div>
-        <NextButton 
-          active={true}
-          onClick={handleNextClick}
-          text="Next"
-        />
-      </div>
+        <div style={{ position: 'fixed', bottom: '0', zIndex: 1000, left: '104px', right: '40px' }}>
+          <NextButton 
+            active={true}
+            onClick={handleNextClick}
+            text="Next"
+          />
+        </div>
       </PageLayout>
     </>
   );

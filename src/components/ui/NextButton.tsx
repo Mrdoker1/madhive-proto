@@ -31,7 +31,6 @@ export const NextButton: React.FC<NextButtonProps> = ({
   return (
     <div className={`
       w-full 
-      px-10 
       flex items-center justify-end
       border-t
       bg-[var(--header-background)]
@@ -52,8 +51,7 @@ export const NextButton: React.FC<NextButtonProps> = ({
         styles={{
           root: {
             height: '32px',
-            fontSize: '12px',
-            padding: '0 16px'
+            fontSize: '12px'
           }
         }}
       >
