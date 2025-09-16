@@ -62,20 +62,6 @@ const GeneralDetailsSection: React.FC<GeneralDetailsSectionProps> = ({
         onChange={(event) => handleInputChange('campaignName', event.currentTarget.value)}
         required
         mb="lg"
-        styles={{
-          label: {
-            fontSize: '14px',
-            fontWeight: 500,
-            color: '#374151',
-            marginBottom: '8px'
-          },
-          input: {
-            fontSize: '14px',
-            padding: '12px 16px',
-            border: '1px solid #D1D5DB',
-            borderRadius: '6px'
-          }
-        }}
       />
 
       {/* Строка с Advertiser и Brand */}
@@ -88,20 +74,6 @@ const GeneralDetailsSection: React.FC<GeneralDetailsSectionProps> = ({
             value={formData.advertiser}
             onChange={(value) => handleInputChange('advertiser', value)}
             required
-            styles={{
-              label: {
-                fontSize: '14px',
-                fontWeight: 500,
-                color: '#374151',
-                marginBottom: '8px'
-              },
-              input: {
-                fontSize: '14px',
-                padding: '12px 16px',
-                border: '1px solid #D1D5DB',
-                borderRadius: '6px'
-              }
-            }}
           />
         </Grid.Col>
         <Grid.Col span={6}>
@@ -111,20 +83,6 @@ const GeneralDetailsSection: React.FC<GeneralDetailsSectionProps> = ({
             data={brandOptions}
             value={formData.brand}
             onChange={(value) => handleInputChange('brand', value)}
-            styles={{
-              label: {
-                fontSize: '14px',
-                fontWeight: 500,
-                color: '#374151',
-                marginBottom: '8px'
-              },
-              input: {
-                fontSize: '14px',
-                padding: '12px 16px',
-                border: '1px solid #D1D5DB',
-                borderRadius: '6px'
-              }
-            }}
           />
         </Grid.Col>
       </Grid>
@@ -139,20 +97,6 @@ const GeneralDetailsSection: React.FC<GeneralDetailsSectionProps> = ({
             value={formData.agency}
             onChange={(value) => handleInputChange('agency', value)}
             required
-            styles={{
-              label: {
-                fontSize: '14px',
-                fontWeight: 500,
-                color: '#374151',
-                marginBottom: '8px'
-              },
-              input: {
-                fontSize: '14px',
-                padding: '12px 16px',
-                border: '1px solid #D1D5DB',
-                borderRadius: '6px'
-              }
-            }}
           />
         </Grid.Col>
         <Grid.Col span={6}>
@@ -163,20 +107,6 @@ const GeneralDetailsSection: React.FC<GeneralDetailsSectionProps> = ({
             value={formData.cpeCode}
             onChange={(value) => handleInputChange('cpeCode', value)}
             required
-            styles={{
-              label: {
-                fontSize: '14px',
-                fontWeight: 500,
-                color: '#374151',
-                marginBottom: '8px'
-              },
-              input: {
-                fontSize: '14px',
-                padding: '12px 16px',
-                border: '1px solid #D1D5DB',
-                borderRadius: '6px'
-              }
-            }}
           />
         </Grid.Col>
       </Grid>
@@ -190,20 +120,6 @@ const GeneralDetailsSection: React.FC<GeneralDetailsSectionProps> = ({
             value={formData.campaignOwner}
             onChange={(event) => handleInputChange('campaignOwner', event.currentTarget.value)}
             required
-            styles={{
-              label: {
-                fontSize: '14px',
-                fontWeight: 500,
-                color: '#374151',
-                marginBottom: '8px'
-              },
-              input: {
-                fontSize: '14px',
-                padding: '12px 16px',
-                border: '1px solid #D1D5DB',
-                borderRadius: '6px'
-              }
-            }}
           />
         </Grid.Col>
         <Grid.Col span={6}>
@@ -214,20 +130,6 @@ const GeneralDetailsSection: React.FC<GeneralDetailsSectionProps> = ({
             value={formData.campaignApprover}
             onChange={(value) => handleInputChange('campaignApprover', value)}
             required
-            styles={{
-              label: {
-                fontSize: '14px',
-                fontWeight: 500,
-                color: '#374151',
-                marginBottom: '8px'
-              },
-              input: {
-                fontSize: '14px',
-                padding: '12px 16px',
-                border: '1px solid #D1D5DB',
-                borderRadius: '6px'
-              }
-            }}
           />
         </Grid.Col>
       </Grid>
