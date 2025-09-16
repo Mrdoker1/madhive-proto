@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import PageLayout from "@/components/layout/PageLayout";
 import NavigationAnchors, { AnchorItem } from "@/components/ui/NavigationAnchors";
 import SectionWrapper from "@/components/ui/SectionWrapper";
@@ -11,6 +12,7 @@ import FlightRangeSection from "@/components/features/sections/FlightRangeSectio
 import NextButton from "@/components/ui/NextButton";
 
 export default function NewCampaignPage() {
+  const [totalBudget, setTotalBudget] = useState<number>(0);
   // Бредкрамбсы для страницы New Campaign
   const breadcrumbSteps: BreadcrumbStep[] = [
     { id: 'new-campaign', label: 'New Campaign', status: 'completed', isSection: true },
@@ -31,6 +33,11 @@ export default function NewCampaignPage() {
   const handleNextClick = () => {
     console.log('Переход к следующему шагу - Channels');
     // Здесь можно добавить логику перехода на следующий шаг
+  };
+
+  const handleTotalBudgetChange = (budget: number) => {
+    setTotalBudget(budget);
+    console.log('Total budget changed:', budget);
   };
 
   return (
@@ -65,7 +72,7 @@ export default function NewCampaignPage() {
               id="total-budget" 
               title="Total Budget *"
             >
-              <TotalBudgetSection />
+              <TotalBudgetSection onChange={handleTotalBudgetChange} />
             </SectionWrapper>
 
             {/* Goal Section */}
@@ -81,7 +88,7 @@ export default function NewCampaignPage() {
               id="flight-range" 
               title="Flight Range *"
             >
-              <FlightRangeSection />
+              <FlightRangeSection totalBudget={totalBudget} />
             </SectionWrapper>
               
               </div>

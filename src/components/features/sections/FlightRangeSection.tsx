@@ -2,16 +2,21 @@
 
 import React, { useState } from 'react';
 import { Radio, Button, Group } from '@mantine/core';
-import DateRangeInput from '@/components/ui/DateRangeInput';
+import DualCalendar from '@/components/ui/DateRangeInput';
+import FlightByWeek from './FlightByWeek';
 
 interface FlightRangeSectionProps {
   className?: string;
+  totalBudget?: number;
 }
 
 const FlightRangeSection: React.FC<FlightRangeSectionProps> = ({
-  className = ''
+  className = '',
+  totalBudget = 0
 }) => {
   const [flightStatus, setFlightStatus] = useState('active');
+  const [selectedStartDate, setSelectedStartDate] = useState<string>('');
+  const [selectedEndDate, setSelectedEndDate] = useState<string>('');
 
   const handleExtendCampaign = () => {
     console.log('Extend Campaign clicked');
@@ -20,7 +25,14 @@ const FlightRangeSection: React.FC<FlightRangeSectionProps> = ({
 
   const handleDateRangeChange = (startDate: string, endDate: string) => {
     console.log('Date range changed:', startDate, endDate);
+    setSelectedStartDate(startDate);
+    setSelectedEndDate(endDate);
     // Логика для обработки изменения диапазона дат
+  };
+
+  const handleWeeklyBudgetChange = (weeklyBudgets: any[]) => {
+    console.log('Weekly budgets changed:', weeklyBudgets);
+    // Логика для обработки изменения недельных бюджетов
   };
 
   return (
@@ -72,10 +84,20 @@ const FlightRangeSection: React.FC<FlightRangeSectionProps> = ({
 
       {/* Отступ 16px между радиокнопками и датапикером */}
       <div style={{ marginTop: '16px' }}>
-        <DateRangeInput
+        <DualCalendar
           size="md"
           required={true}
           onChange={handleDateRangeChange}
+        />
+      </div>
+
+      {/* Flight by Week Component */}
+      <div style={{ marginTop: '24px' }}>
+        <FlightByWeek
+          startDate={selectedStartDate}
+          endDate={selectedEndDate}
+          totalBudget={totalBudget}
+          onChange={handleWeeklyBudgetChange}
         />
       </div>
     </div>

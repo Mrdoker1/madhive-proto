@@ -6,10 +6,12 @@ import { IconCurrencyDollar } from '@tabler/icons-react';
 
 interface TotalBudgetSectionProps {
   className?: string;
+  onChange?: (budget: number) => void;
 }
 
 const TotalBudgetSection: React.FC<TotalBudgetSectionProps> = ({
-  className = ''
+  className = '',
+  onChange
 }) => {
   const [totalBudget, setTotalBudget] = useState('');
 
@@ -18,6 +20,12 @@ const TotalBudgetSection: React.FC<TotalBudgetSectionProps> = ({
     // Разрешаем только цифры и точку для десятичных чисел
     if (/^\d*\.?\d*$/.test(value)) {
       setTotalBudget(value);
+      
+      // Вызываем onChange с числовым значением
+      if (onChange) {
+        const numericValue = parseFloat(value) || 0;
+        onChange(numericValue);
+      }
     }
   };
 
