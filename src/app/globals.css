@@ -15,6 +15,14 @@
   --active-color: #2A1037;
   --hover-background: rgba(0, 0, 0, 0.02);
   --active-background: rgba(0, 0, 0, 0.05);
+  
+  /* Breadcrumbs colors */
+  --breadcrumbs-background: #F3F2EB;
+  --breadcrumbs-completed: #33CC33;
+  --breadcrumbs-current: #291036;
+  --breadcrumbs-pending: #E6E3E8;
+  --breadcrumbs-text: #291036;
+  --breadcrumbs-arrow: #645C70;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -40,7 +48,7 @@ html, body {
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Inter', Arial, Helvetica, sans-serif;
 }
 
 @layer utilities {

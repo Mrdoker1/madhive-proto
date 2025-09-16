@@ -20,9 +20,9 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
         <Sidebar />
         
         {/* Content Portal */}
-        <main className="flex-1 overflow-auto">
+        <div className="flex-1 overflow-auto">
           {children}
-        </main>
+        </div>
       </div>
     </div>
   );
