@@ -2,6 +2,7 @@ import PageLayout from "@/components/PageLayout";
 import NavigationAnchors, { AnchorItem } from "@/components/NavigationAnchors";
 import SectionWrapper from "@/components/SectionWrapper";
 import { BreadcrumbStep } from "@/components/Breadcrumbs";
+import GeneralDetailsSection from "@/components/sections/GeneralDetailsSection";
 
 export default function NewCampaignPage() {
   // Бредкрамбсы для страницы New Campaign
@@ -44,7 +45,7 @@ export default function NewCampaignPage() {
               id="general-details" 
               title="General Details"
             >
-              <div>Контент секции General Details</div>
+              <GeneralDetailsSection />
             </SectionWrapper>
 
             {/* Total Budget Section */}
