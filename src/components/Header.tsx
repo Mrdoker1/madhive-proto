@@ -5,7 +5,7 @@ import Image from 'next/image';
 
 const Header: React.FC = () => {
   return (
-    <header className="w-full h-16 border-b" style={{ backgroundColor: '#FDFCFA', borderBottomColor: '#E6E3E8' }}>
+    <header className="w-full h-16 border-b" style={{ backgroundColor: 'var(--header-background)', borderBottomColor: 'var(--border-color)' }}>
       <div className="h-full max-w-full mx-auto flex items-center justify-between px-4 lg:px-6">
         {/* Left - Burger Menu */}
         <div className="flex items-center justify-center shrink-0" style={{ width: '64px', height: '64px' }}>

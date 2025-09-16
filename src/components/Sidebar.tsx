@@ -50,8 +50,8 @@ const Sidebar: React.FC<SidebarProps> = ({
       className="flex flex-col border-r h-full" 
       style={{ 
         width: '64px', 
-        backgroundColor: '#FDFCFA', 
-        borderRightColor: '#E6E3E8'
+        backgroundColor: 'var(--sidebar-background)', 
+        borderRightColor: 'var(--border-color)'
       }}
     >
       {/* Элементы меню */}
@@ -59,12 +59,24 @@ const Sidebar: React.FC<SidebarProps> = ({
         {allItems.map((item) => (
           <div
             key={item.id}
-            className={`relative flex items-center justify-center cursor-pointer transition-colors duration-200 ${
-              activeItemId === item.id 
-                ? 'bg-gray-100' 
-                : 'hover:bg-gray-50'
-            }`}
-            style={{ width: '64px', height: '64px' }}
+            className={`relative flex items-center justify-center cursor-pointer transition-colors duration-200`}
+            style={{ 
+              width: '64px', 
+              height: '64px',
+              backgroundColor: activeItemId === item.id 
+                ? 'var(--active-background)' 
+                : 'transparent'
+            }}
+            onMouseEnter={(e) => {
+              if (activeItemId !== item.id) {
+                e.currentTarget.style.backgroundColor = 'var(--hover-background)';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (activeItemId !== item.id) {
+                e.currentTarget.style.backgroundColor = 'transparent';
+              }
+            }}
             onClick={() => handleItemClick(item.id)}
           >
             {/* Левая линия для активного элемента */}
@@ -75,7 +87,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                   left: '0px',
                   width: '2px',
                   height: '56px',
-                  backgroundColor: '#2A1037'
+                  backgroundColor: 'var(--active-color)'
                 }}
               />
             )}
@@ -89,7 +101,7 @@ const Sidebar: React.FC<SidebarProps> = ({
               style={{
                 filter: activeItemId === item.id 
                   ? 'brightness(0) saturate(100%) invert(8%) sepia(45%) saturate(2285%) hue-rotate(264deg) brightness(98%) contrast(98%)'
-                  : undefined
+                  : 'brightness(0) saturate(100%) invert(44%) sepia(8%) saturate(878%) hue-rotate(314deg) brightness(91%) contrast(86%)'
               }}
             />
           </div>
