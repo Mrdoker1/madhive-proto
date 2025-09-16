@@ -1,0 +1,36 @@
+/* Кастомные стили для Swagger UI с поддержкой темной темы */
+
+.swagger-ui {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Helvetica Neue', sans-serif;
+}
+
+/* Темная тема для Swagger UI */
+@media (prefers-color-scheme: dark) {
+  .swagger-ui {
+    filter: invert(1) hue-rotate(180deg);
+  }
+  
+  .swagger-ui .scheme-container {
+    filter: invert(1) hue-rotate(180deg);
+  }
+  
+  .swagger-ui .topbar {
+    filter: invert(1) hue-rotate(180deg);
+  }
+}
+
+/* Убираем лишние отступы */
+.swagger-ui .topbar {
+  display: none;
+}
+
+.swagger-ui .info {
+  margin: 20px 0;
+}
+
+.swagger-ui .scheme-container {
+  padding: 10px 0;
+  margin: 0;
+  background: transparent;
+  box-shadow: none;
+}
