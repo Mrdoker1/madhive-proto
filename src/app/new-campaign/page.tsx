@@ -27,7 +27,7 @@ export default function NewCampaignPage() {
       <div style={{ backgroundColor: '#FDFCFA', paddingTop: '32px', paddingBottom: '32px', paddingLeft: '32px', paddingRight: '32px' }}>
         <div style={{ display: 'flex', justifyContent: 'center', maxWidth: '1200px', margin: '0 auto' }}>
           {/* Левая колонка с навигацией */}
-          <div className="w-64" style={{ paddingRight: '20px' }}>
+          <div className="w-64" style={{ paddingRight: '20px', position: 'sticky', top: '32px', height: 'fit-content' }}>
             <NavigationAnchors 
               items={anchorItems}
               orientation="vertical"

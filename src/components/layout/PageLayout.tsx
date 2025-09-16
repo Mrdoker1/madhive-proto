@@ -12,7 +12,7 @@ interface PageLayoutProps {
 
 const PageLayout: React.FC<PageLayoutProps> = ({ children, breadcrumbs = [], title }) => {
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full overflow-hidden">
       {/* Breadcrumbs - только если переданы */}
       {breadcrumbs.length > 0 && (
         <Breadcrumbs steps={breadcrumbs} />
