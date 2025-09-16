@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useAppSelector, useAppDispatch } from '@/store/hooks';
-import { fetchServerStatus, clearError } from '@/store/features/serverStatusSlice';
+import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
+import { fetchServerStatus, clearError } from '@/store/slices/serverStatusSlice';
 import { Container, Card, Title, Text, Button, Group, Badge, Stack, Loader, Alert } from '@mantine/core';
 import { motion } from 'framer-motion';
 

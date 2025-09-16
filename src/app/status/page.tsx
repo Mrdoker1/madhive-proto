@@ -1,4 +1,4 @@
-import ServerStatus from "@/components/ServerStatus";
+import ServerStatus from "@/components/features/ServerStatus";
 
 export default function Home() {
   return (

@@ -1,5 +1,5 @@
 import { configureStore } from '@reduxjs/toolkit';
-import serverStatusReducer from '@/store/features/serverStatusSlice';
+import serverStatusReducer from '@/store/slices/serverStatusSlice';
 
 export const makeStore = () => {
   return configureStore({

@@ -1,8 +1,8 @@
-import PageLayout from "@/components/PageLayout";
-import NavigationAnchors, { AnchorItem } from "@/components/NavigationAnchors";
-import SectionWrapper from "@/components/SectionWrapper";
-import { BreadcrumbStep } from "@/components/Breadcrumbs";
-import GeneralDetailsSection from "@/components/sections/GeneralDetailsSection";
+import PageLayout from "@/components/layout/PageLayout";
+import NavigationAnchors, { AnchorItem } from "@/components/ui/NavigationAnchors";
+import SectionWrapper from "@/components/ui/SectionWrapper";
+import { BreadcrumbStep } from "@/components/ui/Breadcrumbs";
+import GeneralDetailsSection from "@/components/features/sections/GeneralDetailsSection";
 
 export default function NewCampaignPage() {
   // Бредкрамбсы для страницы New Campaign

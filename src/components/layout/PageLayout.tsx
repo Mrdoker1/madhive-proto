@@ -1,8 +1,8 @@
 'use client';
 
 import React from 'react';
-import Breadcrumbs, { BreadcrumbStep } from './Breadcrumbs';
-import PageHeader from './PageHeader';
+import Breadcrumbs, { BreadcrumbStep } from '../ui/Breadcrumbs';
+import PageHeader from '../ui/PageHeader';
 
 interface PageLayoutProps {
   children: React.ReactNode;
