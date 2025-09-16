@@ -1,8 +1,11 @@
+'use client';
+
 import PageLayout from "@/components/layout/PageLayout";
 import NavigationAnchors, { AnchorItem } from "@/components/ui/NavigationAnchors";
 import SectionWrapper from "@/components/ui/SectionWrapper";
 import { BreadcrumbStep } from "@/components/ui/Breadcrumbs";
 import GeneralDetailsSection from "@/components/features/sections/GeneralDetailsSection";
+import NextButton from "@/components/ui/NextButton";
 
 export default function NewCampaignPage() {
   // Бредкрамбсы для страницы New Campaign
@@ -22,9 +25,15 @@ export default function NewCampaignPage() {
     { id: 'flight-range', label: 'Flight Range', anchor: '#flight-range' }
   ];
 
+  const handleNextClick = () => {
+    console.log('Переход к следующему шагу - Channels');
+    // Здесь можно добавить логику перехода на следующий шаг
+  };
+
   return (
-    <PageLayout breadcrumbs={breadcrumbSteps} title="Campaign Information">
-      <div style={{ backgroundColor: '#FDFCFA', paddingTop: '32px', paddingBottom: '32px', paddingLeft: '32px', paddingRight: '32px' }}>
+    <>
+      <PageLayout breadcrumbs={breadcrumbSteps} title="Campaign Information">
+      <div style={{ backgroundColor: '#FDFCFA', paddingTop: '32px', paddingBottom: '96px', paddingLeft: '32px', paddingRight: '32px' }}>
         <div style={{ display: 'flex', justifyContent: 'center', maxWidth: '1200px', margin: '0 auto' }}>
           {/* Левая колонка с навигацией */}
           <div className="w-64" style={{ paddingRight: '20px', position: 'sticky', top: '32px', height: 'fit-content' }}>
@@ -76,6 +85,14 @@ export default function NewCampaignPage() {
           </div>
         </div>
       </div>
-    </PageLayout>
+      <div>
+        <NextButton 
+          active={true}
+          onClick={handleNextClick}
+          text="Next"
+        />
+      </div>
+      </PageLayout>
+    </>
   );
 }
