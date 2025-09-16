@@ -1,5 +1,6 @@
 import PageLayout from "@/components/PageLayout";
 import NavigationAnchors, { AnchorItem } from "@/components/NavigationAnchors";
+import SectionWrapper from "@/components/SectionWrapper";
 import { BreadcrumbStep } from "@/components/Breadcrumbs";
 
 export default function NewCampaignPage() {
@@ -23,7 +24,7 @@ export default function NewCampaignPage() {
   return (
     <PageLayout breadcrumbs={breadcrumbSteps} title="Campaign Information">
       <div style={{ backgroundColor: '#FDFCFA', paddingTop: '32px', paddingBottom: '32px', paddingLeft: '32px', paddingRight: '32px' }}>
-        <div className="flex">
+        <div style={{ display: 'flex', justifyContent: 'center', maxWidth: '1200px', margin: '0 auto' }}>
           {/* Левая колонка с навигацией */}
           <div className="w-64" style={{ paddingRight: '20px' }}>
             <NavigationAnchors 
@@ -34,46 +35,41 @@ export default function NewCampaignPage() {
               className="space-y-6"
             />
           </div>
-
           {/* Основной контент */}
-          <div className="flex-1" style={{ paddingLeft: '20px' }}>
-            <div className="max-w-4xl space-y-12">
+          <div style={{ paddingLeft: '20px', width: '100%', maxWidth: '960px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '40px' }}>
             
             {/* General Details Section */}
-            <section id="general-details" className="scroll-mt-8">
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <h2 className="text-xl font-medium text-gray-900 mb-6">
-                  General Details
-                </h2>
-              </div>
-            </section>
+            <SectionWrapper 
+              id="general-details" 
+              title="General Details"
+            >
+              <div>Контент секции General Details</div>
+            </SectionWrapper>
 
             {/* Total Budget Section */}
-            <section id="total-budget" className="scroll-mt-8">
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <h2 className="text-xl font-medium text-gray-900 mb-6">
-                  Total Budget *
-                </h2>
-              </div>
-            </section>
+            <SectionWrapper 
+              id="total-budget" 
+              title="Total Budget *"
+            >
+              <div>Контент секции Total Budget</div>
+            </SectionWrapper>
 
             {/* Goal Section */}
-            <section id="goal" className="scroll-mt-8">
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <h2 className="text-xl font-medium text-gray-900 mb-6">
-                  Goal *
-                </h2>
-              </div>
-            </section>
+            <SectionWrapper 
+              id="goal" 
+              title="Goal *"
+            >
+              <div>Контент секции Goal</div>
+            </SectionWrapper>
 
             {/* Flight Range Section */}
-            <section id="flight-range" className="scroll-mt-8">
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <h2 className="text-xl font-medium text-gray-900 mb-6">
-                  Flight Range *
-                </h2>
-              </div>
-            </section>
+            <SectionWrapper 
+              id="flight-range" 
+              title="Flight Range *"
+            >
+              <div>Контент секции Flight Range</div>
+            </SectionWrapper>
             
             </div>
           </div>
