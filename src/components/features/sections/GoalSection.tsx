@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Textarea } from '@mantine/core';
+import { Textarea, Select } from '@mantine/core';
 
 interface GoalSectionProps {
   className?: string;
@@ -11,31 +11,42 @@ const GoalSection: React.FC<GoalSectionProps> = ({
   className = ''
 }) => {
   const [goal, setGoal] = useState('');
+  const [selectedObjective, setSelectedObjective] = useState<string | null>(null);
+
+  const campaignObjectives = [
+    { value: 'brand-awareness', label: 'Brand Awareness' },
+    { value: 'maximize-reach', label: 'Maximize Reach' },
+    { value: 'achieve-grp-goal', label: 'Achieve GRP Goal' }
+  ];
 
   const handleGoalChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     setGoal(event.target.value);
   };
 
   return (
-    <div className={`space-y-6 ${className}`}>
-      <div className="w-full">
-        <Textarea
-          placeholder="Describe the main goal and objectives of this campaign..."
-          value={goal}
-          onChange={handleGoalChange}
-          minRows={4}
-          maxRows={8}
-          autosize
-          styles={{
-            root: {
-              width: '100%'
-            },
-            input: {
-              resize: 'vertical'
-            }
-          }}
-        />
-      </div>
+    <div className={className}>
+      {/* Campaign Objectives Select */}
+      <Select
+        label="Campaign Objectives"
+        placeholder="Select campaign objective"
+        data={campaignObjectives}
+        value={selectedObjective}
+        onChange={setSelectedObjective}
+        searchable
+        clearable
+        mb="lg"
+      />
+
+      {/* Goal Textarea */}
+      <Textarea
+        label="Campaign Goal"
+        placeholder="Describe the main goal and objectives of this campaign..."
+        value={goal}
+        onChange={handleGoalChange}
+        minRows={4}
+        maxRows={8}
+        autosize
+      />
     </div>
   );
 };
