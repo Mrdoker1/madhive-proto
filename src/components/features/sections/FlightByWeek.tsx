@@ -23,6 +23,9 @@ interface FlightByWeekProps {
     totalAllocated: number;
     showWarning: boolean;
   }) => void;
+  // Новые пропсы для поддержки hiatus режима
+  hiatusStartDate?: string;
+  hiatusEndDate?: string;
 }
 
 const FlightByWeek: React.FC<FlightByWeekProps> = ({
@@ -31,7 +34,9 @@ const FlightByWeek: React.FC<FlightByWeekProps> = ({
   totalBudget = 0,
   className = '',
   onChange,
-  onValidationChange
+  onValidationChange,
+  hiatusStartDate,
+  hiatusEndDate
 }) => {
   const [weeks, setWeeks] = useState<WeekData[]>([]);
   const [totalAllocated, setTotalAllocated] = useState(0);
@@ -48,6 +53,18 @@ const FlightByWeek: React.FC<FlightByWeekProps> = ({
           : week
       )
     );
+  };
+
+  // Функция для проверки, полностью ли неделя находится в hiatus диапазоне
+  const isWeekInHiatus = (weekStart: Date, weekEnd: Date): boolean => {
+    if (!hiatusStartDate || !hiatusEndDate) return false;
+    
+    const hiatusStart = new Date(hiatusStartDate);
+    const hiatusEnd = new Date(hiatusEndDate);
+    
+    // Неделя блокируется только если она ПОЛНОСТЬЮ находится внутри hiatus диапазона
+    // Начало недели >= начала hiatus И конец недели <= конца hiatus
+    return weekStart >= hiatusStart && weekEnd <= hiatusEnd;
   };
 
   // Функция для генерации недель из диапазона дат
@@ -73,13 +90,16 @@ const FlightByWeek: React.FC<FlightByWeekProps> = ({
 
       // Не выходим за пределы выбранного диапазона
       const actualEnd = currentWeekEnd > endDateObj ? endDateObj : currentWeekEnd;
+      
+      // Проверяем, попадает ли неделя в hiatus диапазон
+      const isHiatusWeek = isWeekInHiatus(new Date(currentWeekStart), actualEnd);
 
       weeksArray.push({
         id: `week-${weekCounter}`,
         startDate: new Date(currentWeekStart),
         endDate: actualEnd,
-        budget: 0,
-        isLocked: false // Изначально не заблокирована
+        budget: isHiatusWeek ? 0 : 0, // Если неделя в hiatus, бюджет 0
+        isLocked: isHiatusWeek // Блокируем недели в hiatus
       });
 
       currentWeekStart.setDate(currentWeekStart.getDate() + 7);
@@ -94,12 +114,14 @@ const FlightByWeek: React.FC<FlightByWeekProps> = ({
     if (startDate && endDate) {
       const newWeeks = generateWeeks(startDate, endDate);
       
-      // Равномерно распределяем бюджет между неделями
+      // Равномерно распределяем бюджет между неделями, исключая hiatus недели
       if (newWeeks.length > 0) {
-        const budgetPerWeek = totalBudget / newWeeks.length;
+        const activeWeeks = newWeeks.filter(week => !week.isLocked); // Недели не в hiatus
+        const budgetPerWeek = activeWeeks.length > 0 ? totalBudget / activeWeeks.length : 0;
+        
         const weeksWithBudget = newWeeks.map(week => ({
           ...week,
-          budget: budgetPerWeek
+          budget: week.isLocked ? 0 : budgetPerWeek // Hiatus недели имеют бюджет 0
         }));
         setWeeks(weeksWithBudget);
       } else {
@@ -108,7 +130,7 @@ const FlightByWeek: React.FC<FlightByWeekProps> = ({
     } else {
       setWeeks([]);
     }
-  }, [startDate, endDate, totalBudget]);
+  }, [startDate, endDate, totalBudget, hiatusStartDate, hiatusEndDate]);
 
   // Подсчитываем общую сумму при изменении бюджетов
   useEffect(() => {
@@ -228,6 +250,9 @@ const FlightByWeek: React.FC<FlightByWeekProps> = ({
           const percentage = totalBudget > 0 ? (currentBudget / totalBudget) * 100 : 0;
           const containerHeight = Math.min(Math.max(percentage * 2, 15), 120);
           
+          // Проверяем, является ли неделя hiatus
+          const isHiatusWeek = week.isLocked && currentBudget === 0;
+          
           return (
             <div 
               key={week.id}
@@ -244,41 +269,44 @@ const FlightByWeek: React.FC<FlightByWeekProps> = ({
                 justifyContent: 'center',
                 gap: '4px',
                 fontSize: '10px', 
-                color: '#291036',
+                color: isHiatusWeek ? '#9CA3AF' : '#291036',
                 fontWeight: 500,
                 marginBottom: '4px',
                 height: '15px',
                 textAlign: 'center'
               }}>
-                {/* Lock/Unlock Button - перед суммой */}
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    toggleWeekLock(week.id);
-                  }}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    cursor: 'pointer',
-                    padding: '2px',
-                    color: week.isLocked ? '#000000' : '#9CA3AF',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}
-                  title={week.isLocked ? 'Unlock budget' : 'Lock budget'}
-                >
-                  {week.isLocked ? (
-                    <IconLock size={12} />
-                  ) : (
-                    <IconLockOpen size={12} />
-                  )}
-                </button>
+                {/* Lock/Unlock Button - только для недель не в hiatus */}
+                {!isHiatusWeek && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleWeekLock(week.id);
+                    }}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer',
+                      padding: '2px',
+                      color: week.isLocked ? '#000000' : '#9CA3AF',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                    title={week.isLocked ? 'Unlock budget' : 'Lock budget'}
+                  >
+                    {week.isLocked ? (
+                      <IconLock size={12} />
+                    ) : (
+                      <IconLockOpen size={12} />
+                    )}
+                  </button>
+                )}
                 <span>
-                  {currentBudget >= 1000 
-                    ? `$${(currentBudget / 1000).toFixed(1)}k`
-                    : `$${Math.round(currentBudget)}`
-                  }
+                  {isHiatusWeek ? 'HIATUS' : (
+                    currentBudget >= 1000 
+                      ? `$${(currentBudget / 1000).toFixed(1)}k`
+                      : `$${Math.round(currentBudget)}`
+                  )}
                 </span>
               </div>
 
@@ -291,11 +319,11 @@ const FlightByWeek: React.FC<FlightByWeekProps> = ({
                   width: '100%',
                   maxWidth: '60px',
                   height: `${containerHeight}px`,
-                  backgroundColor: week.isLocked ? '#F0F0F0' : '#F5F5F5',
+                  backgroundColor: isHiatusWeek ? '#FAFAFA' : (week.isLocked ? '#F0F0F0' : '#F5F5F5'),
                   borderRadius: '4px 4px 0 0',
-                  border: `1px solid ${week.isLocked ? '#D1D5DB' : '#E6E3E8'}`,
+                  border: `1px solid ${isHiatusWeek ? '#E5E5E5' : (week.isLocked ? '#D1D5DB' : '#E6E3E8')}`,
                   minHeight: '15px',
-                  opacity: week.isLocked ? 0.6 : 1
+                  opacity: isHiatusWeek ? 0.4 : (week.isLocked ? 0.6 : 1)
                 }}
                 tabIndex={-1}
                 onMouseDown={(e) => {
@@ -339,7 +367,7 @@ const FlightByWeek: React.FC<FlightByWeekProps> = ({
                     // Перераспределяем остальной бюджет между другими неделями
                     const otherWeeks = weeks.filter(w => w.id !== week.id);
                     const unlockedWeeks = otherWeeks.filter(w => !w.isLocked);
-                    const lockedWeeks = otherWeeks.filter(w => w.isLocked);
+                    const lockedWeeks = otherWeeks.filter(w => w.isLocked); // Включает hiatus недели
                     
                     // Вычисляем сумму заблокированных недель
                     const lockedBudgetSum = lockedWeeks.reduce((sum, w) => sum + w.budget, 0);
@@ -396,7 +424,7 @@ const FlightByWeek: React.FC<FlightByWeekProps> = ({
                 <div
                   className="absolute bottom-0 left-0 right-0 w-full h-full transition-none"
                   style={{
-                    backgroundColor: week.isLocked ? '#9CA3AF' : '#291036',
+                    backgroundColor: isHiatusWeek ? '#E5E5E5' : (week.isLocked ? '#9CA3AF' : '#291036'),
                     borderRadius: '4px 4px 0 0'
                   }}
                 />

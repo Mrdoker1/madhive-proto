@@ -14,6 +14,16 @@ interface DateRangeInputProps {
   error?: string;
   className?: string;
   onChange?: (startDate: string, endDate: string) => void;
+  // Новые пропсы для ограничений и внешнего управления значениями
+  minDate?: Date;
+  maxDate?: Date;
+  selectedStartDate?: string;
+  selectedEndDate?: string;
+  key?: string; // Для принудительного ре-рендера компонента
+  // Для подсветки hiatus дат в Active режиме
+  hiatusStartDate?: string;
+  hiatusEndDate?: string;
+  isActiveMode?: boolean;
 }
 
 const DateRangeInput: React.FC<DateRangeInputProps> = ({
@@ -23,20 +33,52 @@ const DateRangeInput: React.FC<DateRangeInputProps> = ({
   required = false,
   error,
   className = '',
-  onChange
+  onChange,
+  minDate,
+  maxDate,
+  selectedStartDate,
+  selectedEndDate,
+  hiatusStartDate,
+  hiatusEndDate,
+  isActiveMode = false
 }) => {
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
+  const [startDate, setStartDate] = useState(selectedStartDate || '');
+  const [endDate, setEndDate] = useState(selectedEndDate || '');
   const [focused, setFocused] = useState(false);
+  
+  // Функция для парсинга даты из строки
+  const parseDate = (dateStr: string): Date | null => {
+    if (!dateStr) return null;
+    const [month, day, year] = dateStr.split('/');
+    return new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+  };
   
   // Состояние для react-date-range
   const [dateRange, setDateRange] = useState([
     {
-      startDate: new Date(),
-      endDate: new Date(),
+      startDate: parseDate(selectedStartDate) || new Date(),
+      endDate: parseDate(selectedEndDate) || new Date(),
       key: 'selection'
     }
   ]);
+  
+  // Обновляем локальное состояние при изменении внешних пропсов
+  React.useEffect(() => {
+    if (selectedStartDate !== undefined) {
+      setStartDate(selectedStartDate);
+    }
+    if (selectedEndDate !== undefined) {
+      setEndDate(selectedEndDate);
+    }
+    
+    // Обновляем dateRange для календаря
+    setDateRange([{
+      startDate: parseDate(selectedStartDate) || new Date(),
+      endDate: parseDate(selectedEndDate) || new Date(),
+      key: 'selection'
+    }]);
+  }, [selectedStartDate, selectedEndDate]);
+
 
   // Состояние для независимых календарей
   const [leftCalendarDate, setLeftCalendarDate] = useState(new Date());
@@ -190,6 +232,24 @@ const DateRangeInput: React.FC<DateRangeInputProps> = ({
           :global(.rdrNextPrevButton:hover) {
             background: rgba(41, 16, 54, 0.2) !important;
           }
+          
+          
+          /* Цвет подчеркивания для сегодняшнего дня */
+          :global(.rdrDayToday .rdrDayNumber:after) {
+            background-color: #FF9BD3 !important;
+          }
+          
+          /* Переопределяем цвет текста для всех дней календаря */
+          :global(.rdrDayNumber) {
+            color: #000000 !important;
+          }
+          
+          /* Цвет текста для выбранных дат остается темным */
+          :global(.rdrDayStartOfRange .rdrDayNumber),
+          :global(.rdrDayEndOfRange .rdrDayNumber),
+          :global(.rdrDayInRange .rdrDayNumber) {
+            color: #FFFFFF !important;
+          }
         `}</style>
         <DateRange
           ranges={dateRange}
@@ -199,6 +259,8 @@ const DateRangeInput: React.FC<DateRangeInputProps> = ({
           moveRangeOnFirstSelection={false}
           rangeColors={['#291036']}
           showDateDisplay={false}
+          minDate={minDate}
+          maxDate={maxDate}
         />
       </div>
 
