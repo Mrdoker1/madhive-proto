@@ -6,7 +6,15 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "push:github": "git push origin dev",
+    "push:gitlab": "git push gitlab dev",
+    "push:all": "git push origin dev && git push gitlab dev",
+    "pull:github": "git pull origin dev",
+    "pull:gitlab": "git pull gitlab dev",
+    "status": "git status",
+    "commit": "git add . && git commit -m",
+    "deploy": "npm run commit && npm run push:all"
   },
   "dependencies": {
     "@mantine/core": "^8.3.1",
