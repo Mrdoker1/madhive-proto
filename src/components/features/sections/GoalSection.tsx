@@ -28,7 +28,7 @@ const GoalSection: React.FC<GoalSectionProps> = ({
       {/* Campaign Objectives Select */}
       <Select
         label="Campaign Objectives"
-        placeholder="Select campaign objective"
+        placeholder="- Select campaign objective -"
         data={campaignObjectives}
         value={selectedObjective}
         onChange={setSelectedObjective}

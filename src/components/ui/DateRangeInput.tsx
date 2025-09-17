@@ -234,11 +234,6 @@ const DateRangeInput: React.FC<DateRangeInputProps> = ({
           }
           
           
-          /* Цвет подчеркивания для сегодняшнего дня */
-          :global(.rdrDayToday .rdrDayNumber:after) {
-            background-color: #FF9BD3 !important;
-          }
-          
           /* Переопределяем цвет текста для всех дней календаря */
           :global(.rdrDayNumber) {
             color: #000000 !important;
@@ -249,6 +244,26 @@ const DateRangeInput: React.FC<DateRangeInputProps> = ({
           :global(.rdrDayEndOfRange .rdrDayNumber),
           :global(.rdrDayInRange .rdrDayNumber) {
             color: #FFFFFF !important;
+          }
+        `}</style>
+        
+        {/* Переопределение точного стиля сегодняшнего дня */}
+        <style jsx global>{`
+          /* Точное переопределение псевдоэлемента :after для сегодняшнего дня */
+          .rdrDayToday .rdrDayNumber:after,
+          .rdrDayToday .rdrDayNumber::after,
+          .rdrDay.rdrDayToday .rdrDayNumber:after,
+          .rdrDay.rdrDayToday .rdrDayNumber::after {
+            content: '' !important;
+            position: absolute !important;
+            bottom: 4px !important;
+            left: 50% !important;
+            transform: translate(-50%, 0) !important;
+            width: 18px !important;
+            height: 2px !important;
+            border-radius: 2px !important;
+            background: #FF9BD3 !important;
+            background-color: #FF9BD3 !important;
           }
         `}</style>
         <DateRange

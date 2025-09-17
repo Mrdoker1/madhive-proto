@@ -125,7 +125,7 @@ const GeneralDetailsSection: React.FC<GeneralDetailsSectionProps> = ({
         <Grid.Col span={6}>
           <Select
             label="Campaign Approver"
-            placeholder="Select Campaign Approver -"
+            placeholder="- Select Campaign Approver -"
             data={approverOptions}
             value={formData.campaignApprover}
             onChange={(value) => handleInputChange('campaignApprover', value)}
