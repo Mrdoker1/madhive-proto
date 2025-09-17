@@ -184,17 +184,7 @@ const FlightByWeek: React.FC<FlightByWeekProps> = ({
   const isOverBudget = totalAllocated > totalBudget;
 
   if (weeks.length === 0) {
-    return (
-      <div className={`${className}`}>
-        <div style={{ 
-          textAlign: 'center', 
-          color: '#666',
-          fontSize: '14px'
-        }}>
-          Select a date range to see weekly budget allocation
-        </div>
-      </div>
-    );
+    return null; // Не показываем компонент, если нет данных
   }
 
   return (

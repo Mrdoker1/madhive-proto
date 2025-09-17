@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { Radio, Button, Group } from '@mantine/core';
 import DualCalendar from '@/components/ui/DateRangeInput';
 import FlightByWeek from './FlightByWeek';
+import FlightByDay from './FlightByDay';
 
 interface FlightRangeSectionProps {
   className?: string;
@@ -28,6 +29,12 @@ const extendButtonStyles = {
     '&:hover': {
       borderColor: '#C2B9C6',
       backgroundColor: 'rgba(194, 185, 198, 0.1)'
+    },
+    '&:disabled': {
+      borderColor: '#E5E5E5 !important',
+      color: '#999999 !important',
+      backgroundColor: 'transparent !important',
+      opacity: '0.6 !important'
     }
   }
 };
@@ -111,7 +118,19 @@ const FlightRangeSection: React.FC<FlightRangeSectionProps> = ({
           variant="outline"
           size="sm"
           onClick={handleExtendCampaign}
-          styles={extendButtonStyles}
+          disabled={true}
+          styles={{
+            root: {
+              fontSize: '12px',
+              height: '32px',
+              padding: '0 16px',
+              borderColor: '#E5E5E5',
+              color: '#999999',
+              backgroundColor: 'transparent',
+              opacity: 0.6,
+              cursor: 'not-allowed'
+            }
+          }}
         >
           Extend Campaign
         </Button>
@@ -135,17 +154,42 @@ const FlightRangeSection: React.FC<FlightRangeSectionProps> = ({
         />
       </div>
 
-      {/* Flight by Week Component */}
-      <div style={{ marginTop: '24px' }}>
-        <FlightByWeek
-          startDate={activeDateRange.start} // Используем всегда активный диапазон для генерации недель
-          endDate={activeDateRange.end}
-          totalBudget={totalBudget}
-          onChange={handleWeeklyBudgetChange}
-          hiatusStartDate={hiatusDates.start} // Передаем исключенные даты
-          hiatusEndDate={hiatusDates.end}
-        />
-      </div>
+      {/* Show components only if dates are selected, otherwise show message */}
+      {activeDateRange.start && activeDateRange.end ? (
+        <>
+          {/* Flight by Day Component */}
+          <div style={{ marginTop: '24px' }}>
+            <FlightByDay
+              startDate={activeDateRange.start}
+              endDate={activeDateRange.end}
+              hiatusStartDate={hiatusDates.start}
+              hiatusEndDate={hiatusDates.end}
+            />
+          </div>
+
+          {/* Flight by Week Component */}
+          <div style={{ marginTop: '24px' }}>
+            <FlightByWeek
+              startDate={activeDateRange.start} // Используем всегда активный диапазон для генерации недель
+              endDate={activeDateRange.end}
+              totalBudget={totalBudget}
+              onChange={handleWeeklyBudgetChange}
+              hiatusStartDate={hiatusDates.start} // Передаем исключенные даты
+              hiatusEndDate={hiatusDates.end}
+            />
+          </div>
+        </>
+      ) : (
+        <div style={{ 
+          marginTop: '24px',
+          textAlign: 'center', 
+          color: '#666',
+          fontSize: '14px',
+          padding: '40px 20px'
+        }}>
+          Select a date range to see weekly flight view & budget allocation
+        </div>
+      )}
     </div>
   );
 };
