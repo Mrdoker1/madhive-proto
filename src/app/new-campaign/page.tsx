@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import PageLayout from "@/components/layout/PageLayout";
 import NavigationAnchors, { AnchorItem } from "@/components/ui/NavigationAnchors";
 import SectionWrapper from "@/components/ui/SectionWrapper";
@@ -13,13 +14,36 @@ import NextButton from "@/components/ui/NextButton";
 
 export default function NewCampaignPage() {
   const [totalBudget, setTotalBudget] = useState<number>(0);
-  // Бредкрамбсы для страницы New Campaign
+  const router = useRouter();
+  
+  // Бредкрамбсы для страницы New Campaign - только индикация статуса
   const breadcrumbSteps: BreadcrumbStep[] = [
-    { id: 'new-campaign', label: 'New Campaign', status: 'completed', isSection: true },
-    { id: 'general', label: 'General', status: 'current' },
-    { id: 'channels', label: 'Channels', status: 'pending' },
-    { id: 'channel-details', label: 'Channel Details', status: 'pending' },
-    { id: 'summary', label: 'Summary', status: 'pending' }
+    { 
+      id: 'new-campaign', 
+      label: 'New Campaign', 
+      status: 'completed', 
+      isSection: true 
+    },
+    { 
+      id: 'general', 
+      label: 'General', 
+      status: 'current' // Устанавливаем статус в зависимости от текущего прогресса
+    },
+    { 
+      id: 'channels', 
+      label: 'Channels', 
+      status: 'pending'
+    },
+    { 
+      id: 'channel-details', 
+      label: 'Channel Details', 
+      status: 'pending'
+    },
+    { 
+      id: 'summary', 
+      label: 'Summary', 
+      status: 'pending'
+    }
   ];
 
   // Якоря для навигации по странице
@@ -31,8 +55,9 @@ export default function NewCampaignPage() {
   ];
 
   const handleNextClick = () => {
-    console.log('Переход к следующему шагу - Channels');
-    // Здесь можно добавить логику перехода на следующий шаг
+    console.log('Переход к следующему шагу - Channel Details');
+    // Переходим на страницу channel-details
+    router.push('/channel-details');
   };
 
   const handleTotalBudgetChange = (budget: number) => {
@@ -42,7 +67,10 @@ export default function NewCampaignPage() {
 
   return (
     <>
-      <PageLayout breadcrumbs={breadcrumbSteps} title="Campaign Information">
+      <PageLayout 
+        breadcrumbs={breadcrumbSteps} 
+        title="Campaign Information"
+      >
         <div style={{ backgroundColor: 'var(--page-background)', paddingTop: '32px', paddingBottom: '96px', paddingLeft: '32px', paddingRight: '32px' }}>
           <div style={{ display: 'flex', justifyContent: 'center', margin: '0 auto' }}>
             {/* Левая колонка с навигацией */}
