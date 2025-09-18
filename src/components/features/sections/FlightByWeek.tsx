@@ -66,9 +66,13 @@ const FlightByWeek: React.FC<FlightByWeekProps> = ({
       const hiatusStart = new Date(hiatusStartDate);
       const hiatusEnd = new Date(hiatusEndDate);
       
-      // Неделя блокируется только если она ПОЛНОСТЬЮ находится внутри hiatus диапазона
-      // Начало недели >= начала hiatus И конец недели <= конца hiatus
-      return weekStart >= hiatusStart && weekEnd <= hiatusEnd;
+      // Определяем реальные границы недели внутри выбранного диапазона кампании
+      const actualWeekStart = weekStart > startDateObj ? weekStart : startDateObj;
+      const actualWeekEnd = weekEnd < endDateObj ? weekEnd : endDateObj;
+      
+      // Неделя блокируется только если её АКТИВНАЯ ЧАСТЬ (внутри диапазона кампании) 
+      // ПОЛНОСТЬЮ находится внутри hiatus диапазона
+      return actualWeekStart >= hiatusStart && actualWeekEnd <= hiatusEnd;
     };
 
     const startDateObj = new Date(start);
