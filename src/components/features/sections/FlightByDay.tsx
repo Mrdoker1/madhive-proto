@@ -161,7 +161,7 @@ const FlightByDay: React.FC<FlightByDayProps> = ({
       setWeeks([]);
       setHiatusBlocks([]);
     }
-  }, [startDate, endDate, hiatusStartDate, hiatusEndDate]);
+  }, [startDate, endDate, hiatusStartDate, hiatusEndDate, generateWeeks, generateHiatusBlocks]);
 
   // Форматирование даты для отображения
   const formatDate = (date: Date) => {

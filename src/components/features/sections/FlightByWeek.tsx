@@ -130,7 +130,7 @@ const FlightByWeek: React.FC<FlightByWeekProps> = ({
     } else {
       setWeeks([]);
     }
-  }, [startDate, endDate, totalBudget, hiatusStartDate, hiatusEndDate]);
+  }, [startDate, endDate, totalBudget, hiatusStartDate, hiatusEndDate, generateWeeks]);
 
   // Подсчитываем общую сумму при изменении бюджетов
   useEffect(() => {
