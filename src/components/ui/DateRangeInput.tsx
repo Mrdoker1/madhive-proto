@@ -286,9 +286,24 @@ const DateRangeInput: React.FC<DateRangeInputProps> = ({
           :global(.rdrDayStartOfRange .rdrDayNumber),
           :global(.rdrDayEndOfRange .rdrDayNumber),
           :global(.rdrDayInRange .rdrDayNumber) {
-            color: #FFFFFF !important;
-          }
-        `}</style>
+              color: #FFFFFF !important;
+            }
+            
+            /* Выходные дни - только тонкие полосочки по краям */
+            /* Воскресенье - каждый 7n+1 день */
+            :global(.rdrDays .rdrDay:nth-child(7n+1):not(.rdrDayStartOfRange):not(.rdrDayEndOfRange):not(.rdrDayInRange):not(.rdrDayDisabled):not(.rdrDayToday) .rdrDayNumber) {
+              // border-left: 1px solid rgba(122, 115, 124, 0.2) !important;
+              // border-right: 1px solid rgba(122, 115, 124, 0.2) !important;
+              background-color: rgba(214, 210, 215, 0.1) !important;
+            }
+            
+            /* Суббота - каждый 7n день */
+            :global(.rdrDays .rdrDay:nth-child(7n):not(.rdrDayStartOfRange):not(.rdrDayEndOfRange):not(.rdrDayInRange):not(.rdrDayDisabled):not(.rdrDayToday) .rdrDayNumber) {
+              // border-left: 1px solid rgba(122, 115, 124, 0.2) !important;
+              // border-right: 1px solid rgba(122, 115, 124, 0.2) !important;
+              background-color: rgba(214, 210, 215, 0.1) !important;
+            }
+          `}</style>
         
         {/* Переопределение точного стиля сегодняшнего дня */}
         <style jsx global>{`
