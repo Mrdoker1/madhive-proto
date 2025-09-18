@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 interface WeekData {
   id: string;
@@ -47,7 +47,7 @@ const FlightByDay: React.FC<FlightByDayProps> = ({
   };
 
   // Функция для генерации недель из диапазона дат
-  const generateWeeks = (start: string, end: string): WeekData[] => {
+  const generateWeeks = useCallback((start: string, end: string): WeekData[] => {
     if (!start || !end) return [];
 
     const startDateObj = new Date(start);
@@ -98,10 +98,10 @@ const FlightByDay: React.FC<FlightByDayProps> = ({
     }
 
     return weeksArray;
-  };
+  }, [isDayInHiatus]);
 
   // Функция для генерации hiatus блоков
-  const generateHiatusBlocks = (weeks: WeekData[]): HiatusBlock[] => {
+  const generateHiatusBlocks = useCallback((weeks: WeekData[]): HiatusBlock[] => {
     if (!hiatusStartDate || !hiatusEndDate || weeks.length === 0) return [];
 
     const hiatusStart = new Date(hiatusStartDate);
@@ -127,7 +127,7 @@ const FlightByDay: React.FC<FlightByDayProps> = ({
     }
 
     return [];
-  };
+  }, [hiatusStartDate, hiatusEndDate]);
 
   // Создаем единый массив элементов для отображения
   const createDisplayItems = (weeks: WeekData[], hiatusBlocks: HiatusBlock[]) => {
@@ -161,7 +161,7 @@ const FlightByDay: React.FC<FlightByDayProps> = ({
       setWeeks([]);
       setHiatusBlocks([]);
     }
-  }, [startDate, endDate, hiatusStartDate, hiatusEndDate]);
+  }, [startDate, endDate, hiatusStartDate, hiatusEndDate, generateWeeks, generateHiatusBlocks]);
 
   // Форматирование даты для отображения
   const formatDate = (date: Date) => {

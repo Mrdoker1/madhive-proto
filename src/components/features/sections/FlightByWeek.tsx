@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { TextInput, Tooltip } from '@mantine/core';
 import { IconCurrencyDollar, IconLock, IconLockOpen, IconInfoCircle } from '@tabler/icons-react';
 
@@ -68,7 +68,7 @@ const FlightByWeek: React.FC<FlightByWeekProps> = ({
   };
 
   // Функция для генерации недель из диапазона дат
-  const generateWeeks = (start: string, end: string): WeekData[] => {
+  const generateWeeks = useCallback((start: string, end: string): WeekData[] => {
     if (!start || !end) return [];
 
     const startDateObj = new Date(start);
@@ -107,7 +107,7 @@ const FlightByWeek: React.FC<FlightByWeekProps> = ({
     }
 
     return weeksArray;
-  };
+  }, [isWeekInHiatus]);
 
   // Генерируем недели при изменении дат
   useEffect(() => {
@@ -130,7 +130,7 @@ const FlightByWeek: React.FC<FlightByWeekProps> = ({
     } else {
       setWeeks([]);
     }
-  }, [startDate, endDate, totalBudget, hiatusStartDate, hiatusEndDate]);
+  }, [startDate, endDate, totalBudget, hiatusStartDate, hiatusEndDate, generateWeeks]);
 
   // Подсчитываем общую сумму при изменении бюджетов
   useEffect(() => {

@@ -56,8 +56,8 @@ const DateRangeInput: React.FC<DateRangeInputProps> = ({
   // Состояние для react-date-range
   const [dateRange, setDateRange] = useState([
     {
-      startDate: parseDate(selectedStartDate) || new Date(),
-      endDate: parseDate(selectedEndDate) || new Date(),
+      startDate: selectedStartDate ? (parseDate(selectedStartDate) || new Date()) : new Date(),
+      endDate: selectedEndDate ? (parseDate(selectedEndDate) || new Date()) : new Date(),
       key: 'selection'
     }
   ]);
@@ -73,8 +73,8 @@ const DateRangeInput: React.FC<DateRangeInputProps> = ({
     
     // Обновляем dateRange для календаря
     setDateRange([{
-      startDate: parseDate(selectedStartDate) || new Date(),
-      endDate: parseDate(selectedEndDate) || new Date(),
+      startDate: selectedStartDate ? (parseDate(selectedStartDate) || new Date()) : new Date(),
+      endDate: selectedEndDate ? (parseDate(selectedEndDate) || new Date()) : new Date(),
       key: 'selection'
     }]);
   }, [selectedStartDate, selectedEndDate]);
