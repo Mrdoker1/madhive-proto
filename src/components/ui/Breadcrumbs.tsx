@@ -106,7 +106,7 @@ const Breadcrumbs: React.FC<BreadcrumbsProps> = ({
     if (step.isSection) return '#000000';
     
     if (step.disabled || step.status === 'disabled') return '#999999';
-    if (step.status === 'completed') return 'var(--breadcrumbs-completed)';
+    if (step.status === 'completed') return 'var(--breadcrumbs-text)';
     if (step.status === 'current') return 'var(--breadcrumbs-current)';
     return 'var(--breadcrumbs-text)';
   };
