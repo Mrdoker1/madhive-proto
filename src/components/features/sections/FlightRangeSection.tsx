@@ -118,7 +118,6 @@ const FlightRangeSection: React.FC<FlightRangeSectionProps> = ({
           variant="outline"
           size="sm"
           onClick={handleExtendCampaign}
-          disabled={true}
           styles={{
             root: {
               fontSize: '12px',
@@ -127,8 +126,8 @@ const FlightRangeSection: React.FC<FlightRangeSectionProps> = ({
               borderColor: '#E5E5E5',
               color: '#999999',
               backgroundColor: 'transparent',
-              opacity: 0.6,
-              cursor: 'not-allowed'
+              opacity: 0,
+              cursor: 'auto'
             }
           }}
         >
