@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Text, Anchor, Table, TableThead, TableTbody, TableTr, TableTh, TableTd } from '@mantine/core';
+import { Text, Table, TableThead, TableTbody, TableTr, TableTh, TableTd } from '@mantine/core';
 import PageLayout from "@/components/layout/PageLayout";
 
 export default function Home() {
@@ -43,9 +43,9 @@ export default function Home() {
                   <TableTr key={index}>
                     <TableTd>
                       <Link href={page.href}>
-                        <Anchor c="black" size="xs">
+                        <Text c="black" size="xs" style={{ cursor: 'pointer' }}>
                           {page.title}
-                        </Anchor>
+                        </Text>
                       </Link>
                     </TableTd>
                     <TableTd>
