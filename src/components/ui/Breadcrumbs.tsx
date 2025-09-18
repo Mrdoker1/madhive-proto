@@ -65,8 +65,8 @@ const Breadcrumbs: React.FC<BreadcrumbsProps> = ({
             style={{ 
               width: '16px',
               height: '16px',
-              borderColor: 'var(--breadcrumbs-current)',
-              backgroundColor: 'var(--breadcrumbs-current)'
+              borderColor: 'var(--primary-color)',
+              backgroundColor: 'var(--primary-color)'
             }}
           >
             <div className="w-2 h-2 bg-white rounded-full" />
@@ -79,7 +79,7 @@ const Breadcrumbs: React.FC<BreadcrumbsProps> = ({
             style={{ 
               width: '16px',
               height: '16px',
-              borderColor: 'var(--breadcrumbs-current)',
+              borderColor: 'var(--primary-color)',
               backgroundColor: 'transparent'
             }}
           />
@@ -106,9 +106,9 @@ const Breadcrumbs: React.FC<BreadcrumbsProps> = ({
     if (step.isSection) return '#000000';
     
     if (step.disabled || step.status === 'disabled') return '#999999';
-    if (step.status === 'completed') return 'var(--breadcrumbs-text)';
-    if (step.status === 'current') return 'var(--breadcrumbs-current)';
-    return 'var(--breadcrumbs-text)';
+    if (step.status === 'completed') return 'var(--primary-color)';
+    if (step.status === 'current') return 'var(--primary-color)';
+    return 'var(--primary-color)';
   };
 
   const isClickable = (step: BreadcrumbStep) => {
@@ -172,7 +172,7 @@ const Breadcrumbs: React.FC<BreadcrumbsProps> = ({
         <div className="flex items-center" style={{ gap: '8px' }}>
           <span 
             className="text-sm font-medium"
-            style={{ color: 'var(--breadcrumbs-text)' }}
+            style={{ color: 'var(--primary-color)' }}
           >
             {progressPercentage}% complete
           </span>

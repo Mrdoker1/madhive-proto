@@ -148,6 +148,19 @@ const theme = createTheme({
           }
         }
       }
+    },
+    Checkbox: {
+      defaultProps: {
+        color: 'var(--primary-color)',
+        radius: 'xs',
+        styles: {
+          label: {
+            fontSize: '12px',
+            color: '#000000',
+            fontWeight: 400
+          }
+        }
+      }
     }
   }
 });

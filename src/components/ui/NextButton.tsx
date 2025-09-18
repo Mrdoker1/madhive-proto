@@ -71,17 +71,17 @@ export const NextButton: React.FC<NextButtonProps> = ({
             disabled={!backEnabled}
             variant="outline"
             size="sm"
-            className="text-[var(--active-color)] border-[var(--active-color)] hover:bg-[var(--active-color)]/10 hover:border-[var(--active-color)] text-xs transition-colors"
+            className="text-[var(--primary-color)] border-[var(--primary-color)] hover:bg-[var(--primary-color)]/10 hover:border-[var(--primary-color)] text-xs transition-colors"
             styles={{
               root: {
                 height: '32px',
                 fontSize: '12px',
-                borderColor: 'var(--active-color)',
-                color: 'var(--active-color)',
+                borderColor: 'var(--primary-color)',
+                color: 'var(--primary-color)',
                 '&:hover': {
                   backgroundColor: 'rgba(42, 16, 55, 0.1)',
-                  borderColor: 'var(--active-color)',
-                  color: 'var(--active-color)'
+                  borderColor: 'var(--primary-color)',
+                  color: 'var(--primary-color)'
                 }
               }
             }}
@@ -96,7 +96,7 @@ export const NextButton: React.FC<NextButtonProps> = ({
           disabled={!active}
           variant={active ? 'filled' : 'outline'}
           size="sm"
-          className={active ? 'bg-[var(--active-color)] hover:bg-[var(--active-color)]/90 text-white text-xs transition-colors' : 'text-gray-400 text-xs'}
+          className={active ? 'bg-[var(--primary-color)] hover:bg-[var(--primary-color)]/90 text-white text-xs transition-colors' : 'text-gray-400 text-xs'}
           styles={{
             root: {
               height: '32px',

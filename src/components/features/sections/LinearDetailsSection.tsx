@@ -38,7 +38,6 @@ const LinearDetailsSection = () => {
         placeholder="Select measurement provider"
         data={measurementProviders}
         defaultValue="Nielsen"
-        clearable
       />
     </div>
   );

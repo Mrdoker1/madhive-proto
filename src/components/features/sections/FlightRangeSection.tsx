@@ -102,13 +102,13 @@ const FlightRangeSection: React.FC<FlightRangeSectionProps> = ({
             <Radio 
               value="active" 
               label="Active" 
-              color="#291036"
+              color="var(--primary-color)"
               styles={radioStyles}
             />
             <Radio 
               value="hiatus" 
               label="Hiatus" 
-              color="#291036"
+              color="var(--primary-color)"
               styles={radioStyles}
             />
           </Group>

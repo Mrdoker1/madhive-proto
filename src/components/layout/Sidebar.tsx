@@ -87,7 +87,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                   left: '0px',
                   width: '2px',
                   height: '56px',
-                  backgroundColor: 'var(--active-color)'
+                  backgroundColor: 'var(--primary-color)'
                 }}
               />
             )}

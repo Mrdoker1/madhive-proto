@@ -7,6 +7,7 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --primary-color: #291036;
   
   /* Layout colors */
   --header-background: #FDFCFA;
@@ -15,7 +16,6 @@
   --border-color: #E6E3E8;
   
   /* Interactive colors */
-  --active-color: #2A1037;
   --hover-background: rgba(0, 0, 0, 0.02);
   --active-background: rgba(0, 0, 0, 0.05);
   
@@ -30,9 +30,7 @@
   /* Breadcrumbs colors */
   --breadcrumbs-background: #F3F2EB;
   --breadcrumbs-completed: #33CC33;
-  --breadcrumbs-current: #291036;
   --breadcrumbs-pending: #E6E3E8;
-  --breadcrumbs-text: #291036;
   --breadcrumbs-arrow: #645C70;
 }
 

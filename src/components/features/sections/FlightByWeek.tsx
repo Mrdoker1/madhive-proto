@@ -213,7 +213,7 @@ const FlightByWeek: React.FC<FlightByWeekProps> = ({
               <span style={{ color: '#666' }}>Total Budget: </span>
             </Tooltip>
             <span style={{ 
-              color: '#291036',
+              color: 'var(--primary-color)',
               fontWeight: 500
             }}>
               ${totalBudget.toLocaleString()}
@@ -259,7 +259,7 @@ const FlightByWeek: React.FC<FlightByWeekProps> = ({
                 justifyContent: 'center',
                 gap: '4px',
                 fontSize: '10px', 
-                color: isHiatusWeek ? '#9CA3AF' : '#291036',
+                color: isHiatusWeek ? '#9CA3AF' : 'var(--primary-color)',
                 fontWeight: 500,
                 marginBottom: '4px',
                 height: '15px',
@@ -414,7 +414,7 @@ const FlightByWeek: React.FC<FlightByWeekProps> = ({
                 <div
                   className="absolute bottom-0 left-0 right-0 w-full h-full transition-none"
                   style={{
-                    backgroundColor: isHiatusWeek ? '#E5E5E5' : (week.isLocked ? '#9CA3AF' : '#291036'),
+                    backgroundColor: isHiatusWeek ? '#E5E5E5' : (week.isLocked ? '#9CA3AF' : 'var(--primary-color)'),
                     borderRadius: '4px 4px 0 0'
                   }}
                 />
