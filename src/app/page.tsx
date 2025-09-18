@@ -25,6 +25,14 @@ export default function Home() {
             >
               Channel Details
             </Link>
+            
+            <Link 
+              href="/summary"
+              className="inline-block px-6 py-3 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
+              style={{ backgroundColor: '#2A1037' }}
+            >
+              Summary
+            </Link>
           </div>
         </div>
       </div>

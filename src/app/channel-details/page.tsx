@@ -50,7 +50,8 @@ export default function ChannelDetailsPage() {
 
   const handleNextClick = () => {
     console.log('Переход к следующему шагу - Summary');
-    // Здесь можно добавить логику перехода на следующий шаг или создать страницу Summary
+    // Переходим на страницу summary
+    router.push('/summary');
   };
 
   const handleBackClick = () => {
@@ -64,7 +65,7 @@ export default function ChannelDetailsPage() {
         breadcrumbs={breadcrumbSteps} 
         title="Channel Details"
       >
-        <div style={{ backgroundColor: 'var(--page-background)', paddingTop: '32px', paddingBottom: '96px', paddingLeft: '32px', paddingRight: '32px' }}>
+        <div style={{ backgroundColor: 'var(--page-background)', paddingTop: '32px', paddingBottom: '96px', paddingLeft: '32px', paddingRight: '32px', minHeight: '100%' }}>
           <div style={{ display: 'flex', justifyContent: 'center', margin: '0 auto' }}>
             {/* Левая колонка с навигацией */}
             <div className="w-64" style={{ paddingRight: '20px', position: 'sticky', top: '32px', height: 'fit-content' }}>
