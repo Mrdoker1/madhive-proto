@@ -55,21 +55,21 @@ const FlightByWeek: React.FC<FlightByWeekProps> = ({
     );
   };
 
-  // Функция для проверки, полностью ли неделя находится в hiatus диапазоне
-  const isWeekInHiatus = (weekStart: Date, weekEnd: Date): boolean => {
-    if (!hiatusStartDate || !hiatusEndDate) return false;
-    
-    const hiatusStart = new Date(hiatusStartDate);
-    const hiatusEnd = new Date(hiatusEndDate);
-    
-    // Неделя блокируется только если она ПОЛНОСТЬЮ находится внутри hiatus диапазона
-    // Начало недели >= начала hiatus И конец недели <= конца hiatus
-    return weekStart >= hiatusStart && weekEnd <= hiatusEnd;
-  };
-
   // Функция для генерации недель из диапазона дат
   const generateWeeks = useCallback((start: string, end: string): WeekData[] => {
     if (!start || !end) return [];
+
+    // Локальная функция для проверки недели в хиатусе
+    const isWeekInHiatus = (weekStart: Date, weekEnd: Date): boolean => {
+      if (!hiatusStartDate || !hiatusEndDate) return false;
+      
+      const hiatusStart = new Date(hiatusStartDate);
+      const hiatusEnd = new Date(hiatusEndDate);
+      
+      // Неделя блокируется только если она ПОЛНОСТЬЮ находится внутри hiatus диапазона
+      // Начало недели >= начала hiatus И конец недели <= конца hiatus
+      return weekStart >= hiatusStart && weekEnd <= hiatusEnd;
+    };
 
     const startDateObj = new Date(start);
     const endDateObj = new Date(end);
@@ -107,7 +107,7 @@ const FlightByWeek: React.FC<FlightByWeekProps> = ({
     }
 
     return weeksArray;
-  }, [isWeekInHiatus]);
+  }, [hiatusStartDate, hiatusEndDate]);
 
   // Генерируем недели при изменении дат
   useEffect(() => {
@@ -130,7 +130,7 @@ const FlightByWeek: React.FC<FlightByWeekProps> = ({
     } else {
       setWeeks([]);
     }
-  }, [startDate, endDate, totalBudget, hiatusStartDate, hiatusEndDate, generateWeeks]);
+  }, [startDate, endDate, totalBudget, hiatusStartDate, hiatusEndDate]);
 
   // Подсчитываем общую сумму при изменении бюджетов
   useEffect(() => {

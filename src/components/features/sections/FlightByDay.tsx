@@ -36,19 +36,19 @@ const FlightByDay: React.FC<FlightByDayProps> = ({
   const [weeks, setWeeks] = useState<WeekData[]>([]);
   const [hiatusBlocks, setHiatusBlocks] = useState<HiatusBlock[]>([]);
 
-  // Функция для проверки, находится ли день в hiatus периоде
-  const isDayInHiatus = (date: Date): boolean => {
-    if (!hiatusStartDate || !hiatusEndDate) return false;
-    
-    const hiatusStart = new Date(hiatusStartDate);
-    const hiatusEnd = new Date(hiatusEndDate);
-    
-    return date >= hiatusStart && date <= hiatusEnd;
-  };
-
   // Функция для генерации недель из диапазона дат
   const generateWeeks = useCallback((start: string, end: string): WeekData[] => {
     if (!start || !end) return [];
+
+    // Локальная функция для проверки дня в хиатусе
+    const isDayInHiatus = (date: Date): boolean => {
+      if (!hiatusStartDate || !hiatusEndDate) return false;
+      
+      const hiatusStart = new Date(hiatusStartDate);
+      const hiatusEnd = new Date(hiatusEndDate);
+      
+      return date >= hiatusStart && date <= hiatusEnd;
+    };
 
     const startDateObj = new Date(start);
     const endDateObj = new Date(end);
@@ -98,7 +98,7 @@ const FlightByDay: React.FC<FlightByDayProps> = ({
     }
 
     return weeksArray;
-  }, [isDayInHiatus]);
+  }, [hiatusStartDate, hiatusEndDate]);
 
   // Функция для генерации hiatus блоков
   const generateHiatusBlocks = useCallback((weeks: WeekData[]): HiatusBlock[] => {
@@ -161,7 +161,7 @@ const FlightByDay: React.FC<FlightByDayProps> = ({
       setWeeks([]);
       setHiatusBlocks([]);
     }
-  }, [startDate, endDate, hiatusStartDate, hiatusEndDate, generateWeeks, generateHiatusBlocks]);
+  }, [startDate, endDate, hiatusStartDate, hiatusEndDate]);
 
   // Форматирование даты для отображения
   const formatDate = (date: Date) => {

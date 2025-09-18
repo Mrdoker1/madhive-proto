@@ -151,6 +151,8 @@ const FlightRangeSection: React.FC<FlightRangeSectionProps> = ({
           hiatusStartDate={hiatusDates.start}
           hiatusEndDate={hiatusDates.end}
           isActiveMode={flightStatus === 'active'}
+          // Блокируем календарь в режиме Hiatus, если не выбраны даты в Active
+          disabled={flightStatus === 'hiatus' && (!activeDateRange.start || !activeDateRange.end)}
         />
       </div>
 

@@ -24,6 +24,7 @@ interface DateRangeInputProps {
   hiatusStartDate?: string;
   hiatusEndDate?: string;
   isActiveMode?: boolean;
+  disabled?: boolean;
 }
 
 const DateRangeInput: React.FC<DateRangeInputProps> = ({
@@ -40,7 +41,8 @@ const DateRangeInput: React.FC<DateRangeInputProps> = ({
   selectedEndDate,
   hiatusStartDate,
   hiatusEndDate,
-  isActiveMode = false
+  isActiveMode,
+  disabled = false
 }) => {
   const [startDate, setStartDate] = useState(selectedStartDate || '');
   const [endDate, setEndDate] = useState(selectedEndDate || '');
@@ -64,20 +66,33 @@ const DateRangeInput: React.FC<DateRangeInputProps> = ({
   
   // Обновляем локальное состояние при изменении внешних пропсов
   React.useEffect(() => {
-    if (selectedStartDate !== undefined) {
+    if (selectedStartDate !== undefined && selectedStartDate !== startDate) {
       setStartDate(selectedStartDate);
     }
-    if (selectedEndDate !== undefined) {
+    if (selectedEndDate !== undefined && selectedEndDate !== endDate) {
       setEndDate(selectedEndDate);
     }
     
-    // Обновляем dateRange для календаря
-    setDateRange([{
-      startDate: selectedStartDate ? (parseDate(selectedStartDate) || new Date()) : new Date(),
-      endDate: selectedEndDate ? (parseDate(selectedEndDate) || new Date()) : new Date(),
-      key: 'selection'
-    }]);
-  }, [selectedStartDate, selectedEndDate]);
+    // Обновляем dateRange для календаря только если даты действительно изменились
+    const newStartDate = selectedStartDate ? (parseDate(selectedStartDate) || new Date()) : new Date();
+    const newEndDate = selectedEndDate ? (parseDate(selectedEndDate) || new Date()) : new Date();
+    
+    setDateRange(prevRange => {
+      const currentStart = prevRange[0]?.startDate;
+      const currentEnd = prevRange[0]?.endDate;
+      
+      // Проверяем, изменились ли даты
+      if (currentStart?.getTime() !== newStartDate.getTime() || 
+          currentEnd?.getTime() !== newEndDate.getTime()) {
+        return [{
+          startDate: newStartDate,
+          endDate: newEndDate,
+          key: 'selection'
+        }];
+      }
+      return prevRange;
+    });
+  }, [selectedStartDate, selectedEndDate, startDate, endDate]);
 
 
   // Состояние для независимых календарей
@@ -96,18 +111,46 @@ const DateRangeInput: React.FC<DateRangeInputProps> = ({
     return `${month}/${day}/${year}`;
   };
 
+  // Создаем массив заблокированных дат для хиатуса
+  const getDisabledDates = (): Date[] => {
+    if (!hiatusStartDate || !hiatusEndDate || !isActiveMode) {
+      return [];
+    }
+    
+    const hiatusStart = parseDate(hiatusStartDate);
+    const hiatusEnd = parseDate(hiatusEndDate);
+    
+    if (!hiatusStart || !hiatusEnd) {
+      return [];
+    }
+    
+    const disabledDates: Date[] = [];
+    const currentDate = new Date(hiatusStart);
+    
+    // Добавляем все даты в период хиатуса в массив заблокированных дат
+    while (currentDate <= hiatusEnd) {
+      disabledDates.push(new Date(currentDate));
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+    
+    return disabledDates;
+  };
+
   const handleDateRangeChange = (ranges: any) => {
     const selection = ranges.selection;
-    setDateRange([selection]);
     
     const formattedStartDate = formatDateFromObj(selection.startDate);
     const formattedEndDate = formatDateFromObj(selection.endDate);
     
-    setStartDate(formattedStartDate);
-    setEndDate(formattedEndDate);
-    
-    if (onChange) {
-      onChange(formattedStartDate, formattedEndDate);
+    // Обновляем состояние только если даты изменились
+    if (formattedStartDate !== startDate || formattedEndDate !== endDate) {
+      setDateRange([selection]);
+      setStartDate(formattedStartDate);
+      setEndDate(formattedEndDate);
+      
+      if (onChange) {
+        onChange(formattedStartDate, formattedEndDate);
+      }
     }
   };
 
@@ -266,17 +309,45 @@ const DateRangeInput: React.FC<DateRangeInputProps> = ({
             background-color: #FF9BD3 !important;
           }
         `}</style>
-        <DateRange
-          ranges={dateRange}
-          onChange={handleDateRangeChange}
-          months={2}
-          direction="horizontal"
-          moveRangeOnFirstSelection={false}
-          rangeColors={['#291036']}
-          showDateDisplay={false}
-          minDate={minDate}
-          maxDate={maxDate}
-        />
+        <div style={{ 
+          position: 'relative',
+          ...(disabled && {
+            pointerEvents: 'none',
+            opacity: 0.5
+          })
+        }}>
+          <DateRange
+            ranges={dateRange}
+            onChange={handleDateRangeChange}
+            months={2}
+            direction="horizontal"
+            moveRangeOnFirstSelection={false}
+            rangeColors={['#291036']}
+            showDateDisplay={false}
+            minDate={minDate}
+            maxDate={maxDate}
+            disabledDates={getDisabledDates()}
+          />
+          {disabled && (
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(248, 249, 250, 0.8)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '14px',
+              color: '#6c757d',
+              fontWeight: 500,
+              zIndex: 10
+            }}>
+              Select a date range in Active mode first
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Error Message */}
