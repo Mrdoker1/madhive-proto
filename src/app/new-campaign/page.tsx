@@ -30,11 +30,6 @@ export default function NewCampaignPage() {
       status: 'current' // Устанавливаем статус в зависимости от текущего прогресса
     },
     { 
-      id: 'channels', 
-      label: 'Channels', 
-      status: 'pending'
-    },
-    { 
       id: 'channel-details', 
       label: 'Channel Details', 
       status: 'pending'

@@ -7,6 +7,10 @@ import NavigationAnchors, { AnchorItem } from "@/components/ui/NavigationAnchors
 import SectionWrapper from "@/components/ui/SectionWrapper";
 import { BreadcrumbStep } from "@/components/ui/Breadcrumbs";
 import NextButton from "@/components/ui/NextButton";
+import LinearDetailsSection from "@/components/features/sections/LinearDetailsSection";
+import AudiencesSection from "@/components/features/sections/AudiencesSection";
+import MarketsSection from "@/components/features/sections/MarketsSection";
+import DaypartsSection from "@/components/features/sections/DaypartsSection";
 
 export default function ChannelDetailsPage() {
   const router = useRouter();
@@ -21,11 +25,6 @@ export default function ChannelDetailsPage() {
     { 
       id: 'general', 
       label: 'General', 
-      status: 'completed' // выполнен
-    },
-    { 
-      id: 'channels', 
-      label: 'Channels', 
       status: 'completed' // выполнен
     },
     { 
@@ -86,15 +85,7 @@ export default function ChannelDetailsPage() {
                 id="linear-details" 
                 title="Linear Details"
               >
-                <div style={{ 
-                  padding: '24px', 
-                  border: '1px dashed #ddd', 
-                  borderRadius: '8px', 
-                  textAlign: 'center',
-                  color: '#666'
-                }}>
-                  Linear Details section content will be here
-                </div>
+                <LinearDetailsSection />
               </SectionWrapper>
 
               {/* Audiences Section */}
@@ -102,15 +93,7 @@ export default function ChannelDetailsPage() {
                 id="audiences" 
                 title="Audiences"
               >
-                <div style={{ 
-                  padding: '24px', 
-                  border: '1px dashed #ddd', 
-                  borderRadius: '8px', 
-                  textAlign: 'center',
-                  color: '#666'
-                }}>
-                  Audiences section content will be here
-                </div>
+                <AudiencesSection />
               </SectionWrapper>
 
               {/* Markets Section */}
@@ -118,15 +101,7 @@ export default function ChannelDetailsPage() {
                 id="markets" 
                 title="Markets"
               >
-                <div style={{ 
-                  padding: '24px', 
-                  border: '1px dashed #ddd', 
-                  borderRadius: '8px', 
-                  textAlign: 'center',
-                  color: '#666'
-                }}>
-                  Markets section content will be here
-                </div>
+                <MarketsSection />
               </SectionWrapper>
 
               {/* Dayparts Section */}
@@ -134,15 +109,7 @@ export default function ChannelDetailsPage() {
                 id="dayparts" 
                 title="Dayparts"
               >
-                <div style={{ 
-                  padding: '24px', 
-                  border: '1px dashed #ddd', 
-                  borderRadius: '8px', 
-                  textAlign: 'center',
-                  color: '#666'
-                }}>
-                  Dayparts section content will be here
-                </div>
+                <DaypartsSection />
               </SectionWrapper>
               
               </div>

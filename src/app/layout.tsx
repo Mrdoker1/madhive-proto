@@ -119,6 +119,35 @@ const theme = createTheme({
           }
         }
       }
+    },
+    MultiSelect: {
+      defaultProps: {
+        styles: {
+          label: {
+            fontSize: '14px',
+            fontWeight: 500,
+            color: 'var(--form-label-color)',
+            marginBottom: '8px'
+          },
+          input: {
+            fontSize: '14px',
+            padding: '12px 16px',
+            border: '1px solid var(--form-input-border)',
+            borderRadius: '6px'
+          },
+          dropdown: {
+            backgroundColor: '#FFFFFF',
+            border: '1px solid var(--form-input-border)',
+            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+          },
+          option: {
+            color: '#374151',
+            fontSize: '14px',
+            backgroundColor: '#FFFFFF',
+            padding: '8px 12px'
+          }
+        }
+      }
     }
   }
 });

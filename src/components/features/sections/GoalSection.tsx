@@ -32,8 +32,6 @@ const GoalSection: React.FC<GoalSectionProps> = ({
         data={campaignObjectives}
         value={selectedObjective}
         onChange={setSelectedObjective}
-        searchable
-        clearable
         mb="lg"
       />
 

@@ -47,11 +47,6 @@ const GeneralDetailsSection: React.FC<GeneralDetailsSectionProps> = ({
     { value: 'cpe2', label: 'CPE002' },
   ];
 
-  const approverOptions = [
-    { value: 'approver1', label: 'John Smith' },
-    { value: 'approver2', label: 'Jane Doe' },
-  ];
-
   return (
     <div className={className}>
       {/* Campaign Name - полная ширина */}
@@ -123,12 +118,11 @@ const GeneralDetailsSection: React.FC<GeneralDetailsSectionProps> = ({
           />
         </Grid.Col>
         <Grid.Col span={6}>
-          <Select
+          <TextInput
             label="Campaign Approver"
-            placeholder="- Select Campaign Approver -"
-            data={approverOptions}
+            placeholder="Enter Campaign Approver"
             value={formData.campaignApprover}
-            onChange={(value) => handleInputChange('campaignApprover', value)}
+            onChange={(event) => handleInputChange('campaignApprover', event.currentTarget.value)}
             required
           />
         </Grid.Col>

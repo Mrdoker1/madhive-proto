@@ -24,11 +24,6 @@ export default function SummaryPage() {
       status: 'completed' // выполнен
     },
     { 
-      id: 'channels', 
-      label: 'Channels', 
-      status: 'completed' // выполнен
-    },
-    { 
       id: 'channel-details', 
       label: 'Channel Details', 
       status: 'completed' // выполнен
