@@ -8,8 +8,9 @@ interface DaypartsState {
 const DaypartsSection = () => {
   const [mode, setMode] = useState<'include' | 'exclude'>('include');
   const [selectedSlots, setSelectedSlots] = useState<DaypartsState>({});
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragStartCell, setDragStartCell] = useState<{ day: string; hour: number } | null>(null);
+  const [isSelecting, setIsSelecting] = useState(false);
+  const [selectionStart, setSelectionStart] = useState<{ day: string; hour: number } | null>(null);
+  const [selectionEnd, setSelectionEnd] = useState<{ day: string; hour: number } | null>(null);
   const gridRef = useRef<HTMLDivElement>(null);
 
   const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -26,53 +27,89 @@ const DaypartsSection = () => {
     return selectedSlots[day]?.[hour] || false;
   };
 
-  const toggleCell = (day: string, hour: number) => {
-    setSelectedSlots(prev => ({
-      ...prev,
-      [day]: {
-        ...prev[day],
-        [hour]: !isCellSelected(day, hour)
-      }
-    }));
-  };
-
-  const handleMouseDown = (day: string, hour: number) => {
-    setIsDragging(true);
-    setDragStartCell({ day, hour });
-    toggleCell(day, hour);
-  };
-
-  const handleMouseEnter = (day: string, hour: number) => {
-    if (isDragging && dragStartCell) {
-      // При перетаскивании выбираем все ячейки в прямоугольнике
-      const dayStart = days.indexOf(dragStartCell.day);
-      const dayEnd = days.indexOf(day);
-      const hourStart = dragStartCell.hour;
-      const hourEnd = hour;
-
-      const minDay = Math.min(dayStart, dayEnd);
-      const maxDay = Math.max(dayStart, dayEnd);
-      const minHour = Math.min(hourStart, hourEnd);
-      const maxHour = Math.max(hourStart, hourEnd);
-
-      const newSelectedSlots = { ...selectedSlots };
+  const handleCellClick = (day: string, hour: number) => {
+    if (!isSelecting) {
+      // Одиночный клик - переключаем состояние ячейки
+      const isCurrentlySelected = isCellSelected(day, hour);
       
-      for (let d = minDay; d <= maxDay; d++) {
-        const dayName = days[d];
-        if (!newSelectedSlots[dayName]) newSelectedSlots[dayName] = {};
-        
-        for (let h = minHour; h <= maxHour; h++) {
-          newSelectedSlots[dayName][h] = true;
+      setSelectedSlots(prev => ({
+        ...prev,
+        [day]: {
+          ...prev[day],
+          [hour]: !isCurrentlySelected
         }
-      }
+      }));
       
-      setSelectedSlots(newSelectedSlots);
+      // Начинаем bulk выделение
+      setIsSelecting(true);
+      setSelectionStart({ day, hour });
+      setSelectionEnd({ day, hour });
+    } else {
+      // Завершаем выделение
+      setSelectionEnd({ day, hour });
+      applySelection();
+      setIsSelecting(false);
+      setSelectionStart(null);
+      setSelectionEnd(null);
     }
   };
 
-  const handleMouseUp = () => {
-    setIsDragging(false);
-    setDragStartCell(null);
+  const handleMouseEnter = (day: string, hour: number) => {
+    if (isSelecting && selectionStart) {
+      // Обновляем конечную точку выделения
+      setSelectionEnd({ day, hour });
+    }
+  };
+
+  const applySelection = () => {
+    if (!selectionStart || !selectionEnd) return;
+    
+    const dayStart = days.indexOf(selectionStart.day);
+    const dayEnd = days.indexOf(selectionEnd.day);
+    const hourStart = selectionStart.hour;
+    const hourEnd = selectionEnd.hour;
+
+    const minDay = Math.min(dayStart, dayEnd);
+    const maxDay = Math.max(dayStart, dayEnd);
+    const minHour = Math.min(hourStart, hourEnd);
+    const maxHour = Math.max(hourStart, hourEnd);
+
+    const newSelectedSlots = { ...selectedSlots };
+    
+    for (let d = minDay; d <= maxDay; d++) {
+      const dayName = days[d];
+      if (!newSelectedSlots[dayName]) newSelectedSlots[dayName] = {};
+      
+      for (let h = minHour; h <= maxHour; h++) {
+        if (mode === 'include') {
+          // Include режим - добавляем ячейки
+          newSelectedSlots[dayName][h] = true;
+        } else {
+          // Exclude режим - убираем ячейки  
+          newSelectedSlots[dayName][h] = false;
+        }
+      }
+    }
+    
+    setSelectedSlots(newSelectedSlots);
+  };
+
+  const isCellInPreview = (day: string, hour: number): boolean => {
+    if (!isSelecting || !selectionStart || !selectionEnd) return false;
+    
+    const dayStart = days.indexOf(selectionStart.day);
+    const dayEnd = days.indexOf(selectionEnd.day);
+    const hourStart = selectionStart.hour;
+    const hourEnd = selectionEnd.hour;
+    const currentDay = days.indexOf(day);
+
+    const minDay = Math.min(dayStart, dayEnd);
+    const maxDay = Math.max(dayStart, dayEnd);
+    const minHour = Math.min(hourStart, hourEnd);
+    const maxHour = Math.max(hourStart, hourEnd);
+
+    return currentDay >= minDay && currentDay <= maxDay && 
+           hour >= minHour && hour <= maxHour;
   };
 
   const selectAll = () => {
@@ -108,8 +145,6 @@ const DaypartsSection = () => {
       {/* Таблица времени */}
       <div 
         ref={gridRef}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
         style={{ userSelect: 'none', width: '100%', maxWidth: '740px'}}
       >
         {/* Заголовок с часами */}
@@ -162,22 +197,36 @@ const DaypartsSection = () => {
             </div>
 
             {/* Ячейки часов */}
-            {hours.map(hour => (
-              <div
-                key={`${day}-${hour}`}
-                style={{
-                  width: '24px',
-                  height: '24px',
-                  backgroundColor: isCellSelected(day, hour) ? '#291036' : '#EBE6EC',
-                  cursor: 'pointer',
-                  borderRadius: '2px',
-                  transition: 'background-color 0.1s ease',
-                  flexShrink: 0
-                }}
-                onMouseDown={() => handleMouseDown(day, hour)}
-                onMouseEnter={() => handleMouseEnter(day, hour)}
-              />
-            ))}
+            {hours.map(hour => {
+              const isSelected = isCellSelected(day, hour);
+              const isInPreview = isCellInPreview(day, hour);
+              
+              let backgroundColor = '#EBE6EC'; // default
+              
+              if (isInPreview) {
+                // Preview всегда одинаковый - полупрозрачный фиолетовый
+                backgroundColor = 'rgba(41, 16, 54, 0.3)';
+              } else if (isSelected) {
+                backgroundColor = '#291036'; // selected
+              }
+              
+              return (
+                <div
+                  key={`${day}-${hour}`}
+                  style={{
+                    width: '24px',
+                    height: '24px',
+                    backgroundColor,
+                    cursor: 'pointer',
+                    borderRadius: '2px',
+                    transition: 'background-color 0.1s ease',
+                    flexShrink: 0
+                  }}
+                  onClick={() => handleCellClick(day, hour)}
+                  onMouseEnter={() => handleMouseEnter(day, hour)}
+                />
+              );
+            })}
           </div>
         ))}
       </div>
