@@ -77,7 +77,7 @@ export default function SummaryPage() {
             </div>
           </div>
         </div>
-        <div style={{ position: 'fixed', bottom: '0', zIndex: 1000, left: '104px', right: '40px' }}>
+        <div style={{ position: 'fixed', bottom: '0', zIndex: 1000, left: '64px', right: '0' }}>
           <NextButton 
             active={true}
             onClick={handleNextClick}

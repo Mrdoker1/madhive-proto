@@ -25,7 +25,7 @@ const RightSidebar: React.FC<RightSidebarProps> = ({ className = '' }) => {
         <div>
           <TextInput
             label="Budget Estimation"
-            placeholder="Enter budget estimation"
+            placeholder="Budget estimation"
             styles={{
               label: {
                 fontSize: '14px',
@@ -48,7 +48,8 @@ const RightSidebar: React.FC<RightSidebarProps> = ({ className = '' }) => {
         <div>
           <TextInput
             label="Audience Estimation"
-            placeholder="Enter audience estimation"
+            placeholder="Audience estimation"
+            disabled
             styles={{
               label: {
                 fontSize: '14px',
@@ -71,7 +72,8 @@ const RightSidebar: React.FC<RightSidebarProps> = ({ className = '' }) => {
         <div>
           <TextInput
             label="Market Estimation"
-            placeholder="Enter market estimation"
+            placeholder="Market estimation"
+            disabled
             styles={{
               label: {
                 fontSize: '14px',

@@ -28,24 +28,57 @@ const NavigationAnchors: React.FC<NavigationAnchorsProps> = ({
   // Функция для плавного скролла к якорю
   const scrollToAnchor = (anchor: string, itemId: string) => {
     const element = document.querySelector(anchor);
+    const scrollContainer = document.querySelector('main.overflow-auto');
+    
     if (element) {
-      element.scrollIntoView({ 
-        behavior: 'smooth',
-        block: 'start'
-      });
-      setActiveAnchor(itemId);
+      if (scrollContainer) {
+        // Скролл внутри main контейнера
+        const containerRect = scrollContainer.getBoundingClientRect();
+        const elementRect = element.getBoundingClientRect();
+        const scrollTop = elementRect.top - containerRect.top + scrollContainer.scrollTop - 20; // 20px offset
+        
+        // Проверяем поддержку smooth scroll
+        if ('scrollBehavior' in document.documentElement.style) {
+          scrollContainer.scrollTo({
+            top: scrollTop,
+            behavior: 'smooth'
+          });
+        } else {
+          // Fallback для старых браузеров
+          scrollContainer.scrollTop = scrollTop;
+        }
+      } else {
+        // Обычный скролл для window
+        if ('scrollBehavior' in document.documentElement.style) {
+          element.scrollIntoView({ 
+            behavior: 'smooth',
+            block: 'start'
+          });
+        } else {
+          // Fallback для старых браузеров
+          element.scrollIntoView(true);
+        }
+      }
     }
   };
 
   // Отслеживание активного якоря при скролле
   useEffect(() => {
-    const handleScroll = () => {
-      const scrollPosition = window.scrollY + 100; // Offset для более точного определения
+    const handleScroll = (event?: Event) => {
+      // Определяем контейнер скролла - либо main с overflow-auto, либо window
+      const scrollContainer = document.querySelector('main.overflow-auto') || document.documentElement;
+      const scrollPosition = (scrollContainer === document.documentElement ? window.scrollY : scrollContainer.scrollTop) + 100;
 
       for (const item of items) {
         const element = document.querySelector(item.anchor) as HTMLElement;
         if (element) {
-          const elementTop = element.offsetTop;
+          // Используем getBoundingClientRect для более точного позиционирования
+          const rect = element.getBoundingClientRect();
+          const containerRect = scrollContainer === document.documentElement 
+            ? { top: 0 } 
+            : (scrollContainer as HTMLElement).getBoundingClientRect();
+          
+          const elementTop = rect.top + (scrollContainer === document.documentElement ? window.scrollY : scrollContainer.scrollTop) - containerRect.top;
           const elementBottom = elementTop + element.offsetHeight;
           
           if (scrollPosition >= elementTop && scrollPosition < elementBottom) {
@@ -56,10 +89,24 @@ const NavigationAnchors: React.FC<NavigationAnchorsProps> = ({
       }
     };
 
-    window.addEventListener('scroll', handleScroll);
+    // Добавляем слушателей как для window, так и для main контейнера
+    const scrollContainer = document.querySelector('main.overflow-auto');
+    
+    if (scrollContainer) {
+      scrollContainer.addEventListener('scroll', handleScroll);
+    } else {
+      window.addEventListener('scroll', handleScroll);
+    }
+    
     handleScroll(); // Вызываем сразу для установки начального состояния
 
-    return () => window.removeEventListener('scroll', handleScroll);
+    return () => {
+      if (scrollContainer) {
+        scrollContainer.removeEventListener('scroll', handleScroll);
+      } else {
+        window.removeEventListener('scroll', handleScroll);
+      }
+    };
   }, [items]);
 
   const containerClass = orientation === 'vertical' 
