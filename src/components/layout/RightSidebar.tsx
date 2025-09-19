@@ -4,6 +4,7 @@ import React from 'react';
 import { TextInput, Text, Card } from '@mantine/core';
 import { IconCurrencyDollar } from '@tabler/icons-react';
 import { useAppSelector } from '@/hooks/useRedux';
+import Image from 'next/image';
 
 interface RightSidebarProps {
   className?: string;
@@ -122,11 +123,27 @@ const RightSidebar: React.FC<RightSidebarProps> = ({ className = '' }) => {
             root: {
               backgroundColor: '#FFFFFF',
               borderRadius: '8px',
+              position: 'relative'
             }
           }}
         >
-          <Text size="xs" style={{ color: '#666', lineHeight: 1.5 }}>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor 
+          {/* Spark Icon in top right corner */}
+          <div style={{
+            position: 'absolute',
+            top: '16px',
+            right: '16px'
+          }}>
+            <Image
+              src="/assets/icons/other/spark.svg"
+              alt="AI Spark"
+              width={20}
+              height={20}
+              className={className}
+            />
+          </div>
+          
+          <Text size="xs" style={{ color: '#666', lineHeight: 1.5, paddingRight: '30px' }}>
+            We suggest you : Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor 
             incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud 
             exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute 
             irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla 
