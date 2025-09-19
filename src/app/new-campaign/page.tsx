@@ -70,7 +70,6 @@ export default function NewCampaignPage() {
             active={true}
             onClick={handleNextClick}
             text="Next"
-            isFooter={true}
           />
         }
       >

@@ -72,7 +72,6 @@ export default function ChannelDetailsPage() {
             showBack={true}
             onBackClick={handleBackClick}
             backText="Back"
-            isFooter={true}
           />
         }
       >

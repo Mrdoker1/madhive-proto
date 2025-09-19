@@ -58,7 +58,6 @@ export default function SummaryPage() {
             showBack={true}
             onBackClick={handleBackClick}
             backText="Back"
-            isFooter={true}
           />
         }
       >

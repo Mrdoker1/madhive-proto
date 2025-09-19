@@ -37,10 +37,6 @@ interface NextButtonProps {
    * Whether the Back button is enabled (defaults to true)
    */
   backEnabled?: boolean;
-  /**
-   * Whether this button is used as a footer (removes padding)
-   */
-  isFooter?: boolean;
 }
 
 export const NextButton: React.FC<NextButtonProps> = ({
@@ -52,12 +48,11 @@ export const NextButton: React.FC<NextButtonProps> = ({
   onBackClick,
   backText = 'Back',
   backEnabled = true,
-  isFooter = false
 }) => {
   return (
     <div style={{ 
-      paddingLeft: isFooter ? '0' : '40px', 
-      paddingRight: isFooter ? '0' : '40px', 
+      paddingLeft: '40px', 
+      paddingRight: '40px',
       backgroundColor: 'var(--header-background)',
       width: '100%'
     }}>
@@ -69,9 +64,7 @@ export const NextButton: React.FC<NextButtonProps> = ({
       `}
       style={{ 
         borderTopColor: 'var(--border-color)',
-        height: '64px',
-        paddingLeft: isFooter ? '40px' : '0',
-        paddingRight: isFooter ? '40px' : '0'
+        height: '64px'
       }}
       >
         {/* Container for buttons with gap */}
