@@ -50,39 +50,40 @@ export const NextButton: React.FC<NextButtonProps> = ({
   backEnabled = true
 }) => {
   return (
-    <div className={`
-      w-full 
-      flex items-center ${showBack ? 'justify-end' : 'justify-end'}
-      border-t
-      bg-[var(--header-background)]
-      ${className}
-    `}
-    style={{ 
-      borderTopColor: 'var(--border-color)',
-      height: '64px'
-    }}
-    >
-      {/* Container for buttons with gap */}
-      <div className="flex items-center" style={{ gap: '16px' }}>
-        {/* Back Button */}
-        {showBack && (
-          <Button
-            onClick={backEnabled ? onBackClick : undefined}
-            disabled={!backEnabled}
-            variant="outline"
-          >
-            {backText}
-          </Button>
-        )}
+    <div style={{ paddingLeft: '40px', paddingRight: '40px', backgroundColor: 'var(--header-background)' }}>
+      <div className={`
+        w-full 
+        flex items-center justify-end
+        border-t
+        ${className}
+      `}
+      style={{ 
+        borderTopColor: 'var(--border-color)',
+        height: '64px'
+      }}
+      >
+        {/* Container for buttons with gap */}
+        <div className="flex items-center" style={{ gap: '16px' }}>
+          {/* Back Button */}
+          {showBack && (
+            <Button
+              onClick={backEnabled ? onBackClick : undefined}
+              disabled={!backEnabled}
+              variant="outline"
+            >
+              {backText}
+            </Button>
+          )}
 
-        {/* Next Button */}
-        <Button
-          onClick={active ? onClick : undefined}
-          disabled={!active}
-          variant={active ? 'filled' : 'outline'}
-        >
-          {text}
-        </Button>
+          {/* Next Button */}
+          <Button
+            onClick={active ? onClick : undefined}
+            disabled={!active}
+            variant={active ? 'filled' : 'outline'}
+          >
+            {text}
+          </Button>
+        </div>
       </div>
     </div>
   );

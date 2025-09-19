@@ -5,7 +5,7 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
+  --background: #FDFCFA;
   --foreground: #171717;
   --primary-color: #291036;
   
@@ -34,10 +34,10 @@
   --breadcrumbs-arrow: #645C70;
 }
 
-@media (prefers-color-scheme: dark) {
+@media (prefers-color-scheme: light) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #FDFCFA;
+    --foreground: #171717;
   }
 }
 
