@@ -13,10 +13,6 @@ interface FlightRangeSectionProps {
 
 type DateRange = { start: string; end: string };
 
-// Стили для радиокнопок
-const radioStyles = {
-  label: { fontSize: '14px', color: '#000000' }
-};
 
 // Стили для кнопки Extend Campaign
 const extendButtonStyles = {
@@ -102,14 +98,10 @@ const FlightRangeSection: React.FC<FlightRangeSectionProps> = ({
             <Radio 
               value="active" 
               label="Active" 
-              color="var(--primary-color)"
-              styles={radioStyles}
             />
             <Radio 
               value="hiatus" 
               label="Hiatus" 
-              color="var(--primary-color)"
-              styles={radioStyles}
             />
           </Group>
         </Radio.Group>

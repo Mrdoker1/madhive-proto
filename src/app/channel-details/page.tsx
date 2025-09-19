@@ -77,7 +77,7 @@ export default function ChannelDetailsPage() {
               />
             </div>
             {/* Основной контент */}
-            <div style={{ paddingLeft: '20px', width: '100%', maxWidth: '960px' }}>
+            <div style={{ paddingLeft: '20px', width: '100%', maxWidth: '800px' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '40px' }}>
               
               {/* Linear Details Section */}

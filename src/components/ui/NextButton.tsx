@@ -70,21 +70,6 @@ export const NextButton: React.FC<NextButtonProps> = ({
             onClick={backEnabled ? onBackClick : undefined}
             disabled={!backEnabled}
             variant="outline"
-            size="sm"
-            className="text-[var(--primary-color)] border-[var(--primary-color)] hover:bg-[var(--primary-color)]/10 hover:border-[var(--primary-color)] text-xs transition-colors"
-            styles={{
-              root: {
-                height: '32px',
-                fontSize: '12px',
-                borderColor: 'var(--primary-color)',
-                color: 'var(--primary-color)',
-                '&:hover': {
-                  backgroundColor: 'rgba(42, 16, 55, 0.1)',
-                  borderColor: 'var(--primary-color)',
-                  color: 'var(--primary-color)'
-                }
-              }
-            }}
           >
             {backText}
           </Button>
@@ -95,14 +80,6 @@ export const NextButton: React.FC<NextButtonProps> = ({
           onClick={active ? onClick : undefined}
           disabled={!active}
           variant={active ? 'filled' : 'outline'}
-          size="sm"
-          className={active ? 'bg-[var(--primary-color)] hover:bg-[var(--primary-color)]/90 text-white text-xs transition-colors' : 'text-gray-400 text-xs'}
-          styles={{
-            root: {
-              height: '32px',
-              fontSize: '12px'
-            }
-          }}
         >
           {text}
         </Button>

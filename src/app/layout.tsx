@@ -83,11 +83,13 @@ const theme = createTheme({
     },
     Button: {
       defaultProps: {
+        color: 'var(--primary-color)',
         styles: {
           root: {
-            fontSize: '14px',
+            fontSize: '12px',
             fontWeight: 500,
-            borderRadius: '6px'
+            borderRadius: '6px',
+            height: '32px'
           }
         }
       }
@@ -158,6 +160,17 @@ const theme = createTheme({
             fontSize: '12px',
             color: '#000000',
             fontWeight: 400
+          }
+        }
+      }
+    },
+    Radio: {
+      defaultProps: {
+        color: 'var(--primary-color)',
+        styles: {
+          label: {
+            fontSize: '14px',
+            color: '#000000'
           }
         }
       }
