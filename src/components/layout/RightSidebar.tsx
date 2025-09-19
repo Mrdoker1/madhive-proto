@@ -2,12 +2,29 @@
 
 import React from 'react';
 import { TextInput, Text, Card } from '@mantine/core';
+import { IconCurrencyDollar } from '@tabler/icons-react';
+import { useAppSelector } from '@/hooks/useRedux';
 
 interface RightSidebarProps {
   className?: string;
 }
 
 const RightSidebar: React.FC<RightSidebarProps> = ({ className = '' }) => {
+  // Получаем данные кампании из глобального стейта
+  const totalBudget = useAppSelector((state) => state.campaign.budget.totalBudget);
+  const audienceEstimation = useAppSelector((state) => state.campaign.estimations.audienceEstimation);
+  const marketEstimation = useAppSelector((state) => state.campaign.estimations.marketEstimation);
+
+  // Форматирование бюджета для отображения
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount);
+  };
+
   return (
     <div 
       className={`w-80 flex-shrink-0 h-full overflow-auto ${className}`}
@@ -25,7 +42,10 @@ const RightSidebar: React.FC<RightSidebarProps> = ({ className = '' }) => {
         <div>
           <TextInput
             label="Budget Estimation"
-            placeholder="Budget estimation"
+            placeholder="No budget set"
+            leftSection={<IconCurrencyDollar size={16} color="#666" />}
+            value={totalBudget > 0 ? formatCurrency(totalBudget) : ''}
+            readOnly
             styles={{
               label: {
                 fontSize: '14px',
@@ -36,9 +56,11 @@ const RightSidebar: React.FC<RightSidebarProps> = ({ className = '' }) => {
               input: {
                 fontSize: '14px',
                 padding: '12px 16px',
+                paddingLeft: '40px', // Добавляем отступ для иконки
                 border: '1px solid var(--form-input-border)',
                 borderRadius: '6px',
-                backgroundColor: '#FFFFFF'
+                backgroundColor: '#F8F9FA', // Слегка серый фон для readOnly поля
+                cursor: 'default'
               }
             }}
           />

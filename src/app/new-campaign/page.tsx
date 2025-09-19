@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
+import { updateBudgetData } from '@/store/slices/campaignSlice';
 import PageLayout from "@/components/layout/PageLayout";
 import NavigationAnchors, { AnchorItem } from "@/components/ui/NavigationAnchors";
 import SectionWrapper from "@/components/ui/SectionWrapper";
@@ -13,8 +14,11 @@ import FlightRangeSection from "@/components/features/sections/FlightRangeSectio
 import NextButton from "@/components/ui/NextButton";
 
 export default function NewCampaignPage() {
-  const [totalBudget, setTotalBudget] = useState<number>(0);
   const router = useRouter();
+  const dispatch = useAppDispatch();
+  
+  // Получаем данные из глобального стейта
+  const totalBudget = useAppSelector((state) => state.campaign.budget.totalBudget);
   
   // Бредкрамбсы для страницы New Campaign - только индикация статуса
   const breadcrumbSteps: BreadcrumbStep[] = [
@@ -56,7 +60,7 @@ export default function NewCampaignPage() {
   };
 
   const handleTotalBudgetChange = (budget: number) => {
-    setTotalBudget(budget);
+    dispatch(updateBudgetData({ totalBudget: budget }));
     console.log('Total budget changed:', budget);
   };
 

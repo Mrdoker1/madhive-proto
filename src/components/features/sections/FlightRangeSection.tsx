@@ -1,7 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Radio, Button, Group } from '@mantine/core';
+import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
+import { updateFlightData } from '@/store/slices/campaignSlice';
 import DualCalendar from '@/components/ui/DateRangeInput';
 import FlightByWeek from './FlightByWeek';
 import FlightByDay from './FlightByDay';
@@ -39,10 +41,26 @@ const FlightRangeSection: React.FC<FlightRangeSectionProps> = ({
   className = '',
   totalBudget = 0
 }) => {
+  const dispatch = useAppDispatch();
+  const globalFlightData = useAppSelector((state) => state.campaign.flight);
+  const globalBudget = useAppSelector((state) => state.campaign.budget.totalBudget);
   
   const [flightStatus, setFlightStatus] = useState<'active' | 'hiatus'>('active');
   const [activeDateRange, setActiveDateRange] = useState<DateRange>({ start: '', end: '' });
   const [hiatusDates, setHiatusDates] = useState<DateRange>({ start: '', end: '' });
+
+  // Синхронизируем локальное состояние с глобальным при загрузке
+  useEffect(() => {
+    setFlightStatus(globalFlightData.flightStatus || 'active');
+    setActiveDateRange({
+      start: globalFlightData.startDate || '',
+      end: globalFlightData.endDate || ''
+    });
+    setHiatusDates({
+      start: globalFlightData.hiatusStartDate || '',
+      end: globalFlightData.hiatusEndDate || ''
+    });
+  }, [globalFlightData]);
   
   // Вычисляемые значения для текущего отображения
   const currentDateRange = flightStatus === 'active' ? activeDateRange : hiatusDates;
@@ -73,15 +91,32 @@ const FlightRangeSection: React.FC<FlightRangeSectionProps> = ({
     
     if (flightStatus === 'active') {
       setActiveDateRange({ start: startDate, end: endDate });
+      // Обновляем глобальный стейт
+      dispatch(updateFlightData({ 
+        startDate: startDate, 
+        endDate: endDate 
+      }));
       // Очищаем hiatus даты при изменении активного диапазона
       setHiatusDates({ start: '', end: '' });
+      dispatch(updateFlightData({ 
+        hiatusStartDate: '',
+        hiatusEndDate: ''
+      }));
     } else {
       setHiatusDates({ start: startDate, end: endDate });
+      // Обновляем глобальный стейт для hiatus дат
+      dispatch(updateFlightData({ 
+        hiatusStartDate: startDate,
+        hiatusEndDate: endDate
+      }));
     }
   };
   
   const handleFlightStatusChange = (value: string) => {
-    setFlightStatus(value as 'active' | 'hiatus');
+    const newStatus = value as 'active' | 'hiatus';
+    setFlightStatus(newStatus);
+    // Обновляем глобальный стейт
+    dispatch(updateFlightData({ flightStatus: newStatus }));
   };
 
   const handleWeeklyBudgetChange = (weeklyBudgets: any[]) => {
@@ -165,7 +200,7 @@ const FlightRangeSection: React.FC<FlightRangeSectionProps> = ({
             <FlightByWeek
               startDate={activeDateRange.start} // Используем всегда активный диапазон для генерации недель
               endDate={activeDateRange.end}
-              totalBudget={totalBudget}
+              totalBudget={globalBudget}
               onChange={handleWeeklyBudgetChange}
               hiatusStartDate={hiatusDates.start} // Передаем исключенные даты
               hiatusEndDate={hiatusDates.end}

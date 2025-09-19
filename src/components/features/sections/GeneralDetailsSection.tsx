@@ -1,7 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { TextInput, Select, Grid } from '@mantine/core';
+import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
+import { updateGeneralData } from '@/store/slices/campaignSlice';
 
 interface GeneralDetailsSectionProps {
   className?: string;
@@ -10,6 +12,9 @@ interface GeneralDetailsSectionProps {
 const GeneralDetailsSection: React.FC<GeneralDetailsSectionProps> = ({
   className = ''
 }) => {
+  const dispatch = useAppDispatch();
+  const globalGeneralData = useAppSelector((state) => state.campaign.general);
+  
   const [formData, setFormData] = useState({
     campaignName: '',
     advertiser: '',
@@ -20,11 +25,35 @@ const GeneralDetailsSection: React.FC<GeneralDetailsSectionProps> = ({
     campaignApprover: ''
   });
 
+  // Синхронизируем локальное состояние с глобальным при загрузке
+  useEffect(() => {
+    setFormData({
+      campaignName: globalGeneralData.campaignName || '',
+      advertiser: globalGeneralData.advertiser || '',
+      brand: globalGeneralData.brand || '',
+      agency: '', // это поле не в globalGeneralData, но сохраним как есть
+      cpeCode: '', // это поле не в globalGeneralData, но сохраним как есть
+      campaignOwner: '', // это поле не в globalGeneralData, но сохраним как есть
+      campaignApprover: '' // это поле не в globalGeneralData, но сохраним как есть
+    });
+  }, [globalGeneralData]);
+
   const handleInputChange = (field: string, value: string | null) => {
+    const newValue = value || '';
     setFormData(prev => ({
       ...prev,
-      [field]: value || ''
+      [field]: newValue
     }));
+
+    // Обновляем глобальный стейт для полей, которые есть в campaignSlice
+    if (field === 'campaignName') {
+      dispatch(updateGeneralData({ campaignName: newValue }));
+    } else if (field === 'advertiser') {
+      dispatch(updateGeneralData({ advertiser: newValue }));
+    } else if (field === 'brand') {
+      dispatch(updateGeneralData({ brand: newValue }));
+    }
+    // agency, cpeCode, campaignOwner, campaignApprover пока остаются локальными
   };
 
   const advertiserOptions = [

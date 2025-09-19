@@ -1,8 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { TextInput } from '@mantine/core';
 import { IconCurrencyDollar } from '@tabler/icons-react';
+import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
+import { updateBudgetData } from '@/store/slices/campaignSlice';
 
 interface TotalBudgetSectionProps {
   className?: string;
@@ -13,7 +15,16 @@ const TotalBudgetSection: React.FC<TotalBudgetSectionProps> = ({
   className = '',
   onChange
 }) => {
+  const dispatch = useAppDispatch();
+  const globalBudget = useAppSelector((state) => state.campaign.budget.totalBudget);
   const [totalBudget, setTotalBudget] = useState('');
+
+  // Синхронизируем локальное состояние с глобальным при загрузке
+  useEffect(() => {
+    if (globalBudget > 0) {
+      setTotalBudget(globalBudget.toString());
+    }
+  }, [globalBudget]);
 
   const handleBudgetChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
@@ -21,9 +32,12 @@ const TotalBudgetSection: React.FC<TotalBudgetSectionProps> = ({
     if (/^\d*\.?\d*$/.test(value)) {
       setTotalBudget(value);
       
-      // Вызываем onChange с числовым значением
+      // Обновляем глобальный стейт
+      const numericValue = parseFloat(value) || 0;
+      dispatch(updateBudgetData({ totalBudget: numericValue }));
+      
+      // Вызываем onChange для обратной совместимости
       if (onChange) {
-        const numericValue = parseFloat(value) || 0;
         onChange(numericValue);
       }
     }

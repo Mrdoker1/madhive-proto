@@ -1,7 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Textarea, Select } from '@mantine/core';
+import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
+import { updateGoalData } from '@/store/slices/campaignSlice';
 
 interface GoalSectionProps {
   className?: string;
@@ -10,8 +12,17 @@ interface GoalSectionProps {
 const GoalSection: React.FC<GoalSectionProps> = ({
   className = ''
 }) => {
+  const dispatch = useAppDispatch();
+  const globalGoalData = useAppSelector((state) => state.campaign.goal);
+  
   const [goal, setGoal] = useState('');
   const [selectedObjective, setSelectedObjective] = useState<string | null>(null);
+
+  // Синхронизируем локальное состояние с глобальным при загрузке
+  useEffect(() => {
+    setSelectedObjective(globalGoalData.goalType || null);
+    setGoal(globalGoalData.goalMetric || ''); // используем goalMetric для текстового описания
+  }, [globalGoalData]);
 
   const campaignObjectives = [
     { value: 'brand-awareness', label: 'Brand Awareness' },
@@ -20,7 +31,14 @@ const GoalSection: React.FC<GoalSectionProps> = ({
   ];
 
   const handleGoalChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setGoal(event.target.value);
+    const newGoal = event.target.value;
+    setGoal(newGoal);
+    dispatch(updateGoalData({ goalMetric: newGoal }));
+  };
+
+  const handleObjectiveChange = (value: string | null) => {
+    setSelectedObjective(value);
+    dispatch(updateGoalData({ goalType: value || '' }));
   };
 
   return (
@@ -31,7 +49,7 @@ const GoalSection: React.FC<GoalSectionProps> = ({
         placeholder="- Select campaign objective -"
         data={campaignObjectives}
         value={selectedObjective}
-        onChange={setSelectedObjective}
+        onChange={handleObjectiveChange}
         mb="lg"
       />
 

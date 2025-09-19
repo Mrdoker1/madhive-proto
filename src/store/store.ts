@@ -1,10 +1,12 @@
 import { configureStore } from '@reduxjs/toolkit';
 import serverStatusReducer from '@/store/slices/serverStatusSlice';
+import campaignReducer from '@/store/slices/campaignSlice';
 
 export const makeStore = () => {
   return configureStore({
     reducer: {
       serverStatus: serverStatusReducer,
+      campaign: campaignReducer,
     },
   });
 };
