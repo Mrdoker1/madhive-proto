@@ -37,6 +37,10 @@ interface NextButtonProps {
    * Whether the Back button is enabled (defaults to true)
    */
   backEnabled?: boolean;
+  /**
+   * Whether this button is used as a footer (removes padding)
+   */
+  isFooter?: boolean;
 }
 
 export const NextButton: React.FC<NextButtonProps> = ({
@@ -47,10 +51,16 @@ export const NextButton: React.FC<NextButtonProps> = ({
   showBack = false,
   onBackClick,
   backText = 'Back',
-  backEnabled = true
+  backEnabled = true,
+  isFooter = false
 }) => {
   return (
-    <div style={{ paddingLeft: '40px', paddingRight: '40px', backgroundColor: 'var(--header-background)' }}>
+    <div style={{ 
+      paddingLeft: isFooter ? '0' : '40px', 
+      paddingRight: isFooter ? '0' : '40px', 
+      backgroundColor: 'var(--header-background)',
+      width: '100%'
+    }}>
       <div className={`
         w-full 
         flex items-center justify-end
@@ -59,7 +69,9 @@ export const NextButton: React.FC<NextButtonProps> = ({
       `}
       style={{ 
         borderTopColor: 'var(--border-color)',
-        height: '64px'
+        height: '64px',
+        paddingLeft: isFooter ? '40px' : '0',
+        paddingRight: isFooter ? '40px' : '0'
       }}
       >
         {/* Container for buttons with gap */}

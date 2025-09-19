@@ -64,6 +64,17 @@ export default function ChannelDetailsPage() {
         breadcrumbs={breadcrumbSteps} 
         title="Channel Details"
         showRightSidebar={true}
+        footerContent={
+          <NextButton 
+            active={true}
+            onClick={handleNextClick}
+            text="Next"
+            showBack={true}
+            onBackClick={handleBackClick}
+            backText="Back"
+            isFooter={true}
+          />
+        }
       >
         <div style={{ backgroundColor: 'var(--page-background)', paddingTop: '32px', paddingBottom: '96px', paddingLeft: '32px', paddingRight: '32px', minHeight: '100%' }}>
           <div style={{ display: 'flex', justifyContent: 'center', margin: '0 auto' }}>
@@ -116,16 +127,6 @@ export default function ChannelDetailsPage() {
               </div>
             </div>
           </div>
-        </div>
-        <div style={{ position: 'fixed', bottom: '0', zIndex: 1000, left: '64px', right: '0' }}>
-          <NextButton 
-            active={true}
-            onClick={handleNextClick}
-            text="Next"
-            showBack={true}
-            onBackClick={handleBackClick}
-            backText="Back"
-          />
         </div>
       </PageLayout>
     </>
