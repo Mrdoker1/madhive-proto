@@ -4,6 +4,7 @@ const nextConfig = {
     optimizePackageImports: ['@mantine/core', '@mantine/hooks'],
   },
   outputFileTracingRoot: __dirname,
+  output: "standalone",
 }
 
 module.exports = nextConfig
