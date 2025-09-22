@@ -15,14 +15,9 @@ services:
     build:
       context: .
     restart: unless-stopped
-    volumes:
-      - static:/app/public
     networks:
       - app
 
 networks:
   app:
     driver: bridge
-
-volumes:
-  static:
