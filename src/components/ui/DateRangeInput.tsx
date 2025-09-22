@@ -46,7 +46,6 @@ const DateRangeInput: React.FC<DateRangeInputProps> = ({
 }) => {
   const [startDate, setStartDate] = useState(selectedStartDate || '');
   const [endDate, setEndDate] = useState(selectedEndDate || '');
-  const [focused, setFocused] = useState(false);
   
   // Функция для парсинга даты из строки
   const parseDate = (dateStr: string): Date | null => {
@@ -154,18 +153,6 @@ const DateRangeInput: React.FC<DateRangeInputProps> = ({
     }
   };
 
-  const getSizeStyles = () => {
-    switch (size) {
-      case 'xs': return { height: '30px', fontSize: '12px', padding: '6px 12px' };
-      case 'sm': return { height: '36px', fontSize: '13px', padding: '8px 14px' };
-      case 'md': return { height: '42px', fontSize: '14px', padding: '10px 16px' };
-      case 'lg': return { height: '50px', fontSize: '16px', padding: '12px 18px' };
-      case 'xl': return { height: '60px', fontSize: '18px', padding: '16px 20px' };
-      default: return { height: '42px', fontSize: '14px', padding: '10px 16px' };
-    }
-  };
-
-  const sizeStyles = getSizeStyles();
   const hasError = !!error;
 
   return (
@@ -173,11 +160,11 @@ const DateRangeInput: React.FC<DateRangeInputProps> = ({
       {/* Label */}
       {label && (
         <label 
-          className="block text-sm font-medium mb-1"
           style={{ 
-            color: hasError ? '#FA5252' : 'var(--foreground)',
+            display: 'block',
             fontSize: '14px',
             fontWeight: 500,
+            color: 'var(--form-label-color)',
             marginBottom: '8px'
           }}
         >
@@ -188,37 +175,29 @@ const DateRangeInput: React.FC<DateRangeInputProps> = ({
 
       {/* Input Container */}
       <div 
-        className={`
-          flex items-center bg-white border transition-all duration-200
-          ${focused 
-            ? (hasError ? 'border-red-500 ring-1 ring-red-500' : 'border-blue-500 ring-1 ring-blue-500') 
-            : (hasError ? 'border-red-300' : '')
-          }
-          ${hasError ? 'border-red-300' : ''}
-        `}
+        className="flex items-center"
         style={{ 
-          minHeight: sizeStyles.height,
+          fontSize: '14px',
+          padding: '0',
           backgroundColor: '#FFFFFF',
-          borderRadius: '4px',
-          borderColor: focused 
-            ? (hasError ? '#FA5252' : '#339AF0') 
-            : (hasError ? '#FA5252' : 'var(--mantine-color-gray-4)')
+          borderRadius: '6px',
+          border: `1px solid ${hasError ? '#FA5252' : 'var(--form-input-border)'}`,
+          minHeight: '42px' // Стандартная высота Mantine input
         }}
-        onFocus={() => setFocused(true)}
-        onBlur={() => setFocused(false)}
       >
         {/* Calendar Icon */}
         <div 
-          className="flex items-center justify-center"
           style={{ 
-            paddingLeft: '12px', 
-            paddingRight: '8px',
-            height: '100%'
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            paddingLeft: '16px', 
+            paddingRight: '8px'
           }}
         >
           <IconCalendar 
-            size={18} 
-            style={{ color: '#9CA3AF' }}
+            size={16} 
+            style={{ color: 'var(--form-placeholder)' }}
           />
         </div>
         
@@ -228,22 +207,24 @@ const DateRangeInput: React.FC<DateRangeInputProps> = ({
           placeholder="MM/DD/YYYY"
           value={startDate}
           readOnly
-          onFocus={() => setFocused(true)}
-          onBlur={() => setFocused(false)}
-          className="flex-1 border-none outline-none bg-transparent"
           style={{ 
-            fontSize: sizeStyles.fontSize,
-            padding: '0 4px',
+            fontSize: '14px',
+            padding: '0 8px',
             color: '#000000',
-            textAlign: 'left'
+            border: 'none',
+            outline: 'none',
+            backgroundColor: 'transparent',
+            flex: 1,
+            lineHeight: '20px'
           }}
+          className="placeholder-color"
         />
         
         {/* Arrow Separator */}
         <div style={{ padding: '0 8px' }}>
           <IconArrowRight 
-            size={14} 
-            style={{ color: '#9CA3AF' }}
+            size={12} 
+            style={{ color: 'var(--form-placeholder)' }}
           />
         </div>
         
@@ -253,22 +234,27 @@ const DateRangeInput: React.FC<DateRangeInputProps> = ({
           placeholder="MM/DD/YYYY"
           value={endDate}
           readOnly
-          onFocus={() => setFocused(true)}
-          onBlur={() => setFocused(false)}
-          className="flex-1 border-none outline-none bg-transparent"
           style={{ 
-            fontSize: sizeStyles.fontSize,
-            padding: '0 4px',
+            fontSize: '14px',
+            padding: '0 8px',
+            paddingRight: '16px',
             color: '#000000',
-            paddingRight: '12px',
-            textAlign: 'left'
+            border: 'none',
+            outline: 'none',
+            backgroundColor: 'transparent',
+            flex: 1,
+            lineHeight: '20px'
           }}
+          className="placeholder-color"
         />
       </div>
 
       {/* React Date Range Calendar */}
       <div className="mt-4 w-full">
         <style jsx>{`
+          :global(.placeholder-color::placeholder) {
+            color: var(--form-placeholder) !important;
+          }
           :global(.rdrNextPrevButton) {
             background: rgba(41, 16, 54, 0.1) !important;
           }
