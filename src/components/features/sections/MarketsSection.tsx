@@ -1,7 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Select, Radio, Group, Checkbox, Table, TableThead, TableTbody, TableTr, TableTh, TableTd, Text } from '@mantine/core';
+import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
+import { updateMarketsData } from '@/store/slices/campaignSlice';
 
 interface MarketData {
   id: string;
@@ -14,8 +16,9 @@ interface MarketData {
 }
 
 const MarketsSection = () => {
-  const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
-  const [mode, setMode] = useState<'include' | 'exclude'>('include');
+  const dispatch = useAppDispatch();
+  const marketsData = useAppSelector((state) => state.campaign.markets);
+  const [selectedRegion, setSelectedRegion] = useState<string | null>(marketsData.selectedRegion || null);
   const [markets, setMarkets] = useState<MarketData[]>([]);
 
   const regionOptions = [
@@ -146,25 +149,47 @@ const MarketsSection = () => {
   };
 
   // Обработчик выбора региона
-  const handleRegionChange = (region: string | null) => {
-    setSelectedRegion(region);
-    if (region && marketsDatabase[region]) {
-      // Загружаем рынки для выбранного региона
-      setMarkets(marketsDatabase[region].map(market => ({ ...market, selected: false })));
+  // Загружаем рынки при изменении региона
+  useEffect(() => {
+    if (selectedRegion && marketsDatabase[selectedRegion]) {
+      const regionMarkets = marketsDatabase[selectedRegion].map(market => ({
+        ...market,
+        selected: marketsData.selectedMarkets.includes(market.name)
+      }));
+      setMarkets(regionMarkets);
     } else {
-      // Очищаем таблицу если регион не выбран
       setMarkets([]);
     }
+  }, [selectedRegion, marketsData.selectedMarkets]);
+
+  const handleRegionChange = (region: string | null) => {
+    setSelectedRegion(region);
+    dispatch(updateMarketsData({ selectedRegion: region || undefined }));
+  };
+
+  const handleModeChange = (mode: 'include' | 'exclude') => {
+    dispatch(updateMarketsData({ mode }));
   };
 
   const handleSelectAll = (checked: boolean) => {
-    setMarkets(prev => prev.map(market => ({ ...market, selected: checked })));
+    const updatedMarkets = markets.map(market => ({ ...market, selected: checked }));
+    setMarkets(updatedMarkets);
+    
+    const selectedMarketNames = checked ? markets.map(market => market.name) : [];
+    dispatch(updateMarketsData({ selectedMarkets: selectedMarketNames }));
   };
 
   const handleMarketSelect = (marketId: string, checked: boolean) => {
-    setMarkets(prev => prev.map(market => 
+    const updatedMarkets = markets.map(market => 
       market.id === marketId ? { ...market, selected: checked } : market
-    ));
+    );
+    setMarkets(updatedMarkets);
+    
+    const selectedMarketNames = updatedMarkets
+      .filter(market => market.selected)
+      .map(market => market.name);
+    
+    dispatch(updateMarketsData({ selectedMarkets: selectedMarketNames }));
   };
 
   const allSelected = markets.length > 0 && markets.every(market => market.selected);
@@ -186,7 +211,7 @@ const MarketsSection = () => {
         </div>
 
         {/* Radio buttons */}
-        <Radio.Group value={mode} onChange={(value) => setMode(value as 'include' | 'exclude')}>
+        <Radio.Group value={marketsData.mode} onChange={(value) => handleModeChange(value as 'include' | 'exclude')}>
           <Group gap="md">
             <Radio value="include" label="Include" />
             <Radio value="exclude" label="Exclude" />

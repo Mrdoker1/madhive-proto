@@ -44,6 +44,8 @@ export interface CampaignAudienceData {
 
 export interface CampaignMarketsData {
   selectedMarkets: string[];
+  selectedRegion?: string;
+  mode: 'include' | 'exclude';
 }
 
 export interface CampaignDaypartsData {
@@ -105,7 +107,8 @@ const initialState: CampaignState = {
     householdSize: []
   },
   markets: {
-    selectedMarkets: []
+    selectedMarkets: [],
+    mode: 'include'
   },
   dayparts: {
     mode: 'include',

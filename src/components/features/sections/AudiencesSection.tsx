@@ -1,23 +1,18 @@
 import { Checkbox, Text, Grid } from '@mantine/core';
-import { useState } from 'react';
+import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
+import { updateAudienceData } from '@/store/slices/campaignSlice';
 
 const AudiencesSection = () => {
-  const [selectedOptions, setSelectedOptions] = useState<Record<string, string[]>>({
-    gender: [],
-    age: [],
-    income: [],
-    education: [],
-    householdSize: [],
-    children: []
-  });
+  const dispatch = useAppDispatch();
+  const audienceData = useAppSelector((state) => state.campaign.audience);
 
-  const handleCheckboxChange = (category: string, value: string, checked: boolean) => {
-    setSelectedOptions(prev => ({
-      ...prev,
-      [category]: checked 
-        ? [...prev[category], value]
-        : prev[category].filter(item => item !== value)
-    }));
+  const handleCheckboxChange = (category: keyof typeof audienceData, value: string, checked: boolean) => {
+    const currentValues = audienceData[category] || [];
+    const newValues = checked 
+      ? [...currentValues, value]
+      : currentValues.filter(item => item !== value);
+    
+    dispatch(updateAudienceData({ [category]: newValues }));
   };
 
   const audienceCategories = [
@@ -62,9 +57,9 @@ const AudiencesSection = () => {
                   key={option}
                   label={option}
                   size="sm"
-                  checked={selectedOptions[category.key].includes(option)}
+                  checked={audienceData[category.key as keyof typeof audienceData]?.includes(option) || false}
                   onChange={(event) => 
-                    handleCheckboxChange(category.key, option, event.currentTarget.checked)
+                    handleCheckboxChange(category.key as keyof typeof audienceData, option, event.currentTarget.checked)
                   }
                 />
               ))}

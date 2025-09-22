@@ -1,13 +1,15 @@
 import { Text, Radio, Button, Group } from '@mantine/core';
 import { useState, useRef, useCallback } from 'react';
+import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
+import { updateDaypartsData } from '@/store/slices/campaignSlice';
 
 interface DaypartsState {
   [day: string]: { [hour: number]: boolean };
 }
 
 const DaypartsSection = () => {
-  const [mode, setMode] = useState<'include' | 'exclude'>('include');
-  const [selectedSlots, setSelectedSlots] = useState<DaypartsState>({});
+  const dispatch = useAppDispatch();
+  const daypartsData = useAppSelector((state) => state.campaign.dayparts);
   const [isSelecting, setIsSelecting] = useState(false);
   const [selectionStart, setSelectionStart] = useState<{ day: string; hour: number } | null>(null);
   const [selectionEnd, setSelectionEnd] = useState<{ day: string; hour: number } | null>(null);
@@ -15,6 +17,15 @@ const DaypartsSection = () => {
 
   const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   const hours = Array.from({ length: 24 }, (_, i) => i); // 0-23 часы
+
+  // Вспомогательная функция для глубокого копирования selectedSlots
+  const deepCopySelectedSlots = (slots: Record<string, Record<number, boolean>>): DaypartsState => {
+    const copy: DaypartsState = {};
+    Object.keys(slots).forEach(day => {
+      copy[day] = { ...slots[day] };
+    });
+    return copy;
+  };
 
   const formatHour = (hour: number): string => {
     if (hour === 0) return '12am';
@@ -24,7 +35,7 @@ const DaypartsSection = () => {
   };
 
   const isCellSelected = (day: string, hour: number): boolean => {
-    return selectedSlots[day]?.[hour] || false;
+    return daypartsData.selectedSlots[day]?.[hour] || false;
   };
 
   const handleCellClick = (day: string, hour: number) => {
@@ -32,13 +43,17 @@ const DaypartsSection = () => {
       // Одиночный клик - переключаем состояние ячейки
       const isCurrentlySelected = isCellSelected(day, hour);
       
-      setSelectedSlots(prev => ({
-        ...prev,
-        [day]: {
-          ...prev[day],
-          [hour]: !isCurrentlySelected
-        }
-      }));
+      const newSelectedSlots = deepCopySelectedSlots(daypartsData.selectedSlots);
+      
+      // Если день еще не существует, создаем его
+      if (!newSelectedSlots[day]) {
+        newSelectedSlots[day] = {};
+      }
+      
+      // Обновляем конкретную ячейку
+      newSelectedSlots[day][hour] = !isCurrentlySelected;
+      
+      dispatch(updateDaypartsData({ selectedSlots: newSelectedSlots }));
       
       // Начинаем bulk выделение
       setIsSelecting(true);
@@ -74,14 +89,14 @@ const DaypartsSection = () => {
     const minHour = Math.min(hourStart, hourEnd);
     const maxHour = Math.max(hourStart, hourEnd);
 
-    const newSelectedSlots = { ...selectedSlots };
+    const newSelectedSlots = deepCopySelectedSlots(daypartsData.selectedSlots);
     
     for (let d = minDay; d <= maxDay; d++) {
       const dayName = days[d];
       if (!newSelectedSlots[dayName]) newSelectedSlots[dayName] = {};
       
       for (let h = minHour; h <= maxHour; h++) {
-        if (mode === 'include') {
+        if (daypartsData.mode === 'include') {
           // Include режим - добавляем ячейки
           newSelectedSlots[dayName][h] = true;
         } else {
@@ -91,7 +106,7 @@ const DaypartsSection = () => {
       }
     }
     
-    setSelectedSlots(newSelectedSlots);
+    dispatch(updateDaypartsData({ selectedSlots: newSelectedSlots }));
   };
 
   const isCellInPreview = (day: string, hour: number): boolean => {
@@ -120,11 +135,11 @@ const DaypartsSection = () => {
         newSelectedSlots[day][hour] = true;
       });
     });
-    setSelectedSlots(newSelectedSlots);
+    dispatch(updateDaypartsData({ selectedSlots: newSelectedSlots }));
   };
 
   const reset = () => {
-    setSelectedSlots({});
+    dispatch(updateDaypartsData({ selectedSlots: {} }));
   };
 
   return (
@@ -135,7 +150,11 @@ const DaypartsSection = () => {
       </Text>
 
       {/* Радиокнопки Include/Exclude */}
-      <Radio.Group value={mode} onChange={(value) => setMode(value as 'include' | 'exclude')} mb="xl">
+      <Radio.Group 
+        value={daypartsData.mode} 
+        onChange={(value) => dispatch(updateDaypartsData({ mode: value as 'include' | 'exclude' }))} 
+        mb="xl"
+      >
         <Group gap="16px">
           <Radio value="include" label="Include" />
           <Radio value="exclude" label="Exclude" />

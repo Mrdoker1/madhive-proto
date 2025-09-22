@@ -183,19 +183,22 @@ const CampaignSummarySection: React.FC = () => {
               value={
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                   {campaign.audience.gender.length > 0 && (
-                    <Text size="xs" c="dark">
-                      <Text component="span" fw={500}>Gender:</Text> {formatArray(campaign.audience.gender)}
-                    </Text>
+                    <div>
+                      <Text component="span" size="xs" fw={500} c="dark">Gender:</Text>
+                      <Text component="span" size="xs" c="dark"> {formatArray(campaign.audience.gender)}</Text>
+                    </div>
                   )}
                   {campaign.audience.age.length > 0 && (
-                    <Text size="xs" c="dark">
-                      <Text component="span" fw={500}>Age:</Text> {formatArray(campaign.audience.age)}
-                    </Text>
+                    <div>
+                      <Text component="span" size="xs" fw={500} c="dark">Age:</Text>
+                      <Text component="span" size="xs" c="dark"> {formatArray(campaign.audience.age)}</Text>
+                    </div>
                   )}
                   {campaign.audience.income.length > 0 && (
-                    <Text size="xs" c="dark">
-                      <Text component="span" fw={500}>Income:</Text> {formatArray(campaign.audience.income)}
-                    </Text>
+                    <div>
+                      <Text component="span" size="xs" fw={500} c="dark">Income:</Text>
+                      <Text component="span" size="xs" c="dark"> {formatArray(campaign.audience.income)}</Text>
+                    </div>
                   )}
                 </div>
               }
