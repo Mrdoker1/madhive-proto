@@ -61,8 +61,6 @@ build:
       --push \
       --builder container \
       --output type=image .
-  needs:
-    - init
   rules:
     - if: $CI_PIPELINE_SOURCE == "web" || $CI_PIPELINE_SOURCE == "merge_request_event"
 
@@ -74,8 +72,6 @@ deploy:
   services:
     - name: docker:27-dind
       alias: docker
-  needs:
-    - build
   before_script:
     - 'command -v ssh-agent >/dev/null || ( apt-get update -y && apt-get install openssh-client -y )'
     - eval $(ssh-agent -s)
