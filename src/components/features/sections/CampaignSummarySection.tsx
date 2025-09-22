@@ -99,9 +99,47 @@ const CampaignSummarySection: React.FC = () => {
     return `${arr.slice(0, limit).join(', ')} +${arr.length - limit} more`;
   };
 
+  // Форматирование данных аудитории в строку
+  const formatAudienceString = () => {
+    const parts = [];
+    if (campaign.audience.gender.length > 0) {
+      parts.push(`Gender: ${formatArray(campaign.audience.gender)}`);
+    }
+    if (campaign.audience.age.length > 0) {
+      parts.push(`Age: ${formatArray(campaign.audience.age)}`);
+    }
+    if (campaign.audience.income.length > 0) {
+      parts.push(`Income: ${formatArray(campaign.audience.income)}`);
+    }
+    return parts.join(', ');
+  };
+
+  // Форматирование Geo данных
+  const formatGeoString = () => {
+    return formatArray(campaign.markets.selectedMarkets);
+  };
+
+  // Форматирование Daypart Summary
+  const formatDaypartSummary = () => {
+    const selectedSlots = campaign.dayparts.selectedSlots;
+    const totalSlots = Object.values(selectedSlots).reduce(
+      (total, daySlots) => total + Object.values(daySlots).filter(Boolean).length, 
+      0
+    );
+    
+    if (totalSlots === 0) return '';
+    
+    const mode = campaign.dayparts.mode;
+    return `${mode} ${totalSlots} time slots`;
+  };
+
   return (
-    <Table>
-      <TableTbody>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+      {/* General Section */}
+      <div>
+        <Text size="lg" fw={600} mb="md" c="dark">General</Text>
+        <Table>
+          <TableTbody>
             {/* Campaign Name */}
             <SummaryRow
               label="Campaign Name"
@@ -126,22 +164,6 @@ const CampaignSummarySection: React.FC = () => {
               isEmpty={!campaign.general.advertiser}
             />
 
-            {/* Brand */}
-            <SummaryRow
-              label="Brand"
-              value={campaign.general.brand}
-              editRoute="/new-campaign"
-              isEmpty={!campaign.general.brand}
-            />
-
-            {/* Product */}
-            <SummaryRow
-              label="Product"
-              value={campaign.general.product}
-              editRoute="/new-campaign"
-              isEmpty={!campaign.general.product}
-            />
-
             {/* Agency */}
             <SummaryRow
               label="Agency"
@@ -149,31 +171,15 @@ const CampaignSummarySection: React.FC = () => {
               editRoute="/new-campaign"
               isEmpty={!campaign.general.agency}
             />
+          </TableTbody>
+        </Table>
+      </div>
 
-            {/* CPE Code */}
-            <SummaryRow
-              label="CPE Code"
-              value={campaign.general.cpeCode}
-              editRoute="/new-campaign"
-              isEmpty={!campaign.general.cpeCode}
-            />
-
-            {/* Campaign Owner */}
-            <SummaryRow
-              label="Campaign Owner"
-              value={campaign.general.campaignOwner}
-              editRoute="/new-campaign"
-              isEmpty={!campaign.general.campaignOwner}
-            />
-
-            {/* Campaign Approver */}
-            <SummaryRow
-              label="Campaign Approver"
-              value={campaign.general.campaignApprover}
-              editRoute="/new-campaign"
-              isEmpty={!campaign.general.campaignApprover}
-            />
-
+      {/* Rich Section */}
+      <div>
+        <Text size="lg" fw={600} mb="md" c="dark">Rich</Text>
+        <Table>
+          <TableTbody>
             {/* Budget */}
             <SummaryRow
               label="Budget"
@@ -182,58 +188,10 @@ const CampaignSummarySection: React.FC = () => {
               isEmpty={campaign.budget.totalBudget === 0}
             />
 
-            {/* Goal */}
+            {/* Audience */}
             <SummaryRow
-              label="Goal"
-              value={campaign.goal.goalType ? 
-                `${campaign.goal.goalType}${campaign.goal.targetValue ? ` - ${campaign.goal.targetValue} ${campaign.goal.goalMetric}` : ''}` 
-                : ''
-              }
-              editRoute="/new-campaign"
-              isEmpty={!campaign.goal.goalType}
-            />
-
-            {/* Broadcasters */}
-            <SummaryRow
-              label="Broadcasters"
-              value={formatArray(campaign.linear.broadcasters)}
-              editRoute="/channel-details"
-              isEmpty={campaign.linear.broadcasters.length === 0}
-            />
-
-            {/* Measurement Provider */}
-            <SummaryRow
-              label="Measurement Provider"
-              value={campaign.linear.measurementProvider}
-              editRoute="/channel-details"
-              isEmpty={!campaign.linear.measurementProvider}
-            />
-
-            {/* Audiences */}
-            <SummaryRow
-              label="Target Audiences"
-              value={
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                  {campaign.audience.gender.length > 0 && (
-                    <div>
-                      <Text component="span" size="xs" fw={500} c="dark">Gender:</Text>
-                      <Text component="span" size="xs" c="dark"> {formatArray(campaign.audience.gender)}</Text>
-                    </div>
-                  )}
-                  {campaign.audience.age.length > 0 && (
-                    <div>
-                      <Text component="span" size="xs" fw={500} c="dark">Age:</Text>
-                      <Text component="span" size="xs" c="dark"> {formatArray(campaign.audience.age)}</Text>
-                    </div>
-                  )}
-                  {campaign.audience.income.length > 0 && (
-                    <div>
-                      <Text component="span" size="xs" fw={500} c="dark">Income:</Text>
-                      <Text component="span" size="xs" c="dark"> {formatArray(campaign.audience.income)}</Text>
-                    </div>
-                  )}
-                </div>
-              }
+              label="Audience"
+              value={formatAudienceString()}
               editRoute="/channel-details"
               isEmpty={
                 campaign.audience.gender.length === 0 && 
@@ -242,15 +200,29 @@ const CampaignSummarySection: React.FC = () => {
               }
             />
 
-            {/* Markets */}
+            {/* Geo */}
             <SummaryRow
-              label="Markets"
-              value={formatArray(campaign.markets.selectedMarkets)}
+              label="Geo"
+              value={formatGeoString()}
               editRoute="/channel-details"
               isEmpty={campaign.markets.selectedMarkets.length === 0}
             />
-      </TableTbody>
-    </Table>
+
+            {/* Daypart Summary */}
+            <SummaryRow
+              label="Daypart Summary"
+              value={formatDaypartSummary()}
+              editRoute="/channel-details"
+              isEmpty={
+                Object.values(campaign.dayparts.selectedSlots).every(
+                  daySlots => Object.values(daySlots).every(slot => !slot)
+                )
+              }
+            />
+          </TableTbody>
+        </Table>
+      </div>
+    </div>
   );
 };
 
