@@ -31,10 +31,10 @@ const GeneralDetailsSection: React.FC<GeneralDetailsSectionProps> = ({
       campaignName: globalGeneralData.campaignName || '',
       advertiser: globalGeneralData.advertiser || '',
       brand: globalGeneralData.brand || '',
-      agency: '', // это поле не в globalGeneralData, но сохраним как есть
-      cpeCode: '', // это поле не в globalGeneralData, но сохраним как есть
-      campaignOwner: '', // это поле не в globalGeneralData, но сохраним как есть
-      campaignApprover: '' // это поле не в globalGeneralData, но сохраним как есть
+      agency: globalGeneralData.agency || '',
+      cpeCode: globalGeneralData.cpeCode || '',
+      campaignOwner: globalGeneralData.campaignOwner || '',
+      campaignApprover: globalGeneralData.campaignApprover || ''
     });
   }, [globalGeneralData]);
 
@@ -45,15 +45,22 @@ const GeneralDetailsSection: React.FC<GeneralDetailsSectionProps> = ({
       [field]: newValue
     }));
 
-    // Обновляем глобальный стейт для полей, которые есть в campaignSlice
+    // Обновляем глобальный стейт для всех полей
     if (field === 'campaignName') {
       dispatch(updateGeneralData({ campaignName: newValue }));
     } else if (field === 'advertiser') {
       dispatch(updateGeneralData({ advertiser: newValue }));
     } else if (field === 'brand') {
       dispatch(updateGeneralData({ brand: newValue }));
+    } else if (field === 'agency') {
+      dispatch(updateGeneralData({ agency: newValue }));
+    } else if (field === 'cpeCode') {
+      dispatch(updateGeneralData({ cpeCode: newValue }));
+    } else if (field === 'campaignOwner') {
+      dispatch(updateGeneralData({ campaignOwner: newValue }));
+    } else if (field === 'campaignApprover') {
+      dispatch(updateGeneralData({ campaignApprover: newValue }));
     }
-    // agency, cpeCode, campaignOwner, campaignApprover пока остаются локальными
   };
 
   const advertiserOptions = [

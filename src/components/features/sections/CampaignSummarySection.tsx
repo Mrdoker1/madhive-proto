@@ -142,6 +142,38 @@ const CampaignSummarySection: React.FC = () => {
               isEmpty={!campaign.general.product}
             />
 
+            {/* Agency */}
+            <SummaryRow
+              label="Agency"
+              value={campaign.general.agency}
+              editRoute="/new-campaign"
+              isEmpty={!campaign.general.agency}
+            />
+
+            {/* CPE Code */}
+            <SummaryRow
+              label="CPE Code"
+              value={campaign.general.cpeCode}
+              editRoute="/new-campaign"
+              isEmpty={!campaign.general.cpeCode}
+            />
+
+            {/* Campaign Owner */}
+            <SummaryRow
+              label="Campaign Owner"
+              value={campaign.general.campaignOwner}
+              editRoute="/new-campaign"
+              isEmpty={!campaign.general.campaignOwner}
+            />
+
+            {/* Campaign Approver */}
+            <SummaryRow
+              label="Campaign Approver"
+              value={campaign.general.campaignApprover}
+              editRoute="/new-campaign"
+              isEmpty={!campaign.general.campaignApprover}
+            />
+
             {/* Budget */}
             <SummaryRow
               label="Budget"

@@ -7,6 +7,10 @@ export interface CampaignGeneralData {
   brand: string;
   product: string;
   campaignType: string;
+  agency: string;
+  cpeCode: string;
+  campaignOwner: string;
+  campaignApprover: string;
 }
 
 export interface CampaignBudgetData {
@@ -78,7 +82,11 @@ const initialState: CampaignState = {
     advertiser: '',
     brand: '',
     product: '',
-    campaignType: 'Linear'
+    campaignType: 'Linear',
+    agency: '',
+    cpeCode: '',
+    campaignOwner: '',
+    campaignApprover: ''
   },
   budget: {
     totalBudget: 0,
