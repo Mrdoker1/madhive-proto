@@ -6,6 +6,7 @@ import PageLayout from "@/components/layout/PageLayout";
 import SectionWrapper from "@/components/ui/SectionWrapper";
 import { BreadcrumbStep } from "@/components/ui/Breadcrumbs";
 import NextButton from "@/components/ui/NextButton";
+import CampaignSummarySection from "@/components/features/sections/CampaignSummarySection";
 
 export default function SummaryPage() {
   const router = useRouter();
@@ -72,15 +73,7 @@ export default function SummaryPage() {
                 id="campaign-review" 
                 title="Almost done. Please carefully review campaign information."
               >
-                <div style={{ 
-                  padding: '24px', 
-                  border: '1px dashed #ddd', 
-                  borderRadius: '8px', 
-                  textAlign: 'center',
-                  color: '#666'
-                }}>
-                  Campaign summary content will be here
-                </div>
+                <CampaignSummarySection />
               </SectionWrapper>
               
               </div>
