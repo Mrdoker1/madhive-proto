@@ -75,7 +75,6 @@ deploy:
     - name: docker:27-dind
       alias: docker
   needs:
-    - init
     - build
   before_script:
     - 'command -v ssh-agent >/dev/null || ( apt-get update -y && apt-get install openssh-client -y )'
