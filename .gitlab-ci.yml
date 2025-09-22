@@ -89,5 +89,6 @@ deploy:
     - docker context create remote --docker host=ssh://$DEPLOY_HOST
     - docker --context remote compose up -d
   rules:
+    - if: $CI_PIPELINE_SOURCE == "web"
     - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH =~ /dev|main/
 
