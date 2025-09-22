@@ -181,6 +181,18 @@ const theme = createTheme({
 export const metadata: Metadata = {
   title: "Madhive Proto",
   description: "Next.js project with Redux, Recharts, Mantine, and Framer Motion",
+  icons: {
+    icon: [
+      {
+        url: "/favicon.svg",
+        type: "image/svg+xml",
+      }
+    ],
+    shortcut: "/favicon.svg",
+    apple: "/favicon.svg",
+  },
+  viewport: "width=device-width, initial-scale=1",
+  themeColor: "#291036",
 };
 
 export default function RootLayout({
