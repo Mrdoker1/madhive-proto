@@ -44,6 +44,9 @@ logs
 Thumbs.db
 
 # Package manager lockfiles
-package-lock.json
 yarn.lock
 pnpm-lock.yaml
+
+# Deploy files
+deploy/ssl/*
+!deploy/ssl/.gitkeep
