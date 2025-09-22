@@ -1,4 +1,4 @@
-import { Text, Radio, Button, Group } from '@mantine/core';
+import { Text, Button, Group } from '@mantine/core';
 import { useState, useRef, useCallback } from 'react';
 import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
 import { updateDaypartsData } from '@/store/slices/campaignSlice';
@@ -13,6 +13,7 @@ const DaypartsSection = () => {
   const [isSelecting, setIsSelecting] = useState(false);
   const [selectionStart, setSelectionStart] = useState<{ day: string; hour: number } | null>(null);
   const [selectionEnd, setSelectionEnd] = useState<{ day: string; hour: number } | null>(null);
+  const [originalCellState, setOriginalCellState] = useState<boolean | null>(null);
   const gridRef = useRef<HTMLDivElement>(null);
 
   const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -20,11 +21,7 @@ const DaypartsSection = () => {
 
   // Вспомогательная функция для глубокого копирования selectedSlots
   const deepCopySelectedSlots = (slots: Record<string, Record<number, boolean>>): DaypartsState => {
-    const copy: DaypartsState = {};
-    Object.keys(slots).forEach(day => {
-      copy[day] = { ...slots[day] };
-    });
-    return copy;
+    return structuredClone(slots);
   };
 
   const formatHour = (hour: number): string => {
@@ -38,37 +35,48 @@ const DaypartsSection = () => {
     return daypartsData.selectedSlots[day]?.[hour] || false;
   };
 
+  /**
+   * Обработчик клика по ячейке сетки dayparts
+   * Поддерживает как одиночные клики, так и bulk выделение областей
+   */
   const handleCellClick = (day: string, hour: number) => {
     if (!isSelecting) {
-      // Одиночный клик - переключаем состояние ячейки
-      const isCurrentlySelected = isCellSelected(day, hour);
+      // ПЕРВЫЙ КЛИК: Начинаем новое выделение
+      // Сохраняем исходное состояние ячейки ПЕРЕД любыми изменениями
+      const originalCellState = isCellSelected(day, hour);
       
-      const newSelectedSlots = deepCopySelectedSlots(daypartsData.selectedSlots);
-      
-      // Если день еще не существует, создаем его
-      if (!newSelectedSlots[day]) {
-        newSelectedSlots[day] = {};
-      }
-      
-      // Обновляем конкретную ячейку
-      newSelectedSlots[day][hour] = !isCurrentlySelected;
-      
-      dispatch(updateDaypartsData({ selectedSlots: newSelectedSlots }));
-      
-      // Начинаем bulk выделение
+      // Инициализируем режим выделения
       setIsSelecting(true);
       setSelectionStart({ day, hour });
       setSelectionEnd({ day, hour });
+      
+      // Сразу применяем toggle для одной ячейки
+      const newSelectedSlots = deepCopySelectedSlots(daypartsData.selectedSlots);
+      if (!newSelectedSlots[day]) {
+        newSelectedSlots[day] = {};
+      }
+      // Toggle логика: пустая -> заполненная, заполненная -> пустая
+      newSelectedSlots[day][hour] = !originalCellState;
+      dispatch(updateDaypartsData({ selectedSlots: newSelectedSlots }));
+      
+      // Сохраняем исходное состояние для bulk операций
+      setOriginalCellState(originalCellState);
     } else {
-      // Завершаем выделение
+      // ВТОРОЙ КЛИК: Завершаем bulk выделение области
       setSelectionEnd({ day, hour });
       applySelection();
+      
+      // Сбрасываем состояние выделения
       setIsSelecting(false);
       setSelectionStart(null);
       setSelectionEnd(null);
+      setOriginalCellState(null);
     }
   };
 
+  /**
+   * Обработчик наведения мыши для preview bulk выделения
+   */
   const handleMouseEnter = (day: string, hour: number) => {
     if (isSelecting && selectionStart) {
       // Обновляем конечную точку выделения
@@ -76,8 +84,12 @@ const DaypartsSection = () => {
     }
   };
 
+  /**
+   * Применяет bulk выделение к области ячеек
+   * Использует сохраненное исходное состояние первой ячейки для определения действия
+   */
   const applySelection = () => {
-    if (!selectionStart || !selectionEnd) return;
+    if (!selectionStart || !selectionEnd || originalCellState === null) return;
     
     const dayStart = days.indexOf(selectionStart.day);
     const dayEnd = days.indexOf(selectionEnd.day);
@@ -91,24 +103,23 @@ const DaypartsSection = () => {
 
     const newSelectedSlots = deepCopySelectedSlots(daypartsData.selectedSlots);
     
+    // Используем сохраненное исходное состояние первой ячейки
+    const actionToApply = !originalCellState; // Если первая ячейка была пустая - заполняем, если заполнена - очищаем
+    
     for (let d = minDay; d <= maxDay; d++) {
       const dayName = days[d];
       if (!newSelectedSlots[dayName]) newSelectedSlots[dayName] = {};
       
       for (let h = minHour; h <= maxHour; h++) {
-        if (daypartsData.mode === 'include') {
-          // Include режим - добавляем ячейки
-          newSelectedSlots[dayName][h] = true;
-        } else {
-          // Exclude режим - убираем ячейки  
-          newSelectedSlots[dayName][h] = false;
-        }
+        newSelectedSlots[dayName][h] = actionToApply;
       }
     }
-    
     dispatch(updateDaypartsData({ selectedSlots: newSelectedSlots }));
   };
 
+  /**
+   * Проверяет, находится ли ячейка в preview области bulk выделения
+   */
   const isCellInPreview = (day: string, hour: number): boolean => {
     if (!isSelecting || !selectionStart || !selectionEnd) return false;
     
@@ -145,21 +156,11 @@ const DaypartsSection = () => {
   return (
     <div>
       {/* Описание */}
-      <Text size="sm" c="dimmed" mb="lg">
-        Daypart allows you to specify precisely when an ad will run throughout the week.
+      <Text size="sm" c="dimmed" mb="xl">
+        Daypart allows you to specify precisely when an ad will run throughout the week
+        <br />
+        Click empty slots to add time, click filled slots to remove time
       </Text>
-
-      {/* Радиокнопки Include/Exclude */}
-      <Radio.Group 
-        value={daypartsData.mode} 
-        onChange={(value) => dispatch(updateDaypartsData({ mode: value as 'include' | 'exclude' }))} 
-        mb="xl"
-      >
-        <Group gap="16px">
-          <Radio value="include" label="Include" />
-          <Radio value="exclude" label="Exclude" />
-        </Group>
-      </Radio.Group>
 
       {/* Таблица времени */}
       <div 

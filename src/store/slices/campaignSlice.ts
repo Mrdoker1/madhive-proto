@@ -53,7 +53,6 @@ export interface CampaignMarketsData {
 }
 
 export interface CampaignDaypartsData {
-  mode: 'include' | 'exclude';
   selectedSlots: Record<string, Record<number, boolean>>;
 }
 
@@ -119,7 +118,6 @@ const initialState: CampaignState = {
     mode: 'include'
   },
   dayparts: {
-    mode: 'include',
     selectedSlots: {}
   },
   estimations: {
@@ -170,7 +168,7 @@ const campaignSlice = createSlice({
 
     // Dayparts Data Actions
     updateDaypartsData: (state, action: PayloadAction<Partial<CampaignDaypartsData>>) => {
-      state.dayparts = { ...state.dayparts, ...action.payload };
+      Object.assign(state.dayparts, action.payload);
     },
 
     // Estimations Actions

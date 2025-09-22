@@ -129,8 +129,7 @@ const CampaignSummarySection: React.FC = () => {
     
     if (totalSlots === 0) return '';
     
-    const mode = campaign.dayparts.mode;
-    return `${mode} ${totalSlots} time slots`;
+    return `${totalSlots} time slots selected`;
   };
 
   return (
