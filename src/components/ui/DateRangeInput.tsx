@@ -74,6 +74,13 @@ const DateRangeInput: React.FC<DateRangeInputProps> = ({
   useEffect(() => {
     setIsMounted(true);
   }, []);
+
+  // Уведомляем родительский компонент об изменениях hiatus ranges
+  useEffect(() => {
+    if (isMounted && onHiatusRangesChange) {
+      onHiatusRangesChange(hiatusRanges);
+    }
+  }, [hiatusRanges, onHiatusRangesChange, isMounted]);
   
   // Инициализируем календарь в hiatus режиме
   useEffect(() => {
@@ -239,10 +246,6 @@ const DateRangeInput: React.FC<DateRangeInputProps> = ({
         // Добавляем новый диапазон в локальное состояние
         setHiatusRanges(prev => {
           const newRanges = [...prev, newRange];
-          // Уведомляем родительский компонент об изменении
-          if (onHiatusRangesChange) {
-            onHiatusRangesChange(newRanges);
-          }
           return newRanges;
         });
         
@@ -273,10 +276,6 @@ const DateRangeInput: React.FC<DateRangeInputProps> = ({
   const removeHiatusRange = (id: string) => {
     setHiatusRanges(prev => {
       const newRanges = prev.filter(range => range.id !== id);
-      // Уведомляем родительский компонент об изменении
-      if (onHiatusRangesChange) {
-        onHiatusRangesChange(newRanges);
-      }
       return newRanges;
     });
     // Принудительно обновляем календарь

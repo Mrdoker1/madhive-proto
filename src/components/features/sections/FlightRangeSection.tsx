@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Radio, Button, Group } from '@mantine/core';
 import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
 import { updateFlightData } from '@/store/slices/campaignSlice';
@@ -49,6 +49,18 @@ const FlightRangeSection: React.FC<FlightRangeSectionProps> = ({
   const [activeDateRange, setActiveDateRange] = useState<DateRange>({ start: '', end: '' });
   const [hiatusDates, setHiatusDates] = useState<DateRange>({ start: '', end: '' });
   const [currentHiatusRanges, setCurrentHiatusRanges] = useState<Array<{id: string, start: string, end: string}>>([]);
+  
+  // Состояние для данных от FlightByWeek
+  const [weekData, setWeekData] = useState<any[]>([]);
+  const [weeklyValidation, setWeeklyValidation] = useState<{
+    isOverBudget: boolean;
+    totalAllocated: number;
+    showWarning: boolean;
+  }>({ isOverBudget: false, totalAllocated: 0, showWarning: false });
+  
+  // Состояние для данных FlightByDay (генерируется из weekData)
+  const [dayWeeks, setDayWeeks] = useState<any[]>([]);
+  const [dayHiatusBlocks, setDayHiatusBlocks] = useState<any[]>([]);
 
   // Синхронизируем локальное состояние с глобальным при загрузке
   useEffect(() => {
@@ -114,15 +126,128 @@ const FlightRangeSection: React.FC<FlightRangeSectionProps> = ({
     dispatch(updateFlightData({ flightStatus: newStatus }));
   };
 
-  const handleWeeklyBudgetChange = (weeklyBudgets: any[]) => {
+  const handleWeeklyBudgetChange = useCallback((weeklyBudgets: any[]) => {
     console.log('Weekly budgets changed:', weeklyBudgets);
     // Логика для обработки изменения недельных бюджетов
-  };
+  }, []);
 
-  const handleHiatusRangesChange = (ranges: Array<{id: string, start: string, end: string}>) => {
+  const handleHiatusRangesChange = useCallback((ranges: Array<{id: string, start: string, end: string}>) => {
     console.log('Hiatus ranges changed:', ranges);
     setCurrentHiatusRanges(ranges);
-  };
+  }, []);
+
+  // Обработчик данных от FlightByWeek
+  const handleWeekDataChange = useCallback((weeks: any[]) => {
+    setWeekData(prevWeekData => {
+      // Проверяем, изменились ли данные, чтобы избежать бесконечного цикла
+      if (JSON.stringify(prevWeekData) !== JSON.stringify(weeks)) {
+        return weeks;
+      }
+      return prevWeekData;
+    });
+  }, []);
+
+  // Обработчик валидации от FlightByWeek  
+  const handleValidationChange = useCallback((validation: {
+    isOverBudget: boolean;
+    totalAllocated: number;
+    showWarning: boolean;
+  }) => {
+    setWeeklyValidation(prevValidation => {
+      // Проверяем, изменились ли данные валидации
+      if (JSON.stringify(prevValidation) !== JSON.stringify(validation)) {
+        return validation;
+      }
+      return prevValidation;
+    });
+  }, []);
+
+  // Конвертируем данные недель для FlightByDay
+  useEffect(() => {
+    if (weekData.length > 0) {
+      // Функция для проверки дня в хиатусе
+      const isDayInHiatus = (date: Date): boolean => {
+        if (currentHiatusRanges && currentHiatusRanges.length > 0) {
+          return currentHiatusRanges.some(range => {
+            const rangeStart = new Date(range.start);
+            const rangeEnd = new Date(range.end);
+            return date >= rangeStart && date <= rangeEnd;
+          });
+        }
+        return false;
+      };
+
+      // Конвертируем данные недель в формат для FlightByDay
+      const convertedWeeks = weekData.map((week, index) => {
+        // Получаем границы кампании
+        const campaignStart = new Date(activeDateRange.start);
+        const campaignEnd = new Date(activeDateRange.end);
+        
+        // Ограничиваем неделю границами кампании
+        const actualStart = week.startDate < campaignStart ? campaignStart : week.startDate;
+        const actualEnd = week.endDate > campaignEnd ? campaignEnd : week.endDate;
+        
+        const totalDays = Math.floor((actualEnd.getTime() - actualStart.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+        
+        // Правильно считаем активные дни с учетом хиатус диапазонов и границ кампании
+        let activeDays = 0;
+        let tempDate = new Date(actualStart);
+        
+        while (tempDate <= actualEnd) {
+          if (!isDayInHiatus(new Date(tempDate))) {
+            activeDays++;
+          }
+          tempDate.setDate(tempDate.getDate() + 1);
+        }
+
+        console.log(`Week ${index + 1}: actualStart=${actualStart.toDateString()}, actualEnd=${actualEnd.toDateString()}, totalDays=${totalDays}, activeDays=${activeDays}, hiatusCount=${currentHiatusRanges.length}`);
+
+        return {
+          id: week.id,
+          startDate: actualStart,
+          endDate: actualEnd,
+          totalDays,
+          activeDays,
+          weekNumber: index + 1
+        };
+      });
+      
+      setDayWeeks(convertedWeeks);
+
+      // Генерируем hiatus блоки
+      const hiatusBlocks: any[] = [];
+      if (currentHiatusRanges && currentHiatusRanges.length > 0) {
+        currentHiatusRanges.forEach((range, rangeIndex) => {
+          const hiatusStart = new Date(range.start);
+          const hiatusEnd = new Date(range.end);
+
+          // Найти после какой недели нужно показать hiatus текст
+          let insertAfterWeek = -1;
+
+          convertedWeeks.forEach((week, index) => {
+            // Если hiatus начинается в этой неделе или после неё
+            if (week.endDate >= hiatusStart && insertAfterWeek === -1) {
+              insertAfterWeek = index;
+            }
+          });
+
+          if (insertAfterWeek !== -1) {
+            hiatusBlocks.push({
+              id: `hiatus-${rangeIndex + 1}`,
+              startDate: hiatusStart,
+              endDate: hiatusEnd,
+              insertAfterWeek
+            });
+          }
+        });
+      }
+      
+      setDayHiatusBlocks(hiatusBlocks);
+    } else {
+      setDayWeeks([]);
+      setDayHiatusBlocks([]);
+    }
+  }, [weekData, currentHiatusRanges]);
 
   return (
     <div className={`${className}`}>
@@ -195,6 +320,8 @@ const FlightRangeSection: React.FC<FlightRangeSectionProps> = ({
               hiatusStartDate={hiatusDates.start}
               hiatusEndDate={hiatusDates.end}
               hiatusRanges={currentHiatusRanges}
+              weeks={dayWeeks}
+              hiatusBlocks={dayHiatusBlocks}
             />
           </div>
 
@@ -204,7 +331,8 @@ const FlightRangeSection: React.FC<FlightRangeSectionProps> = ({
               startDate={activeDateRange.start} // Используем всегда активный диапазон для генерации недель
               endDate={activeDateRange.end}
               totalBudget={globalBudget}
-              onChange={handleWeeklyBudgetChange}
+              onChange={handleWeekDataChange}
+              onValidationChange={handleValidationChange}
               hiatusStartDate={hiatusDates.start} // Передаем исключенные даты
               hiatusEndDate={hiatusDates.end}
               hiatusRanges={currentHiatusRanges}

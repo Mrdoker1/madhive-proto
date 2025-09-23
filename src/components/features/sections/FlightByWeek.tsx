@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { TextInput, Tooltip } from '@mantine/core';
 import { IconCurrencyDollar, IconLock, IconLockOpen, IconInfoCircle } from '@tabler/icons-react';
 
@@ -10,6 +10,12 @@ interface WeekData {
   endDate: Date;
   budget: number;
   isLocked?: boolean; // Добавляем поле для блокировки
+}
+
+interface HiatusRange {
+  id: string;
+  start: string;
+  end: string;
 }
 
 interface FlightByWeekProps {
@@ -26,6 +32,7 @@ interface FlightByWeekProps {
   // Новые пропсы для поддержки hiatus режима
   hiatusStartDate?: string;
   hiatusEndDate?: string;
+  hiatusRanges?: HiatusRange[];
 }
 
 const FlightByWeek: React.FC<FlightByWeekProps> = ({
@@ -36,13 +43,17 @@ const FlightByWeek: React.FC<FlightByWeekProps> = ({
   onChange,
   onValidationChange,
   hiatusStartDate,
-  hiatusEndDate
+  hiatusEndDate,
+  hiatusRanges = []
 }) => {
   const [weeks, setWeeks] = useState<WeekData[]>([]);
   const [totalAllocated, setTotalAllocated] = useState(0);
   const [dragState, setDragState] = useState<{[key: string]: number}>({});
   const [isDragging, setIsDragging] = useState(false);
   const [showBudgetTooltip, setShowBudgetTooltip] = useState(false);
+
+  // Мемоизируем hiatusRanges для стабильности зависимостей
+  const stableHiatusRanges = useMemo(() => hiatusRanges || [], [hiatusRanges]);
 
   // Функция для переключения блокировки недели
   const toggleWeekLock = (weekId: string) => {
@@ -61,17 +72,28 @@ const FlightByWeek: React.FC<FlightByWeekProps> = ({
 
     // Локальная функция для проверки недели в хиатусе
     const isWeekInHiatus = (weekStart: Date, weekEnd: Date): boolean => {
+      // Определяем реальные границы недели внутри выбранного диапазона кампании
+      const actualWeekStart = weekStart > startDateObj ? weekStart : startDateObj;
+      const actualWeekEnd = weekEnd < endDateObj ? weekEnd : endDateObj;
+      
+      // Проверяем новые множественные диапазоны
+      if (stableHiatusRanges && stableHiatusRanges.length > 0) {
+        return stableHiatusRanges.some(range => {
+          const hiatusStart = new Date(range.start);
+          const hiatusEnd = new Date(range.end);
+          
+          // Неделя блокируется только если её АКТИВНАЯ ЧАСТЬ ПОЛНОСТЬЮ находится в hiatus диапазоне
+          return actualWeekStart >= hiatusStart && actualWeekEnd <= hiatusEnd;
+        });
+      }
+      
+      // Обратная совместимость со старым API
       if (!hiatusStartDate || !hiatusEndDate) return false;
       
       const hiatusStart = new Date(hiatusStartDate);
       const hiatusEnd = new Date(hiatusEndDate);
       
-      // Определяем реальные границы недели внутри выбранного диапазона кампании
-      const actualWeekStart = weekStart > startDateObj ? weekStart : startDateObj;
-      const actualWeekEnd = weekEnd < endDateObj ? weekEnd : endDateObj;
-      
-      // Неделя блокируется только если её АКТИВНАЯ ЧАСТЬ (внутри диапазона кампании) 
-      // ПОЛНОСТЬЮ находится внутри hiatus диапазона
+      // Неделя блокируется только если её АКТИВНАЯ ЧАСТЬ ПОЛНОСТЬЮ находится внутри hiatus диапазона
       return actualWeekStart >= hiatusStart && actualWeekEnd <= hiatusEnd;
     };
 
@@ -111,7 +133,7 @@ const FlightByWeek: React.FC<FlightByWeekProps> = ({
     }
 
     return weeksArray;
-  }, [hiatusStartDate, hiatusEndDate]);
+  }, [hiatusStartDate, hiatusEndDate, stableHiatusRanges]);
 
   // Генерируем недели при изменении дат
   useEffect(() => {
@@ -134,7 +156,7 @@ const FlightByWeek: React.FC<FlightByWeekProps> = ({
     } else {
       setWeeks([]);
     }
-  }, [startDate, endDate, totalBudget, hiatusStartDate, hiatusEndDate, generateWeeks]);
+  }, [startDate, endDate, totalBudget, hiatusStartDate, hiatusEndDate, stableHiatusRanges, generateWeeks]);
 
   // Подсчитываем общую сумму при изменении бюджетов
   useEffect(() => {
@@ -144,14 +166,14 @@ const FlightByWeek: React.FC<FlightByWeekProps> = ({
 
   // Уведомляем родительский компонент о изменениях
   useEffect(() => {
-    if (onChange) {
+    if (onChange && weeks.length > 0) {
       onChange(weeks);
     }
   }, [weeks, onChange]);
 
   // Отправляем валидацию в родительский компонент
   useEffect(() => {
-    if (onValidationChange) {
+    if (onValidationChange && weeks.length > 0) {
       const isOverBudget = totalAllocated > totalBudget;
       onValidationChange({
         isOverBudget,
