@@ -128,16 +128,3 @@ button.rdrDay.rdrDayWeekend .rdrDayNumber span {
   /* color: var(--secondary-color) !important; */
   opacity: 0.5;
 }
-
-/* Выбранные даты остаются белыми */
-.rdrDayStartOfRange,
-.rdrDayEndOfRange, 
-.rdrDayInRange {
-  color: #FFFFFF !important;
-}
-
-.rdrDayStartOfRange .rdrDayNumber,
-.rdrDayEndOfRange .rdrDayNumber, 
-.rdrDayInRange .rdrDayNumber {
-  color: inherit !important;
-}
