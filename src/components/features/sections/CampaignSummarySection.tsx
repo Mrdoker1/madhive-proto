@@ -114,8 +114,8 @@ const CampaignSummarySection: React.FC = () => {
     return parts.join(', ');
   };
 
-  // Форматирование Geo данных
-  const formatGeoString = () => {
+  // Форматирование Markets данных
+  const formatMarketsString = () => {
     return formatArray(campaign.markets.selectedMarkets);
   };
 
@@ -199,10 +199,10 @@ const CampaignSummarySection: React.FC = () => {
               }
             />
 
-            {/* Geo */}
+            {/* Markets */}
             <SummaryRow
-              label="Geo"
-              value={formatGeoString()}
+              label="Markets"
+              value={formatMarketsString()}
               editRoute="/channel-details"
               isEmpty={campaign.markets.selectedMarkets.length === 0}
             />
