@@ -118,3 +118,26 @@ body {
     text-wrap: balance;
   }
 }
+
+/* Выходные дни - максимально специфичный селектор */
+button.rdrDay.rdrDayWeekend[style*="color"] {
+  /* color: var(--secondary-color) !important; */
+}
+
+button.rdrDay.rdrDayWeekend .rdrDayNumber span {
+  /* color: var(--secondary-color) !important; */
+  opacity: 0.5;
+}
+
+/* Выбранные даты остаются белыми */
+.rdrDayStartOfRange,
+.rdrDayEndOfRange, 
+.rdrDayInRange {
+  color: #FFFFFF !important;
+}
+
+.rdrDayStartOfRange .rdrDayNumber,
+.rdrDayEndOfRange .rdrDayNumber, 
+.rdrDayInRange .rdrDayNumber {
+  color: inherit !important;
+}

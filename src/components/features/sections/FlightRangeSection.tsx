@@ -48,6 +48,7 @@ const FlightRangeSection: React.FC<FlightRangeSectionProps> = ({
   const [flightStatus, setFlightStatus] = useState<'active' | 'hiatus'>('active');
   const [activeDateRange, setActiveDateRange] = useState<DateRange>({ start: '', end: '' });
   const [hiatusDates, setHiatusDates] = useState<DateRange>({ start: '', end: '' });
+  const [currentHiatusRanges, setCurrentHiatusRanges] = useState<Array<{id: string, start: string, end: string}>>([]);
 
   // Синхронизируем локальное состояние с глобальным при загрузке
   useEffect(() => {
@@ -102,14 +103,8 @@ const FlightRangeSection: React.FC<FlightRangeSectionProps> = ({
         hiatusStartDate: '',
         hiatusEndDate: ''
       }));
-    } else {
-      setHiatusDates({ start: startDate, end: endDate });
-      // Обновляем глобальный стейт для hiatus дат
-      dispatch(updateFlightData({ 
-        hiatusStartDate: startDate,
-        hiatusEndDate: endDate
-      }));
     }
+    // В hiatus режиме календарь сам управляет диапазонами
   };
   
   const handleFlightStatusChange = (value: string) => {
@@ -122,6 +117,11 @@ const FlightRangeSection: React.FC<FlightRangeSectionProps> = ({
   const handleWeeklyBudgetChange = (weeklyBudgets: any[]) => {
     console.log('Weekly budgets changed:', weeklyBudgets);
     // Логика для обработки изменения недельных бюджетов
+  };
+
+  const handleHiatusRangesChange = (ranges: Array<{id: string, start: string, end: string}>) => {
+    console.log('Hiatus ranges changed:', ranges);
+    setCurrentHiatusRanges(ranges);
   };
 
   return (
@@ -177,6 +177,8 @@ const FlightRangeSection: React.FC<FlightRangeSectionProps> = ({
           hiatusStartDate={hiatusDates.start}
           hiatusEndDate={hiatusDates.end}
           isActiveMode={flightStatus === 'active'}
+          isHiatusMode={flightStatus === 'hiatus'}
+          onHiatusRangesChange={handleHiatusRangesChange}
           // Блокируем календарь в режиме Hiatus, если не выбраны даты в Active
           disabled={flightStatus === 'hiatus' && (!activeDateRange.start || !activeDateRange.end)}
         />
@@ -192,6 +194,7 @@ const FlightRangeSection: React.FC<FlightRangeSectionProps> = ({
               endDate={activeDateRange.end}
               hiatusStartDate={hiatusDates.start}
               hiatusEndDate={hiatusDates.end}
+              hiatusRanges={currentHiatusRanges}
             />
           </div>
 
@@ -204,6 +207,7 @@ const FlightRangeSection: React.FC<FlightRangeSectionProps> = ({
               onChange={handleWeeklyBudgetChange}
               hiatusStartDate={hiatusDates.start} // Передаем исключенные даты
               hiatusEndDate={hiatusDates.end}
+              hiatusRanges={currentHiatusRanges}
             />
           </div>
         </>
