@@ -22,7 +22,8 @@ const GeneralDetailsSection: React.FC<GeneralDetailsSectionProps> = ({
     agency: '',
     cpeCode: '',
     campaignOwner: '',
-    campaignApprover: ''
+    campaignApprover: '',
+    spotLength: ''
   });
 
   // Синхронизируем локальное состояние с глобальным при загрузке
@@ -34,7 +35,8 @@ const GeneralDetailsSection: React.FC<GeneralDetailsSectionProps> = ({
       agency: globalGeneralData.agency || '',
       cpeCode: globalGeneralData.cpeCode || '',
       campaignOwner: globalGeneralData.campaignOwner || '',
-      campaignApprover: globalGeneralData.campaignApprover || ''
+      campaignApprover: globalGeneralData.campaignApprover || '',
+      spotLength: globalGeneralData.spotLength || ''
     });
   }, [globalGeneralData]);
 
@@ -143,7 +145,7 @@ const GeneralDetailsSection: React.FC<GeneralDetailsSectionProps> = ({
       </Grid>
 
       {/* Строка с Campaign Owner и Campaign Approver */}
-      <Grid>
+      <Grid mb="lg">
         <Grid.Col span={6}>
           <TextInput
             label="Campaign Owner"
@@ -159,6 +161,24 @@ const GeneralDetailsSection: React.FC<GeneralDetailsSectionProps> = ({
             placeholder="Enter Campaign Approver"
             value={formData.campaignApprover}
             onChange={(event) => handleInputChange('campaignApprover', event.currentTarget.value)}
+            required
+          />
+        </Grid.Col>
+      </Grid>
+
+      {/* Строка с Spot Length */}
+      <Grid>
+        <Grid.Col span={6}>
+          <Select
+            label="Spot Length"
+            placeholder="- Select Spot Length -"
+            data={[
+              { value: '15', label: '15 sec' },
+              { value: '30', label: '30 sec' },
+              { value: '60', label: '60 sec' }
+            ]}
+            value={formData.spotLength}
+            onChange={(value) => handleInputChange('spotLength', value)}
             required
           />
         </Grid.Col>
