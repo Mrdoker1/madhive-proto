@@ -19,7 +19,7 @@ const AudiencesSection = () => {
     {
       key: 'gender',
       title: 'Gender',
-      options: ['Male', 'Female', 'Non-binary']
+      options: ['Male', 'Female']
     },
     {
       key: 'age', 
@@ -34,12 +34,12 @@ const AudiencesSection = () => {
     {
       key: 'education',
       title: 'Education Level',
-      options: ['No college', 'High school diploma', "Associate's degree", "Bachelor's degree", "Master's degree"]
+      options: ['High school diploma', "Associate's degree", "Bachelor's degree", "Master's degree"]
     },
     {
       key: 'householdSize',
       title: 'Household Size',
-      options: ['No children', 'One child', 'Two children', '>2 children']
+      options: ['One child', 'Two children', '>2 children']
     }
   ];
 

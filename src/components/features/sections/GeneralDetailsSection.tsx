@@ -42,47 +42,83 @@ const GeneralDetailsSection: React.FC<GeneralDetailsSectionProps> = ({
 
   const handleInputChange = (field: string, value: string | null) => {
     const newValue = value || '';
-    setFormData(prev => ({
-      ...prev,
-      [field]: newValue
-    }));
+    
+    // При изменении рекламодателя сбрасываем бренд
+    if (field === 'advertiser') {
+      setFormData(prev => ({ 
+        ...prev, 
+        [field]: newValue,
+        brand: '' // Сбрасываем бренд при смене рекламодателя
+      }));
+      dispatch(updateGeneralData({ 
+        advertiser: newValue,
+        brand: '' // Сбрасываем бренд в глобальном состоянии
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [field]: newValue
+      }));
 
-    // Обновляем глобальный стейт для всех полей
-    if (field === 'campaignName') {
-      dispatch(updateGeneralData({ campaignName: newValue }));
-    } else if (field === 'advertiser') {
-      dispatch(updateGeneralData({ advertiser: newValue }));
-    } else if (field === 'brand') {
-      dispatch(updateGeneralData({ brand: newValue }));
-    } else if (field === 'agency') {
-      dispatch(updateGeneralData({ agency: newValue }));
-    } else if (field === 'cpeCode') {
-      dispatch(updateGeneralData({ cpeCode: newValue }));
-    } else if (field === 'campaignOwner') {
-      dispatch(updateGeneralData({ campaignOwner: newValue }));
-    } else if (field === 'campaignApprover') {
-      dispatch(updateGeneralData({ campaignApprover: newValue }));
+      // Обновляем глобальный стейт для всех полей
+      if (field === 'campaignName') {
+        dispatch(updateGeneralData({ campaignName: newValue }));
+      } else if (field === 'brand') {
+        dispatch(updateGeneralData({ brand: newValue }));
+      } else if (field === 'agency') {
+        dispatch(updateGeneralData({ agency: newValue }));
+      } else if (field === 'cpeCode') {
+        dispatch(updateGeneralData({ cpeCode: newValue }));
+      } else if (field === 'campaignOwner') {
+        dispatch(updateGeneralData({ campaignOwner: newValue }));
+      } else if (field === 'campaignApprover') {
+        dispatch(updateGeneralData({ campaignApprover: newValue }));
+      }
     }
   };
 
   const advertiserOptions = [
-    { value: 'advertiser1', label: 'Advertiser 1' },
-    { value: 'advertiser2', label: 'Advertiser 2' },
+    { value: 'Ford Motor Company', label: 'Ford Motor Company' },
+    { value: 'Stellantis', label: 'Stellantis' },   
+    { value: 'Toyota Motor Corp', label: 'Toyota Motor Corp' },
   ];
 
-  const brandOptions = [
-    { value: 'brand1', label: 'Brand 1' },
-    { value: 'brand2', label: 'Brand 2' },
-  ];
+  // Бренды зависят от выбранного рекламодателя
+  const allBrandOptions: Record<string, Array<{value: string, label: string}>> = {
+    'Ford Motor Company': [
+      { value: 'ford-f150', label: 'Ford F-150' },
+      { value: 'ford-mustang', label: 'Ford Mustang' },
+      { value: 'ford-explorer', label: 'Ford Explorer' },
+      { value: 'lincoln', label: 'Lincoln' },
+    ],
+    'Stellantis': [
+      { value: 'jeep', label: 'Jeep' },
+      { value: 'ram', label: 'Ram' },
+      { value: 'dodge', label: 'Dodge' },
+      { value: 'chrysler', label: 'Chrysler' },
+      { value: 'fiat', label: 'Fiat' },
+    ],
+    'Toyota Motor Corp': [
+      { value: 'toyota-camry', label: 'Toyota Camry' },
+      { value: 'toyota-corolla', label: 'Toyota Corolla' },
+      { value: 'toyota-prius', label: 'Toyota Prius' },
+      { value: 'lexus', label: 'Lexus' },
+      { value: 'scion', label: 'Scion' },
+    ],
+  };
+
+  // Получаем бренды для выбранного рекламодателя
+  const brandOptions = formData.advertiser ? allBrandOptions[formData.advertiser] || [] : [];
 
   const agencyOptions = [
-    { value: 'agency1', label: 'Agency 1' },
+    { value: 'GROUPM / GLOBAL TEAM BLUE', label: 'GROUPM / GLOBAL TEAM BLUE' },
     { value: 'agency2', label: 'Agency 2' },
   ];
 
   const cpeCodeOptions = [
-    { value: 'cpe1', label: 'CPE001' },
-    { value: 'cpe2', label: 'CPE002' },
+    { value: 'Y3W / H&T / 121', label: 'Y3W / H&T / 121' },
+    { value: 'WNK / JEP / 115', label: 'WNK / JEP / 115' },
+    { value: 'T2S / PUS / 310', label: 'T2S / PUS / 310' },
   ];
 
   return (
@@ -112,10 +148,11 @@ const GeneralDetailsSection: React.FC<GeneralDetailsSectionProps> = ({
         <Grid.Col span={6}>
           <Select
             label="Brand"
-            placeholder="- Select Brand -"
+            placeholder={formData.advertiser ? "- Select Brand -" : "Select Advertiser first"}
             data={brandOptions}
             value={formData.brand}
             onChange={(value) => handleInputChange('brand', value)}
+            disabled={!formData.advertiser}
           />
         </Grid.Col>
       </Grid>

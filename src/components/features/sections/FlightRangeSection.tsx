@@ -17,7 +17,7 @@ type DateRange = { start: string; end: string };
 
 
 // Стили для кнопки Extend Campaign
-const extendButtonStyles = {
+const extendButtonStyles = {  
   root: {
     fontSize: '12px',
     height: '32px',

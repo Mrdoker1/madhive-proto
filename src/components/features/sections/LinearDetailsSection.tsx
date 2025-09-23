@@ -9,21 +9,22 @@ const LinearDetailsSection = () => {
   const channelOptions = [
     'ABC',
     'CBS', 
-    'CW',
-    'FOX',
-    'Graham Media',
+    'NBC',
     'Gray',
+    'Nexstar',
     'Hearst',
-    'NBCU',
-    'NBCU Telemundo'
+    'TEGNA',
+    'Scripps',
+    'News Press Gazette', 
+    'Morgan Murphy',
+    'Hubbard Broadcasting',   
+    'Univision',
+    'Entravision',
   ];
 
   const measurementProviders = [
     'Nielsen',
     'Comscore',
-    'VideoAmp',
-    'iSpot.tv',
-    'TVSquared'
   ];
 
   const handleBroadcastersChange = (value: string[]) => {
