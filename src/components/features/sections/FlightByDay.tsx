@@ -48,6 +48,12 @@ const FlightByDay: React.FC<FlightByDayProps> = ({
 }) => {
   const [weeks, setWeeks] = useState<WeekData[]>([]);
   const [hiatusBlocks, setHiatusBlocks] = useState<HiatusBlock[]>([]);
+  const [isMounted, setIsMounted] = useState(false);
+
+  // Проверяем, что компонент смонтирован на клиенте
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   // Мемоизируем hiatusRanges для стабильности зависимостей
   const stableHiatusRanges = useMemo(() => hiatusRanges || [], [hiatusRanges]);
@@ -55,6 +61,16 @@ const FlightByDay: React.FC<FlightByDayProps> = ({
   // Используем переданные данные если они есть, иначе генерируем свои
   const finalWeeks = propsWeeks || weeks;
   const finalHiatusBlocks = propsHiatusBlocks || hiatusBlocks;
+
+  // Мемоизируем максимальное количество дней для масштабирования
+  const maxDays = useMemo(() => {
+    return Math.max(...finalWeeks.map(week => week.activeDays), 1);
+  }, [finalWeeks]);
+
+  // Мемоизируем общее количество дней
+  const totalDays = useMemo(() => {
+    return finalWeeks.reduce((total, week) => total + week.totalDays, 0);
+  }, [finalWeeks]);
 
   // Функция для генерации недель из диапазона дат
   const generateWeeks = useCallback((start: string, end: string): WeekData[] => {
@@ -193,8 +209,8 @@ const FlightByDay: React.FC<FlightByDayProps> = ({
     return hiatusBlocks;
   }, [hiatusStartDate, hiatusEndDate, stableHiatusRanges]);
 
-  // Создаем единый массив элементов для отображения
-  const createDisplayItems = (weeks: WeekData[], hiatusBlocks: HiatusBlock[]) => {
+  // Мемоизируем создание единого массива элементов для отображения
+  const createDisplayItems = useCallback((weeks: WeekData[], hiatusBlocks: HiatusBlock[]) => {
     const items: Array<{ type: 'week' | 'hiatus', data: WeekData | HiatusBlock, order: number }> = [];
     
     // Обрабатываем недели с учетом хиатус периодов
@@ -246,7 +262,12 @@ const FlightByDay: React.FC<FlightByDayProps> = ({
     
     // Сортируем по порядку
     return items.sort((a, b) => a.order - b.order);
-  };
+  }, []);
+
+  // Мемоизируем массив элементов для отображения
+  const displayItems = useMemo(() => {
+    return createDisplayItems(finalWeeks, finalHiatusBlocks);
+  }, [finalWeeks, finalHiatusBlocks, createDisplayItems]);
 
   // Генерируем недели при изменении дат только если не переданы готовые данные
   useEffect(() => {
@@ -273,15 +294,14 @@ const FlightByDay: React.FC<FlightByDayProps> = ({
     });
   };
 
+  // Не рендерим на сервере для избежания гидратации
+  if (!isMounted) {
+    return null;
+  }
+
   if (finalWeeks.length === 0) {
     return null; // Не показываем компонент, если нет данных
   }
-
-  // Получаем максимальное количество дней для масштабирования
-  const maxDays = Math.max(...finalWeeks.map(week => week.activeDays), 1);
-  
-  // Создаем массив элементов для отображения
-  const displayItems = createDisplayItems(finalWeeks, finalHiatusBlocks);
 
   return (
     <div className={`${className}`}>
@@ -303,7 +323,7 @@ const FlightByDay: React.FC<FlightByDayProps> = ({
           color: '#999',
           fontWeight: 500
         }}>
-          {finalWeeks.reduce((total, week) => total + week.totalDays, 0)} days total
+          {totalDays} days total
         </div>
         
         {/* Mixed visualization - weeks and hiatus in sequence */}
@@ -387,4 +407,4 @@ const FlightByDay: React.FC<FlightByDayProps> = ({
   );
 };
 
-export default FlightByDay;
+export default React.memo(FlightByDay);

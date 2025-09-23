@@ -139,8 +139,9 @@ const FlightRangeSection: React.FC<FlightRangeSectionProps> = ({
   // Обработчик данных от FlightByWeek
   const handleWeekDataChange = useCallback((weeks: any[]) => {
     setWeekData(prevWeekData => {
-      // Проверяем, изменились ли данные, чтобы избежать бесконечного цикла
-      if (JSON.stringify(prevWeekData) !== JSON.stringify(weeks)) {
+      // Проверяем, изменились ли данные по длине и ID
+      if (prevWeekData.length !== weeks.length || 
+          !prevWeekData.every((prev, index) => prev.id === weeks[index]?.id)) {
         return weeks;
       }
       return prevWeekData;
@@ -154,8 +155,10 @@ const FlightRangeSection: React.FC<FlightRangeSectionProps> = ({
     showWarning: boolean;
   }) => {
     setWeeklyValidation(prevValidation => {
-      // Проверяем, изменились ли данные валидации
-      if (JSON.stringify(prevValidation) !== JSON.stringify(validation)) {
+      // Проверяем, изменились ли ключевые поля валидации
+      if (prevValidation.isOverBudget !== validation.isOverBudget ||
+          prevValidation.totalAllocated !== validation.totalAllocated ||
+          prevValidation.showWarning !== validation.showWarning) {
         return validation;
       }
       return prevValidation;
@@ -200,7 +203,6 @@ const FlightRangeSection: React.FC<FlightRangeSectionProps> = ({
           tempDate.setDate(tempDate.getDate() + 1);
         }
 
-        console.log(`Week ${index + 1}: actualStart=${actualStart.toDateString()}, actualEnd=${actualEnd.toDateString()}, totalDays=${totalDays}, activeDays=${activeDays}, hiatusCount=${currentHiatusRanges.length}`);
 
         return {
           id: week.id,

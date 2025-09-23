@@ -135,34 +135,39 @@ const FlightByWeek: React.FC<FlightByWeekProps> = ({
     return weeksArray;
   }, [hiatusStartDate, hiatusEndDate, stableHiatusRanges]);
 
-  // Генерируем недели при изменении дат
-  useEffect(() => {
-    if (startDate && endDate) {
-      const newWeeks = generateWeeks(startDate, endDate);
-      
-      // Равномерно распределяем бюджет между неделями, исключая hiatus недели
-      if (newWeeks.length > 0) {
-        const activeWeeks = newWeeks.filter(week => !week.isLocked); // Недели не в hiatus
-        const budgetPerWeek = activeWeeks.length > 0 ? totalBudget / activeWeeks.length : 0;
-        
-        const weeksWithBudget = newWeeks.map(week => ({
-          ...week,
-          budget: week.isLocked ? 0 : budgetPerWeek // Hiatus недели имеют бюджет 0
-        }));
-        setWeeks(weeksWithBudget);
-      } else {
-        setWeeks(newWeeks);
-      }
-    } else {
-      setWeeks([]);
-    }
-  }, [startDate, endDate, totalBudget, hiatusStartDate, hiatusEndDate, stableHiatusRanges, generateWeeks]);
+  // Мемоизируем сгенерированные недели для предотвращения лишних пересчетов
+  const generatedWeeks = useMemo(() => {
+    if (!startDate || !endDate) return [];
+    return generateWeeks(startDate, endDate);
+  }, [startDate, endDate, hiatusStartDate, hiatusEndDate, stableHiatusRanges, generateWeeks]);
 
-  // Подсчитываем общую сумму при изменении бюджетов
+  // Мемоизируем недели с бюджетом
+  const weeksWithBudget = useMemo(() => {
+    if (generatedWeeks.length === 0) return [];
+    
+    const activeWeeks = generatedWeeks.filter(week => !week.isLocked);
+    const budgetPerWeek = activeWeeks.length > 0 ? totalBudget / activeWeeks.length : 0;
+    
+    return generatedWeeks.map(week => ({
+      ...week,
+      budget: week.isLocked ? 0 : budgetPerWeek
+    }));
+  }, [generatedWeeks, totalBudget]);
+
+  // Обновляем состояние недель когда изменяются мемоизированные данные
   useEffect(() => {
-    const total = weeks.reduce((sum, week) => sum + week.budget, 0);
-    setTotalAllocated(total);
+    setWeeks(weeksWithBudget);
+  }, [weeksWithBudget]);
+
+  // Мемоизируем общую сумму бюджетов
+  const calculatedTotalAllocated = useMemo(() => {
+    return weeks.reduce((sum, week) => sum + week.budget, 0);
   }, [weeks]);
+
+  // Обновляем состояние totalAllocated
+  useEffect(() => {
+    setTotalAllocated(calculatedTotalAllocated);
+  }, [calculatedTotalAllocated]);
 
   // Уведомляем родительский компонент о изменениях
   useEffect(() => {
@@ -171,17 +176,22 @@ const FlightByWeek: React.FC<FlightByWeekProps> = ({
     }
   }, [weeks, onChange]);
 
+  // Мемоизируем объект валидации
+  const validationData = useMemo(() => {
+    const isOverBudget = totalAllocated > totalBudget;
+    return {
+      isOverBudget,
+      totalAllocated,
+      showWarning: !isDragging && isOverBudget
+    };
+  }, [totalAllocated, totalBudget, isDragging]);
+
   // Отправляем валидацию в родительский компонент
   useEffect(() => {
     if (onValidationChange && weeks.length > 0) {
-      const isOverBudget = totalAllocated > totalBudget;
-      onValidationChange({
-        isOverBudget,
-        totalAllocated,
-        showWarning: !isDragging && isOverBudget // Показываем только когда не идет drag
-      });
+      onValidationChange(validationData);
     }
-  }, [totalAllocated, totalBudget, isDragging, onValidationChange]);
+  }, [validationData, onValidationChange, weeks.length]);
 
   // Обновление бюджета конкретной недели
   const updateWeekBudget = (weekId: string, budget: number) => {
@@ -203,11 +213,15 @@ const FlightByWeek: React.FC<FlightByWeekProps> = ({
     });
   };
 
-  // Получение максимального бюджета для масштабирования баров
-  const maxBudget = Math.max(...weeks.map(week => week.budget), 1);
+  // Мемоизируем максимальный бюджет для масштабирования баров
+  const maxBudget = useMemo(() => {
+    return Math.max(...weeks.map(week => week.budget), 1);
+  }, [weeks]);
 
-  // Проверка превышения бюджета
-  const isOverBudget = totalAllocated > totalBudget;
+  // Мемоизируем проверку превышения бюджета  
+  const isOverBudget = useMemo(() => {
+    return totalAllocated > totalBudget;
+  }, [totalAllocated, totalBudget]);
 
   if (weeks.length === 0) {
     return null; // Не показываем компонент, если нет данных
@@ -491,4 +505,4 @@ const FlightByWeek: React.FC<FlightByWeekProps> = ({
   );
 };
 
-export default FlightByWeek;
+export default React.memo(FlightByWeek);
