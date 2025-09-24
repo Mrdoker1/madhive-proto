@@ -693,7 +693,7 @@ const MarketsSection = () => {
                       styles={{
                         input: {
                           fontSize: '12px',
-                          padding: '4px 28px 4px 8px',
+                          padding: '4px 20px 4px 0',
                           height: '28px',
                           textAlign: 'center'
                         },

@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { TextInput, Text, Card } from '@mantine/core';
 import { IconCurrencyDollar } from '@tabler/icons-react';
 import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
-import { updateBudgetData } from '@/store/slices/campaignSlice';
+import { updateBudgetData, updateEstimations } from '@/store/slices/campaignSlice';
 import Image from 'next/image';
 
 interface RightSidebarProps {
@@ -18,6 +18,7 @@ const RightSidebar: React.FC<RightSidebarProps> = ({ className = '' }) => {
   const totalBudget = useAppSelector((state) => state.campaign.budget.totalBudget);
   const audienceEstimation = useAppSelector((state) => state.campaign.estimations.audienceEstimation);
   const marketEstimation = useAppSelector((state) => state.campaign.estimations.marketEstimation);
+  const audienceData = useAppSelector((state) => state.campaign.audience);
   
   // Локальное состояние для редактирования бюджета
   const [budgetInput, setBudgetInput] = useState('');
@@ -38,6 +39,85 @@ const RightSidebar: React.FC<RightSidebarProps> = ({ className = '' }) => {
       maximumFractionDigits: 0,
     }).format(amount);
   };
+
+  // Маппинг аудитории на количество людей (реалистичные цифры)
+  const audienceMapping = {
+    gender: {
+      'Male': 1247832,
+      'Female': 1363571
+    },
+    age: {
+      'Under 18': 734291,
+      '18 - 24': 982145,
+      '25 - 34': 1458367,
+      '35 - 44': 1203794,
+      '45 - 54': 967523,
+      '55 - 64': 845192,
+      '65 and over': 623847
+    },
+    income: {
+      'Under $50k': 1567239,
+      '$50k - $100k': 1892156,
+      '$100k - $150k': 834672,
+      '$150k - $200k': 456283,
+      '$200k - $250k': 187394,
+      'Over $250k': 89156
+    },
+    education: {
+      'High school diploma': 1623948,
+      "Associate's degree": 743821,
+      "Bachelor's degree": 1256347,
+      "Master's degree": 478392
+    },
+    householdSize: {
+      'One child': 892734,
+      'Two children': 1034567,
+      '>2 children': 523189
+    }
+  };
+
+  // Функция для расчета общей аудитории
+  const calculateAudienceEstimation = () => {
+    // Начальная общая аудитория (все демографические группы)
+    const totalPopulation = 16239480; // 15 миллионов базовая аудитория
+    
+    // Если ничего не выбрано - возвращаем полную аудиторию
+    const hasSelections = Object.values(audienceData).some(arr => Array.isArray(arr) && arr.length > 0);
+    if (!hasSelections) {
+      return totalPopulation;
+    }
+    
+    // Рассчитываем процент сужения для каждой категории
+    let audienceMultiplier = 1.0;
+    
+    Object.entries(audienceData).forEach(([category, selectedOptions]) => {
+      if (Array.isArray(selectedOptions) && selectedOptions.length > 0) {
+        // Получаем общую сумму для этой категории
+        const categoryMapping = audienceMapping[category as keyof typeof audienceMapping];
+        if (categoryMapping) {
+          const categoryTotal = Object.values(categoryMapping).reduce((sum, value) => sum + value, 0);
+          const selectedTotal = selectedOptions.reduce((sum, option) => {
+            const optionValue = categoryMapping[option as keyof typeof categoryMapping] || 0;
+            return sum + optionValue;
+          }, 0);
+          
+          // Процент от общей категории
+          const categoryPercent = selectedTotal / categoryTotal;
+          audienceMultiplier *= categoryPercent;
+        }
+      }
+    });
+    
+    return Math.round(totalPopulation * audienceMultiplier);
+  };
+
+  // Автоматически обновляем Audience Estimation при изменении выбранной аудитории
+  useEffect(() => {
+    const calculatedAudience = calculateAudienceEstimation();
+    if (calculatedAudience !== audienceEstimation) {
+      dispatch(updateEstimations({ audienceEstimation: calculatedAudience }));
+    }
+  }, [audienceData, audienceEstimation, dispatch]);
 
   // Обработчик изменения бюджета
   const handleBudgetChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -96,8 +176,9 @@ const RightSidebar: React.FC<RightSidebarProps> = ({ className = '' }) => {
         <div>
           <TextInput
             label="Audience Estimation"
-            placeholder="Audience estimation"
-            disabled
+            placeholder="Select audience criteria"
+            value={audienceEstimation > 0 ? audienceEstimation.toLocaleString('en-US') : ''}
+            readOnly
             styles={{
               label: {
                 fontSize: '14px',
@@ -110,7 +191,8 @@ const RightSidebar: React.FC<RightSidebarProps> = ({ className = '' }) => {
                 padding: '12px 16px',
                 border: '1px solid var(--form-input-border)',
                 borderRadius: '6px',
-                backgroundColor: '#FFFFFF'
+                backgroundColor: '#F8F9FA', // Слегка серый фон для readOnly поля
+                cursor: 'default'
               }
             }}
           />
