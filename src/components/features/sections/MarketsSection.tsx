@@ -637,7 +637,13 @@ const MarketsSection = () => {
       )}
 
       {/* Markets Table */}
-      <Table>
+      <Table
+        styles={{
+          tr: {
+            height: '48px'
+          }
+        }}
+      >
         <TableThead>
           <TableTr>
             <TableTh style={{ width: '40px' }}>
