@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { TextInput, Select, Grid } from '@mantine/core';
+import { TextInput, Select, Grid, Checkbox, Text } from '@mantine/core';
 import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
 import { updateGeneralData } from '@/store/slices/campaignSlice';
 
@@ -23,7 +23,7 @@ const GeneralDetailsSection: React.FC<GeneralDetailsSectionProps> = ({
     cpeCode: '',
     campaignOwner: '',
     campaignApprover: '',
-    spotLength: ''
+    spotLengths: [] as string[]
   });
 
   // Синхронизируем локальное состояние с глобальным при загрузке
@@ -36,7 +36,7 @@ const GeneralDetailsSection: React.FC<GeneralDetailsSectionProps> = ({
       cpeCode: globalGeneralData.cpeCode || '',
       campaignOwner: globalGeneralData.campaignOwner || '',
       campaignApprover: globalGeneralData.campaignApprover || '',
-      spotLength: globalGeneralData.spotLength || ''
+      spotLengths: globalGeneralData.spotLengths || []
     });
   }, [globalGeneralData]);
 
@@ -75,6 +75,27 @@ const GeneralDetailsSection: React.FC<GeneralDetailsSectionProps> = ({
         dispatch(updateGeneralData({ campaignApprover: newValue }));
       }
     }
+  };
+
+  // Обработчик для чекбоксов Spot Length
+  const handleSpotLengthChange = (value: string, checked: boolean) => {
+    let newSpotLengths: string[];
+    
+    if (checked) {
+      // Добавляем значение
+      newSpotLengths = [...formData.spotLengths, value];
+    } else {
+      // Убираем значение
+      newSpotLengths = formData.spotLengths.filter(length => length !== value);
+    }
+    
+    setFormData(prev => ({
+      ...prev,
+      spotLengths: newSpotLengths
+    }));
+    
+    // Обновляем глобальное состояние
+    dispatch(updateGeneralData({ spotLengths: newSpotLengths }));
   };
 
   const advertiserOptions = [
@@ -204,22 +225,25 @@ const GeneralDetailsSection: React.FC<GeneralDetailsSectionProps> = ({
       </Grid>
 
       {/* Строка с Spot Length */}
-      <Grid>
-        <Grid.Col span={6}>
-          <Select
-            label="Spot Length"
-            placeholder="- Select Spot Length -"
-            data={[
-              { value: '15', label: '15 sec' },
-              { value: '30', label: '30 sec' },
-              { value: '60', label: '60 sec' }
-            ]}
-            value={formData.spotLength}
-            onChange={(value) => handleInputChange('spotLength', value)}
-            required
-          />
-        </Grid.Col>
-      </Grid>
+      <div style={{ marginBottom: '24px' }}>
+        <Text size="sm" fw={500} mb="xs">
+          Spot Length <span style={{ color: 'red' }}>*</span>
+        </Text>
+        <div style={{ display: 'flex', gap: '24px' }}>
+          {[
+            { value: '15', label: '15 sec' },
+            { value: '30', label: '30 sec' },
+            { value: '60', label: '60 sec' }
+          ].map((option) => (
+            <Checkbox
+              key={option.value}
+              label={option.label}
+              checked={formData.spotLengths.includes(option.value)}
+              onChange={(event) => handleSpotLengthChange(option.value, event.currentTarget.checked)}
+            />
+          ))}
+        </div>
+      </div>
     </div>
   );
 };

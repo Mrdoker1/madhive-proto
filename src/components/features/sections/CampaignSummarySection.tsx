@@ -122,14 +122,139 @@ const CampaignSummarySection: React.FC = () => {
   // Форматирование Daypart Summary
   const formatDaypartSummary = () => {
     const selectedSlots = campaign.dayparts.selectedSlots;
-    const totalSlots = Object.values(selectedSlots).reduce(
-      (total, daySlots) => total + Object.values(daySlots).filter(Boolean).length, 
-      0
-    );
     
-    if (totalSlots === 0) return '';
+    if (!selectedSlots || Object.keys(selectedSlots).length === 0) return '';
     
-    return `${totalSlots} time slots selected`;
+    // Группируем дни по временным интервалам
+    const timeRanges: Record<string, string[]> = {};
+    
+    // Список дней для правильного порядка
+    const dayOrder = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const dayNames = {
+      'Sun': 'Sun',
+      'Mon': 'Mon', 
+      'Tue': 'Tue',
+      'Wed': 'Wed',
+      'Thu': 'Thu',
+      'Fri': 'Fri',
+      'Sat': 'Sat'
+    };
+    
+    // Функция для форматирования времени
+    const formatHour = (hour: number): string => {
+      if (hour === 0) return '12am';
+      if (hour < 12) return `${hour}am`;
+      if (hour === 12) return '12pm';
+      return `${hour - 12}pm`;
+    };
+    
+    // Для каждого дня находим непрерывные временные интервалы
+    dayOrder.forEach(day => {
+      if (!selectedSlots[day]) return;
+      
+      const selectedHours = Object.entries(selectedSlots[day])
+        .filter(([_, selected]) => selected)
+        .map(([hour, _]) => parseInt(hour))
+        .sort((a, b) => a - b);
+        
+      if (selectedHours.length === 0) return;
+      
+      // Группируем непрерывные часы в диапазоны
+      let ranges: string[] = [];
+      let start = selectedHours[0];
+      let end = selectedHours[0];
+      
+      for (let i = 1; i <= selectedHours.length; i++) {
+        if (i < selectedHours.length && selectedHours[i] === end + 1) {
+          end = selectedHours[i];
+        } else {
+          // Завершаем текущий диапазон
+          let range;
+          if (start === end) {
+            range = formatHour(start);
+          } else {
+            // Диапазон включает конечный час, поэтому добавляем +1 к end
+            range = `${formatHour(start)}-${formatHour(end + 1)}`;
+          }
+          ranges.push(range);
+          
+          if (i < selectedHours.length) {
+            start = selectedHours[i];
+            end = selectedHours[i];
+          }
+        }
+      }
+      
+      // Группируем дни с одинаковыми временными диапазонами
+      const timeKey = ranges.join(', ');
+      if (!timeRanges[timeKey]) {
+        timeRanges[timeKey] = [];
+      }
+      timeRanges[timeKey].push(dayNames[day as keyof typeof dayNames]);
+    });
+    
+    // Формируем итоговую строку
+    const formattedRanges = Object.entries(timeRanges).map(([timeRange, days]) => {
+      // Группируем смежные дни
+      const groupedDays = groupConsecutiveDays(days);
+      return `${groupedDays} ${timeRange}`;
+    });
+    
+    return formattedRanges.join(', ');
+  };
+  
+  // Вспомогательная функция для группировки смежных дней
+  const groupConsecutiveDays = (days: string[]): string => {
+    const dayOrder = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const sortedDays = days.sort((a, b) => dayOrder.indexOf(a) - dayOrder.indexOf(b));
+    
+    if (sortedDays.length === 0) return '';
+    if (sortedDays.length === 1) return sortedDays[0];
+    
+    // Проверяем на специальные группы
+    const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+    const weekend = ['Sat', 'Sun'];
+    
+    if (weekdays.every(day => sortedDays.includes(day)) && sortedDays.length === 5) {
+      return 'Mon-Fri';
+    }
+    
+    if (weekend.every(day => sortedDays.includes(day)) && sortedDays.length === 2) {
+      return 'Sat/Sun';
+    }
+    
+    // Группируем смежные дни
+    const groups: string[] = [];
+    let start = 0;
+    
+    while (start < sortedDays.length) {
+      let end = start;
+      
+      // Находим конец текущей группы смежных дней
+      while (end + 1 < sortedDays.length) {
+        const currentIndex = dayOrder.indexOf(sortedDays[end]);
+        const nextIndex = dayOrder.indexOf(sortedDays[end + 1]);
+        
+        if (nextIndex === currentIndex + 1) {
+          end++;
+        } else {
+          break;
+        }
+      }
+      
+      // Формируем группу
+      if (start === end) {
+        groups.push(sortedDays[start]);
+      } else if (end === start + 1) {
+        groups.push(`${sortedDays[start]}/${sortedDays[end]}`);
+      } else {
+        groups.push(`${sortedDays[start]}-${sortedDays[end]}`);
+      }
+      
+      start = end + 1;
+    }
+    
+    return groups.join('/');
   };
 
   return (
@@ -174,9 +299,10 @@ const CampaignSummarySection: React.FC = () => {
             {/* Spot Length */}
             <SummaryRow
               label="Spot Length"
-              value={campaign.general.spotLength ? `${campaign.general.spotLength} sec` : ''}
+              value={campaign.general.spotLengths.length > 0 ? 
+                campaign.general.spotLengths.map(length => `${length} sec`).join(', ') : ''}
               editRoute="/new-campaign"
-              isEmpty={!campaign.general.spotLength}
+              isEmpty={campaign.general.spotLengths.length === 0}
             />
           </TableTbody>
         </Table>
