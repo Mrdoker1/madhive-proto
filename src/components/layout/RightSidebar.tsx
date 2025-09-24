@@ -1,9 +1,10 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { TextInput, Text, Card } from '@mantine/core';
 import { IconCurrencyDollar } from '@tabler/icons-react';
-import { useAppSelector } from '@/hooks/useRedux';
+import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
+import { updateBudgetData } from '@/store/slices/campaignSlice';
 import Image from 'next/image';
 
 interface RightSidebarProps {
@@ -11,10 +12,22 @@ interface RightSidebarProps {
 }
 
 const RightSidebar: React.FC<RightSidebarProps> = ({ className = '' }) => {
+  const dispatch = useAppDispatch();
+  
   // Получаем данные кампании из глобального стейта
   const totalBudget = useAppSelector((state) => state.campaign.budget.totalBudget);
   const audienceEstimation = useAppSelector((state) => state.campaign.estimations.audienceEstimation);
   const marketEstimation = useAppSelector((state) => state.campaign.estimations.marketEstimation);
+  
+  // Локальное состояние для редактирования бюджета
+  const [budgetInput, setBudgetInput] = useState('');
+
+  // Синхронизируем локальное состояние с глобальным при загрузке
+  useEffect(() => {
+    if (totalBudget > 0) {
+      setBudgetInput(totalBudget.toString());
+    }
+  }, [totalBudget]);
 
   // Форматирование бюджета для отображения
   const formatCurrency = (amount: number) => {
@@ -24,6 +37,19 @@ const RightSidebar: React.FC<RightSidebarProps> = ({ className = '' }) => {
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(amount);
+  };
+
+  // Обработчик изменения бюджета
+  const handleBudgetChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+    // Разрешаем только цифры и точку для десятичных чисел
+    if (/^\d*\.?\d*$/.test(value)) {
+      setBudgetInput(value);
+      
+      // Обновляем глобальный стейт
+      const numericValue = parseFloat(value) || 0;
+      dispatch(updateBudgetData({ totalBudget: numericValue }));
+    }
   };
 
   return (
@@ -43,10 +69,10 @@ const RightSidebar: React.FC<RightSidebarProps> = ({ className = '' }) => {
         <div>
           <TextInput
             label="Budget Estimation"
-            placeholder="No budget set"
+            placeholder="Enter budget amount"
             leftSection={<IconCurrencyDollar size={16} color="#666" />}
-            value={totalBudget > 0 ? formatCurrency(totalBudget) : ''}
-            readOnly
+            value={budgetInput}
+            onChange={handleBudgetChange}
             styles={{
               label: {
                 fontSize: '14px',
@@ -60,8 +86,7 @@ const RightSidebar: React.FC<RightSidebarProps> = ({ className = '' }) => {
                 paddingLeft: '40px', // Добавляем отступ для иконки
                 border: '1px solid var(--form-input-border)',
                 borderRadius: '6px',
-                backgroundColor: '#F8F9FA', // Слегка серый фон для readOnly поля
-                cursor: 'default'
+                backgroundColor: '#FFFFFF'
               }
             }}
           />
