@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Checkbox, Table, TableThead, TableTbody, TableTr, TableTh, TableTd, Text, ActionIcon } from '@mantine/core';
-import { IconChevronDown, IconChevronRight } from '@tabler/icons-react';
+import { Checkbox, Table, TableThead, TableTbody, TableTr, TableTh, TableTd, Text, ActionIcon, TextInput, Alert } from '@mantine/core';
+import { IconChevronDown, IconChevronRight, IconAlertTriangle } from '@tabler/icons-react';
 import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
 import { updateMarketsData } from '@/store/slices/campaignSlice';
 import MarketDetailTable from './MarketDetailTable';
@@ -470,6 +470,43 @@ const MarketsSection = () => {
     });
   };
 
+  // Функция для обработки изменения процента для конкретного рынка
+  const handlePercentageChange = (marketId: string, value: string) => {
+    // Разрешаем только цифры и точку для десятичных чисел
+    if (!/^\d*\.?\d*$/.test(value)) return;
+    
+    const numericValue = parseFloat(value) || 0;
+    
+    // Ограничиваем максимальным значением 100
+    if (numericValue > 100) return;
+    
+    const updatedMarkets = markets.map(market => {
+      if (market.id === marketId) {
+        // Пересчитываем бюджет на основе нового процента
+        const budget = (budgetData.totalBudget * numericValue) / 100;
+        return {
+          ...market,
+          percentage: numericValue,
+          budget: budget
+        };
+      }
+      return market;
+    });
+    
+    setMarkets(updatedMarkets);
+  };
+
+  // Функция для расчета общего процента выбранных рынков
+  const getTotalPercentage = () => {
+    return markets
+      .filter(market => market.selected)
+      .reduce((total, market) => total + market.percentage, 0);
+  };
+
+  // Проверяем, превышает ли общий процент 100%
+  const totalPercentage = getTotalPercentage();
+  const isOverHundredPercent = totalPercentage > 100;
+
   // Загружаем рынки при изменении выбранных broadcasters
   useEffect(() => {
     if (linearData.broadcasters.length === 0) {
@@ -491,38 +528,68 @@ const MarketsSection = () => {
       selected: marketsData.selectedMarkets.includes(market.name)
     }));
 
-    // Рассчитываем распределение процентов и бюджета
-    const selectedMarkets = marketsWithSelection.filter(market => market.selected);
-    const marketsWithBudgetAndPercentage = calculateBudgetAndPercentageDistribution(marketsWithSelection, selectedMarkets);
+    // Сохраняем уже введенные пользователем проценты
+    const marketsWithPreservedData = marketsWithSelection.map(market => {
+      // Ищем существующий рынок с теми же данными, чтобы сохранить введенные проценты
+      const existingMarket = markets.find(m => m.id === market.id);
+      if (existingMarket) {
+        // Сохраняем процент и пересчитываем бюджет
+        const budget = market.selected ? (budgetData.totalBudget * existingMarket.percentage) / 100 : 0;
+        return {
+          ...market,
+          percentage: market.selected ? existingMarket.percentage : 0,
+          budget: budget
+        };
+      }
+      // Для новых рынков - проценты в 0
+      return {
+        ...market,
+        percentage: 0,
+        budget: 0
+      };
+    });
     
-    setMarkets(marketsWithBudgetAndPercentage);
+    setMarkets(marketsWithPreservedData);
   }, [linearData.broadcasters, marketsData.selectedMarkets, budgetData.totalBudget]);
 
 
   const handleSelectAll = (checked: boolean) => {
-    const updatedMarkets = markets.map(market => ({ ...market, selected: checked }));
+    const updatedMarkets = markets.map(market => {
+      const newMarket = { ...market, selected: checked };
+      // При снятии выделения сбрасываем процент и бюджет
+      if (!checked) {
+        newMarket.percentage = 0;
+        newMarket.budget = 0;
+      }
+      // При выделении оставляем процент как есть (0), пользователь сам введет
+      return newMarket;
+    });
     
-    const selectedMarketNames = checked ? markets.map(market => market.name) : [];
-    const selectedMarkets = updatedMarkets.filter(market => market.selected);
-    const marketsWithBudgetAndPercentage = calculateBudgetAndPercentageDistribution(updatedMarkets, selectedMarkets);
-    
-    setMarkets(marketsWithBudgetAndPercentage);
+    const selectedMarketNames = checked ? updatedMarkets.map(market => market.name) : [];
+    setMarkets(updatedMarkets);
     dispatch(updateMarketsData({ selectedMarkets: selectedMarketNames }));
   };
 
   const handleMarketSelect = (marketId: string, checked: boolean) => {
-    const updatedMarkets = markets.map(market => 
-      market.id === marketId ? { ...market, selected: checked } : market
-    );
+    const updatedMarkets = markets.map(market => {
+      if (market.id === marketId) {
+        const newMarket = { ...market, selected: checked };
+        // При снятии выделения сбрасываем процент и бюджет
+        if (!checked) {
+          newMarket.percentage = 0;
+          newMarket.budget = 0;
+        }
+        // При выделении оставляем процент как есть (0), пользователь сам введет
+        return newMarket;
+      }
+      return market;
+    });
     
     const selectedMarketNames = updatedMarkets
       .filter(market => market.selected)
       .map(market => market.name);
     
-    const selectedMarkets = updatedMarkets.filter(market => market.selected);
-    const marketsWithBudgetAndPercentage = calculateBudgetAndPercentageDistribution(updatedMarkets, selectedMarkets);
-    
-    setMarkets(marketsWithBudgetAndPercentage);
+    setMarkets(updatedMarkets);
     dispatch(updateMarketsData({ selectedMarkets: selectedMarketNames }));
   };
 
@@ -555,6 +622,19 @@ const MarketsSection = () => {
           </Text>
         )}
       </div>
+
+      {/* Alert for percentage validation */}
+      {isOverHundredPercent && (
+        <Alert 
+          icon={<IconAlertTriangle size={16} />}
+          title="Percentage Allocation Warning"
+          color="orange"
+          style={{ marginBottom: '20px' }}
+        >
+          Total percentage allocation is {totalPercentage.toFixed(1)}%, which exceeds 100%. 
+          Please adjust the percentages to ensure they do not exceed 100% in total.
+        </Alert>
+      )}
 
       {/* Markets Table */}
       <Table>
@@ -604,7 +684,27 @@ const MarketsSection = () => {
                   </Text>
                 </TableTd>
                 <TableTd>
-                  <Text size="xs">{market.percentage}%</Text>
+                  {market.selected ? (
+                    <TextInput
+                      size="xs"
+                      value={market.percentage.toString()}
+                      onChange={(event) => handlePercentageChange(market.id, event.currentTarget.value)}
+                      rightSection={<Text size="xs" c="dimmed">%</Text>}
+                      styles={{
+                        input: {
+                          fontSize: '12px',
+                          padding: '4px 28px 4px 8px',
+                          height: '28px',
+                          textAlign: 'center'
+                        },
+                        section: {
+                          width: '32px'
+                        }
+                      }}
+                    />
+                  ) : (
+                    <Text size="xs" c="dimmed">-</Text>
+                  )}
                 </TableTd>
                 <TableTd>
                   <Text size="xs">
