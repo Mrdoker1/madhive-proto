@@ -48,11 +48,13 @@ const GeneralDetailsSection: React.FC<GeneralDetailsSectionProps> = ({
       setFormData(prev => ({ 
         ...prev, 
         [field]: newValue,
-        brand: '' // Сбрасываем бренд при смене рекламодателя
+        brand: '', // Сбрасываем бренд при смене рекламодателя
+        agency: '' // Сбрасываем агентство при смене рекламодателя
       }));
       dispatch(updateGeneralData({ 
         advertiser: newValue,
-        brand: '' // Сбрасываем бренд в глобальном состоянии
+        brand: '', // Сбрасываем бренд в глобальном состоянии
+        agency: '' // Сбрасываем агентство в глобальном состоянии
       }));
     } else {
       setFormData(prev => ({
@@ -128,19 +130,30 @@ const GeneralDetailsSection: React.FC<GeneralDetailsSectionProps> = ({
     ],
   };
 
+  // База данных агентств по рекламодателям
+  const allAgencyOptions: Record<string, Array<{value: string, label: string}>> = {
+    'Ford Motor Company': [
+      { value: 'GROUPM / GLOBAL TEAM BLUE', label: 'GROUPM / GLOBAL TEAM BLUE' },
+      { value: 'Wieden+Kennedy', label: 'Wieden+Kennedy' },
+      { value: 'BBDO Detroit', label: 'BBDO Detroit' },
+    ],
+    'Stellantis': [
+      { value: 'Publicis Groupe', label: 'Publicis Groupe' },
+      { value: 'FCB Global', label: 'FCB Global' },
+      { value: 'DDB Worldwide', label: 'DDB Worldwide' },
+    ],
+    'Toyota Motor Corp': [
+      { value: 'Saatchi & Saatchi', label: 'Saatchi & Saatchi' },
+      { value: 'Burrell Communications', label: 'Burrell Communications' },
+      { value: 'Intertrend Communications', label: 'Intertrend Communications' },
+    ],
+  };
+
   // Получаем бренды для выбранного рекламодателя
   const brandOptions = formData.advertiser ? allBrandOptions[formData.advertiser] || [] : [];
-
-  const agencyOptions = [
-    { value: 'GROUPM / GLOBAL TEAM BLUE', label: 'GROUPM / GLOBAL TEAM BLUE' },
-    { value: 'agency2', label: 'Agency 2' },
-  ];
-
-  const cpeCodeOptions = [
-    { value: 'Y3W / H&T / 121', label: 'Y3W / H&T / 121' },
-    { value: 'WNK / JEP / 115', label: 'WNK / JEP / 115' },
-    { value: 'T2S / PUS / 310', label: 'T2S / PUS / 310' },
-  ];
+  
+  // Получаем агентства для выбранного рекламодателя
+  const agencyOptions = formData.advertiser ? allAgencyOptions[formData.advertiser] || [] : [];
 
   return (
     <div className={className}>
@@ -183,20 +196,20 @@ const GeneralDetailsSection: React.FC<GeneralDetailsSectionProps> = ({
         <Grid.Col span={6}>
           <Select
             label="Agency"
-            placeholder="- Select Agency -"
+            placeholder={formData.advertiser ? "- Select Agency -" : "Select Advertiser first"}
             data={agencyOptions}
             value={formData.agency}
             onChange={(value) => handleInputChange('agency', value)}
+            disabled={!formData.advertiser}
             required
           />
         </Grid.Col>
         <Grid.Col span={6}>
-          <Select
+          <TextInput
             label="CPE Code"
-            placeholder="- Select CPE Code -"
-            data={cpeCodeOptions}
+            placeholder="Enter CPE Code"
             value={formData.cpeCode}
-            onChange={(value) => handleInputChange('cpeCode', value)}
+            onChange={(event) => handleInputChange('cpeCode', event.currentTarget.value)}
             required
           />
         </Grid.Col>
