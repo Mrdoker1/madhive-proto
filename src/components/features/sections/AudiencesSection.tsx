@@ -51,7 +51,7 @@ const AudiencesSection = () => {
             <Text size="sm" fw={500} mb="xs" style={{ color: 'var(--form-label-color)' }}>
               {category.title}
             </Text>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               {category.options.map((option) => (
                 <Checkbox
                   key={option}
