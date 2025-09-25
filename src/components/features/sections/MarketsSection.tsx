@@ -1,31 +1,13 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Checkbox, Table, TableThead, TableTbody, TableTr, TableTh, TableTd, Text, ActionIcon, TextInput, Alert } from '@mantine/core';
-import { IconChevronDown, IconChevronRight, IconAlertTriangle } from '@tabler/icons-react';
+import { Checkbox, Table, TableThead, TableTbody, TableTr, TableTh, TableTd, Text, TextInput, Alert } from '@mantine/core';
+import { IconAlertTriangle } from '@tabler/icons-react';
+import MarketDetailTable from './MarketDetailTable';
 import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
 import { updateMarketsData } from '@/store/slices/campaignSlice';
-import MarketDetailTable from './MarketDetailTable';
+import { marketsDatabase, type MarketData, type MarketDetailData } from '@/data/marketsData';
 
-interface MarketDetailData {
-  id: string;
-  name: string;
-  conversionRate: number;
-  revenue: number;
-  roi: number;
-}
-
-interface MarketData {
-  id: string;
-  name: string;
-  percentage: number;
-  budget: number;
-  impression: string;
-  cpm: string;
-  selected: boolean;
-  broadcaster: string;
-  details: MarketDetailData[];
-}
 
 const MarketsSection = () => {
   const dispatch = useAppDispatch();
@@ -33,410 +15,8 @@ const MarketsSection = () => {
   const linearData = useAppSelector((state) => state.campaign.linear);
   const budgetData = useAppSelector((state) => state.campaign.budget);
   const [markets, setMarkets] = useState<MarketData[]>([]);
-  const [expandedMarkets, setExpandedMarkets] = useState<Set<string>>(new Set());
+  const [expandedDetails, setExpandedDetails] = useState<Set<string>>(new Set());
 
-  // База данных рынков по broadcasters
-  const marketsDatabase: Record<string, MarketData[]> = {
-    ABC: [
-      {
-        id: 'abc-1',
-        name: 'New York, NY (ABC)',
-        percentage: 25,
-        budget: 0,
-        impression: '2.5M',
-        cpm: '$12.50',
-        selected: false,
-        broadcaster: 'ABC',
-        details: [
-          { id: 'abc-1-1', name: 'Good Morning America', conversionRate: 28, revenue: 0, roi: 0 },
-          { id: 'abc-1-2', name: 'World News Tonight', conversionRate: 32, revenue: 0, roi: 0 },
-          { id: 'abc-1-3', name: 'The View', conversionRate: 25, revenue: 0, roi: 0 },
-          { id: 'abc-1-4', name: 'General Hospital', conversionRate: 15, revenue: 0, roi: 0 }
-        ]
-      },
-      {
-        id: 'abc-2',
-        name: 'Los Angeles, CA (ABC)',
-        percentage: 30,
-        budget: 0,
-        impression: '3.0M',
-        cpm: '$11.80',
-        selected: false,
-        broadcaster: 'ABC',
-        details: [
-          { id: 'abc-2-1', name: 'Good Morning America', conversionRate: 30, revenue: 0, roi: 0 },
-          { id: 'abc-2-2', name: 'The Bachelor', conversionRate: 35, revenue: 0, roi: 0 },
-          { id: 'abc-2-3', name: 'Dancing with the Stars', conversionRate: 28, revenue: 0, roi: 0 }
-        ]
-      },
-      {
-        id: 'abc-3',
-        name: 'Chicago, IL (ABC)',
-        percentage: 20,
-        budget: 0,
-        impression: '2.0M',
-        cpm: '$13.20',
-        selected: false,
-        broadcaster: 'ABC',
-        details: [
-          { id: 'abc-3-1', name: 'World News Tonight', conversionRate: 22, revenue: 0, roi: 0 },
-          { id: 'abc-3-2', name: 'American Idol', conversionRate: 26, revenue: 0, roi: 0 },
-          { id: 'abc-3-3', name: 'The Rookie', conversionRate: 18, revenue: 0, roi: 0 }
-        ]
-      },
-      {
-        id: 'abc-4',
-        name: 'Dallas-Ft. Worth, TX (ABC)',
-        percentage: 25,
-        budget: 0,
-        impression: '2.2M',
-        cpm: '$12.90',
-        selected: false,
-        broadcaster: 'ABC',
-        details: [
-          { id: 'abc-4-1', name: 'Sandya Kall Show', conversionRate: 30, revenue: 0, roi: 0 },
-          { id: 'abc-4-2', name: 'Local Morning News', conversionRate: 25, revenue: 0, roi: 0 },
-          { id: 'abc-4-3', name: 'Evening Sports Report', conversionRate: 20, revenue: 0, roi: 0 }
-        ]
-      }
-    ],
-    CBS: [
-      {
-        id: 'cbs-1',
-        name: 'New York, NY (CBS)',
-        percentage: 28,
-        budget: 0,
-        impression: '2.8M',
-        cpm: '$13.10',
-        selected: false,
-        broadcaster: 'CBS',
-        details: [
-          { id: 'cbs-1-1', name: 'CBS Evening News', conversionRate: 31, revenue: 0, roi: 0 },
-          { id: 'cbs-1-2', name: 'NCIS', conversionRate: 29, revenue: 0, roi: 0 },
-          { id: 'cbs-1-3', name: 'The Price is Right', conversionRate: 26, revenue: 0, roi: 0 }
-        ]
-      },
-      {
-        id: 'cbs-2',
-        name: 'Los Angeles, CA (CBS)',
-        percentage: 32,
-        budget: 0,
-        impression: '3.2M',
-        cpm: '$12.40',
-        selected: false,
-        broadcaster: 'CBS',
-        details: [
-          { id: 'cbs-2-1', name: 'Young and the Restless', conversionRate: 33, revenue: 0, roi: 0 },
-          { id: 'cbs-2-2', name: 'Survivor', conversionRate: 35, revenue: 0, roi: 0 },
-          { id: 'cbs-2-3', name: 'Blue Bloods', conversionRate: 28, revenue: 0, roi: 0 }
-        ]
-      },
-      {
-        id: 'cbs-3',
-        name: 'Chicago, IL (CBS)',
-        percentage: 22,
-        budget: 0,
-        impression: '2.1M',
-        cpm: '$13.80',
-        selected: false,
-        broadcaster: 'CBS',
-        details: [
-          { id: 'cbs-3-1', name: 'Chicago Fire', conversionRate: 24, revenue: 0, roi: 0 },
-          { id: 'cbs-3-2', name: 'CSI: Vegas', conversionRate: 21, revenue: 0, roi: 0 }
-        ]
-      },
-      {
-        id: 'cbs-4',
-        name: 'Houston, TX (CBS)',
-        percentage: 18,
-        budget: 0,
-        impression: '1.8M',
-        cpm: '$14.20',
-        selected: false,
-        broadcaster: 'CBS',
-        details: [
-          { id: 'cbs-4-1', name: 'Local News at 6', conversionRate: 19, revenue: 0, roi: 0 },
-          { id: 'cbs-4-2', name: 'Sports Update', conversionRate: 17, revenue: 0, roi: 0 }
-        ]
-      }
-    ],
-    CW: [
-      {
-        id: 'cw-1',
-        name: 'New York, NY (CW)',
-        percentage: 15,
-        budget: 0,
-        impression: '1.2M',
-        cpm: '$8.50',
-        selected: false,
-        broadcaster: 'CW',
-        details: [
-          { id: 'cw-1-1', name: 'Riverdale', conversionRate: 16, revenue: 0, roi: 0 },
-          { id: 'cw-1-2', name: 'The Flash', conversionRate: 14, revenue: 0, roi: 0 }
-        ]
-      },
-      {
-        id: 'cw-2',
-        name: 'Los Angeles, CA (CW)',
-        percentage: 18,
-        budget: 0,
-        impression: '1.4M',
-        cpm: '$8.90',
-        selected: false,
-        broadcaster: 'CW',
-        details: [
-          { id: 'cw-2-1', name: 'Superman & Lois', conversionRate: 19, revenue: 0, roi: 0 },
-          { id: 'cw-2-2', name: 'All American', conversionRate: 17, revenue: 0, roi: 0 }
-        ]
-      },
-      {
-        id: 'cw-3',
-        name: 'Atlanta, GA (CW)',
-        percentage: 20,
-        budget: 0,
-        impression: '1.1M',
-        cpm: '$9.20',
-        selected: false,
-        broadcaster: 'CW',
-        details: [
-          { id: 'cw-3-1', name: 'Walker', conversionRate: 21, revenue: 0, roi: 0 },
-          { id: 'cw-3-2', name: 'Local Programming', conversionRate: 19, revenue: 0, roi: 0 }
-        ]
-      }
-    ],
-    FOX: [
-      {
-        id: 'fox-1',
-        name: 'New York, NY (FOX)',
-        percentage: 24,
-        budget: 0,
-        impression: '2.4M',
-        cpm: '$12.20',
-        selected: false,
-        broadcaster: 'FOX',
-        details: [{ id: 'fox-1-1', name: 'FOX News at 6', conversionRate: 25, revenue: 0, roi: 0 }]
-      },
-      {
-        id: 'fox-2',
-        name: 'Los Angeles, CA (FOX)',
-        percentage: 26,
-        budget: 0,
-        impression: '2.6M',
-        cpm: '$11.90',
-        selected: false,
-        broadcaster: 'FOX',
-        details: [{ id: 'fox-2-1', name: 'The Simpsons', conversionRate: 27, revenue: 0, roi: 0 }]
-      },
-      {
-        id: 'fox-3',
-        name: 'Chicago, IL (FOX)',
-        percentage: 22,
-        budget: 0,
-        impression: '2.2M',
-        cpm: '$12.80',
-        selected: false,
-        broadcaster: 'FOX',
-        details: [{ id: 'fox-3-1', name: 'Chicago Bears Game', conversionRate: 23, revenue: 0, roi: 0 }]
-      },
-      {
-        id: 'fox-4',
-        name: 'Philadelphia, PA (FOX)',
-        percentage: 28,
-        budget: 0,
-        impression: '2.0M',
-        cpm: '$13.50',
-        selected: false,
-        broadcaster: 'FOX',
-        details: [{ id: 'fox-4-1', name: 'Local Sports', conversionRate: 29, revenue: 0, roi: 0 }]
-      }
-    ],
-    'Graham Media': [
-      {
-        id: 'graham-1',
-        name: 'Detroit, MI (Graham)',
-        percentage: 35,
-        budget: 0,
-        impression: '1.5M',
-        cpm: '$10.20',
-        selected: false,
-        broadcaster: 'Graham Media',
-        details: []
-      },
-      {
-        id: 'graham-2',
-        name: 'Orlando, FL (Graham)',
-        percentage: 40,
-        budget: 0,
-        impression: '1.2M',
-        cpm: '$9.80',
-        selected: false,
-        broadcaster: 'Graham Media',
-        details: []
-      },
-      {
-        id: 'graham-3',
-        name: 'San Antonio, TX (Graham)',
-        percentage: 25,
-        budget: 0,
-        impression: '1.0M',
-        cpm: '$11.50',
-        selected: false,
-        broadcaster: 'Graham Media',
-        details: []
-      }
-    ],
-    Gray: [
-      {
-        id: 'gray-1',
-        name: 'Atlanta, GA (Gray)',
-        percentage: 30,
-        budget: 0,
-        impression: '1.3M',
-        cpm: '$9.90',
-        selected: false,
-        broadcaster: 'Gray',
-        details: []
-      },
-      {
-        id: 'gray-2',
-        name: 'Birmingham, AL (Gray)',
-        percentage: 45,
-        budget: 0,
-        impression: '0.8M',
-        cpm: '$8.70',
-        selected: false,
-        broadcaster: 'Gray',
-        details: []
-      },
-      {
-        id: 'gray-3',
-        name: 'Cleveland, OH (Gray)',
-        percentage: 25,
-        budget: 0,
-        impression: '1.1M',
-        cpm: '$10.50',
-        selected: false,
-        broadcaster: 'Gray',
-        details: []
-      }
-    ],
-    Hearst: [
-      {
-        id: 'hearst-1',
-        name: 'Boston, MA (Hearst)',
-        percentage: 32,
-        budget: 0,
-        impression: '1.4M',
-        cpm: '$11.20',
-        selected: false,
-        broadcaster: 'Hearst',
-        details: []
-      },
-      {
-        id: 'hearst-2',
-        name: 'Seattle, WA (Hearst)',
-        percentage: 28,
-        budget: 0,
-        impression: '1.2M',
-        cpm: '$10.80',
-        selected: false,
-        broadcaster: 'Hearst',
-        details: []
-      },
-      {
-        id: 'hearst-3',
-        name: 'Pittsburgh, PA (Hearst)',
-        percentage: 40,
-        budget: 0,
-        impression: '0.9M',
-        cpm: '$9.60',
-        selected: false,
-        broadcaster: 'Hearst',
-        details: []
-      }
-    ],
-    NBCU: [
-      {
-        id: 'nbcu-1',
-        name: 'New York, NY (NBC)',
-        percentage: 26,
-        budget: 0,
-        impression: '2.6M',
-        cpm: '$13.40',
-        selected: false,
-        broadcaster: 'NBCU',
-        details: []
-      },
-      {
-        id: 'nbcu-2',
-        name: 'Los Angeles, CA (NBC)',
-        percentage: 29,
-        budget: 0,
-        impression: '2.9M',
-        cpm: '$12.70',
-        selected: false,
-        broadcaster: 'NBCU',
-        details: []
-      },
-      {
-        id: 'nbcu-3',
-        name: 'Chicago, IL (NBC)',
-        percentage: 24,
-        budget: 0,
-        impression: '2.4M',
-        cpm: '$13.90',
-        selected: false,
-        broadcaster: 'NBCU',
-        details: []
-      },
-      {
-        id: 'nbcu-4',
-        name: 'Miami, FL (NBC)',
-        percentage: 21,
-        budget: 0,
-        impression: '1.9M',
-        cpm: '$14.60',
-        selected: false,
-        broadcaster: 'NBCU',
-        details: []
-      }
-    ],
-    'NBCU Telemundo': [
-      {
-        id: 'telemundo-1',
-        name: 'Miami, FL (Telemundo)',
-        percentage: 50,
-        budget: 0,
-        impression: '1.8M',
-        cpm: '$7.20',
-        selected: false,
-        broadcaster: 'NBCU Telemundo',
-        details: []
-      },
-      {
-        id: 'telemundo-2',
-        name: 'Los Angeles, CA (Telemundo)',
-        percentage: 35,
-        budget: 0,
-        impression: '2.1M',
-        cpm: '$8.40',
-        selected: false,
-        broadcaster: 'NBCU Telemundo',
-        details: []
-      },
-      {
-        id: 'telemundo-3',
-        name: 'New York, NY (Telemundo)',
-        percentage: 15,
-        budget: 0,
-        impression: '1.5M',
-        cpm: '$9.80',
-        selected: false,
-        broadcaster: 'NBCU Telemundo',
-        details: []
-      }
-    ]
-  };
 
   // Функция для расчета процентов и бюджета по выбранным маркетам
   const calculateBudgetAndPercentageDistribution = (availableMarkets: MarketData[], selectedMarkets: MarketData[]) => {
@@ -496,11 +76,25 @@ const MarketsSection = () => {
     setMarkets(updatedMarkets);
   };
 
-  // Функция для расчета общего процента выбранных рынков
+  // Функция для расчета общего процента выбранных рынков и подстанций
   const getTotalPercentage = () => {
-    return markets
-      .filter(market => market.selected)
-      .reduce((total, market) => total + market.percentage, 0);
+    let total = 0;
+    
+    markets.forEach(market => {
+      // Добавляем процент основного рынка, если он выбран
+      if (market.selected) {
+        total += market.percentage;
+      }
+      
+      // Добавляем проценты выбранных подстанций
+      market.details.forEach(detail => {
+        if (detail.selected) {
+          total += detail.percentage;
+        }
+      });
+    });
+    
+    return total;
   };
 
   // Проверяем, превышает ли общий процент 100%
@@ -528,17 +122,35 @@ const MarketsSection = () => {
       selected: marketsData.selectedMarkets.includes(market.name)
     }));
 
-    // Сохраняем уже введенные пользователем проценты
+    // Сохраняем уже введенные пользователем проценты и состояние подстанций
     const marketsWithPreservedData = marketsWithSelection.map(market => {
       // Ищем существующий рынок с теми же данными, чтобы сохранить введенные проценты
       const existingMarket = markets.find(m => m.id === market.id);
       if (existingMarket) {
         // Сохраняем процент и пересчитываем бюджет
         const budget = market.selected ? (budgetData.totalBudget * existingMarket.percentage) / 100 : 0;
+        
+        // Сохраняем состояние подстанций
+        const preservedDetails = market.details.map(detail => {
+          const existingDetail = existingMarket.details.find(d => d.id === detail.id);
+          if (existingDetail) {
+            // Пересчитываем бюджет для подстанции
+            const detailBudget = (budgetData.totalBudget * existingDetail.percentage) / 100;
+            return {
+              ...detail,
+              selected: existingDetail.selected,
+              percentage: existingDetail.percentage,
+              budget: detailBudget
+            };
+          }
+          return detail;
+        });
+        
         return {
           ...market,
           percentage: market.selected ? existingMarket.percentage : 0,
-          budget: budget
+          budget: budget,
+          details: preservedDetails
         };
       }
       // Для новых рынков - проценты в 0
@@ -556,12 +168,29 @@ const MarketsSection = () => {
   const handleSelectAll = (checked: boolean) => {
     const updatedMarkets = markets.map(market => {
       const newMarket = { ...market, selected: checked };
+      
       // При снятии выделения сбрасываем процент и бюджет
       if (!checked) {
         newMarket.percentage = 0;
         newMarket.budget = 0;
+        
+        // Также снимаем выделение со всех подстанций
+        newMarket.details = newMarket.details.map(detail => ({
+          ...detail,
+          selected: false,
+          percentage: 0,
+          budget: 0
+        }));
+      } else {
+        // При выделении всех рынков выбираем все подстанции
+        newMarket.details = newMarket.details.map(detail => ({
+          ...detail,
+          selected: true,
+          percentage: 0, // Пользователь сам введет проценты
+          budget: 0
+        }));
       }
-      // При выделении оставляем процент как есть (0), пользователь сам введет
+      
       return newMarket;
     });
     
@@ -574,12 +203,29 @@ const MarketsSection = () => {
     const updatedMarkets = markets.map(market => {
       if (market.id === marketId) {
         const newMarket = { ...market, selected: checked };
+        
         // При снятии выделения сбрасываем процент и бюджет
         if (!checked) {
           newMarket.percentage = 0;
           newMarket.budget = 0;
+          
+          // Также снимаем выделение со всех подстанций
+          newMarket.details = newMarket.details.map(detail => ({
+            ...detail,
+            selected: false,
+            percentage: 0,
+            budget: 0
+          }));
+        } else {
+          // При выделении основного рынка выбираем все подстанции
+          newMarket.details = newMarket.details.map(detail => ({
+            ...detail,
+            selected: true,
+            percentage: 0, // Пользователь сам введет проценты
+            budget: 0
+          }));
         }
-        // При выделении оставляем процент как есть (0), пользователь сам введет
+        
         return newMarket;
       }
       return market;
@@ -593,20 +239,113 @@ const MarketsSection = () => {
     dispatch(updateMarketsData({ selectedMarkets: selectedMarketNames }));
   };
 
-  const handleToggleExpand = (marketId: string) => {
-    setExpandedMarkets(prev => {
+
+  // Обработчик выбора подстанции
+  const handleDetailSelect = (marketId: string, detailId: string, checked: boolean) => {
+    const updatedMarkets = markets.map(market => {
+      if (market.id === marketId) {
+        const updatedDetails = market.details.map(detail => {
+          if (detail.id === detailId) {
+            return { 
+              ...detail, 
+              selected: checked,
+              percentage: checked ? detail.percentage : 0,
+              budget: checked ? detail.budget : 0
+            };
+          }
+          return detail;
+        });
+        
+        // Проверяем, остались ли выбранные подстанции
+        const hasSelectedDetails = updatedDetails.some(detail => detail.selected);
+        
+        // Если нет выбранных подстанций, снимаем выделение с основного рынка
+        const updatedMarket = { 
+          ...market, 
+          details: updatedDetails,
+          selected: hasSelectedDetails ? market.selected : false,
+          percentage: hasSelectedDetails ? market.percentage : 0,
+          budget: hasSelectedDetails ? market.budget : 0
+        };
+        
+        return updatedMarket;
+      }
+      return market;
+    });
+    
+    // Обновляем selectedMarkets в Redux
+    const selectedMarketNames = updatedMarkets
+      .filter(market => market.selected)
+      .map(market => market.name);
+    
+    setMarkets(updatedMarkets);
+    dispatch(updateMarketsData({ selectedMarkets: selectedMarketNames }));
+  };
+
+  // Обработчик изменения процента подстанции
+  const handleDetailPercentageChange = (marketId: string, detailId: string, value: string) => {
+    // Разрешаем только цифры и точку для десятичных чисел
+    if (!/^\d*\.?\d*$/.test(value)) return;
+    
+    const numericValue = parseFloat(value) || 0;
+    
+    // Ограничиваем максимальным значением 100
+    if (numericValue > 100) return;
+    
+    const updatedMarkets = markets.map(market => {
+      if (market.id === marketId) {
+        const updatedDetails = market.details.map(detail => {
+          if (detail.id === detailId) {
+            // Пересчитываем бюджет на основе нового процента
+            const budget = (budgetData.totalBudget * numericValue) / 100;
+            return {
+              ...detail,
+              percentage: numericValue,
+              budget: budget
+            };
+          }
+          return detail;
+        });
+        return { ...market, details: updatedDetails };
+      }
+      return market;
+    });
+    
+    setMarkets(updatedMarkets);
+  };
+
+  // Функция для переключения коллапса детальной таблицы
+  const handleToggleDetailExpand = (marketId: string) => {
+    console.log('Toggling expand for market:', marketId);
+    setExpandedDetails(prev => {
       const newSet = new Set(prev);
+      console.log('Current expanded details:', Array.from(prev));
       if (newSet.has(marketId)) {
         newSet.delete(marketId);
+        console.log('Removing from expanded:', marketId);
       } else {
         newSet.add(marketId);
+        console.log('Adding to expanded:', marketId);
       }
+      console.log('New expanded details:', Array.from(newSet));
       return newSet;
     });
   };
 
   const allSelected = markets.length > 0 && markets.every(market => market.selected);
   const someSelected = markets.some(market => market.selected);
+
+  // Получаем выбранные рынки с деталями для отображения во второй части
+  const selectedMarketsWithDetails = markets.filter(market => market.selected && market.details.length > 0);
+
+  // Автоматически разворачиваем первую детальную таблицу для тестирования
+  useEffect(() => {
+    if (selectedMarketsWithDetails.length > 0 && expandedDetails.size === 0) {
+      const firstMarketId = selectedMarketsWithDetails[0].id;
+      setExpandedDetails(new Set([firstMarketId]));
+      console.log('Auto-expanding first market:', firstMarketId);
+    }
+  }, [selectedMarketsWithDetails.length > 0 ? selectedMarketsWithDetails[0]?.id : null]);
 
   return (
     <div>
@@ -636,7 +375,7 @@ const MarketsSection = () => {
         </Alert>
       )}
 
-      {/* Markets Table */}
+      {/* Main Markets Table */}
       <Table
         styles={{
           tr: {
@@ -656,8 +395,8 @@ const MarketsSection = () => {
             <TableTh>
               <Text size="xs" fw={500}>Market</Text>
             </TableTh>
-            <TableTh style={{ width: '80px' }}>
-              <Text size="xs" fw={500}>%</Text>
+            <TableTh style={{ width: '120px' }}>
+              <Text size="xs" fw={500}>% of Budget</Text>
             </TableTh>
             <TableTh style={{ width: '100px' }}>
               <Text size="xs" fw={500}>Budget</Text>
@@ -668,93 +407,73 @@ const MarketsSection = () => {
             <TableTh style={{ width: '80px' }}>
               <Text size="xs" fw={500}>CPM</Text>
             </TableTh>
-            <TableTh style={{ width: '30px' }}>
-              {/* Expand/Collapse column header */}
-            </TableTh>
           </TableTr>
         </TableThead>
         <TableTbody>
           {markets.map((market) => (
-            <React.Fragment key={market.id}>
-              <TableTr>
-                <TableTd>
-                  <Checkbox
-                    checked={market.selected}
-                    onChange={(event) => handleMarketSelect(market.id, event.currentTarget.checked)}
+            <TableTr key={market.id}>
+              <TableTd>
+                <Checkbox
+                  checked={market.selected}
+                  onChange={(event) => handleMarketSelect(market.id, event.currentTarget.checked)}
+                />
+              </TableTd>
+              <TableTd>
+                <Text size="xs">
+                  {market.name}
+                  {market.details.length > 0 && ` (${market.details.length})`}
+                </Text>
+              </TableTd>
+              <TableTd>
+                {market.selected ? (
+                  <TextInput
+                    size="xs"
+                    value={market.percentage.toString()}
+                    onChange={(event) => handlePercentageChange(market.id, event.currentTarget.value)}
+                    rightSection={<Text size="xs" c="dimmed">%</Text>}
+                    styles={{
+                      input: {
+                        fontSize: '12px',
+                        padding: '4px 20px 4px 0',
+                        height: '28px',
+                        textAlign: 'center'
+                      },
+                      section: {
+                        width: '32px'
+                      }
+                    }}
                   />
-                </TableTd>
-                <TableTd>
-                  <Text size="xs">
-                    {market.name}
-                    {market.details.length > 0 && ` (${market.details.length})`}
-                  </Text>
-                </TableTd>
-                <TableTd>
-                  {market.selected ? (
-                    <TextInput
-                      size="xs"
-                      value={market.percentage.toString()}
-                      onChange={(event) => handlePercentageChange(market.id, event.currentTarget.value)}
-                      rightSection={<Text size="xs" c="dimmed">%</Text>}
-                      styles={{
-                        input: {
-                          fontSize: '12px',
-                          padding: '4px 20px 4px 0',
-                          height: '28px',
-                          textAlign: 'center'
-                        },
-                        section: {
-                          width: '32px'
-                        }
-                      }}
-                    />
-                  ) : (
-                    <Text size="xs" c="dimmed">-</Text>
-                  )}
-                </TableTd>
-                <TableTd>
-                  <Text size="xs">
-                    {market.budget > 0 ? `$${market.budget.toLocaleString('en-US', { maximumFractionDigits: 0 })}` : '$0'}
-                  </Text>
-                </TableTd>
-                <TableTd>
-                  <Text size="xs">{market.impression}</Text>
-                </TableTd>
-                <TableTd>
-                  <Text size="xs">{market.cpm}</Text>
-                </TableTd>
-                <TableTd>
-                  {market.details.length > 0 && (
-                    <ActionIcon
-                      variant="transparent"
-                      size="sm"
-                      onClick={() => handleToggleExpand(market.id)}
-                      title={expandedMarkets.has(market.id) ? "Collapse" : "Expand"}
-                      style={{ color: 'var(--primary-color)' }}
-                    >
-                      {expandedMarkets.has(market.id) ? (
-                        <IconChevronDown size={16} />
-                      ) : (
-                        <IconChevronRight size={16} />
-                      )}
-                    </ActionIcon>
-                  )}
-                </TableTd>
-              </TableTr>
-              {expandedMarkets.has(market.id) && market.details.length > 0 && (
-                <TableTr>
-                  <TableTd colSpan={7} style={{ padding: 0 }}>
-                    <MarketDetailTable 
-                      marketName={market.name}
-                      details={market.details}
-                    />
-                  </TableTd>
-                </TableTr>
-              )}
-            </React.Fragment>
+                ) : (
+                  <Text size="xs" c="dimmed">-</Text>
+                )}
+              </TableTd>
+              <TableTd>
+                <Text size="xs">
+                  {market.budget > 0 ? `$${market.budget.toLocaleString('en-US', { maximumFractionDigits: 0 })}` : '$0'}
+                </Text>
+              </TableTd>
+              <TableTd>
+                <Text size="xs">{market.impression}</Text>
+              </TableTd>
+              <TableTd>
+                <Text size="xs">{market.cpm}</Text>
+              </TableTd>
+            </TableTr>
           ))}
         </TableTbody>
       </Table>
+
+      {/* Detailed Tables for Selected Markets */}
+      {selectedMarketsWithDetails.map((market) => (
+        <MarketDetailTable
+          key={`detail-${market.id}`}
+          market={market}
+          isExpanded={expandedDetails.has(market.id)}
+          onToggleExpand={() => handleToggleDetailExpand(market.id)}
+          onDetailSelect={(detailId, checked) => handleDetailSelect(market.id, detailId, checked)}
+          onDetailPercentageChange={(detailId, value) => handleDetailPercentageChange(market.id, detailId, value)}
+        />
+      ))}
     </div>
   );
 };
