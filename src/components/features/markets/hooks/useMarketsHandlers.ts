@@ -8,7 +8,7 @@ interface UseMarketsHandlersProps {
   markets: MarketData[];
   setMarkets: (markets: MarketData[]) => void;
   expandedDetails: Set<string>;
-  setExpandedDetails: (details: Set<string>) => void;
+  setExpandedDetails: React.Dispatch<React.SetStateAction<Set<string>>>;
   budgetData: { totalBudget: number };
   dispatch: any;
 }
