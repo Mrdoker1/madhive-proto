@@ -37,13 +37,23 @@ const channelNames: Record<string, string> = {
   email: 'Email'
 };
 
-// Создание простого линейного пути: от (0,0) до точки, затем горизонтально
-const createLinearPath = (pointX: number, pointY: number, chartWidth: number, chartHeight: number): string => {
-  // Начинаем от (0, chartHeight) - это соответствует reach = 0
-  // Идем до пользовательской точки
-  // Затем горизонтально до конца графика
-  return `M 0 ${chartHeight} L ${pointX} ${pointY} L ${chartWidth} ${pointY}`;
-};
+  // Создание параболического пути: от (0,0) до точки, затем горизонтально
+  const createParabolicPath = (pointX: number, pointY: number, chartWidth: number, chartHeight: number): string => {
+    // Начинаем от (0, chartHeight) - это соответствует reach = 0
+    let path = `M 0 ${chartHeight}`;
+    
+    // Создаем параболическую кривую до точки с помощью квадратичной кривой Безье
+    const controlX = pointX * 0.5; // Контрольная точка по X (в середине пути)
+    const controlY = pointY; // Контрольная точка по Y (на уровне целевой точки)
+    
+    // Квадратичная кривая Безье для параболы
+    path += ` Q ${controlX} ${controlY} ${pointX} ${pointY}`;
+    
+    // Горизонтальная линия до конца графика
+    path += ` L ${chartWidth} ${pointY}`;
+    
+    return path;
+  };
 
 // Компонент перетаскиваемой точки
 interface DraggablePointProps {
@@ -221,16 +231,6 @@ export const AllocationSection: React.FC = () => {
       return newPoints;
     });
   }, [selectedChannels, totalBudget]);
-  
-  if (channelCount === 0) {
-    return (
-      <Card p="lg" radius="md" style={{ backgroundColor: '#F8F9FA' }}>
-        <Text size="md" c="dimmed" ta="center">
-          Выберите каналы для отображения распределения бюджета
-        </Text>
-      </Card>
-    );
-  }
 
   const points = Object.values(channelPoints);
   
@@ -256,6 +256,16 @@ export const AllocationSection: React.FC = () => {
   // Используем динамические размеры
   const chartWidth = chartDimensions.width;
   const chartHeight = chartDimensions.height;
+
+  if (channelCount === 0) {
+    return (
+      <Card p="lg" radius="md" style={{ backgroundColor: '#F8F9FA' }}>
+        <Text size="md" c="dimmed" ta="center">
+          Выберите каналы для отображения распределения бюджета
+        </Text>
+      </Card>
+    );
+  }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
@@ -381,8 +391,8 @@ export const AllocationSection: React.FC = () => {
               const pointX = (point.budget / 160000) * chartWidth;
               const pointY = ((16000 - point.reach) / 16000) * chartHeight;
               
-              // Создаем линию: от (0,0) до точки, затем горизонтально
-              const pathData = createLinearPath(pointX, pointY, chartWidth, chartHeight);
+                // Создаем параболическую кривую: от (0,0) до точки, затем горизонтально
+                const pathData = createParabolicPath(pointX, pointY, chartWidth, chartHeight);
               
               return (
                 <path
