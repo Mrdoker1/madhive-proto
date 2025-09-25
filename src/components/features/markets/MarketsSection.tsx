@@ -8,6 +8,7 @@ import { useMarketsState } from './hooks/useMarketsState';
 import { useMarketsHandlers } from './hooks/useMarketsHandlers';
 import PercentageWarning from './components/PercentageWarning';
 import MainMarketsTable from './components/MainMarketsTable';
+import MarketsFilter from './components/MarketsFilter';
 
 const MarketsSection = () => {
   const linearData = useAppSelector((state) => state.campaign.linear);
@@ -19,8 +20,11 @@ const MarketsSection = () => {
     allSelected,
     someSelected,
     validation,
+    availableMarkets,
+    filteredMarketNames,
     setMarkets,
     setExpandedDetails,
+    handleMarketsFilterChange,
     budgetData,
     dispatch
   } = useMarketsState();
@@ -44,6 +48,17 @@ const MarketsSection = () => {
           </Text>
         )}
       </div>
+
+      {/* Markets Filter */}
+      {availableMarkets.length > 0 && (
+        <div style={{ marginBottom: '24px' }}>
+          <MarketsFilter
+            availableMarkets={availableMarkets}
+            selectedMarkets={filteredMarketNames}
+            onMarketsChange={handleMarketsFilterChange}
+          />
+        </div>
+      )}
 
       {/* Percentage Allocation Warning */}
       <PercentageWarning validation={validation} />

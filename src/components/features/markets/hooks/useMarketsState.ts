@@ -18,6 +18,8 @@ export const useMarketsState = () => {
   
   const [markets, setMarkets] = useState<MarketData[]>([]);
   const [expandedDetails, setExpandedDetails] = useState<Set<string>>(new Set());
+  const [availableMarkets, setAvailableMarkets] = useState<MarketData[]>([]);
+  const [filteredMarketNames, setFilteredMarketNames] = useState<string[]>([]);
 
   // Validation state
   const totalPercentage = getTotalPercentage(markets);
@@ -35,9 +37,11 @@ export const useMarketsState = () => {
   const allSelected = markets.length > 0 && markets.every(market => market.selected);
   const someSelected = markets.some(market => market.selected);
 
-  // Load markets when broadcasters change
+  // Load available markets when broadcasters change
   useEffect(() => {
     if (linearData.broadcasters.length === 0) {
+      setAvailableMarkets([]);
+      setFilteredMarketNames([]);
       setMarkets([]);
       return;
     }
@@ -50,8 +54,28 @@ export const useMarketsState = () => {
       }
     });
 
+    setAvailableMarkets(allAvailableMarkets);
+    
+    // По умолчанию показываем все доступные рынки
+    if (filteredMarketNames.length === 0) {
+      setFilteredMarketNames(allAvailableMarkets.map(market => market.name));
+    }
+  }, [linearData.broadcasters]);
+
+  // Filter markets based on selected filter
+  useEffect(() => {
+    if (availableMarkets.length === 0) {
+      setMarkets([]);
+      return;
+    }
+
+    // Фильтруем рынки по выбранным в фильтре
+    const filteredMarkets = availableMarkets.filter(market => 
+      filteredMarketNames.includes(market.name)
+    );
+
     // Проставляем статус selected на основе сохраненных данных
-    const marketsWithSelection = allAvailableMarkets.map(market => ({
+    const marketsWithSelection = filteredMarkets.map(market => ({
       ...market,
       selected: marketsData.selectedMarkets.includes(market.name)
     }));
@@ -95,7 +119,7 @@ export const useMarketsState = () => {
     });
     
     setMarkets(marketsWithPreservedData);
-  }, [linearData.broadcasters, marketsData.selectedMarkets, budgetData.totalBudget]);
+  }, [availableMarkets, filteredMarketNames, marketsData.selectedMarkets, budgetData.totalBudget]);
 
   // Auto-expand first detailed table for testing
   useEffect(() => {
@@ -105,6 +129,11 @@ export const useMarketsState = () => {
     }
   }, [selectedMarketsWithDetails.length > 0 ? selectedMarketsWithDetails[0]?.id : null]);
 
+  // Handler for markets filter change
+  const handleMarketsFilterChange = (selectedMarkets: string[]) => {
+    setFilteredMarketNames(selectedMarkets);
+  };
+
   return {
     // State
     markets,
@@ -113,10 +142,13 @@ export const useMarketsState = () => {
     allSelected,
     someSelected,
     validation,
+    availableMarkets,
+    filteredMarketNames,
     
     // Internal setters (for handlers)
     setMarkets,
     setExpandedDetails,
+    handleMarketsFilterChange,
     
     // Redux data
     budgetData,
