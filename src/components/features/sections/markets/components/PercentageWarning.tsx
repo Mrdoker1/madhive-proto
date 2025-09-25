@@ -25,12 +25,12 @@ const PercentageWarning: React.FC<PercentageWarningProps> = ({ validation }) => 
         <>
           Total budget allocation is {totalPercentage.toFixed(1)}%, which exceeds 100%. 
           Additionally, some stations exceed 100% budget allocation within their parent markets. 
-          Please adjust both main market and station percentages to resolve this issue.
+          Please adjust both market and station percentages to resolve this issue.
         </>
       ) : totalPercentage > 100 ? (
         <>
           Total budget allocation is {totalPercentage.toFixed(1)}%, which exceeds 100%. 
-          Please reduce the main market percentages to ensure they total 100% or less.
+          Please reduce market percentages to ensure they total 100% or less.
         </>
       ) : (
         <>
