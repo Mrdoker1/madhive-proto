@@ -420,7 +420,7 @@ export const AllocationSection: React.FC = () => {
                   d={pathData}
                   fill="none"
                   stroke={point.color}
-                  strokeWidth="3"
+                  strokeWidth="4"
                   strokeOpacity="0.8"
                   style={{ transform: 'translate(60px, 20px)' }}
                 />
