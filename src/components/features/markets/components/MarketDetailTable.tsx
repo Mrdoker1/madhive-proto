@@ -10,6 +10,7 @@ interface MarketDetailTableProps {
   isExpanded: boolean;
   onToggleExpand: () => void;
   onDetailSelect: (detailId: string, checked: boolean) => void;
+  onDetailSelectAll: (checked: boolean) => void;
   onDetailPercentageChange: (detailId: string, value: string) => void;
 }
 
@@ -18,6 +19,7 @@ const MarketDetailTable: React.FC<MarketDetailTableProps> = ({
   isExpanded, 
   onToggleExpand, 
   onDetailSelect, 
+  onDetailSelectAll,
   onDetailPercentageChange 
 }) => {
   const totalDetailBudget = market.details.reduce((sum, detail) => sum + detail.budget, 0);
@@ -26,9 +28,8 @@ const MarketDetailTable: React.FC<MarketDetailTableProps> = ({
   const someDetailsSelected = market.details.some(detail => detail.selected);
 
   const handleSelectAllDetails = (checked: boolean) => {
-    market.details.forEach(detail => {
-      onDetailSelect(detail.id, checked);
-    });
+    console.log(`Select All clicked for ${market.name}: ${checked}`);
+    onDetailSelectAll(checked);
   };
 
   const handleToggleClick = (e: React.MouseEvent) => {
@@ -60,10 +61,10 @@ const MarketDetailTable: React.FC<MarketDetailTableProps> = ({
           <Text fw={500} size="sm">{market.name} ({market.details.length})</Text>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
-          <Text size="sm" c="dimmed">
+          <Text size="xs" c="dimmed">
             Total Budget: ${totalDetailBudget.toLocaleString('en-US', { maximumFractionDigits: 0 })}
           </Text>
-          <Text size="sm" c="dimmed">
+          <Text size="xs" c="dimmed">
             Total %: {totalDetailPercentage.toFixed(1)}%
           </Text>
         </div>

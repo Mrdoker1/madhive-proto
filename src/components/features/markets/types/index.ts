@@ -36,6 +36,7 @@ export interface MarketHandlers {
   handlePercentageChange: (marketId: string, value: string) => void;
   handleDetailSelect: (marketId: string, detailId: string, checked: boolean) => void;
   handleDetailPercentageChange: (marketId: string, detailId: string, value: string) => void;
+  handleDetailSelectAll: (marketId: string, checked: boolean) => void;
   handleSelectAll: (checked: boolean) => void;
   handleToggleDetailExpand: (marketId: string) => void;
 }

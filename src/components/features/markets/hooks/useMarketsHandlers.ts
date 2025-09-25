@@ -72,15 +72,21 @@ export const useMarketsHandlers = ({
         
         // Проверяем, остались ли выбранные подстанции
         const hasSelectedDetails = updatedDetails.some(detail => detail.selected);
+        console.log(`Market ${market.name}: hasSelectedDetails = ${hasSelectedDetails}`, updatedDetails.map(d => ({ name: d.name, selected: d.selected })));
         
         // Если нет выбранных подстанций, снимаем выделение с основного рынка
-        const updatedMarket = { 
+        let updatedMarket = { 
           ...market, 
-          details: updatedDetails,
-          selected: hasSelectedDetails ? market.selected : false,
-          percentage: hasSelectedDetails ? market.percentage : 0,
-          budget: hasSelectedDetails ? market.budget : 0
+          details: updatedDetails
         };
+        
+        // Если нет выбранных подрынков, снимаем выделение с основного рынка
+        if (!hasSelectedDetails) {
+          console.log(`Deselecting main market: ${market.name}`);
+          updatedMarket.selected = false;
+          updatedMarket.percentage = 0;
+          updatedMarket.budget = 0;
+        }
         
         return updatedMarket;
       }
@@ -219,11 +225,56 @@ export const useMarketsHandlers = ({
     dispatch(updateMarketsData({ selectedMarkets: selectedMarketNames }));
   }, [markets, setMarkets, dispatch]);
 
+  const handleDetailSelectAll = useCallback((marketId: string, checked: boolean) => {
+    const updatedMarkets = markets.map(market => {
+      if (market.id === marketId) {
+        // Обновляем все подрынки одновременно
+        const updatedDetails = market.details.map(detail => ({
+          ...detail,
+          selected: checked,
+          percentage: checked ? detail.percentage : 0,
+          budget: checked ? detail.budget : 0
+        }));
+        
+        // Проверяем, остались ли выбранные подстанции
+        const hasSelectedDetails = updatedDetails.some(detail => detail.selected);
+        console.log(`Market ${market.name}: Select All ${checked}, hasSelectedDetails = ${hasSelectedDetails}`);
+        
+        // Если нет выбранных подрынков, снимаем выделение с основного рынка
+        let updatedMarket = { 
+          ...market, 
+          details: updatedDetails
+        };
+        
+        if (!hasSelectedDetails) {
+          console.log(`Deselecting main market via Select All: ${market.name}`);
+          updatedMarket.selected = false;
+          updatedMarket.percentage = 0;
+          updatedMarket.budget = 0;
+        }
+        
+        return updatedMarket;
+      }
+      return market;
+    });
+    
+    // Обновляем selectedMarkets в Redux
+    const selectedMarketNames = updatedMarkets
+      .filter(market => market.selected)
+      .map(market => market.name);
+    
+    console.log('Updated selectedMarketNames via Select All:', selectedMarketNames);
+    
+    setMarkets(updatedMarkets);
+    dispatch(updateMarketsData({ selectedMarkets: selectedMarketNames }));
+  }, [markets, setMarkets, dispatch]);
+
   return {
     handleMarketSelect,
     handlePercentageChange,
     handleDetailSelect,
     handleDetailPercentageChange,
+    handleDetailSelectAll,
     handleSelectAll,
     handleToggleDetailExpand
   };

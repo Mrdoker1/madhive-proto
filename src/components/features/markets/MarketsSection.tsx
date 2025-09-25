@@ -64,6 +64,7 @@ const MarketsSection = () => {
           isExpanded={expandedDetails.has(market.id)}
           onToggleExpand={() => handlers.handleToggleDetailExpand(market.id)}
           onDetailSelect={(detailId, checked) => handlers.handleDetailSelect(market.id, detailId, checked)}
+          onDetailSelectAll={(checked) => handlers.handleDetailSelectAll(market.id, checked)}
           onDetailPercentageChange={(detailId, value) => handlers.handleDetailPercentageChange(market.id, detailId, value)}
         />
       ))}
