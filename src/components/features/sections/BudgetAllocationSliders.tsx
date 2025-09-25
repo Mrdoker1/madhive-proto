@@ -123,9 +123,8 @@ const SimpleSlider: React.FC<SimpleSliderProps> = ({ value, max, onChange }) => 
       style={{ 
         position: 'relative', 
         height: '30px',
-        marginBottom: '8px',
+        marginBottom: '12px',
         cursor: 'pointer',
-        marginTop: '6px' // Сдвигаем слайдер ниже
       }}
     >
       {/* Фон */}
