@@ -274,8 +274,8 @@ export const AllocationSection: React.FC = () => {
   if (channelCount === 0) {
     return (
       <div style={{ padding: '24px', textAlign: 'center' }}>
-        <Text size="md" c="dimmed">
-          Выберите каналы для отображения распределения бюджета
+        <Text size="14px" c="dimmed">
+        Select channels to display budget distribution
         </Text>
       </div>
     );
