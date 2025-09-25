@@ -24,7 +24,7 @@ const MarketsFilter: React.FC<MarketsFilterProps> = ({
   return (
     <MultiSelect
       label="Available Markets"
-      placeholder="Select markets to display..."
+      placeholder="Select markets"
       data={marketOptions}
       value={selectedMarkets}
       onChange={onMarketsChange}
