@@ -137,19 +137,14 @@ const theme = createTheme({
             borderRadius: '4px'
           },
           dropdown: {
-            backgroundColor: '#FFFFFF',
+            backgroundColor: '#FFFFFF'
           },
           option: {
             color: '#374151',
-            fontSize: '14px',
-            padding: '4px',
-            '&:hover': {
-              backgroundColor: '#D4C5D9'
-            }
+            fontSize: '14px'
           },
           pill: {
             backgroundColor: '#EBE6EC',
-            color: '#374151',
             borderRadius: '4px',
             fontSize: '12px'
           }
