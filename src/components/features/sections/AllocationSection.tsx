@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useCallback, useRef, useEffect } from 'react';
-import { Card, Text, Group } from '@mantine/core';
+import { Text, Group } from '@mantine/core';
 import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
 import { updateChannelsData } from '@/store/slices/campaignSlice';
 
@@ -60,6 +60,7 @@ interface DraggablePointProps {
   point: ChannelPoint;
   chartWidth: number;
   chartHeight: number;
+  totalBudget: number;
   onPointChange: (channelId: string, newBudget: number, newReach: number) => void;
 }
 
@@ -67,12 +68,13 @@ const DraggablePoint: React.FC<DraggablePointProps> = ({
   point,
   chartWidth,
   chartHeight,
+  totalBudget,
   onPointChange
 }) => {
   const [isDragging, setIsDragging] = useState(false);
   const svgRef = useRef<SVGCircleElement>(null);
   
-  const maxBudget = 160000;
+  const maxBudget = totalBudget || 390250; // Используем реальный бюджет
   const maxReach = 16000;
   const offsetX = 60; // Отступ для Y-axis
   const offsetY = 20; // Отступ сверху
@@ -143,11 +145,8 @@ const DraggablePoint: React.FC<DraggablePointProps> = ({
       cy={svgY}
       r="8"
       fill={point.color}
-      stroke="#ffffff"
-      strokeWidth="2"
       style={{
         cursor: isDragging ? 'grabbing' : 'grab',
-        filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))',
         transition: isDragging ? 'none' : 'all 0.1s ease'
       }}
       onMouseDown={handleMouseDown}
@@ -168,16 +167,23 @@ export const AllocationSection: React.FC = () => {
   // Состояние для точек каналов (budget и reach)
   const [channelPoints, setChannelPoints] = useState<Record<string, ChannelPoint>>(() => {
     const defaultBudget = totalBudget || 390250;
-    const budgetPerChannel = defaultBudget / Math.max(channelCount, 1);
     const initialPoints: Record<string, ChannelPoint> = {};
     
-    selectedChannels.forEach(channelId => {
+    selectedChannels.forEach((channelId, index) => {
+      // Фиксированная позиция на 50% от бюджета
+      const fixedBudget = defaultBudget * 0.5;
+      
+      // Фиксированный reach: каждый канал чуть выше предыдущего
+      const baseReach = 6000; // Базовый reach
+      const reachIncrement = 1000; // Увеличение для каждого следующего канала
+      const fixedReach = baseReach + (index * reachIncrement);
+      
       initialPoints[channelId] = {
         id: channelId,
         name: channelNames[channelId] || channelId,
         color: channelColors[channelId] || '#6B7280',
-        budget: budgetPerChannel,
-        reach: 8000 // Начальный reach
+        budget: fixedBudget,
+        reach: Math.min(fixedReach, 15000) // Максимум 15K из 16K
       };
     });
     
@@ -204,26 +210,34 @@ export const AllocationSection: React.FC = () => {
     return () => window.removeEventListener('resize', updateDimensions);
   }, []);
 
-  // Обновляем точки при изменении каналов
+  // Обновляем точки при изменении каналов или бюджета
   useEffect(() => {
     const defaultBudget = totalBudget || 390250;
-    const budgetPerChannel = defaultBudget / Math.max(channelCount, 1);
     
     setChannelPoints(prevPoints => {
       const newPoints: Record<string, ChannelPoint> = {};
       
-      selectedChannels.forEach(channelId => {
+      selectedChannels.forEach((channelId, index) => {
         if (prevPoints[channelId]) {
-          // Сохраняем существующую точку
-          newPoints[channelId] = prevPoints[channelId];
+          // Обновляем существующую точку - устанавливаем на 50% от нового бюджета
+          newPoints[channelId] = {
+            ...prevPoints[channelId],
+            budget: defaultBudget * 0.5
+          };
         } else {
-          // Создаем новую точку
+          // Создаем новую точку с фиксированными позициями
+          const fixedBudget = defaultBudget * 0.5;
+          
+          const baseReach = 6000;
+          const reachIncrement = 1000;
+          const fixedReach = baseReach + (index * reachIncrement);
+          
           newPoints[channelId] = {
             id: channelId,
             name: channelNames[channelId] || channelId,
             color: channelColors[channelId] || '#6B7280',
-            budget: budgetPerChannel,
-            reach: 8000
+            budget: fixedBudget,
+            reach: Math.min(fixedReach, 15000)
           };
         }
       });
@@ -259,20 +273,20 @@ export const AllocationSection: React.FC = () => {
 
   if (channelCount === 0) {
     return (
-      <Card p="lg" radius="md" style={{ backgroundColor: '#F8F9FA' }}>
-        <Text size="md" c="dimmed" ta="center">
+      <div style={{ padding: '24px', textAlign: 'center' }}>
+        <Text size="md" c="dimmed">
           Выберите каналы для отображения распределения бюджета
         </Text>
-      </Card>
+      </div>
     );
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+    <div style={{ display: 'flex', flexDirection: 'column' }}>
       {/* Header with Budget and Legend */}
       <div>
         <Group justify="space-between" align="center" mb="md">
-          <Text size="xl" fw={600} c="#374151">
+          <Text size="16px" fw={600} c="#374151">
             Budget: ${totalAllocatedBudget.toLocaleString()} in {channelCount} Channels
           </Text>
           <Group gap="lg">
@@ -286,7 +300,7 @@ export const AllocationSection: React.FC = () => {
                     backgroundColor: point.color
                   }}
                 />
-                <Text size="sm" fw={500}>{point.name}</Text>
+                <Text size="12px" fw={500}>{point.name}</Text>
               </Group>
             ))}
           </Group>
@@ -296,9 +310,7 @@ export const AllocationSection: React.FC = () => {
         <div style={{ 
           display: 'flex', 
           height: '32px', 
-          borderRadius: '6px', 
-          overflow: 'hidden',
-          border: '1px solid #E5E7EB'
+          overflow: 'hidden'
         }}>
           {allocations.map(allocation => (
             <div
@@ -323,7 +335,7 @@ export const AllocationSection: React.FC = () => {
       </div>
 
       {/* Interactive Chart */}
-      <Card p="lg" radius="md" style={{ border: '1px solid #E5E7EB' }}>
+      <div>
         <div ref={chartContainerRef} style={{ width: '100%', height: '400px', position: 'relative' }}>
           <svg width="100%" height="350" style={{ overflow: 'visible' }}>
             {/* Grid lines */}
@@ -363,32 +375,40 @@ export const AllocationSection: React.FC = () => {
             ))}
             
             {/* X Axis labels */}
-            {[0, 40, 80, 120, 160].map((value, index) => (
-              <g key={value}>
-                <text 
-                  x={60 + (index * chartWidth / 4)} 
-                  y="340" 
-                  textAnchor="middle"
-                  fontSize="12" 
-                  fill="#6B7280"
-                >
-                  {value}K
-                </text>
-                <line 
-                  x1={60 + (index * chartWidth / 4)} 
-                  y1="320" 
-                  x2={60 + (index * chartWidth / 4)} 
-                  y2="323" 
-                  stroke="#E5E7EB" 
-                  strokeWidth="1"
-                />
-              </g>
-            ))}
+            {(() => {
+              const maxBudget = totalBudget || 390250;
+              const steps = [0, 0.25, 0.5, 0.75, 1.0];
+              return steps.map((step, index) => {
+                const value = Math.round((maxBudget * step) / 1000);
+                return (
+                  <g key={step}>
+                    <text 
+                      x={60 + (index * chartWidth / 4)} 
+                      y="340" 
+                      textAnchor="middle"
+                      fontSize="12" 
+                      fill="#6B7280"
+                    >
+                      {value}K
+                    </text>
+                    <line 
+                      x1={60 + (index * chartWidth / 4)} 
+                      y1="320" 
+                      x2={60 + (index * chartWidth / 4)} 
+                      y2="323" 
+                      stroke="#E5E7EB" 
+                      strokeWidth="1"
+                    />
+                  </g>
+                );
+              });
+            })()}
             
             {/* Simple linear graphs through points */}
             {points.map(point => {
               // Позиция точки пользователя на графике
-              const pointX = (point.budget / 160000) * chartWidth;
+              const maxBudget = totalBudget || 390250; // Используем реальный бюджет
+              const pointX = maxBudget > 0 ? (point.budget / maxBudget) * chartWidth : 0;
               const pointY = ((16000 - point.reach) / 16000) * chartHeight;
               
                 // Создаем параболическую кривую: от (0,0) до точки, затем горизонтально
@@ -414,6 +434,7 @@ export const AllocationSection: React.FC = () => {
                 point={point}
                 chartWidth={chartWidth}
                 chartHeight={chartHeight}
+                totalBudget={totalBudget || 390250}
                 onPointChange={handlePointChange}
               />
             ))}
@@ -421,8 +442,8 @@ export const AllocationSection: React.FC = () => {
           
           {/* Axis labels */}
           <Text 
-            size="sm" 
-            c="dimmed" 
+            size="12px" 
+            c="black" 
             ta="center" 
             style={{ 
               position: 'absolute',
@@ -434,12 +455,12 @@ export const AllocationSection: React.FC = () => {
             Budget ($)
           </Text>
           <Text 
-            size="sm" 
-            c="dimmed" 
+            size="12px" 
+            c="black" 
             style={{ 
               position: 'absolute', 
-              left: '20px', 
-              top: '50%', 
+              left: '10px', 
+              top: '170px', 
               transform: 'rotate(-90deg) translateY(-50%)',
               transformOrigin: 'center'
             }}
@@ -447,7 +468,7 @@ export const AllocationSection: React.FC = () => {
             Reach
           </Text>
         </div>
-      </Card>
+      </div>
     </div>
   );
 };
