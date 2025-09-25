@@ -7,6 +7,7 @@ import NavigationAnchors, { AnchorItem } from "@/components/ui/NavigationAnchors
 import SectionWrapper from "@/components/ui/SectionWrapper";
 import { BreadcrumbStep } from "@/components/ui/Breadcrumbs";
 import NextButton from "@/components/ui/NextButton";
+import SelectChannelsSection from "@/components/features/sections/SelectChannelsSection";
 
 export default function OmnichannelChannelsPage() {
   const router = useRouter();
@@ -15,7 +16,7 @@ export default function OmnichannelChannelsPage() {
   const breadcrumbSteps: BreadcrumbStep[] = [
     { 
       id: 'omnichannel-campaign', 
-      label: 'Omnichannel Campaign', 
+      label: 'New Campaign', 
       status: 'completed', 
       isSection: true 
     },
@@ -94,9 +95,12 @@ export default function OmnichannelChannelsPage() {
                 id="select-channels" 
                 title="Select Channels"
               >
-                <Text size="sm" c="dimmed">
-                  Choose which advertising channels to include in your omnichannel campaign.
-                </Text>
+                <SelectChannelsSection 
+                  onSelectionChange={(channels) => {
+                    console.log('Selected channels:', channels);
+                  }}
+                  initialSelection={['linear_tv']}
+                />
               </SectionWrapper>
 
               {/* Allocation Section */}

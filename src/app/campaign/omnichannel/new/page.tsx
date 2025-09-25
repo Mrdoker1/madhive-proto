@@ -24,7 +24,7 @@ export default function OmnichannelNewCampaignPage() {
   const breadcrumbSteps: BreadcrumbStep[] = [
     { 
       id: 'omnichannel-campaign', 
-      label: 'Omnichannel Campaign', 
+      label: 'New Campaign', 
       status: 'completed', 
       isSection: true 
     },
