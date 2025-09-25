@@ -49,7 +49,7 @@ export default function OmnichannelSummaryPage() {
     <>
       <PageLayout 
         breadcrumbs={breadcrumbSteps} 
-        title="Campaign Summary"
+        title="Summary"
         showRightSidebar={true}
         footerContent={
           <NextButton 

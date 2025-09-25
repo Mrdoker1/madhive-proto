@@ -64,7 +64,7 @@ export default function OmnichannelDetailsPage() {
     <>
       <PageLayout 
         breadcrumbs={breadcrumbSteps} 
-        title="Omnichannel Details"
+        title="Channel Details(4)"
         showRightSidebar={true}
         footerContent={
           <NextButton 
