@@ -17,25 +17,25 @@ const PercentageWarning: React.FC<PercentageWarningProps> = ({ validation }) => 
   return (
     <Alert 
       icon={<IconAlertTriangle size={16} />}
-      title="Percentage Allocation Warning"
+      title="Budget Allocation Warning"
       color="orange"
       style={{ marginBottom: '20px' }}
     >
       {totalPercentage > 100 && hasSubMarketOverallocation ? (
         <>
-          Total percentage allocation is {totalPercentage.toFixed(1)}%, which exceeds 100%. 
-          Additionally, some sub-markets exceed 100% allocation within their parent markets. 
-          Please adjust the percentages accordingly.
+          Total budget allocation is {totalPercentage.toFixed(1)}%, which exceeds 100%. 
+          Additionally, some stations exceed 100% budget allocation within their parent markets. 
+          Please adjust both main market and station percentages to resolve this issue.
         </>
       ) : totalPercentage > 100 ? (
         <>
-          Total percentage allocation is {totalPercentage.toFixed(1)}%, which exceeds 100%. 
-          Please adjust the percentages to ensure they do not exceed 100% in total.
+          Total budget allocation is {totalPercentage.toFixed(1)}%, which exceeds 100%. 
+          Please reduce the main market percentages to ensure they total 100% or less.
         </>
       ) : (
         <>
-          Some sub-markets exceed 100% allocation within their parent markets. 
-          Please adjust the sub-market percentages to ensure they do not exceed 100% per market.
+          Some stations exceed 100% budget allocation within their parent markets. 
+          Please adjust the station percentages to ensure they do not exceed 100% per market.
         </>
       )}
     </Alert>
