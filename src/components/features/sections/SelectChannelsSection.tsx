@@ -1,9 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button, Grid, Text, Group } from '@mantine/core';
 import { IconCheck } from '@tabler/icons-react';
 import Image from 'next/image';
+import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
+import { updateChannelsData } from '@/store/slices/campaignSlice';
 
 interface Channel {
   id: string;
@@ -27,12 +29,18 @@ interface SelectChannelsSectionProps {
 }
 
 export const SelectChannelsSection: React.FC<SelectChannelsSectionProps> = ({ 
-  onSelectionChange,
-  initialSelection = []
+  onSelectionChange
 }) => {
+  const dispatch = useAppDispatch();
+  const channelsData = useAppSelector((state) => state.campaign.channels);
   const [selectedChannels, setSelectedChannels] = useState<Set<string>>(
-    new Set(initialSelection)
+    new Set(channelsData.selectedChannels)
   );
+
+  // Синхронизируем локальное состояние с Redux при изменении store
+  useEffect(() => {
+    setSelectedChannels(new Set(channelsData.selectedChannels));
+  }, [channelsData.selectedChannels]);
 
   const handleChannelToggle = (channelId: string) => {
     const newSelection = new Set(selectedChannels);
@@ -41,18 +49,29 @@ export const SelectChannelsSection: React.FC<SelectChannelsSectionProps> = ({
     } else {
       newSelection.add(channelId);
     }
+    const newChannelsList = Array.from(newSelection);
     setSelectedChannels(newSelection);
-    onSelectionChange?.(Array.from(newSelection));
+    
+    // Обновляем Redux store
+    dispatch(updateChannelsData({ selectedChannels: newChannelsList }));
+    onSelectionChange?.(newChannelsList);
   };
 
   const handleSelectAll = () => {
-    const allChannelIds = new Set(channels.map(channel => channel.id));
-    setSelectedChannels(allChannelIds);
-    onSelectionChange?.(Array.from(allChannelIds));
+    const allChannelIds = channels.map(channel => channel.id);
+    const allChannelsSet = new Set(allChannelIds);
+    setSelectedChannels(allChannelsSet);
+    
+    // Обновляем Redux store
+    dispatch(updateChannelsData({ selectedChannels: allChannelIds }));
+    onSelectionChange?.(allChannelIds);
   };
 
   const handleReset = () => {
     setSelectedChannels(new Set());
+    
+    // Обновляем Redux store
+    dispatch(updateChannelsData({ selectedChannels: [] }));
     onSelectionChange?.([]);
   };
 

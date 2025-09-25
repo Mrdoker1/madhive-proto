@@ -99,7 +99,6 @@ export default function OmnichannelChannelsPage() {
                   onSelectionChange={(channels) => {
                     console.log('Selected channels:', channels);
                   }}
-                  initialSelection={['linear_tv']}
                 />
               </SectionWrapper>
 

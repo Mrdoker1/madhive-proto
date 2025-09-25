@@ -57,6 +57,10 @@ export interface CampaignDaypartsData {
   selectedSlots: Record<string, Record<number, boolean>>;
 }
 
+export interface CampaignChannelsData {
+  selectedChannels: string[];
+}
+
 export interface CampaignState {
   general: CampaignGeneralData;
   budget: CampaignBudgetData;
@@ -66,6 +70,7 @@ export interface CampaignState {
   audience: CampaignAudienceData;
   markets: CampaignMarketsData;
   dayparts: CampaignDaypartsData;
+  channels: CampaignChannelsData;
   
   // Вычисляемые поля
   estimations: {
@@ -122,6 +127,9 @@ const initialState: CampaignState = {
   dayparts: {
     selectedSlots: {}
   },
+  channels: {
+    selectedChannels: ['linear_tv']
+  },
   estimations: {
     budgetEstimation: 0,
     audienceEstimation: 0,
@@ -173,6 +181,11 @@ const campaignSlice = createSlice({
       Object.assign(state.dayparts, action.payload);
     },
 
+    // Channels Data Actions
+    updateChannelsData: (state, action: PayloadAction<Partial<CampaignChannelsData>>) => {
+      state.channels = { ...state.channels, ...action.payload };
+    },
+
     // Estimations Actions
     updateEstimations: (state, action: PayloadAction<Partial<CampaignState['estimations']>>) => {
       state.estimations = { ...state.estimations, ...action.payload };
@@ -196,6 +209,7 @@ export const {
   updateAudienceData,
   updateMarketsData,
   updateDaypartsData,
+  updateChannelsData,
   updateEstimations,
   resetCampaign,
   setCampaignData
