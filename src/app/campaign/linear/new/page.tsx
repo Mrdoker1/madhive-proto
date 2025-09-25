@@ -56,7 +56,7 @@ export default function NewCampaignPage() {
   const handleNextClick = () => {
     console.log('Переход к следующему шагу - Channel Details');
     // Переходим на страницу channel-details
-    router.push('/channel-details');
+    router.push('/campaign/linear/details');
   };
 
   const handleTotalBudgetChange = (budget: number) => {

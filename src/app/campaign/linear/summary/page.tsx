@@ -43,7 +43,7 @@ export default function SummaryPage() {
 
   const handleBackClick = () => {
     console.log('Возврат к предыдущему шагу - Channel Details');
-    router.push('/channel-details');
+    router.push('/campaign/linear/details');
   };
 
   return (

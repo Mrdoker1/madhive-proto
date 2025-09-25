@@ -1,68 +1,67 @@
 'use client';
 
-import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { Text } from '@mantine/core';
 import PageLayout from "@/components/layout/PageLayout";
 import NavigationAnchors, { AnchorItem } from "@/components/ui/NavigationAnchors";
 import SectionWrapper from "@/components/ui/SectionWrapper";
 import { BreadcrumbStep } from "@/components/ui/Breadcrumbs";
 import NextButton from "@/components/ui/NextButton";
-import LinearDetailsSection from "@/components/features/sections/LinearDetailsSection";
-import AudiencesSection from "@/components/features/sections/AudiencesSection";
-import MarketsSection from "@/components/features/sections/MarketsSection";
-import DaypartsSection from "@/components/features/sections/DaypartsSection";
 
-export default function ChannelDetailsPage() {
+export default function OmnichannelChannelsPage() {
   const router = useRouter();
-  // Бредкрамбсы для страницы Channel Details - обновленные статусы
+
+  // Бредкрамбсы для страницы Channels
   const breadcrumbSteps: BreadcrumbStep[] = [
     { 
-      id: 'new-campaign', 
-      label: 'New Campaign', 
+      id: 'omnichannel-campaign', 
+      label: 'Omnichannel Campaign', 
       status: 'completed', 
       isSection: true 
     },
     { 
       id: 'general', 
       label: 'General', 
-      status: 'completed' // выполнен
+      status: 'completed'
+    },
+    { 
+      id: 'channels', 
+      label: 'Channels', 
+      status: 'current'
     },
     { 
       id: 'channel-details', 
       label: 'Channel Details', 
-      status: 'current' // текущий шаг
+      status: 'pending'
     },
     { 
       id: 'summary', 
       label: 'Summary', 
-      status: 'pending' // ожидает
+      status: 'pending'
     }
   ];
 
   // Якоря для навигации по странице
   const anchorItems: AnchorItem[] = [
-    { id: 'linear-details', label: 'Linear Details', anchor: '#linear-details' },
-    { id: 'audiences', label: 'Audiences', anchor: '#audiences' },
-    { id: 'markets', label: 'Markets', anchor: '#markets' },
-    { id: 'dayparts', label: 'Dayparts', anchor: '#dayparts' }
+    { id: 'select-channels', label: 'Select Channels', anchor: '#select-channels' },
+    { id: 'allocation', label: 'Allocation', anchor: '#allocation' }
   ];
 
   const handleNextClick = () => {
-    console.log('Переход к следующему шагу - Summary');
-    // Переходим на страницу summary
-    router.push('/summary');
+    console.log('Переход к следующему шагу - Channel Details');
+    router.push('/campaign/omnichannel/details');
   };
 
   const handleBackClick = () => {
     console.log('Возврат к предыдущему шагу - General');
-    router.push('/new-campaign');
+    router.push('/campaign/omnichannel/new');
   };
 
   return (
     <>
       <PageLayout 
         breadcrumbs={breadcrumbSteps} 
-        title="Channel Details"
+        title="Channels"
         showRightSidebar={true}
         footerContent={
           <NextButton 
@@ -77,7 +76,6 @@ export default function ChannelDetailsPage() {
       >
         <div style={{ backgroundColor: 'var(--page-background)', paddingTop: '32px', paddingBottom: '96px', paddingLeft: '32px', paddingRight: '32px', minHeight: '100%' }}>
           <div style={{ display: 'flex', justifyContent: 'center', margin: '0 auto' }}>
-            {/* Левая колонка с навигацией */}
             <div className="w-64" style={{ paddingRight: '20px', position: 'sticky', top: '32px', height: 'fit-content' }}>
               <NavigationAnchors 
                 items={anchorItems}
@@ -91,36 +89,24 @@ export default function ChannelDetailsPage() {
             <div style={{ paddingLeft: '20px', width: '100%', maxWidth: '800px' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '40px' }}>
               
-              {/* Linear Details Section */}
+              {/* Select Channels Section */}
               <SectionWrapper 
-                id="linear-details" 
-                title="Linear Details"
+                id="select-channels" 
+                title="Select Channels"
               >
-                <LinearDetailsSection />
+                <Text size="sm" c="dimmed">
+                  Choose which advertising channels to include in your omnichannel campaign.
+                </Text>
               </SectionWrapper>
 
-              {/* Audiences Section */}
+              {/* Allocation Section */}
               <SectionWrapper 
-                id="audiences" 
-                title="Audiences"
+                id="allocation" 
+                title="Allocation"
               >
-                <AudiencesSection />
-              </SectionWrapper>
-
-              {/* Markets Section */}
-              <SectionWrapper 
-                id="markets" 
-                title="Markets"
-              >
-                <MarketsSection />
-              </SectionWrapper>
-
-              {/* Dayparts Section */}
-              <SectionWrapper 
-                id="dayparts" 
-                title="Dayparts"
-              >
-                <DaypartsSection />
+                <Text size="sm" c="dimmed">
+                  Allocate budget and resources across selected channels.
+                </Text>
               </SectionWrapper>
               
               </div>
