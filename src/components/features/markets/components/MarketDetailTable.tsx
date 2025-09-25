@@ -3,27 +3,7 @@
 import React from 'react';
 import { Table, TableTbody, TableTr, TableTd, TableTh, Checkbox, TextInput, Text, Collapse } from '@mantine/core';
 import { IconChevronDown, IconChevronRight } from '@tabler/icons-react';
-
-interface MarketDetailData {
-  id: string;
-  name: string;
-  percentage: number;
-  budget: number;
-  impression: string;
-  cpm: string;
-  selected: boolean;
-}
-
-interface MarketData {
-  id: string;
-  name: string;
-  percentage: number;
-  budget: number;
-  impression: string;
-  cpm: string;
-  selected: boolean;
-  details: MarketDetailData[];
-}
+import type { MarketData } from '../types';
 
 interface MarketDetailTableProps {
   market: MarketData;
