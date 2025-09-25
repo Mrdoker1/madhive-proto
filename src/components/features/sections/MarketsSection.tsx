@@ -64,10 +64,18 @@ const MarketsSection = () => {
       if (market.id === marketId) {
         // Пересчитываем бюджет на основе нового процента
         const budget = (budgetData.totalBudget * numericValue) / 100;
+        
+        // Пересчитываем бюджеты подрынков на основе нового бюджета основного рынка
+        const updatedDetails = market.details.map(detail => ({
+          ...detail,
+          budget: (budget * detail.percentage) / 100
+        }));
+        
         return {
           ...market,
           percentage: numericValue,
-          budget: budget
+          budget: budget,
+          details: updatedDetails
         };
       }
       return market;
@@ -76,30 +84,38 @@ const MarketsSection = () => {
     setMarkets(updatedMarkets);
   };
 
-  // Функция для расчета общего процента выбранных рынков и подстанций
+  // Функция для расчета общего процента выбранных рынков
   const getTotalPercentage = () => {
     let total = 0;
     
     markets.forEach(market => {
       // Добавляем процент основного рынка, если он выбран
+      // Подрынки являются частью основного рынка, поэтому их проценты не суммируются с основным
       if (market.selected) {
         total += market.percentage;
       }
-      
-      // Добавляем проценты выбранных подстанций
-      market.details.forEach(detail => {
-        if (detail.selected) {
-          total += detail.percentage;
-        }
-      });
     });
     
     return total;
   };
 
-  // Проверяем, превышает ли общий процент 100%
+  // Функция для проверки превышения процентов в подрынках
+  const checkSubMarketOverallocation = () => {
+    return markets.some(market => {
+      if (market.selected && market.details.length > 0) {
+        const subMarketTotal = market.details
+          .filter(detail => detail.selected)
+          .reduce((sum, detail) => sum + detail.percentage, 0);
+        return subMarketTotal > 100;
+      }
+      return false;
+    });
+  };
+
+  // Проверяем, превышает ли общий процент 100% или есть превышение в подрынках
   const totalPercentage = getTotalPercentage();
-  const isOverHundredPercent = totalPercentage > 100;
+  const hasSubMarketOverallocation = checkSubMarketOverallocation();
+  const isOverHundredPercent = totalPercentage > 100 || hasSubMarketOverallocation;
 
   // Загружаем рынки при изменении выбранных broadcasters
   useEffect(() => {
@@ -134,8 +150,8 @@ const MarketsSection = () => {
         const preservedDetails = market.details.map(detail => {
           const existingDetail = existingMarket.details.find(d => d.id === detail.id);
           if (existingDetail) {
-            // Пересчитываем бюджет для подстанции
-            const detailBudget = (budgetData.totalBudget * existingDetail.percentage) / 100;
+            // Пересчитываем бюджет для подстанции от бюджета основного рынка
+            const detailBudget = (budget * existingDetail.percentage) / 100;
             return {
               ...detail,
               selected: existingDetail.selected,
@@ -217,13 +233,21 @@ const MarketsSection = () => {
             budget: 0
           }));
         } else {
-          // При выделении основного рынка выбираем все подстанции
-          newMarket.details = newMarket.details.map(detail => ({
-            ...detail,
-            selected: true,
-            percentage: 0, // Пользователь сам введет проценты
-            budget: 0
-          }));
+          // При выделении основного рынка выбираем все подстанции с равномерным распределением
+          const detailsCount = newMarket.details.length;
+          const percentagePerDetail = detailsCount > 0 ? 100 / detailsCount : 0;
+          
+          newMarket.details = newMarket.details.map(detail => {
+            const percentage = Math.round(percentagePerDetail * 100) / 100; // Округляем до 2 знаков
+            const budget = (newMarket.budget * percentage) / 100; // Рассчитываем бюджет от основного рынка
+            
+            return {
+              ...detail,
+              selected: true,
+              percentage: percentage,
+              budget: budget
+            };
+          });
         }
         
         return newMarket;
@@ -296,8 +320,8 @@ const MarketsSection = () => {
       if (market.id === marketId) {
         const updatedDetails = market.details.map(detail => {
           if (detail.id === detailId) {
-            // Пересчитываем бюджет на основе нового процента
-            const budget = (budgetData.totalBudget * numericValue) / 100;
+            // Пересчитываем бюджет на основе нового процента от бюджета основного рынка
+            const budget = (market.budget * numericValue) / 100;
             return {
               ...detail,
               percentage: numericValue,
@@ -370,8 +394,23 @@ const MarketsSection = () => {
           color="orange"
           style={{ marginBottom: '20px' }}
         >
-          Total percentage allocation is {totalPercentage.toFixed(1)}%, which exceeds 100%. 
-          Please adjust the percentages to ensure they do not exceed 100% in total.
+          {totalPercentage > 100 && hasSubMarketOverallocation ? (
+            <>
+              Total percentage allocation is {totalPercentage.toFixed(1)}%, which exceeds 100%. 
+              Additionally, some sub-markets exceed 100% allocation within their parent markets. 
+              Please adjust the percentages accordingly.
+            </>
+          ) : totalPercentage > 100 ? (
+            <>
+              Total percentage allocation is {totalPercentage.toFixed(1)}%, which exceeds 100%. 
+              Please adjust the percentages to ensure they do not exceed 100% in total.
+            </>
+          ) : (
+            <>
+              Some sub-markets exceed 100% allocation within their parent markets. 
+              Please adjust the sub-market percentages to ensure they do not exceed 100% per market.
+            </>
+          )}
         </Alert>
       )}
 
