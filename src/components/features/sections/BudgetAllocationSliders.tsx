@@ -135,7 +135,7 @@ const SimpleSlider: React.FC<SimpleSliderProps> = ({ value, max, onChange }) => 
         left: 0,
         right: 0,
         height: '20px',
-        backgroundColor: '#F3F4F6',
+        backgroundColor: '#EBE6EC',
         borderRadius: '4px'
       }} />
       
@@ -195,6 +195,7 @@ export const BudgetAllocationSliders: React.FC = () => {
   const selectedChannels = channelsData.selectedChannels;
   const [allocations, setAllocations] = useState<Record<string, ChannelAllocation>>({});
   const [isLoading, setIsLoading] = useState<Record<string, boolean>>({});
+  const [focusedInputs, setFocusedInputs] = useState<Set<string>>(new Set());
 
   // Инициализация аллокаций
   useEffect(() => {
@@ -258,7 +259,10 @@ export const BudgetAllocationSliders: React.FC = () => {
           budget: newBudget,
           maxReach: metrics.maxReach,
           reachPercent: metrics.reachPercent,
-          isInefficient: newBudget < totalBudget / selectedChannels.length * 0.5
+          // Не меняем isInefficient если инпут в фокусе
+          isInefficient: focusedInputs.has(channelId) 
+            ? prev[channelId].isInefficient
+            : newBudget < totalBudget / selectedChannels.length * 0.5
         }
       }));
     } catch (error) {
@@ -289,7 +293,7 @@ export const BudgetAllocationSliders: React.FC = () => {
     return (
       <div style={{ 
         marginBottom: '32px',
-        backgroundColor: allocation.isInefficient ? '#FEF2F2' : 'transparent'
+        backgroundColor: 'transparent'
       }}>
         {/* Все элементы в одну строку */}
         <div style={{ 
@@ -338,24 +342,16 @@ export const BudgetAllocationSliders: React.FC = () => {
           <div style={{ 
             flex: 1, 
             minWidth: '200px', 
-            marginRight: '16px',
-            position: 'relative'
+            marginRight: '16px'
           }}>
-            <SimpleSlider
-              value={allocation.budget}
-              max={totalBudget}
-              onChange={(value) => handleBudgetChange(allocation.id, value)}
-            />
-            
-            {/* Метрики в правом верхнем углу */}
+            {/* Метрики над слайдером */}
             <div style={{
-              position: 'absolute',
-              top: '-8px',
-              right: '0px',
               display: 'flex',
+              justifyContent: 'flex-end',
               gap: '16px',
               fontSize: '12px',
-              color: '#6B7280'
+              color: '#6B7280',
+              marginBottom: '4px'
             }}>
               <span>
                 Max Reach: {isLoading[allocation.id] ? '...' : allocation.maxReach.toLocaleString()}
@@ -364,6 +360,12 @@ export const BudgetAllocationSliders: React.FC = () => {
                 Reach%: {isLoading[allocation.id] ? '...' : `${allocation.reachPercent}%`}
               </span>
             </div>
+            
+            <SimpleSlider
+              value={allocation.budget}
+              max={totalBudget}
+              onChange={(value) => handleBudgetChange(allocation.id, value)}
+            />
           </div>
           
           {/* Кнопка удаления */}
@@ -442,15 +444,25 @@ export const BudgetAllocationSliders: React.FC = () => {
       {/* Inefficient channels */}
       {inefficientChannels.length > 0 && (
         <div>
-          <Text size="18px" fw={600} c="#1F2937" mb="20px">
-            Think about reallocate:
-          </Text>
-          <Text size="14px" c="#6B7280" mb="16px">
-            These channels may benefit from budget reallocation for better performance
-          </Text>
-          {inefficientChannels.map(allocation => (
-            <ChannelSlider key={allocation.id} allocation={allocation} />
-          ))}
+          {/* Дивайдер */}
+          <div style={{
+            height: '1px',
+            backgroundColor: '#EBE6EC',
+            marginBottom: '24px'
+          }} />
+          
+          <div style={{
+            backgroundColor: '#FFF5FB',
+            borderRadius: '8px',
+            padding: '20px'
+          }}>
+            <Text size="14px" fw={400} c="#1F2937" mb="20px">
+              Think about reallocate:
+            </Text>
+            {inefficientChannels.map(allocation => (
+              <ChannelSlider key={allocation.id} allocation={allocation} />
+            ))}
+          </div>
         </div>
       )}
     </div>
