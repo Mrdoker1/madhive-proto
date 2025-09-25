@@ -199,7 +199,7 @@ export const AllocationSection: React.FC = () => {
         const offsetY = 60; // Отступы сверху и снизу
         
         setChartDimensions({
-          width: rect.width - offsetX - 20, // Минус отступы
+          width: rect.width - offsetX, // Минус отступ для Y-axis
           height: 300 // Фиксированная высота
         });
       }
