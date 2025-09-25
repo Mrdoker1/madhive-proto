@@ -8,6 +8,7 @@ import SectionWrapper from "@/components/ui/SectionWrapper";
 import { BreadcrumbStep } from "@/components/ui/Breadcrumbs";
 import NextButton from "@/components/ui/NextButton";
 import SelectChannelsSection from "@/components/features/sections/SelectChannelsSection";
+import AllocationSection from "@/components/features/sections/AllocationSection";
 
 export default function OmnichannelChannelsPage() {
   const router = useRouter();
@@ -107,9 +108,7 @@ export default function OmnichannelChannelsPage() {
                 id="allocation" 
                 title="Allocation"
               >
-                <Text size="sm" c="dimmed">
-                  Allocate budget and resources across selected channels.
-                </Text>
+                <AllocationSection />
               </SectionWrapper>
               
               </div>
