@@ -1,6 +1,7 @@
 import { Checkbox, Text, Grid } from '@mantine/core';
 import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
 import { updateAudienceData } from '@/store/slices/campaignSlice';
+import { audienceCategories } from '@/data/audienceData';
 
 const AudiencesSection = () => {
   const dispatch = useAppDispatch();
@@ -15,33 +16,6 @@ const AudiencesSection = () => {
     dispatch(updateAudienceData({ [category]: newValues }));
   };
 
-  const audienceCategories = [
-    {
-      key: 'gender',
-      title: 'Gender',
-      options: ['Male', 'Female']
-    },
-    {
-      key: 'age', 
-      title: 'Age',
-      options: ['Under 18', '18 - 24', '25 - 34', '35 - 44', '45 - 54', '55 - 64', '65 and over']
-    },
-    {
-      key: 'income',
-      title: 'Household Income', 
-      options: ['Under $50k', '$50k - $100k', '$100k - $150k', '$150k - $200k', '$200k - $250k', 'Over $250k']
-    },
-    {
-      key: 'education',
-      title: 'Education Level',
-      options: ['High school diploma', "Associate's degree", "Bachelor's degree", "Master's degree"]
-    },
-    {
-      key: 'householdSize',
-      title: 'Household Size',
-      options: ['One child', 'Two children', '>2 children']
-    }
-  ];
 
   return (
     <Grid>

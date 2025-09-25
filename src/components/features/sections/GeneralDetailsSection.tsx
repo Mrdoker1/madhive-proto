@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { TextInput, Select, Grid, Checkbox, Text } from '@mantine/core';
 import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
 import { updateGeneralData } from '@/store/slices/campaignSlice';
+import { advertiserOptions, brandOptions, agencyOptions, spotLengthOptions } from '@/data/generalDetailsData';
 
 interface GeneralDetailsSectionProps {
   className?: string;
@@ -100,60 +101,11 @@ const GeneralDetailsSection: React.FC<GeneralDetailsSectionProps> = ({
     dispatch(updateGeneralData({ spotLengths: newSpotLengths }));
   };
 
-  const advertiserOptions = [
-    { value: 'Ford Motor Company', label: 'Ford Motor Company' },
-    { value: 'Stellantis', label: 'Stellantis' },   
-    { value: 'Toyota Motor Corp', label: 'Toyota Motor Corp' },
-  ];
-
-  // Бренды зависят от выбранного рекламодателя
-  const allBrandOptions: Record<string, Array<{value: string, label: string}>> = {
-    'Ford Motor Company': [
-      { value: 'ford-f150', label: 'Ford F-150' },
-      { value: 'ford-mustang', label: 'Ford Mustang' },
-      { value: 'ford-explorer', label: 'Ford Explorer' },
-      { value: 'lincoln', label: 'Lincoln' },
-    ],
-    'Stellantis': [
-      { value: 'jeep', label: 'Jeep' },
-      { value: 'ram', label: 'Ram' },
-      { value: 'dodge', label: 'Dodge' },
-      { value: 'chrysler', label: 'Chrysler' },
-      { value: 'fiat', label: 'Fiat' },
-    ],
-    'Toyota Motor Corp': [
-      { value: 'toyota-camry', label: 'Toyota Camry' },
-      { value: 'toyota-corolla', label: 'Toyota Corolla' },
-      { value: 'toyota-prius', label: 'Toyota Prius' },
-      { value: 'lexus', label: 'Lexus' },
-      { value: 'scion', label: 'Scion' },
-    ],
-  };
-
-  // База данных агентств по рекламодателям
-  const allAgencyOptions: Record<string, Array<{value: string, label: string}>> = {
-    'Ford Motor Company': [
-      { value: 'GROUPM / GLOBAL TEAM BLUE', label: 'GROUPM / GLOBAL TEAM BLUE' },
-      { value: 'Wieden+Kennedy', label: 'Wieden+Kennedy' },
-      { value: 'BBDO Detroit', label: 'BBDO Detroit' },
-    ],
-    'Stellantis': [
-      { value: 'Publicis Groupe', label: 'Publicis Groupe' },
-      { value: 'FCB Global', label: 'FCB Global' },
-      { value: 'DDB Worldwide', label: 'DDB Worldwide' },
-    ],
-    'Toyota Motor Corp': [
-      { value: 'Saatchi & Saatchi', label: 'Saatchi & Saatchi' },
-      { value: 'Burrell Communications', label: 'Burrell Communications' },
-      { value: 'Intertrend Communications', label: 'Intertrend Communications' },
-    ],
-  };
-
   // Получаем бренды для выбранного рекламодателя
-  const brandOptions = formData.advertiser ? allBrandOptions[formData.advertiser] || [] : [];
+  const availableBrandOptions = formData.advertiser ? brandOptions[formData.advertiser] || [] : [];
   
   // Получаем агентства для выбранного рекламодателя
-  const agencyOptions = formData.advertiser ? allAgencyOptions[formData.advertiser] || [] : [];
+  const availableAgencyOptions = formData.advertiser ? agencyOptions[formData.advertiser] || [] : [];
 
   return (
     <div className={className}>
@@ -183,7 +135,7 @@ const GeneralDetailsSection: React.FC<GeneralDetailsSectionProps> = ({
           <Select
             label="Brand"
             placeholder={formData.advertiser ? "- Select Brand -" : "Select Advertiser first"}
-            data={brandOptions}
+            data={availableBrandOptions}
             value={formData.brand}
             onChange={(value) => handleInputChange('brand', value)}
             disabled={!formData.advertiser}
@@ -197,7 +149,7 @@ const GeneralDetailsSection: React.FC<GeneralDetailsSectionProps> = ({
           <Select
             label="Agency"
             placeholder={formData.advertiser ? "- Select Agency -" : "Select Advertiser first"}
-            data={agencyOptions}
+            data={availableAgencyOptions}
             value={formData.agency}
             onChange={(value) => handleInputChange('agency', value)}
             disabled={!formData.advertiser}
@@ -243,11 +195,7 @@ const GeneralDetailsSection: React.FC<GeneralDetailsSectionProps> = ({
           Spot Length <span style={{ color: 'red' }}>*</span>
         </Text>
         <div style={{ display: 'flex', gap: '24px' }}>
-          {[
-            { value: '15', label: '15 sec' },
-            { value: '30', label: '30 sec' },
-            { value: '60', label: '60 sec' }
-          ].map((option) => (
+          {spotLengthOptions.map((option) => (
             <Checkbox
               key={option.value}
               label={option.label}

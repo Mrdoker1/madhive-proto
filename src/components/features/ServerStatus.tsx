@@ -38,13 +38,13 @@ export default function ServerStatus() {
   };
 
   return (
-    <Container size="md">
+    <Container size="md" style={{ marginTop: '20px' }} >
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <Card shadow="sm" padding="lg" radius="md" withBorder>
+        <div>
           <Stack gap="md">
             <Group justify="space-between" align="center">
               <Title order={2}>Server Status</Title>
@@ -124,7 +124,7 @@ export default function ServerStatus() {
               </motion.div>
             )}
           </Stack>
-        </Card>
+        </div>
       </motion.div>
     </Container>
   );
