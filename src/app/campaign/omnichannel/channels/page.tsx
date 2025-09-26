@@ -9,7 +9,6 @@ import { BreadcrumbStep } from "@/components/ui/Breadcrumbs";
 import NextButton from "@/components/ui/NextButton";
 import SelectChannelsSection from "@/components/features/sections/SelectChannelsSection";
 import AllocationSection from "@/components/features/sections/AllocationSection";
-import { BudgetAllocationSliders } from "@/components/features/sections/BudgetAllocationSliders";
 
 export default function OmnichannelChannelsPage() {
   const router = useRouter();
@@ -110,9 +109,6 @@ export default function OmnichannelChannelsPage() {
                 title="Allocation"
               >
                 <AllocationSection />
-                <div style={{ marginTop: '32px' }}>
-                  <BudgetAllocationSliders />
-                </div>
               </SectionWrapper>
               
               </div>
