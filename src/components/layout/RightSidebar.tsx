@@ -78,10 +78,14 @@ const RightSidebar: React.FC<RightSidebarProps> = ({ className = '' }) => {
 
   // Функция для расчета общей аудитории
   const calculateAudienceEstimation = () => {
-    // Используем Market Estimation как базовую аудитории, если доступна
-    const totalPopulation = marketEstimation > 0 ? marketEstimation : 16239480; // fallback если рынки не выбраны
+    // Если нет Market Estimation, то и Audience Estimation должен быть 0
+    if (marketEstimation === 0) {
+      return 0;
+    }
     
-    // Если ничего не выбрано - возвращаем полную аудиторию
+    const totalPopulation = marketEstimation;
+    
+    // Если ничего не выбрано в аудитории - возвращаем полную аудиторию рынков
     const hasSelections = Object.values(audienceData).some(arr => Array.isArray(arr) && arr.length > 0);
     if (!hasSelections) {
       return totalPopulation;
