@@ -18,12 +18,12 @@ interface ChannelAllocation extends ChannelPoint {
 }
 
 const channelColors: Record<string, string> = {
-  linear_tv: '#6B46C1', // Purple
-  ctv: '#EC4899',       // Pink
-  display: '#F59E0B',   // Orange
-  audio: '#10B981',     // Teal
-  social: '#3B82F6',    // Blue
-  search: '#8B5CF6',    // Violet
+  linear_tv: '#6633CC', // Purple
+  ctv: '#FF9BD3',       // Pink
+  display: '#FFA100',   // Orange
+  audio: '#33CCCC',     // Teal
+  social: '#00A3FF',    // Blue
+  search: '#AB00FF',    // Violet
   email: '#F97316'      // Orange-red
 };
 

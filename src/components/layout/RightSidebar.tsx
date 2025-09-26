@@ -202,8 +202,9 @@ const RightSidebar: React.FC<RightSidebarProps> = ({ className = '' }) => {
         <div>
           <TextInput
             label="Market Estimation"
-            placeholder="Market estimation"
-            disabled
+            placeholder="Select markets to see estimation"
+            value={marketEstimation > 0 ? marketEstimation.toLocaleString('en-US') : ''}
+            readOnly
             styles={{
               label: {
                 fontSize: '14px',
@@ -216,7 +217,8 @@ const RightSidebar: React.FC<RightSidebarProps> = ({ className = '' }) => {
                 padding: '12px 16px',
                 border: '1px solid var(--form-input-border)',
                 borderRadius: '6px',
-                backgroundColor: '#FFFFFF'
+                backgroundColor: '#F8F9FA', // Слегка серый фон для readOnly поля
+                cursor: 'default'
               }
             }}
           />

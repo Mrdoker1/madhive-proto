@@ -1,8 +1,8 @@
 import { useCallback } from 'react';
-import { updateMarketsData } from '@/store/slices/campaignSlice';
+import { updateMarketsData, updateEstimations } from '@/store/slices/campaignSlice';
 import type { MarketData } from '@/data/marketsData';
 import type { MarketHandlers } from '../types';
-import { distributePercentagesEvenly } from '../utils/marketCalculations';
+import { distributePercentagesEvenly, calculateMarketEstimation } from '../utils/marketCalculations';
 
 interface UseMarketsHandlersProps {
   markets: MarketData[];
@@ -100,6 +100,10 @@ export const useMarketsHandlers = ({
     
     setMarkets(updatedMarkets);
     dispatch(updateMarketsData({ selectedMarkets: selectedMarketNames }));
+    
+    // Пересчитываем Market Estimation
+    const marketEstimation = calculateMarketEstimation(updatedMarkets);
+    dispatch(updateEstimations({ marketEstimation }));
   }, [markets, setMarkets, dispatch]);
 
   const handleDetailPercentageChange = useCallback((marketId: string, detailId: string, value: string) => {
@@ -175,6 +179,10 @@ export const useMarketsHandlers = ({
     const selectedMarketNames = checked ? updatedMarkets.map(market => market.name) : [];
     setMarkets(updatedMarkets);
     dispatch(updateMarketsData({ selectedMarkets: selectedMarketNames }));
+    
+    // Пересчитываем Market Estimation
+    const marketEstimation = calculateMarketEstimation(updatedMarkets);
+    dispatch(updateEstimations({ marketEstimation }));
   }, [markets, setMarkets, dispatch]);
 
   const handleMarketSelect = useCallback((marketId: string, checked: boolean) => {
@@ -223,6 +231,10 @@ export const useMarketsHandlers = ({
     
     setMarkets(updatedMarkets);
     dispatch(updateMarketsData({ selectedMarkets: selectedMarketNames }));
+    
+    // Пересчитываем Market Estimation
+    const marketEstimation = calculateMarketEstimation(updatedMarkets);
+    dispatch(updateEstimations({ marketEstimation }));
   }, [markets, setMarkets, dispatch]);
 
   const handleDetailSelectAll = useCallback((marketId: string, checked: boolean) => {
@@ -267,6 +279,10 @@ export const useMarketsHandlers = ({
     
     setMarkets(updatedMarkets);
     dispatch(updateMarketsData({ selectedMarkets: selectedMarketNames }));
+    
+    // Пересчитываем Market Estimation
+    const marketEstimation = calculateMarketEstimation(updatedMarkets);
+    dispatch(updateEstimations({ marketEstimation }));
   }, [markets, setMarkets, dispatch]);
 
   return {

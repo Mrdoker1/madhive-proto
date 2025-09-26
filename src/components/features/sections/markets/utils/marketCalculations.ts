@@ -1,4 +1,5 @@
 import type { MarketData } from '../types';
+import type { MarketData as MarketDbData } from '@/data/marketsData';
 
 export const calculateBudgetAndPercentageDistribution = (
   availableMarkets: MarketData[], 
@@ -66,4 +67,32 @@ export const getSelectedMarketsWithDetails = (markets: MarketData[]): MarketData
 
 export const distributePercentagesEvenly = (detailsCount: number): number => {
   return detailsCount > 0 ? Math.round((100 / detailsCount) * 100) / 100 : 0;
+};
+
+/**
+ * Вычисляет Market Estimation на основе выбранных рынков и подстанций
+ * @param markets - массив рынков с их текущим состоянием (выбраны/не выбраны)
+ * @returns общий размер аудитории выбранных рынков и подстанций
+ */
+export const calculateMarketEstimation = (markets: MarketDbData[]): number => {
+  let totalMarketSize = 0;
+  
+  markets.forEach(market => {
+    if (market.selected) {
+      // Проверяем, есть ли выбранные подстанции
+      const selectedDetails = market.details.filter(detail => detail.selected);
+      
+      if (selectedDetails.length > 0) {
+        // Если есть выбранные подстанции, суммируем их marketSize
+        selectedDetails.forEach(detail => {
+          totalMarketSize += detail.marketSize;
+        });
+      } else {
+        // Если подстанций нет или они не выбраны, используем marketSize основного рынка
+        totalMarketSize += market.marketSize;
+      }
+    }
+  });
+  
+  return totalMarketSize;
 };

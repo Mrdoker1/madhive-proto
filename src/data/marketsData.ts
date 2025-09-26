@@ -6,6 +6,7 @@ export interface MarketDetailData {
   impression: string;
   cpm: string;
   selected: boolean;
+  marketSize: number; // размер аудитории для подстанции
 }
 
 export interface MarketData {
@@ -18,6 +19,7 @@ export interface MarketData {
   selected: boolean;
   broadcaster: string;
   details: MarketDetailData[];
+  marketSize: number; // размер аудитории для основного рынка
 }
 
 export const marketsDatabase: Record<string, MarketData[]> = {
@@ -31,11 +33,12 @@ export const marketsDatabase: Record<string, MarketData[]> = {
       cpm: '$12.50',
       selected: false,
       broadcaster: 'ABC',
+      marketSize: 8400000, // ~8.4M население NY metropolitan area
       details: [
-        { id: 'abc-1-1', name: 'Good Morning America', percentage: 0, budget: 0, impression: '800K', cpm: '$12.80', selected: false },
-        { id: 'abc-1-2', name: 'World News Tonight', percentage: 0, budget: 0, impression: '900K', cpm: '$12.20', selected: false },
-        { id: 'abc-1-3', name: 'The View', percentage: 0, budget: 0, impression: '600K', cpm: '$13.10', selected: false },
-        { id: 'abc-1-4', name: 'General Hospital', percentage: 0, budget: 0, impression: '450K', cpm: '$12.90', selected: false }
+        { id: 'abc-1-1', name: 'Good Morning America', percentage: 0, budget: 0, impression: '800K', cpm: '$12.80', selected: false, marketSize: 2100000 },
+        { id: 'abc-1-2', name: 'World News Tonight', percentage: 0, budget: 0, impression: '900K', cpm: '$12.20', selected: false, marketSize: 2300000 },
+        { id: 'abc-1-3', name: 'The View', percentage: 0, budget: 0, impression: '600K', cpm: '$13.10', selected: false, marketSize: 1800000 },
+        { id: 'abc-1-4', name: 'General Hospital', percentage: 0, budget: 0, impression: '450K', cpm: '$12.90', selected: false, marketSize: 1200000 }
       ]
     },
     {
@@ -47,10 +50,11 @@ export const marketsDatabase: Record<string, MarketData[]> = {
       cpm: '$11.80',
       selected: false,
       broadcaster: 'ABC',
+      marketSize: 13200000, // ~13.2M население LA metropolitan area
       details: [
-        { id: 'abc-2-1', name: 'Good Morning America', percentage: 0, budget: 0, impression: '850K', cpm: '$11.90', selected: false },
-        { id: 'abc-2-2', name: 'The Bachelor', percentage: 0, budget: 0, impression: '950K', cpm: '$11.70', selected: false },
-        { id: 'abc-2-3', name: 'Dancing with the Stars', percentage: 0, budget: 0, impression: '750K', cpm: '$12.00', selected: false }
+        { id: 'abc-2-1', name: 'Good Morning America', percentage: 0, budget: 0, impression: '850K', cpm: '$11.90', selected: false, marketSize: 4400000 },
+        { id: 'abc-2-2', name: 'The Bachelor', percentage: 0, budget: 0, impression: '950K', cpm: '$11.70', selected: false, marketSize: 4800000 },
+        { id: 'abc-2-3', name: 'Dancing with the Stars', percentage: 0, budget: 0, impression: '750K', cpm: '$12.00', selected: false, marketSize: 4000000 }
       ]
     },
     {
@@ -62,6 +66,7 @@ export const marketsDatabase: Record<string, MarketData[]> = {
       cpm: '$13.20',
       selected: false,
       broadcaster: 'ABC',
+      marketSize: 9600000, // ~9.6M население Chicago metropolitan area
       details: []
     },
     {
@@ -73,6 +78,7 @@ export const marketsDatabase: Record<string, MarketData[]> = {
       cpm: '$12.90',
       selected: false,
       broadcaster: 'ABC',
+      marketSize: 7600000, // ~7.6M население Dallas-Fort Worth metropolitan area
       details: []
     }
   ],
@@ -86,10 +92,11 @@ export const marketsDatabase: Record<string, MarketData[]> = {
       cpm: '$13.10',
       selected: false,
       broadcaster: 'CBS',
+      marketSize: 8400000,
       details: [
-        { id: 'cbs-1-1', name: 'CBS Evening News', percentage: 31, budget: 0, impression: '500K', cpm: '$12.00', selected: false },
-        { id: 'cbs-1-2', name: 'NCIS', percentage: 29, budget: 0, impression: '500K', cpm: '$12.00', selected: false },
-        { id: 'cbs-1-3', name: 'The Price is Right', percentage: 26, budget: 0, impression: '500K', cpm: '$12.00', selected: false }
+        { id: 'cbs-1-1', name: 'CBS Evening News', percentage: 31, budget: 0, impression: '500K', cpm: '$12.00', selected: false, marketSize: 2600000 },
+        { id: 'cbs-1-2', name: 'NCIS', percentage: 29, budget: 0, impression: '500K', cpm: '$12.00', selected: false, marketSize: 2400000 },
+        { id: 'cbs-1-3', name: 'The Price is Right', percentage: 26, budget: 0, impression: '500K', cpm: '$12.00', selected: false, marketSize: 2200000 }
       ]
     },
     {
@@ -101,10 +108,11 @@ export const marketsDatabase: Record<string, MarketData[]> = {
       cpm: '$12.40',
       selected: false,
       broadcaster: 'CBS',
+      marketSize: 13200000,
       details: [
-        { id: 'cbs-2-1', name: 'Young and the Restless', percentage: 33, budget: 0, impression: '500K', cpm: '$12.00', selected: false },
-        { id: 'cbs-2-2', name: 'Survivor', percentage: 35, budget: 0, impression: '500K', cpm: '$12.00', selected: false },
-        { id: 'cbs-2-3', name: 'Blue Bloods', percentage: 28, budget: 0, impression: '500K', cpm: '$12.00', selected: false }
+        { id: 'cbs-2-1', name: 'Young and the Restless', percentage: 33, budget: 0, impression: '500K', cpm: '$12.00', selected: false, marketSize: 4400000 },
+        { id: 'cbs-2-2', name: 'Survivor', percentage: 35, budget: 0, impression: '500K', cpm: '$12.00', selected: false, marketSize: 4600000 },
+        { id: 'cbs-2-3', name: 'Blue Bloods', percentage: 28, budget: 0, impression: '500K', cpm: '$12.00', selected: false, marketSize: 3700000 }
       ]
     },
     {
@@ -116,9 +124,10 @@ export const marketsDatabase: Record<string, MarketData[]> = {
       cpm: '$13.80',
       selected: false,
       broadcaster: 'CBS',
+      marketSize: 9600000,
       details: [
-        { id: 'cbs-3-1', name: 'Chicago Fire', percentage: 24, budget: 0, impression: '500K', cpm: '$12.00', selected: false },
-        { id: 'cbs-3-2', name: 'CSI: Vegas', percentage: 21, budget: 0, impression: '500K', cpm: '$12.00', selected: false }
+        { id: 'cbs-3-1', name: 'Chicago Fire', percentage: 24, budget: 0, impression: '500K', cpm: '$12.00', selected: false, marketSize: 2300000 },
+        { id: 'cbs-3-2', name: 'CSI: Vegas', percentage: 21, budget: 0, impression: '500K', cpm: '$12.00', selected: false, marketSize: 2000000 }
       ]
     },
     {
@@ -130,9 +139,10 @@ export const marketsDatabase: Record<string, MarketData[]> = {
       cpm: '$14.20',
       selected: false,
       broadcaster: 'CBS',
+      marketSize: 7100000,
       details: [
-        { id: 'cbs-4-1', name: 'Local News at 6', percentage: 19, budget: 0, impression: '500K', cpm: '$12.00', selected: false },
-        { id: 'cbs-4-2', name: 'Sports Update', percentage: 17, budget: 0, impression: '500K', cpm: '$12.00', selected: false }
+        { id: 'cbs-4-1', name: 'Local News at 6', percentage: 19, budget: 0, impression: '500K', cpm: '$12.00', selected: false, marketSize: 1350000 },
+        { id: 'cbs-4-2', name: 'Sports Update', percentage: 17, budget: 0, impression: '500K', cpm: '$12.00', selected: false, marketSize: 1200000 }
       ]
     }
   ],
@@ -146,9 +156,10 @@ export const marketsDatabase: Record<string, MarketData[]> = {
       cpm: '$8.50',
       selected: false,
       broadcaster: 'CW',
+      marketSize: 8400000,
       details: [
-        { id: 'cw-1-1', name: 'Riverdale', percentage: 16, budget: 0, impression: '500K', cpm: '$12.00', selected: false },
-        { id: 'cw-1-2', name: 'The Flash', percentage: 14, budget: 0, impression: '500K', cpm: '$12.00', selected: false }
+        { id: 'cw-1-1', name: 'Riverdale', percentage: 16, budget: 0, impression: '500K', cpm: '$12.00', selected: false, marketSize: 1300000 },
+        { id: 'cw-1-2', name: 'The Flash', percentage: 14, budget: 0, impression: '500K', cpm: '$12.00', selected: false, marketSize: 1200000 }
       ]
     },
     {
@@ -160,9 +171,10 @@ export const marketsDatabase: Record<string, MarketData[]> = {
       cpm: '$8.90',
       selected: false,
       broadcaster: 'CW',
+      marketSize: 13200000,
       details: [
-        { id: 'cw-2-1', name: 'Superman & Lois', percentage: 19, budget: 0, impression: '500K', cpm: '$12.00', selected: false },
-        { id: 'cw-2-2', name: 'All American', percentage: 17, budget: 0, impression: '500K', cpm: '$12.00', selected: false }
+        { id: 'cw-2-1', name: 'Superman & Lois', percentage: 19, budget: 0, impression: '500K', cpm: '$12.00', selected: false, marketSize: 2500000 },
+        { id: 'cw-2-2', name: 'All American', percentage: 17, budget: 0, impression: '500K', cpm: '$12.00', selected: false, marketSize: 2200000 }
       ]
     },
     {
@@ -174,9 +186,10 @@ export const marketsDatabase: Record<string, MarketData[]> = {
       cpm: '$9.20',
       selected: false,
       broadcaster: 'CW',
+      marketSize: 6100000,
       details: [
-        { id: 'cw-3-1', name: 'Walker', percentage: 21, budget: 0, impression: '500K', cpm: '$12.00', selected: false },
-        { id: 'cw-3-2', name: 'Local Programming', percentage: 19, budget: 0, impression: '500K', cpm: '$12.00', selected: false }
+        { id: 'cw-3-1', name: 'Walker', percentage: 21, budget: 0, impression: '500K', cpm: '$12.00', selected: false, marketSize: 1300000 },
+        { id: 'cw-3-2', name: 'Local Programming', percentage: 19, budget: 0, impression: '500K', cpm: '$12.00', selected: false, marketSize: 1200000 }
       ]
     }
   ],
@@ -190,7 +203,8 @@ export const marketsDatabase: Record<string, MarketData[]> = {
       cpm: '$12.20',
       selected: false,
       broadcaster: 'FOX',
-      details: [{ id: 'fox-1-1', name: 'FOX News at 6', percentage: 25, budget: 0, impression: '500K', cpm: '$12.00', selected: false }]
+      marketSize: 8400000,
+      details: [{ id: 'fox-1-1', name: 'FOX News at 6', percentage: 25, budget: 0, impression: '500K', cpm: '$12.00', selected: false, marketSize: 2000000 }]
     },
     {
       id: 'fox-2',
@@ -201,7 +215,8 @@ export const marketsDatabase: Record<string, MarketData[]> = {
       cpm: '$11.90',
       selected: false,
       broadcaster: 'FOX',
-      details: [{ id: 'fox-2-1', name: 'The Simpsons', percentage: 27, budget: 0, impression: '500K', cpm: '$12.00', selected: false }]
+      marketSize: 13200000,
+      details: [{ id: 'fox-2-1', name: 'The Simpsons', percentage: 27, budget: 0, impression: '500K', cpm: '$12.00', selected: false, marketSize: 3600000 }]
     },
     {
       id: 'fox-3',
@@ -212,7 +227,8 @@ export const marketsDatabase: Record<string, MarketData[]> = {
       cpm: '$12.80',
       selected: false,
       broadcaster: 'FOX',
-      details: [{ id: 'fox-3-1', name: 'Chicago Bears Game', percentage: 23, budget: 0, impression: '500K', cpm: '$12.00', selected: false }]
+      marketSize: 9600000,
+      details: [{ id: 'fox-3-1', name: 'Chicago Bears Game', percentage: 23, budget: 0, impression: '500K', cpm: '$12.00', selected: false, marketSize: 2200000 }]
     },
     {
       id: 'fox-4',
@@ -223,7 +239,8 @@ export const marketsDatabase: Record<string, MarketData[]> = {
       cpm: '$13.50',
       selected: false,
       broadcaster: 'FOX',
-      details: [{ id: 'fox-4-1', name: 'Local Sports', percentage: 29, budget: 0, impression: '500K', cpm: '$12.00', selected: false }]
+      marketSize: 6200000,
+      details: [{ id: 'fox-4-1', name: 'Local Sports', percentage: 29, budget: 0, impression: '500K', cpm: '$12.00', selected: false, marketSize: 1800000 }]
     }
   ],
   'Graham Media': [
@@ -236,6 +253,7 @@ export const marketsDatabase: Record<string, MarketData[]> = {
       cpm: '$10.20',
       selected: false,
       broadcaster: 'Graham Media',
+      marketSize: 4300000,
       details: []
     },
     {
@@ -247,6 +265,7 @@ export const marketsDatabase: Record<string, MarketData[]> = {
       cpm: '$9.80',
       selected: false,
       broadcaster: 'Graham Media',
+      marketSize: 2600000,
       details: []
     },
     {
@@ -258,6 +277,7 @@ export const marketsDatabase: Record<string, MarketData[]> = {
       cpm: '$11.50',
       selected: false,
       broadcaster: 'Graham Media',
+      marketSize: 2500000,
       details: []
     }
   ],
@@ -271,6 +291,7 @@ export const marketsDatabase: Record<string, MarketData[]> = {
       cpm: '$9.90',
       selected: false,
       broadcaster: 'Gray',
+      marketSize: 6100000,
       details: []
     },
     {
@@ -282,6 +303,7 @@ export const marketsDatabase: Record<string, MarketData[]> = {
       cpm: '$8.70',
       selected: false,
       broadcaster: 'Gray',
+      marketSize: 1200000,
       details: []
     },
     {
@@ -293,6 +315,7 @@ export const marketsDatabase: Record<string, MarketData[]> = {
       cpm: '$10.50',
       selected: false,
       broadcaster: 'Gray',
+      marketSize: 2100000,
       details: []
     }
   ],
@@ -306,6 +329,7 @@ export const marketsDatabase: Record<string, MarketData[]> = {
       cpm: '$11.20',
       selected: false,
       broadcaster: 'Hearst',
+      marketSize: 4900000,
       details: []
     },
     {
@@ -317,6 +341,7 @@ export const marketsDatabase: Record<string, MarketData[]> = {
       cpm: '$10.80',
       selected: false,
       broadcaster: 'Hearst',
+      marketSize: 4000000,
       details: []
     },
     {
@@ -328,6 +353,7 @@ export const marketsDatabase: Record<string, MarketData[]> = {
       cpm: '$9.60',
       selected: false,
       broadcaster: 'Hearst',
+      marketSize: 2400000,
       details: []
     }
   ],
@@ -341,6 +367,7 @@ export const marketsDatabase: Record<string, MarketData[]> = {
       cpm: '$13.40',
       selected: false,
       broadcaster: 'NBCU',
+      marketSize: 8400000,
       details: []
     },
     {
@@ -352,6 +379,7 @@ export const marketsDatabase: Record<string, MarketData[]> = {
       cpm: '$12.70',
       selected: false,
       broadcaster: 'NBCU',
+      marketSize: 13200000,
       details: []
     },
     {
@@ -363,6 +391,7 @@ export const marketsDatabase: Record<string, MarketData[]> = {
       cpm: '$13.90',
       selected: false,
       broadcaster: 'NBCU',
+      marketSize: 9600000,
       details: []
     },
     {
@@ -374,6 +403,7 @@ export const marketsDatabase: Record<string, MarketData[]> = {
       cpm: '$14.60',
       selected: false,
       broadcaster: 'NBCU',
+      marketSize: 6200000,
       details: []
     }
   ],
@@ -387,6 +417,7 @@ export const marketsDatabase: Record<string, MarketData[]> = {
       cpm: '$7.20',
       selected: false,
       broadcaster: 'NBCU Telemundo',
+      marketSize: 6200000,
       details: []
     },
     {
@@ -398,6 +429,7 @@ export const marketsDatabase: Record<string, MarketData[]> = {
       cpm: '$8.40',
       selected: false,
       broadcaster: 'NBCU Telemundo',
+      marketSize: 13200000,
       details: []
     },
     {
@@ -409,6 +441,7 @@ export const marketsDatabase: Record<string, MarketData[]> = {
       cpm: '$9.80',
       selected: false,
       broadcaster: 'NBCU Telemundo',
+      marketSize: 8400000,
       details: []
     }
   ]
