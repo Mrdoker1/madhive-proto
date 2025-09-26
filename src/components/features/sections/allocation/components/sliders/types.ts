@@ -11,6 +11,8 @@ export interface ChannelAllocation {
 export interface SimpleSliderProps {
   value: number;
   max: number;
+  step?: number; // Шаг изменения значения (по умолчанию 100)
+  color?: string; // Цвет маркера (по умолчанию розовый)
   onChange: (value: number) => void;
 }
 

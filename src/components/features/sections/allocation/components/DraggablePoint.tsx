@@ -3,7 +3,7 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { DraggablePointProps } from '../types';
 import { CHART_CONFIG } from '../constants';
-import { calculateChartPosition, mouseToValues, clampToChart } from '../utils';
+import { calculateChartPosition, mouseToValues, clampToChart, calculateReachFromBudget } from '../utils';
 
 export const DraggablePoint: React.FC<DraggablePointProps> = ({
   point,
@@ -48,27 +48,19 @@ export const DraggablePoint: React.FC<DraggablePointProps> = ({
     
     // Позиция мыши в SVG координатах
     const mouseXInSvg = e.clientX - rect.left;
-    const mouseYInSvg = e.clientY - rect.top;
     
-    // Преобразуем в координаты графика (убираем отступы)
+    // Преобразуем в координаты графика (убираем отступ по X)
     const mouseXInChart = mouseXInSvg - OFFSET_X;
-    const mouseYInChart = mouseYInSvg - OFFSET_Y;
     
-    // Ограничиваем в пределах графика
-    const clamped = clampToChart(mouseXInChart, mouseYInChart, chartWidth, chartHeight);
+    // Ограничиваем только по оси X
+    const clampedX = Math.max(0, Math.min(mouseXInChart, chartWidth));
     
-    // Преобразуем в бюджет и reach
-    const values = mouseToValues(
-      clamped.x, 
-      clamped.y, 
-      chartWidth, 
-      chartHeight, 
-      maxBudget, 
-      MAX_REACH
-    );
+    // Вычисляем новый бюджет на основе позиции X
+    const newBudget = (clampedX / chartWidth) * maxBudget;
     
-    onPointChange(point.id, values.budget, values.reach);
-  }, [isDragging, chartWidth, chartHeight, maxBudget, point.id, onPointChange, OFFSET_X, OFFSET_Y, MAX_REACH]);
+    // Передаем только новый бюджет (округленный до кратного 100), reach будет вычислен автоматически
+    onPointChange(point.id, Math.round(newBudget / 100) * 100);
+  }, [isDragging, chartWidth, maxBudget, point.id, onPointChange, OFFSET_X]);
   
   const handleMouseUp = useCallback(() => {
     setIsDragging(false);

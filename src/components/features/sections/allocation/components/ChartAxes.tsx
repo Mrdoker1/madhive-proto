@@ -1,4 +1,5 @@
 import React from 'react';
+import { CHART_CONFIG } from '../constants';
 
 interface ChartAxesProps {
   chartWidth: number;
@@ -64,7 +65,7 @@ export const ChartAxes: React.FC<ChartAxesProps> = ({
       
       {/* X Axis labels */}
       {(() => {
-        const maxBudget = totalBudget || 390250;
+        const maxBudget = totalBudget || CHART_CONFIG.DEFAULT_BUDGET;
         const steps = [0, 0.25, 0.5, 0.75, 1.0];
         return steps.map((step, index) => {
           const value = Math.round((maxBudget * step) / 1000);

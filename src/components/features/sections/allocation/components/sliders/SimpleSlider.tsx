@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { SimpleSliderProps } from './types';
 
-export const SimpleSlider: React.FC<SimpleSliderProps> = ({ value, max, onChange }) => {
+export const SimpleSlider: React.FC<SimpleSliderProps> = ({ value, max, step = 100, color = '#EC4899', onChange }) => {
   const [localValue, setLocalValue] = useState(value);
   const [isDragging, setIsDragging] = useState(false);
   const sliderRef = useRef<HTMLDivElement>(null);
@@ -23,7 +23,7 @@ export const SimpleSlider: React.FC<SimpleSliderProps> = ({ value, max, onChange
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const newPercent = Math.max(0, Math.min(100, (x / rect.width) * 100));
-    const newValue = Math.round((newPercent / 100) * max / 1000) * 1000;
+    const newValue = Math.round((newPercent / 100) * max / step) * step;
     
     setLocalValue(newValue);
     onChange(newValue);
@@ -41,7 +41,7 @@ export const SimpleSlider: React.FC<SimpleSliderProps> = ({ value, max, onChange
       const rect = sliderRef.current.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const newPercent = Math.max(0, Math.min(100, (x / rect.width) * 100));
-      const newValue = Math.round((newPercent / 100) * max / 1000) * 1000;
+      const newValue = Math.round((newPercent / 100) * max / step) * step;
       
       currentDragValue = newValue; // Обновляем локальную переменную
       setLocalValue(newValue);
@@ -100,7 +100,7 @@ export const SimpleSlider: React.FC<SimpleSliderProps> = ({ value, max, onChange
         transform: 'translateX(-50%)',
         width: '2px',
         height: '27px',
-        backgroundColor: '#EC4899'
+        backgroundColor: color
       }} />
       
       {/* Маркер */}
@@ -111,7 +111,7 @@ export const SimpleSlider: React.FC<SimpleSliderProps> = ({ value, max, onChange
           left: `${percent}%`,
           top: '28px',
           transform: 'translateX(-50%)',
-          backgroundColor: '#EC4899',
+          backgroundColor: color,
           color: 'white',
           padding: '4px 8px',
           borderRadius: '4px',
@@ -124,7 +124,7 @@ export const SimpleSlider: React.FC<SimpleSliderProps> = ({ value, max, onChange
           textAlign: 'center'
         }}
       >
-        ${Math.round(localValue / 1000)}K
+        {localValue >= 1000 ? `$${Math.round(localValue / 1000)}K` : `$${localValue}`}
       </div>
     </div>
   );

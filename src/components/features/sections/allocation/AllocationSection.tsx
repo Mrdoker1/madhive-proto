@@ -4,7 +4,7 @@ import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { Text, Group } from '@mantine/core';
 import { useAppSelector } from '@/hooks/useRedux';
 import { ChannelPoint, ChannelAllocation, ChartDimensions } from './types';
-import { channelColors, channelNames, CHART_CONFIG } from './constants';
+import { channelColors, channelNames, CHART_CONFIG, CHANNEL_REACH_COEFFICIENTS } from './constants';
 import { DraggablePoint } from './components/DraggablePoint';
 import { ChartGrid } from './components/ChartGrid';
 import { ChartAxes } from './components/ChartAxes';
@@ -14,6 +14,7 @@ import {
   ChannelSlider, 
   fetchForecastMetrics
 } from './components/sliders';
+import { calculateReachFromBudget, redistributeBudgetSmart } from './utils';
 
 export const AllocationSection: React.FC = () => {
   const channelsData = useAppSelector((state) => state.campaign.channels);
@@ -51,7 +52,7 @@ export const AllocationSection: React.FC = () => {
     const initializeChannelData = async () => {
       if (!totalBudget || selectedChannels.length === 0) return;
       
-      const budgetPerChannel = totalBudget / selectedChannels.length;
+      const budgetPerChannel = Math.round(totalBudget / selectedChannels.length / 100) * 100;
       const newChannelData: Record<string, ChannelPoint & SliderChannelAllocation> = {};
       const loadingStates: Record<string, boolean> = {};
 
@@ -61,10 +62,10 @@ export const AllocationSection: React.FC = () => {
         setIsLoading(prev => ({ ...prev, [channelId]: true }));
         
         // Получаем метрики для слайдеров
-        const metrics = await fetchForecastMetrics(channelId, budgetPerChannel);
+        const metrics = await fetchForecastMetrics(channelId, budgetPerChannel, totalBudget);
         
-        // Создаем объединенные данные для графика и слайдеров
-        const fixedReach = CHART_CONFIG.BASE_REACH + (index * CHART_CONFIG.REACH_INCREMENT);
+        // Вычисляем reach на основе бюджета и коэффициента канала
+        const calculatedReach = calculateReachFromBudget(channelId, budgetPerChannel, totalBudget);
         
         newChannelData[channelId] = {
           // Данные для графика
@@ -72,7 +73,7 @@ export const AllocationSection: React.FC = () => {
           name: channelNames[channelId] || channelId,
           color: channelColors[channelId] || '#6B7280',
           budget: budgetPerChannel,
-          reach: Math.min(fixedReach, CHART_CONFIG.MAX_DISPLAY_REACH),
+          reach: calculatedReach,
           // Данные для слайдеров
           maxReach: metrics.maxReach,
           reachPercent: metrics.reachPercent,
@@ -91,32 +92,31 @@ export const AllocationSection: React.FC = () => {
 
   const points = Object.values(channelData);
   
-  // Обработчик изменения точки на графике с перераспределением
-  const handlePointChange = useCallback((channelId: string, newBudget: number, newReach: number) => {
-    // Ограничиваем бюджет максимальным значением
-    const clampedBudget = Math.min(Math.max(0, newBudget), totalBudget);
-    
-    // Вычисляем остаток бюджета для других каналов
-    const otherChannels = selectedChannels.filter(id => id !== channelId);
-    const remainingBudget = totalBudget - clampedBudget;
-    const budgetPerOtherChannel = otherChannels.length > 0 ? remainingBudget / otherChannels.length : 0;
+  // Обработчик изменения точки на графике с умным перераспределением (только по X - бюджет)
+  const handlePointChange = useCallback((channelId: string, newBudget: number) => {
+    // Ограничиваем бюджет максимальным значением и округляем до кратного 100
+    const clampedBudget = Math.round(Math.min(Math.max(0, newBudget), totalBudget) / 100) * 100;
 
     setChannelData(prev => {
+      // Получаем текущие бюджеты всех каналов
+      const currentBudgets: Record<string, number> = {};
+      Object.keys(prev).forEach(id => {
+        currentBudgets[id] = prev[id].budget;
+      });
+
+      // Умное перераспределение с учетом коэффициентов
+      const newBudgets = redistributeBudgetSmart(currentBudgets, channelId, clampedBudget, totalBudget);
+
+      // Обновляем все каналы с новыми бюджетами и пересчитанным reach
       const updated = { ...prev };
-      
-      // Обновляем выбранный канал
-      updated[channelId] = {
-        ...prev[channelId],
-        budget: clampedBudget,
-        reach: newReach
-      };
-      
-      // Перераспределяем бюджет между остальными каналами (сохраняем их reach)
-      otherChannels.forEach(otherId => {
-        if (updated[otherId]) {
-          updated[otherId] = {
-            ...updated[otherId],
-            budget: budgetPerOtherChannel
+      Object.keys(newBudgets).forEach(id => {
+        if (updated[id]) {
+          const newChannelBudget = newBudgets[id];
+          const calculatedReach = calculateReachFromBudget(id, newChannelBudget, totalBudget);
+          updated[id] = {
+            ...updated[id],
+            budget: newChannelBudget,
+            reach: calculatedReach
           };
         }
       });
@@ -125,35 +125,35 @@ export const AllocationSection: React.FC = () => {
     });
   }, [selectedChannels, totalBudget]);
 
-  // Обработчик изменения бюджета с автоматическим перераспределением
+  // Обработчик изменения бюджета с умным перераспределением
   const handleBudgetChange = async (channelId: string, newBudget: number) => {
     const currentData = channelData[channelId];
     if (!currentData) return;
 
-    // Ограничиваем бюджет максимальным значением
-    const clampedBudget = Math.min(Math.max(0, newBudget), totalBudget);
-    
-    // Вычисляем остаток бюджета для других каналов
-    const otherChannels = selectedChannels.filter(id => id !== channelId);
-    const remainingBudget = totalBudget - clampedBudget;
-    const budgetPerOtherChannel = otherChannels.length > 0 ? remainingBudget / otherChannels.length : 0;
+    // Ограничиваем бюджет максимальным значением и округляем до кратного 100
+    const clampedBudget = Math.round(Math.min(Math.max(0, newBudget), totalBudget) / 100) * 100;
 
-    // Обновляем данные с перераспределением
+    // Обновляем данные с умным перераспределением и пересчетом reach
     setChannelData(prev => {
+      // Получаем текущие бюджеты всех каналов
+      const currentBudgets: Record<string, number> = {};
+      Object.keys(prev).forEach(id => {
+        currentBudgets[id] = prev[id].budget;
+      });
+
+      // Умное перераспределение с учетом коэффициентов
+      const newBudgets = redistributeBudgetSmart(currentBudgets, channelId, clampedBudget, totalBudget);
+
+      // Обновляем все каналы с новыми бюджетами и пересчитанным reach
       const updated = { ...prev };
-      
-      // Обновляем выбранный канал
-      updated[channelId] = {
-        ...prev[channelId],
-        budget: clampedBudget
-      };
-      
-      // Перераспределяем бюджет между остальными каналами
-      otherChannels.forEach(otherId => {
-        if (updated[otherId]) {
-          updated[otherId] = {
-            ...updated[otherId],
-            budget: budgetPerOtherChannel
+      Object.keys(newBudgets).forEach(id => {
+        if (updated[id]) {
+          const newChannelBudget = newBudgets[id];
+          const calculatedReach = calculateReachFromBudget(id, newChannelBudget, totalBudget);
+          updated[id] = {
+            ...updated[id],
+            budget: newChannelBudget,
+            reach: calculatedReach
           };
         }
       });
@@ -165,7 +165,7 @@ export const AllocationSection: React.FC = () => {
     setIsLoading(prev => ({ ...prev, [channelId]: true }));
     
     try {
-      const metrics = await fetchForecastMetrics(channelId, clampedBudget);
+      const metrics = await fetchForecastMetrics(channelId, clampedBudget, totalBudget);
       
       setChannelData(prev => ({
         ...prev,
@@ -295,9 +295,9 @@ export const AllocationSection: React.FC = () => {
         </div>
       </div>
 
-      {/* Interactive Chart */}
-      <div>
-        <div ref={chartContainerRef} style={{ width: '100%', height: '400px', position: 'relative' }}>
+          {/* Interactive Chart */}
+          <div>
+            <div ref={chartContainerRef} style={{ width: '100%', height: '400px', position: 'relative', overflow: 'hidden' }}>
           <svg width="100%" height="350" style={{ overflow: 'visible' }}>
             <ChartGrid 
               chartWidth={chartWidth}

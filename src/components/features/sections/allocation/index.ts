@@ -27,7 +27,7 @@ export type {
 } from './components/sliders';
 
 // Экспорт констант для переиспользования
-export { channelColors, channelNames, CHART_CONFIG } from './constants';
+export { channelColors, channelNames, CHART_CONFIG, CHANNEL_REACH_COEFFICIENTS } from './constants';
 
 // Экспорт констант слайдеров
 export { SLIDER_CONFIG } from './components/sliders';
@@ -37,7 +37,11 @@ export {
   createParabolicPath, 
   calculateChartPosition, 
   mouseToValues, 
-  clampToChart 
+  clampToChart,
+  calculateReachFromBudget,
+  redistributeBudgetSmart,
+  debugReachGrowth,
+  debugSmartRedistribution
 } from './utils';
 
 // Экспорт утилит слайдеров

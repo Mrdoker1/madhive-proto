@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Text, ActionIcon, TextInput } from '@mantine/core';
 import { IconTrash, IconCurrencyDollar } from '@tabler/icons-react';
 import Image from 'next/image';
@@ -16,10 +16,33 @@ export const ChannelSlider: React.FC<ChannelSliderProps> = ({
   isLoading = false 
 }) => {
   const totalBudget = useAppSelector((state) => state.campaign.budget.totalBudget) || 390250;
+  
+  // Локальное состояние для инпута
+  const [inputValue, setInputValue] = useState(formatCurrency(allocation.budget));
+  const [isInputFocused, setIsInputFocused] = useState(false);
+
+  // Синхронизируем локальное состояние с внешним значением
+  useEffect(() => {
+    if (!isInputFocused) {
+      setInputValue(formatCurrency(allocation.budget));
+    }
+  }, [allocation.budget, isInputFocused]);
 
   const handleInputChange = (value: string) => {
-    const numericValue = parseNumericValue(value);
+    setInputValue(value);
+  };
+
+  const handleInputBlur = () => {
+    setIsInputFocused(false);
+    const numericValue = parseNumericValue(inputValue);
     onBudgetChange(allocation.id, numericValue);
+    setInputValue(formatCurrency(numericValue));
+  };
+
+  const handleInputFocus = () => {
+    setIsInputFocused(true);
+    // При фокусе показываем сырое числовое значение
+    setInputValue(allocation.budget.toString());
   };
 
   const handleSliderChange = (value: number) => {
@@ -58,8 +81,10 @@ export const ChannelSlider: React.FC<ChannelSliderProps> = ({
         
         {/* Поле ввода бюджета */}
         <TextInput
-          value={formatCurrency(allocation.budget)}
+          value={inputValue}
           onChange={(e) => handleInputChange(e.target.value)}
+          onFocus={handleInputFocus}
+          onBlur={handleInputBlur}
           leftSection={<IconCurrencyDollar size={16} color="#666" />}
           w={140}
           styles={{
@@ -101,6 +126,8 @@ export const ChannelSlider: React.FC<ChannelSliderProps> = ({
           <SimpleSlider
             value={allocation.budget}
             max={totalBudget}
+            step={100} // Шаг в 100 долларов для точного контроля
+            color={allocation.color} // Цвет канала
             onChange={handleSliderChange}
           />
         </div>

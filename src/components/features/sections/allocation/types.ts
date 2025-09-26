@@ -15,7 +15,7 @@ export interface DraggablePointProps {
   chartWidth: number;
   chartHeight: number;
   totalBudget: number;
-  onPointChange: (channelId: string, newBudget: number, newReach: number) => void;
+  onPointChange: (channelId: string, newBudget: number) => void;
 }
 
 export interface ChartDimensions {
