@@ -12,9 +12,7 @@ import { ChartLines } from './components/ChartLines';
 import { 
   ChannelAllocation as SliderChannelAllocation, 
   ChannelSlider, 
-  SLIDER_CONFIG,
-  fetchForecastMetrics,
-  isChannelInefficient
+  fetchForecastMetrics
 } from './components/sliders';
 
 export const AllocationSection: React.FC = () => {
@@ -29,7 +27,6 @@ export const AllocationSection: React.FC = () => {
   // Единое состояние для каналов (содержит данные для графика и слайдеров)
   const [channelData, setChannelData] = useState<Record<string, ChannelPoint & SliderChannelAllocation>>({});
   const [isLoading, setIsLoading] = useState<Record<string, boolean>>({});
-  const [focusedInputs, setFocusedInputs] = useState<Set<string>>(new Set());
 
   // Отслеживаем размеры контейнера
   useEffect(() => {
@@ -94,50 +91,90 @@ export const AllocationSection: React.FC = () => {
 
   const points = Object.values(channelData);
   
-  // Обработчик изменения точки на графике
+  // Обработчик изменения точки на графике с перераспределением
   const handlePointChange = useCallback((channelId: string, newBudget: number, newReach: number) => {
-    setChannelData(prev => ({
-      ...prev,
-      [channelId]: {
-        ...prev[channelId],
-        budget: newBudget,
-        reach: newReach
-      }
-    }));
-  }, []);
+    // Ограничиваем бюджет максимальным значением
+    const clampedBudget = Math.min(Math.max(0, newBudget), totalBudget);
+    
+    // Вычисляем остаток бюджета для других каналов
+    const otherChannels = selectedChannels.filter(id => id !== channelId);
+    const remainingBudget = totalBudget - clampedBudget;
+    const budgetPerOtherChannel = otherChannels.length > 0 ? remainingBudget / otherChannels.length : 0;
 
-  // Обработчик изменения бюджета для слайдеров
+    setChannelData(prev => {
+      const updated = { ...prev };
+      
+      // Обновляем выбранный канал
+      updated[channelId] = {
+        ...prev[channelId],
+        budget: clampedBudget,
+        reach: newReach
+      };
+      
+      // Перераспределяем бюджет между остальными каналами (сохраняем их reach)
+      otherChannels.forEach(otherId => {
+        if (updated[otherId]) {
+          updated[otherId] = {
+            ...updated[otherId],
+            budget: budgetPerOtherChannel
+          };
+        }
+      });
+      
+      return updated;
+    });
+  }, [selectedChannels, totalBudget]);
+
+  // Обработчик изменения бюджета с автоматическим перераспределением
   const handleBudgetChange = async (channelId: string, newBudget: number) => {
     const currentData = channelData[channelId];
     if (!currentData) return;
 
-    // Обновляем бюджет сразу для UX
-    setChannelData(prev => ({
-      ...prev,
-      [channelId]: {
-        ...prev[channelId],
-        budget: newBudget
-      }
-    }));
+    // Ограничиваем бюджет максимальным значением
+    const clampedBudget = Math.min(Math.max(0, newBudget), totalBudget);
+    
+    // Вычисляем остаток бюджета для других каналов
+    const otherChannels = selectedChannels.filter(id => id !== channelId);
+    const remainingBudget = totalBudget - clampedBudget;
+    const budgetPerOtherChannel = otherChannels.length > 0 ? remainingBudget / otherChannels.length : 0;
 
-    // Получаем новые метрики
+    // Обновляем данные с перераспределением
+    setChannelData(prev => {
+      const updated = { ...prev };
+      
+      // Обновляем выбранный канал
+      updated[channelId] = {
+        ...prev[channelId],
+        budget: clampedBudget
+      };
+      
+      // Перераспределяем бюджет между остальными каналами
+      otherChannels.forEach(otherId => {
+        if (updated[otherId]) {
+          updated[otherId] = {
+            ...updated[otherId],
+            budget: budgetPerOtherChannel
+          };
+        }
+      });
+      
+      return updated;
+    });
+
+    // Получаем новые метрики для изменённого канала
     setIsLoading(prev => ({ ...prev, [channelId]: true }));
     
     try {
-      const metrics = await fetchForecastMetrics(channelId, newBudget);
-      const averageBudget = totalBudget / selectedChannels.length;
+      const metrics = await fetchForecastMetrics(channelId, clampedBudget);
       
       setChannelData(prev => ({
         ...prev,
         [channelId]: {
           ...prev[channelId],
-          budget: newBudget,
+          budget: clampedBudget,
           maxReach: metrics.maxReach,
           reachPercent: metrics.reachPercent,
-          // Не меняем isInefficient если инпут в фокусе
-          isInefficient: focusedInputs.has(channelId) 
-            ? prev[channelId].isInefficient
-            : isChannelInefficient(newBudget, averageBudget)
+          isInefficient: false
         }
       }));
     } catch (error) {
@@ -147,11 +184,25 @@ export const AllocationSection: React.FC = () => {
     }
   };
 
-  // Удаление канала
+  // Удаление канала с перераспределением бюджета
   const handleRemoveChannel = (channelId: string) => {
     setChannelData(prev => {
       const newData = { ...prev };
+      const removedChannelBudget = newData[channelId]?.budget || 0;
       delete newData[channelId];
+      
+      // Перераспределяем бюджет удаленного канала между оставшимися
+      const remainingChannels = Object.keys(newData);
+      if (remainingChannels.length > 0) {
+        const budgetPerChannel = removedChannelBudget / remainingChannels.length;
+        remainingChannels.forEach(otherId => {
+          newData[otherId] = {
+            ...newData[otherId],
+            budget: newData[otherId].budget + budgetPerChannel
+          };
+        });
+      }
+      
       return newData;
     });
   };
@@ -163,14 +214,8 @@ export const AllocationSection: React.FC = () => {
     percentage: totalAllocatedBudget > 0 ? (point.budget / totalAllocatedBudget) * 100 : 0
   }));
 
-  // Вычисляем данные для слайдеров
-  const sliderAllocatedBudget = Object.values(channelData).reduce((sum, channel) => sum + channel.budget, 0);
-  const remainingBudget = totalBudget - sliderAllocatedBudget;
-  const isValidAllocation = Math.abs(remainingBudget) < 1;
-
-  // Группировка каналов для слайдеров
-  const confidentChannels = Object.values(channelData).filter(channel => !channel.isInefficient);
-  const inefficientChannels = Object.values(channelData).filter(channel => channel.isInefficient);
+  // Все каналы для слайдеров
+  const allChannels = Object.values(channelData);
 
   // Используем динамические размеры
   const chartWidth = chartDimensions.width;
@@ -324,57 +369,14 @@ export const AllocationSection: React.FC = () => {
       {/* Budget Allocation Sliders */}
       {selectedChannels.length > 0 && (
         <div style={{ marginTop: '32px', maxWidth: '900px' }}>
-          {/* Остаток бюджета */}
-          {!isValidAllocation && (
-            <div style={{ 
-              marginBottom: '32px',
-              padding: '16px 20px',
-              backgroundColor: remainingBudget > 0 ? '#FEF3C7' : '#FEE2E2',
-              border: remainingBudget > 0 ? '1px solid #FBBF24' : '1px solid #FECACA',
-              borderRadius: '12px',
-              textAlign: 'center'
-            }}>
-              <Text size="16px" fw={600} c={remainingBudget > 0 ? '#92400E' : '#DC2626'}>
-                {remainingBudget > 0 
-                  ? `$${remainingBudget.toLocaleString()} remaining to allocate` 
-                  : `Over allocated by $${Math.abs(remainingBudget).toLocaleString()}`
-                }
-              </Text>
-              <Text size="14px" c={remainingBudget > 0 ? '#92400E' : '#DC2626'} mt="4px">
-                {remainingBudget > 0 
-                  ? 'Allocate remaining budget to continue' 
-                  : 'Reduce allocation to continue'
-                }
-              </Text>
-            </div>
-          )}
 
-          {/* Индикатор валидности аллокации */}
-          {isValidAllocation && (
-            <div style={{ 
-              marginBottom: '32px',
-              padding: '16px 20px',
-              backgroundColor: '#F0FDF4',
-              border: '1px solid #BBF7D0',
-              borderRadius: '12px',
-              textAlign: 'center'
-            }}>
-              <Text size="16px" fw={600} c="#15803D">
-                ✓ Budget allocation complete
-              </Text>
-              <Text size="14px" c="#15803D" mt="4px">
-                Total budget of ${totalBudget.toLocaleString()} has been fully allocated
-              </Text>
-            </div>
-          )}
-
-          {/* Confident channels */}
-          {confidentChannels.length > 0 && (
-            <div style={{ marginBottom: '40px' }}>
+          {/* Channel Sliders */}
+          {allChannels.length > 0 && (
+            <div>
               <Text size="12px" fw={400} c="#1F2937" mb="20px">
-                Confident to the following channels to meet your goals:
+                Budget allocation by channel:
               </Text>
-              {confidentChannels.map(channel => (
+              {allChannels.map(channel => (
                 <ChannelSlider 
                   key={channel.id} 
                   allocation={channel} 
@@ -383,37 +385,6 @@ export const AllocationSection: React.FC = () => {
                   isLoading={isLoading[channel.id]}
                 />
               ))}
-            </div>
-          )}
-
-          {/* Inefficient channels */}
-          {inefficientChannels.length > 0 && (
-            <div>
-              {/* Дивайдер */}
-              <div style={{
-                height: '1px',
-                backgroundColor: '#EBE6EC',
-                marginBottom: '24px'
-              }} />
-              
-              <div style={{
-                backgroundColor: '#FFF5FB',
-                borderRadius: '8px',
-                padding: '20px'
-              }}>
-                <Text size="14px" fw={400} c="#1F2937" mb="20px">
-                  Think about reallocate:
-                </Text>
-                {inefficientChannels.map(channel => (
-                  <ChannelSlider 
-                    key={channel.id} 
-                    allocation={channel} 
-                    onBudgetChange={handleBudgetChange}
-                    onRemove={handleRemoveChannel}
-                    isLoading={isLoading[channel.id]}
-                  />
-                ))}
-              </div>
             </div>
           )}
         </div>
