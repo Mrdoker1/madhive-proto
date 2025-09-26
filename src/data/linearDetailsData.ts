@@ -1,18 +1,14 @@
 // Опции каналов/вещателей
 export const broadcasterOptions: string[] = [
   'ABC',
-  'CBS', 
-  'NBC',
+  'CBS',
+  'CW', 
+  'FOX',
+  'Graham Media',
   'Gray',
-  'Nexstar',
   'Hearst',
-  'TEGNA',
-  'Scripps',
-  'News Press Gazette', 
-  'Morgan Murphy',
-  'Hubbard Broadcasting',   
-  'Univision',
-  'Entravision',
+  'NBCU',
+  'NBCU Telemundo',
 ];
 
 // Опции провайдеров измерений

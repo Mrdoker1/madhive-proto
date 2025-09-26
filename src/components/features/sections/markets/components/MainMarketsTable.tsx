@@ -4,6 +4,7 @@ import React from 'react';
 import { Checkbox, Table, TableThead, TableTbody, TableTr, TableTh, TableTd, Text, TextInput } from '@mantine/core';
 import type { MarketData } from '@/data/marketsData';
 import type { MarketHandlers } from '../types';
+import { calculateMarketImpressions } from '../utils/marketCalculations';
 
 interface MainMarketsTableProps {
   markets: MarketData[];
@@ -96,7 +97,7 @@ const MainMarketsTable: React.FC<MainMarketsTableProps> = ({
               </Text>
             </TableTd>
             <TableTd>
-              <Text size="xs">{market.impression}</Text>
+              <Text size="xs">{calculateMarketImpressions(market)}</Text>
             </TableTd>
             <TableTd>
               <Text size="xs">{market.cpm}</Text>

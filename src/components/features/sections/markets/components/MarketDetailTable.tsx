@@ -3,7 +3,8 @@
 import React from 'react';
 import { Table, TableTbody, TableTr, TableTd, TableTh, Checkbox, TextInput, Text, Collapse } from '@mantine/core';
 import { IconChevronDown, IconChevronRight } from '@tabler/icons-react';
-import type { MarketData } from '../types';
+import type { MarketData } from '@/data/marketsData';
+import { calculateImpressions } from '../utils/marketCalculations';
 
 interface MarketDetailTableProps {
   market: MarketData;
@@ -141,7 +142,7 @@ const MarketDetailTable: React.FC<MarketDetailTableProps> = ({
                   </Text>
                 </TableTd>
                 <TableTd>
-                  <Text size="xs">{detail.impression}</Text>
+                  <Text size="xs">{calculateImpressions(detail.budget, detail.cpm)}</Text>
                 </TableTd>
                 <TableTd>
                   <Text size="xs">{detail.cpm}</Text>
