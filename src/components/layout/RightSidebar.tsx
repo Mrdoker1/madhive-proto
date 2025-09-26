@@ -78,8 +78,8 @@ const RightSidebar: React.FC<RightSidebarProps> = ({ className = '' }) => {
 
   // Функция для расчета общей аудитории
   const calculateAudienceEstimation = () => {
-    // Начальная общая аудитория (все демографические группы)
-    const totalPopulation = 16239480; // 15 миллионов базовая аудитория
+    // Используем Market Estimation как базовую аудитории, если доступна
+    const totalPopulation = marketEstimation > 0 ? marketEstimation : 16239480; // fallback если рынки не выбраны
     
     // Если ничего не выбрано - возвращаем полную аудиторию
     const hasSelections = Object.values(audienceData).some(arr => Array.isArray(arr) && arr.length > 0);
@@ -111,13 +111,13 @@ const RightSidebar: React.FC<RightSidebarProps> = ({ className = '' }) => {
     return Math.round(totalPopulation * audienceMultiplier);
   };
 
-  // Автоматически обновляем Audience Estimation при изменении выбранной аудитории
+  // Автоматически обновляем Audience Estimation при изменении выбранной аудитории или market estimation
   useEffect(() => {
     const calculatedAudience = calculateAudienceEstimation();
     if (calculatedAudience !== audienceEstimation) {
       dispatch(updateEstimations({ audienceEstimation: calculatedAudience }));
     }
-  }, [audienceData, audienceEstimation, dispatch]);
+  }, [audienceData, audienceEstimation, marketEstimation, dispatch]);
 
   // Обработчик изменения бюджета
   const handleBudgetChange = (event: React.ChangeEvent<HTMLInputElement>) => {
