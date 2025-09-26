@@ -3,8 +3,8 @@ export interface MarketDetailData {
   name: string;
   percentage: number;
   budget: number;
-  impression: string;
   cpm: string;
+  marketSize: number;
   selected: boolean;
 }
 
@@ -13,8 +13,8 @@ export interface MarketData {
   name: string;
   percentage: number;
   budget: number;
-  impression: string;
   cpm: string;
+  marketSize: number;
   selected: boolean;
   broadcaster: string;
   details: MarketDetailData[];

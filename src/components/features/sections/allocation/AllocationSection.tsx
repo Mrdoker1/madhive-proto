@@ -123,7 +123,7 @@ export const AllocationSection: React.FC = () => {
       
       return updated;
     });
-  }, [selectedChannels, totalBudget]);
+  }, [totalBudget]);
 
   // Обработчик изменения бюджета с умным перераспределением
   const handleBudgetChange = async (channelId: string, newBudget: number) => {
