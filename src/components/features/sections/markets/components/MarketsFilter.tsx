@@ -24,7 +24,7 @@ const MarketsFilter: React.FC<MarketsFilterProps> = ({
   // Формируем данные для MultiSelect
   const marketOptions = availableMarkets.map(market => ({
     value: market.name,
-    label: market.displayName
+    label: market.name // Используем name вместо displayName для удаления цифр
   }));
 
   return (
