@@ -1,7 +1,6 @@
 export { default } from './MarketsSection';
 export { default as MarketsSection } from './MarketsSection';
 export { default as MarketDetailTable } from './components/MarketDetailTable';
-export { default as PercentageWarning } from './components/PercentageWarning';
 export { default as MainMarketsTable } from './components/MainMarketsTable';
 export { default as MarketsFilter } from './components/MarketsFilter';
 export * from './types';

@@ -8,7 +8,7 @@ import { BreadcrumbStep } from "@/components/ui/Breadcrumbs";
 import NextButton from "@/components/ui/NextButton";
 import LinearDetailsSection from "@/components/features/sections/LinearDetailsSection";
 import AudiencesSection from "@/components/features/sections/AudiencesSection";
-import MarketsSection from "@/components/features/sections/MarketsSection";
+import MarketsSection from "@/components/features/sections/markets";
 import DaypartsSection from "@/components/features/sections/DaypartsSection";
 
 export default function ChannelDetailsPage() {

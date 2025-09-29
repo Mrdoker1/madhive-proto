@@ -1,32 +1,91 @@
 'use client';
 
-import React from 'react';
-import { Table, TableTbody, TableTr, TableTd, TableTh, Checkbox, TextInput, Text, Collapse } from '@mantine/core';
+import React, { useState, useRef } from 'react';
+import { Table, TableTbody, TableTr, TableTd, TableTh, Checkbox, TextInput, Text, Collapse, Tooltip } from '@mantine/core';
 import { IconChevronDown, IconChevronRight } from '@tabler/icons-react';
-import type { MarketData } from '@/data/marketsData';
-import { calculateImpressions } from '../utils/marketCalculations';
+import type { MarketWithStationsData } from '../types';
+import { calculateStationImpressions } from '../utils/marketCalculations';
+
+// Функция для форматирования процентов (максимум 2 знака после запятой)
+const formatPercentage = (value: number): string => {
+  return Number(value.toFixed(2)).toString();
+};
 
 interface MarketDetailTableProps {
-  market: MarketData;
+  market: MarketWithStationsData;
   isExpanded: boolean;
   onToggleExpand: () => void;
-  onDetailSelect: (detailId: string, checked: boolean) => void;
+  onDetailSelect: (stationId: string, checked: boolean) => void;
   onDetailSelectAll: (checked: boolean) => void;
-  onDetailPercentageChange: (detailId: string, value: string) => void;
+  onDetailPercentageChange: (stationId: string, value: string) => void;
 }
 
-const MarketDetailTable: React.FC<MarketDetailTableProps> = ({ 
-  market, 
-  isExpanded, 
-  onToggleExpand, 
-  onDetailSelect, 
+const MarketDetailTable: React.FC<MarketDetailTableProps> = ({
+  market,
+  isExpanded,
+  onToggleExpand,
+  onDetailSelect,
   onDetailSelectAll,
-  onDetailPercentageChange 
+  onDetailPercentageChange
 }) => {
-  const totalDetailBudget = market.details.reduce((sum, detail) => sum + detail.budget, 0);
-  const totalDetailPercentage = market.details.reduce((sum, detail) => sum + detail.percentage, 0);
-  const allDetailsSelected = market.details.length > 0 && market.details.every(detail => detail.selected);
-  const someDetailsSelected = market.details.some(detail => detail.selected);
+  // Состояние для валидации станций
+  const [previousStationValues, setPreviousStationValues] = useState<Record<string, number>>({});
+  const [stationErrorTooltips, setStationErrorTooltips] = useState<Record<string, boolean>>({});
+  const stationInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
+
+  // Обработчик фокуса для станций
+  const handleStationPercentageFocus = (stationId: string, currentValue: number) => {
+    setPreviousStationValues(prev => ({
+      ...prev,
+      [stationId]: currentValue
+    }));
+  };
+
+  // Обработчик потери фокуса для станций - валидация
+  const handleStationPercentageBlur = (stationId: string, newValue: string) => {
+    const numericValue = parseFloat(newValue) || 0;
+    const currentStation = market.stations.find(s => s.id === stationId);
+    
+    if (!currentStation) return;
+
+    // Рассчитываем общий процент станций в этом маркете если бы мы применили новое значение
+    const otherStationsTotal = market.stations.reduce((total, station) => {
+      if (station.id === stationId || !station.selected) return total;
+      return total + station.percentage;
+    }, 0);
+    
+    const wouldBeTotal = otherStationsTotal + numericValue;
+    
+    // Если превышает 100%, показываем ошибку и возвращаем предыдущее значение
+    if (wouldBeTotal > 100) {
+      setStationErrorTooltips(prev => ({
+        ...prev,
+        [stationId]: true
+      }));
+      
+      // Возвращаем предыдущее значение
+      const previousValue = previousStationValues[stationId] || currentStation.percentage;
+      onDetailPercentageChange(stationId, previousValue.toString());
+      
+      // Скрываем tooltip через 3 секунды
+      setTimeout(() => {
+        setStationErrorTooltips(prev => ({
+          ...prev,
+          [stationId]: false
+        }));
+      }, 3000);
+    } else {
+      // Убираем ошибку если она была
+      setStationErrorTooltips(prev => ({
+        ...prev,
+        [stationId]: false
+      }));
+    }
+  };
+  const totalStationBudget = market.stations.reduce((sum, station) => sum + station.budget, 0);
+  const totalStationPercentage = market.stations.reduce((sum, station) => sum + station.percentage, 0);
+  const allStationsSelected = market.stations.length > 0 && market.stations.every(station => station.selected);
+  const someStationsSelected = market.stations.some(station => station.selected);
 
   const handleSelectAllDetails = (checked: boolean) => {
     console.log(`Select All clicked for ${market.name}: ${checked}`);
@@ -59,14 +118,14 @@ const MarketDetailTable: React.FC<MarketDetailTableProps> = ({
               <IconChevronRight size={16} />
             }
           </div>
-          <Text fw={500} size="sm">{market.name} ({market.details.length})</Text>
+          <Text fw={500} size="sm">{market.displayName}</Text>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
           <Text size="xs" c="dimmed">
-            Total Budget: ${totalDetailBudget.toLocaleString('en-US', { maximumFractionDigits: 0 })}
+            Total Budget: ${totalStationBudget.toLocaleString('en-US', { maximumFractionDigits: 0 })}
           </Text>
           <Text size="xs" c="dimmed">
-            Total %: {totalDetailPercentage.toFixed(1)}%
+            Total %: {totalStationPercentage.toFixed(1)}%
           </Text>
         </div>
       </div>
@@ -79,13 +138,13 @@ const MarketDetailTable: React.FC<MarketDetailTableProps> = ({
             <TableTr style={{ height: '48px' }}>
               <TableTh style={{ width: '40px', textAlign: 'center' }}>
                 <Checkbox
-                  checked={allDetailsSelected}
-                  indeterminate={someDetailsSelected && !allDetailsSelected}
+                  checked={allStationsSelected}
+                  indeterminate={someStationsSelected && !allStationsSelected}
                   onChange={(event) => handleSelectAllDetails(event.currentTarget.checked)}
                 />
               </TableTh>
               <TableTh>
-                <Text size="xs" fw={500}>Market Details</Text>
+                <Text size="xs" fw={500}>TV Stations</Text>
               </TableTh>
               <TableTh style={{ width: '120px' }}>
                 <Text size="xs" fw={500}>% of Budget</Text>
@@ -101,51 +160,63 @@ const MarketDetailTable: React.FC<MarketDetailTableProps> = ({
               </TableTh>
             </TableTr>
             
-            {/* Detail rows */}
-            {market.details.map((detail) => (
-              <TableTr key={detail.id} style={{ height: '48px' }}>
+            {/* Station rows */}
+            {market.stations.map((station) => (
+              <TableTr key={station.id} style={{ height: '48px' }}>
                 <TableTd>
                   <Checkbox
-                    checked={detail.selected}
-                    onChange={(event) => onDetailSelect(detail.id, event.currentTarget.checked)}
+                    checked={station.selected}
+                    onChange={(event) => onDetailSelect(station.id, event.currentTarget.checked)}
                   />
                 </TableTd>
                 <TableTd>
-                  <Text size="xs">{detail.name}</Text>
+                  <Text size="xs">{station.name}</Text>
                 </TableTd>
                 <TableTd>
-                  <TextInput
-                    value={detail.percentage > 0 ? detail.percentage.toString() : ''}
-                    onChange={(event) => onDetailPercentageChange(detail.id, event.target.value)}
-                    placeholder="0"
-                    size="xs"
-                    disabled={!detail.selected}
-                    styles={{
-                      input: {
-                        textAlign: 'center',
-                        padding: '4px 20px 4px 0',
-                        height: '28px'
-                      },
-                      section: {
-                        width: '32px'
-                      }
-                    }}
-                    rightSection={<Text size="xs" c="dimmed">%</Text>}
-                  />
+                  <Tooltip
+                    label="You have exceeded the maximum budget value"
+                    opened={stationErrorTooltips[station.id] || false}
+                    color="red"
+                    position="top"
+                    withArrow
+                  >
+                    <TextInput
+                      ref={(el) => { stationInputRefs.current[station.id] = el; }}
+                      value={station.percentage > 0 ? formatPercentage(station.percentage) : ''}
+                      onChange={(event) => onDetailPercentageChange(station.id, event.target.value)}
+                      onFocus={() => handleStationPercentageFocus(station.id, station.percentage)}
+                      onBlur={(event) => handleStationPercentageBlur(station.id, event.target.value)}
+                      placeholder="0"
+                      size="xs"
+                      disabled={!station.selected}
+                      styles={{
+                        input: {
+                          textAlign: 'center',
+                          padding: '4px 20px 4px 0',
+                          height: '28px',
+                          borderColor: stationErrorTooltips[station.id] ? '#fa5252' : undefined
+                        },
+                        section: {
+                          width: '32px'
+                        }
+                      }}
+                      rightSection={<Text size="xs" c="dimmed">%</Text>}
+                    />
+                  </Tooltip>
                 </TableTd>
                 <TableTd>
                   <Text size="xs">
-                    {detail.budget > 0 
-                      ? `$${detail.budget.toLocaleString('en-US', { maximumFractionDigits: 0 })}` 
-                      : '#'
+                    {station.budget > 0 
+                      ? `$${station.budget.toLocaleString('en-US', { maximumFractionDigits: 0 })}` 
+                      : '$0'
                     }
                   </Text>
                 </TableTd>
                 <TableTd>
-                  <Text size="xs">{calculateImpressions(detail.budget, detail.cpm)}</Text>
+                  <Text size="xs">{calculateStationImpressions(station.budget, station.cpm)}</Text>
                 </TableTd>
                 <TableTd>
-                  <Text size="xs">{detail.cpm}</Text>
+                  <Text size="xs">{station.cpm}</Text>
                 </TableTd>
               </TableTr>
             ))}

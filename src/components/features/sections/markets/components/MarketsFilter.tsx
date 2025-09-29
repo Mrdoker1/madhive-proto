@@ -2,10 +2,16 @@
 
 import React from 'react';
 import { MultiSelect } from '@mantine/core';
-import type { MarketData } from '../types';
+// import type { MarketData } from '../types';
+
+interface MarketFilterOption {
+  id: string;
+  name: string;
+  displayName: string;
+}
 
 interface MarketsFilterProps {
-  availableMarkets: MarketData[];
+  availableMarkets: MarketFilterOption[];
   selectedMarkets: string[];
   onMarketsChange: (selectedMarkets: string[]) => void;
 }
@@ -18,7 +24,7 @@ const MarketsFilter: React.FC<MarketsFilterProps> = ({
   // Формируем данные для MultiSelect
   const marketOptions = availableMarkets.map(market => ({
     value: market.name,
-    label: market.name
+    label: market.displayName
   }));
 
   return (

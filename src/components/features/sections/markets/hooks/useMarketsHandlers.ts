@@ -1,17 +1,19 @@
 import { useCallback } from 'react';
 import { updateMarketsData, updateEstimations } from '@/store/slices/campaignSlice';
-import type { MarketData } from '@/data/marketsData';
-import type { MarketHandlers } from '../types';
-import { distributePercentagesEvenly, calculateMarketEstimation } from '../utils/marketCalculations';
+import { calculateMarketEstimation } from '../utils/marketCalculations';
+import type { MarketWithStationsData, MarketHandlers } from '../types';
+import type { AppDispatch } from '@/store/store';
 
 interface UseMarketsHandlersProps {
-  markets: MarketData[];
-  setMarkets: (markets: MarketData[]) => void;
+  markets: MarketWithStationsData[];
+  setMarkets: (markets: MarketWithStationsData[]) => void;
   expandedDetails: Set<string>;
-  setExpandedDetails: React.Dispatch<React.SetStateAction<Set<string>>>;
+  setExpandedDetails: (expanded: Set<string>) => void;
   budgetData: { totalBudget: number };
-  dispatch: any;
+  dispatch: AppDispatch;
 }
+
+// calculateMarketEstimation импортирован из utils
 
 export const useMarketsHandlers = ({
   markets,
@@ -22,217 +24,213 @@ export const useMarketsHandlers = ({
   dispatch
 }: UseMarketsHandlersProps): MarketHandlers => {
 
-  const handlePercentageChange = useCallback((marketId: string, value: string) => {
-    // Разрешаем только цифры и точку для десятичных чисел
-    if (!/^\d*\.?\d*$/.test(value)) return;
-    
-    const numericValue = parseFloat(value) || 0;
-    
-    // Ограничиваем максимальным значением 100
-    if (numericValue > 100) return;
-    
-    const updatedMarkets = markets.map(market => {
-      if (market.id === marketId) {
-        // Пересчитываем бюджет на основе нового процента
-        const budget = (budgetData.totalBudget * numericValue) / 100;
-        
-        // Пересчитываем бюджеты подрынков на основе нового бюджета основного рынка
-        const updatedDetails = market.details.map(detail => ({
-          ...detail,
-          budget: (budget * detail.percentage) / 100
-        }));
-        
+  const handleSelectAll = useCallback((checked: boolean) => {
+    if (checked) {
+      // Если выбираем все маркеты, равномерно распределяем проценты
+      const percentagePerMarket = Math.round((100 / markets.length) * 100) / 100;
+      
+      const updatedMarkets = markets.map(market => {
+        const marketBudget = (budgetData.totalBudget * percentagePerMarket) / 100;
+        const budgetPerStation = market.stations.length > 0 
+          ? marketBudget / market.stations.length 
+          : 0;
+
         return {
           ...market,
-          percentage: numericValue,
-          budget: budget,
-          details: updatedDetails
+          selected: true,
+          percentage: percentagePerMarket,
+          budget: marketBudget,
+          stations: market.stations.map(station => ({
+            ...station,
+            selected: true,
+            percentage: market.stations.length > 0 ? Math.round((100 / market.stations.length) * 100) / 100 : 0,
+            budget: budgetPerStation
+          }))
         };
-      }
-      return market;
-    });
-    
-    setMarkets(updatedMarkets);
-  }, [markets, budgetData.totalBudget, setMarkets]);
+      });
 
-  const handleDetailSelect = useCallback((marketId: string, detailId: string, checked: boolean) => {
-    const updatedMarkets = markets.map(market => {
-      if (market.id === marketId) {
-        const updatedDetails = market.details.map(detail => {
-          if (detail.id === detailId) {
-            return { 
-              ...detail, 
-              selected: checked,
-              percentage: checked ? detail.percentage : 0,
-              budget: checked ? detail.budget : 0
-            };
-          }
-          return detail;
-        });
-        
-        // Проверяем, остались ли выбранные подстанции
-        const hasSelectedDetails = updatedDetails.some(detail => detail.selected);
-        console.log(`Market ${market.name}: hasSelectedDetails = ${hasSelectedDetails}`, updatedDetails.map(d => ({ name: d.name, selected: d.selected })));
-        
-        // Если нет выбранных подстанций, снимаем выделение с основного рынка
-        let updatedMarket = { 
-          ...market, 
-          details: updatedDetails
-        };
-        
-        // Если нет выбранных подрынков, снимаем выделение с основного рынка
-        if (!hasSelectedDetails) {
-          console.log(`Deselecting main market: ${market.name}`);
-          updatedMarket.selected = false;
-          updatedMarket.percentage = 0;
-          updatedMarket.budget = 0;
-        }
-        
-        return updatedMarket;
-      }
-      return market;
-    });
-    
-    // Обновляем selectedMarkets в Redux
-    const selectedMarketNames = updatedMarkets
-      .filter(market => market.selected)
-      .map(market => market.name);
-    
-    setMarkets(updatedMarkets);
-    dispatch(updateMarketsData({ selectedMarkets: selectedMarketNames }));
-    
-    // Пересчитываем Market Estimation
-    const marketEstimation = calculateMarketEstimation(updatedMarkets);
-    dispatch(updateEstimations({ marketEstimation }));
-  }, [markets, setMarkets, dispatch]);
+      setMarkets(updatedMarkets);
 
-  const handleDetailPercentageChange = useCallback((marketId: string, detailId: string, value: string) => {
-    // Разрешаем только цифры и точку для десятичных чисел
-    if (!/^\d*\.?\d*$/.test(value)) return;
-    
-    const numericValue = parseFloat(value) || 0;
-    
-    // Ограничиваем максимальным значением 100
-    if (numericValue > 100) return;
-    
-    const updatedMarkets = markets.map(market => {
-      if (market.id === marketId) {
-        const updatedDetails = market.details.map(detail => {
-          if (detail.id === detailId) {
-            // Пересчитываем бюджет на основе нового процента от бюджета основного рынка
-            const budget = (market.budget * numericValue) / 100;
-            return {
-              ...detail,
-              percentage: numericValue,
-              budget: budget
-            };
-          }
-          return detail;
-        });
-        return { ...market, details: updatedDetails };
-      }
-      return market;
-    });
-    
-    setMarkets(updatedMarkets);
-  }, [markets, setMarkets]);
+      // Update Redux
+      const selectedMarketNames = updatedMarkets.map(m => m.name);
+      dispatch(updateMarketsData({ selectedMarkets: selectedMarketNames }));
 
-  const handleToggleDetailExpand = useCallback((marketId: string) => {
-    setExpandedDetails(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(marketId)) {
-        newSet.delete(marketId);
-      } else {
-        newSet.add(marketId);
-      }
-      return newSet;
-    });
-  }, [setExpandedDetails]);
-
-  const handleSelectAll = useCallback((checked: boolean) => {
-    const updatedMarkets = markets.map(market => {
-      const newMarket = { ...market, selected: checked };
-      if (!checked) {
-        newMarket.percentage = 0;
-        newMarket.budget = 0;
-        newMarket.details = newMarket.details.map(detail => ({
-          ...detail,
+      // Update estimations
+      const marketEstimation = calculateMarketEstimation(updatedMarkets);
+      dispatch(updateEstimations({ marketEstimation }));
+    } else {
+      // Если снимаем выбор со всех маркетов
+      const updatedMarkets = markets.map(market => ({
+        ...market,
+        selected: false,
+        percentage: 0,
+        budget: 0,
+        stations: market.stations.map(station => ({
+          ...station,
           selected: false,
           percentage: 0,
           budget: 0
-        }));
-      } else {
-        // При выборе всех рынков, подрынки тоже выбираются с равномерным распределением
-        const detailsCount = newMarket.details.length;
-        const percentagePerDetail = distributePercentagesEvenly(detailsCount);
-        
-        newMarket.details = newMarket.details.map(detail => ({
-          ...detail,
-          selected: true,
-          percentage: percentagePerDetail,
-          budget: (newMarket.budget * percentagePerDetail) / 100
-        }));
-      }
-      return newMarket;
-    });
-    
-    const selectedMarketNames = checked ? updatedMarkets.map(market => market.name) : [];
-    setMarkets(updatedMarkets);
-    dispatch(updateMarketsData({ selectedMarkets: selectedMarketNames }));
-    
-    // Пересчитываем Market Estimation
-    const marketEstimation = calculateMarketEstimation(updatedMarkets);
-    dispatch(updateEstimations({ marketEstimation }));
-  }, [markets, setMarkets, dispatch]);
+        }))
+      }));
 
-  const handleMarketSelect = useCallback((marketId: string, checked: boolean) => {
-    const updatedMarkets = markets.map(market => {
+      setMarkets(updatedMarkets);
+
+      // Update Redux
+      dispatch(updateMarketsData({ selectedMarkets: [] }));
+
+      // Update estimations
+      dispatch(updateEstimations({ marketEstimation: 0 }));
+    }
+  }, [markets, budgetData.totalBudget, setMarkets, dispatch]);
+
+  const handleSelect = useCallback((marketId: string, checked: boolean) => {
+    // Сначала обновляем статус выбранного маркета
+    const preliminaryMarkets = markets.map(market => {
       if (market.id === marketId) {
-        const newMarket = { ...market, selected: checked };
-        
-        // При снятии выделения сбрасываем процент и бюджет
-        if (!checked) {
-          newMarket.percentage = 0;
-          newMarket.budget = 0;
-          
-          // Также снимаем выделение со всех подстанций
-          newMarket.details = newMarket.details.map(detail => ({
-            ...detail,
-            selected: false,
-            percentage: 0,
-            budget: 0
-          }));
-        } else {
-          // При выделении основного рынка выбираем все подстанции с равномерным распределением
-          const detailsCount = newMarket.details.length;
-          const percentagePerDetail = distributePercentagesEvenly(detailsCount);
-          
-          newMarket.details = newMarket.details.map(detail => {
-            const percentage = percentagePerDetail;
-            const budget = (newMarket.budget * percentage) / 100;
-            
-            return {
-              ...detail,
-              selected: true,
-              percentage: percentage,
-              budget: budget
-            };
-          });
-        }
-        
-        return newMarket;
+        return {
+          ...market,
+          selected: checked,
+          stations: market.stations.map(station => ({
+            ...station,
+            selected: checked,
+            percentage: checked ? Math.round((100 / market.stations.length) * 100) / 100 : 0,
+            budget: 0 // Пока 0, пересчитаем после распределения процентов
+          }))
+        };
       }
       return market;
     });
+
+    // Подсчитываем количество выбранных маркетов
+    const selectedMarkets = preliminaryMarkets.filter(market => market.selected);
+    const selectedCount = selectedMarkets.length;
     
+    // Равномерно распределяем проценты между выбранными маркетами
+    const percentagePerMarket = selectedCount > 0 ? Math.round((100 / selectedCount) * 100) / 100 : 0;
+    
+    const updatedMarkets = preliminaryMarkets.map(market => {
+      if (market.selected) {
+        const marketBudget = (budgetData.totalBudget * percentagePerMarket) / 100;
+        const budgetPerStation = market.stations.filter(s => s.selected).length > 0 
+          ? marketBudget / market.stations.filter(s => s.selected).length 
+          : 0;
+
+        return {
+          ...market,
+          percentage: percentagePerMarket,
+          budget: marketBudget,
+          stations: market.stations.map(station => ({
+            ...station,
+            budget: station.selected ? budgetPerStation : 0
+          }))
+        };
+      } else {
+        return {
+          ...market,
+          percentage: 0,
+          budget: 0,
+          stations: market.stations.map(station => ({
+            ...station,
+            percentage: 0,
+            budget: 0
+          }))
+        };
+      }
+    });
+
+    setMarkets(updatedMarkets);
+
+    // Update Redux
     const selectedMarketNames = updatedMarkets
       .filter(market => market.selected)
       .map(market => market.name);
-    
-    setMarkets(updatedMarkets);
     dispatch(updateMarketsData({ selectedMarkets: selectedMarketNames }));
+
+    // Update estimations
+    const marketEstimation = calculateMarketEstimation(updatedMarkets);
+    dispatch(updateEstimations({ marketEstimation }));
+  }, [markets, budgetData.totalBudget, setMarkets, dispatch]);
+
+  const handlePercentageChange = useCallback((marketId: string, value: string) => {
+    const percentage = Math.max(0, Math.min(100, parseFloat(value) || 0));
     
-    // Пересчитываем Market Estimation
+    const updatedMarkets = markets.map(market => {
+      if (market.id === marketId) {
+        const budget = (budgetData.totalBudget * percentage) / 100;
+        
+        // Redistribute budget among selected stations
+        const selectedStations = market.stations.filter(s => s.selected);
+        const updatedStations = market.stations.map(station => {
+          if (station.selected && selectedStations.length > 0) {
+            return {
+              ...station,
+              budget: budget / selectedStations.length
+            };
+          }
+          return station;
+        });
+
+        return {
+          ...market,
+          percentage,
+          budget,
+          stations: updatedStations
+        };
+      }
+      return market;
+    });
+
+    setMarkets(updatedMarkets);
+  }, [markets, budgetData.totalBudget, setMarkets]);
+
+  const handleToggleDetailExpand = useCallback((marketId: string) => {
+    const newExpanded = new Set(expandedDetails);
+    if (newExpanded.has(marketId)) {
+      newExpanded.delete(marketId);
+    } else {
+      newExpanded.add(marketId);
+    }
+    setExpandedDetails(newExpanded);
+  }, [expandedDetails, setExpandedDetails]);
+
+  const handleDetailSelect = useCallback((marketId: string, stationId: string, checked: boolean) => {
+    const updatedMarkets = markets.map(market => {
+      if (market.id === marketId) {
+        const updatedStations = market.stations.map(station => {
+          if (station.id === stationId) {
+            return {
+              ...station,
+              selected: checked,
+              percentage: checked ? station.percentage || (100 / market.stations.length) : 0,
+              budget: checked ? station.budget || (market.budget / market.stations.filter(s => s.selected || s.id === stationId).length) : 0
+            };
+          }
+          return station;
+        });
+
+        // Check if market should remain selected
+        const hasSelectedStations = updatedStations.some(station => station.selected);
+        
+        return {
+          ...market,
+          selected: hasSelectedStations,
+          percentage: hasSelectedStations ? market.percentage : 0,
+          budget: hasSelectedStations ? market.budget : 0,
+          stations: updatedStations
+        };
+      }
+      return market;
+    });
+
+    setMarkets(updatedMarkets);
+
+    // Update Redux
+    const selectedMarketNames = updatedMarkets
+      .filter(market => market.selected)
+      .map(market => market.name);
+    dispatch(updateMarketsData({ selectedMarkets: selectedMarketNames }));
+
+    // Update estimations
     const marketEstimation = calculateMarketEstimation(updatedMarkets);
     dispatch(updateEstimations({ marketEstimation }));
   }, [markets, setMarkets, dispatch]);
@@ -240,58 +238,67 @@ export const useMarketsHandlers = ({
   const handleDetailSelectAll = useCallback((marketId: string, checked: boolean) => {
     const updatedMarkets = markets.map(market => {
       if (market.id === marketId) {
-        // Обновляем все подрынки одновременно
-        const updatedDetails = market.details.map(detail => ({
-          ...detail,
+        const updatedStations = market.stations.map(station => ({
+          ...station,
           selected: checked,
-          percentage: checked ? detail.percentage : 0,
-          budget: checked ? detail.budget : 0
+            percentage: checked ? Math.round((100 / market.stations.length) * 100) / 100 : 0,
+          budget: checked ? (market.budget / market.stations.length) : 0
         }));
-        
-        // Проверяем, остались ли выбранные подстанции
-        const hasSelectedDetails = updatedDetails.some(detail => detail.selected);
-        console.log(`Market ${market.name}: Select All ${checked}, hasSelectedDetails = ${hasSelectedDetails}`);
-        
-        // Если нет выбранных подрынков, снимаем выделение с основного рынка
-        let updatedMarket = { 
-          ...market, 
-          details: updatedDetails
+
+        return {
+          ...market,
+          stations: updatedStations
         };
-        
-        if (!hasSelectedDetails) {
-          console.log(`Deselecting main market via Select All: ${market.name}`);
-          updatedMarket.selected = false;
-          updatedMarket.percentage = 0;
-          updatedMarket.budget = 0;
-        }
-        
-        return updatedMarket;
       }
       return market;
     });
-    
-    // Обновляем selectedMarkets в Redux
-    const selectedMarketNames = updatedMarkets
-      .filter(market => market.selected)
-      .map(market => market.name);
-    
-    console.log('Updated selectedMarketNames via Select All:', selectedMarketNames);
-    
+
     setMarkets(updatedMarkets);
-    dispatch(updateMarketsData({ selectedMarkets: selectedMarketNames }));
+
+    // Update estimations
+    const marketEstimation = calculateMarketEstimation(updatedMarkets);
+    dispatch(updateEstimations({ marketEstimation }));
+  }, [markets, setMarkets, dispatch]);
+
+  const handleDetailPercentageChange = useCallback((marketId: string, stationId: string, value: string) => {
+    const percentage = Math.round(Math.max(0, Math.min(100, parseFloat(value) || 0)) * 100) / 100;
     
-    // Пересчитываем Market Estimation
+    const updatedMarkets = markets.map(market => {
+      if (market.id === marketId) {
+        const updatedStations = market.stations.map(station => {
+          if (station.id === stationId) {
+            const budget = (market.budget * percentage) / 100;
+            return {
+              ...station,
+              percentage,
+              budget
+            };
+          }
+          return station;
+        });
+
+        return {
+          ...market,
+          stations: updatedStations
+        };
+      }
+      return market;
+    });
+
+    setMarkets(updatedMarkets);
+
+    // Update estimations
     const marketEstimation = calculateMarketEstimation(updatedMarkets);
     dispatch(updateEstimations({ marketEstimation }));
   }, [markets, setMarkets, dispatch]);
 
   return {
-    handleMarketSelect,
-    handlePercentageChange,
-    handleDetailSelect,
-    handleDetailPercentageChange,
-    handleDetailSelectAll,
     handleSelectAll,
-    handleToggleDetailExpand
+    handleSelect,
+    handlePercentageChange,
+    handleToggleDetailExpand,
+    handleDetailSelect,
+    handleDetailSelectAll,
+    handleDetailPercentageChange
   };
 };

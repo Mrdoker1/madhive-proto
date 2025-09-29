@@ -1,7 +1,7 @@
 import { MultiSelect, Select } from '@mantine/core';
 import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
 import { updateLinearData } from '@/store/slices/campaignSlice';
-import { broadcasterOptions, measurementProviderOptions } from '@/data/linearDetailsData';
+import { broadcastersData } from '@/data/broadcastersData';
 
 const LinearDetailsSection = () => {
   const dispatch = useAppDispatch();
@@ -21,7 +21,7 @@ const LinearDetailsSection = () => {
       <MultiSelect
         label="Broadcasters"
         placeholder="Select channels"
-        data={broadcasterOptions}
+        data={broadcastersData.map(broadcaster => broadcaster.name)}
         value={linearData.broadcasters}
         onChange={handleBroadcastersChange}
         clearable
@@ -32,7 +32,7 @@ const LinearDetailsSection = () => {
       <Select
         label="Measurement Providers"
         placeholder="Select measurement provider"
-        data={measurementProviderOptions}
+        data={['Nielsen', 'Comscore']}
         value={linearData.measurementProvider}
         onChange={handleMeasurementProviderChange}
       />

@@ -1,109 +1,12 @@
-import type { MarketData } from '../types';
-import type { MarketData as MarketDbData } from '@/data/marketsData';
-
-export const calculateBudgetAndPercentageDistribution = (
-  availableMarkets: MarketData[], 
-  selectedMarkets: MarketData[], 
-  totalBudget: number
-): MarketData[] => {
-  if (selectedMarkets.length === 0) {
-    return availableMarkets.map(market => ({ 
-      ...market, 
-      budget: 0,
-      percentage: 0
-    }));
-  }
-
-  const percentagePerMarket = 100 / selectedMarkets.length;
-  
-  return availableMarkets.map(market => {
-    if (market.selected) {
-      // Рассчитываем бюджет на основе процента от общего бюджета
-      const budget = (totalBudget * percentagePerMarket) / 100;
-      return {
-        ...market,
-        percentage: Math.round(percentagePerMarket * 100) / 100, // Округляем до 2 знаков
-        budget: budget
-      };
-    } else {
-      return {
-        ...market,
-        percentage: 0,
-        budget: 0
-      };
-    }
-  });
-};
-
-export const getTotalPercentage = (markets: MarketData[]): number => {
-  let total = 0;
-  
-  markets.forEach(market => {
-    // Добавляем процент основного рынка, если он выбран
-    // Подрынки являются частью основного рынка, поэтому их проценты не суммируются с основным
-    if (market.selected) {
-      total += market.percentage;
-    }
-  });
-  
-  return total;
-};
-
-export const checkSubMarketOverallocation = (markets: MarketData[]): boolean => {
-  return markets.some(market => {
-    if (market.selected && market.details.length > 0) {
-      const subMarketTotal = market.details
-        .filter(detail => detail.selected)
-        .reduce((sum, detail) => sum + detail.percentage, 0);
-      return subMarketTotal > 100;
-    }
-    return false;
-  });
-};
-
-export const getSelectedMarketsWithDetails = (markets: MarketData[]): MarketData[] => {
-  return markets.filter(market => market.selected && market.details.length > 0);
-};
-
-export const distributePercentagesEvenly = (detailsCount: number): number => {
-  return detailsCount > 0 ? Math.round((100 / detailsCount) * 100) / 100 : 0;
-};
-
-/**
- * Вычисляет Market Estimation на основе выбранных рынков и подстанций
- * @param markets - массив рынков с их текущим состоянием (выбраны/не выбраны)
- * @returns общий размер аудитории выбранных рынков и подстанций
- */
-export const calculateMarketEstimation = (markets: MarketDbData[]): number => {
-  let totalMarketSize = 0;
-  
-  markets.forEach(market => {
-    if (market.selected) {
-      // Проверяем, есть ли выбранные подстанции
-      const selectedDetails = market.details.filter(detail => detail.selected);
-      
-      if (selectedDetails.length > 0) {
-        // Если есть выбранные подстанции, суммируем их marketSize
-        selectedDetails.forEach(detail => {
-          totalMarketSize += detail.marketSize;
-        });
-      } else {
-        // Если подстанций нет или они не выбраны, используем marketSize основного рынка
-        totalMarketSize += market.marketSize;
-      }
-    }
-  });
-  
-  return totalMarketSize;
-};
+import type { MarketWithStationsData, StationSelectionData } from '../types';
 
 /**
  * Вычисляет Impressions по формуле: Impressions = (Total Campaign Cost / CPM) × 1,000
- * @param budget - общий бюджет кампании для данного рынка/подстанции
+ * @param budget - общий бюджет кампании для данной станции
  * @param cpmString - строковое значение CPM (например, "$12.50")
  * @returns отформатированная строка impressions (например, "2.1M")
  */
-export const calculateImpressions = (budget: number, cpmString: string): string => {
+export const calculateStationImpressions = (budget: number, cpmString: string): string => {
   if (budget === 0) return '0';
   
   // Извлекаем числовое значение CPM из строки (убираем $ и парсим)
@@ -124,25 +27,25 @@ export const calculateImpressions = (budget: number, cpmString: string): string 
 };
 
 /**
- * Вычисляет Impressions для основного рынка
- * Если есть выбранные подстанции, возвращает сумму их impressions
- * Иначе использует собственный CPM и бюджет рынка
+ * Вычисляет Impressions для основного маркета
+ * Если есть выбранные станции, возвращает сумму их impressions
+ * Иначе возвращает 0
  */
-export const calculateMarketImpressions = (market: MarketDbData): string => {
+export const calculateMarketImpressions = (market: MarketWithStationsData): string => {
   if (market.budget === 0) return '0';
   
-  // Проверяем, есть ли выбранные подстанции
-  const selectedDetails = market.details.filter(detail => detail.selected);
+  // Проверяем, есть ли выбранные станции
+  const selectedStations = market.stations.filter(station => station.selected);
   
-  if (selectedDetails.length > 0) {
-    // Суммируем impressions всех выбранных подстанций
+  if (selectedStations.length > 0) {
+    // Суммируем impressions всех выбранных станций
     let totalImpressions = 0;
     
-    selectedDetails.forEach(detail => {
-      if (detail.budget > 0) {
-        const cpm = parseFloat(detail.cpm.replace('$', ''));
+    selectedStations.forEach(station => {
+      if (station.budget > 0) {
+        const cpm = parseFloat(station.cpm.replace('$', ''));
         if (cpm > 0) {
-          totalImpressions += (detail.budget / cpm) * 1000;
+          totalImpressions += (station.budget / cpm) * 1000;
         }
       }
     });
@@ -156,7 +59,55 @@ export const calculateMarketImpressions = (market: MarketDbData): string => {
       return totalImpressions.toFixed(0);
     }
   } else {
-    // Если подстанции не выбраны, используем CPM основного рынка
-    return calculateImpressions(market.budget, market.cpm);
+    // Если станции не выбраны, возвращаем 0
+    return '0';
   }
+};
+
+/**
+ * Вычисляет общий процент для всех маркетов
+ */
+export const getTotalPercentage = (markets: MarketWithStationsData[]): number => {
+  return markets.reduce((total, market) => {
+    if (market.selected) {
+      return total + market.percentage;
+    }
+    return total;
+  }, 0);
+};
+
+/**
+ * Проверяет, есть ли переаллокация в станциях (сумма процентов > 100%)
+ */
+export const checkStationOverallocation = (markets: MarketWithStationsData[]): boolean => {
+  return markets.some(market => {
+    if (market.selected && market.stations.length > 0) {
+      const stationTotal = market.stations
+        .filter(station => station.selected)
+        .reduce((sum, station) => sum + station.percentage, 0);
+      return stationTotal > 100;
+    }
+    return false;
+  });
+};
+
+/**
+ * Вычисляет Market Estimation на основе выбранных станций
+ * @param markets - массив маркетов с их текущим состоянием
+ * @returns общий размер аудитории выбранных станций
+ */
+export const calculateMarketEstimation = (markets: MarketWithStationsData[]): number => {
+  let totalAudienceSize = 0;
+  
+  markets.forEach(market => {
+    if (market.selected) {
+      // Суммируем audienceSize всех выбранных станций
+      const selectedStations = market.stations.filter(station => station.selected);
+      selectedStations.forEach(station => {
+        totalAudienceSize += station.audienceSize;
+      });
+    }
+  });
+  
+  return totalAudienceSize;
 };

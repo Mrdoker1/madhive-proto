@@ -6,7 +6,6 @@ import { useAppSelector } from '@/hooks/useRedux';
 import MarketDetailTable from './components/MarketDetailTable';
 import { useMarketsState } from './hooks/useMarketsState';
 import { useMarketsHandlers } from './hooks/useMarketsHandlers';
-import PercentageWarning from './components/PercentageWarning';
 import MainMarketsTable from './components/MainMarketsTable';
 import MarketsFilter from './components/MarketsFilter';
 
@@ -16,10 +15,9 @@ const MarketsSection = () => {
   const {
     markets,
     expandedDetails,
-    selectedMarketsWithDetails,
+    selectedMarketsWithStations,
     allSelected,
     someSelected,
-    validation,
     availableMarkets,
     filteredMarketNames,
     setMarkets,
@@ -60,8 +58,6 @@ const MarketsSection = () => {
         </div>
       )}
 
-      {/* Percentage Allocation Warning */}
-      <PercentageWarning validation={validation} />
 
       {/* Main Markets Table */}
       <MainMarketsTable
@@ -72,15 +68,15 @@ const MarketsSection = () => {
       />
 
       {/* Detailed Tables for Selected Markets */}
-      {selectedMarketsWithDetails.map((market) => (
+      {selectedMarketsWithStations.map((market) => (
         <MarketDetailTable
           key={`detail-${market.id}`}
           market={market}
           isExpanded={expandedDetails.has(market.id)}
           onToggleExpand={() => handlers.handleToggleDetailExpand(market.id)}
-          onDetailSelect={(detailId, checked) => handlers.handleDetailSelect(market.id, detailId, checked)}
+          onDetailSelect={(stationId, checked) => handlers.handleDetailSelect(market.id, stationId, checked)}
           onDetailSelectAll={(checked) => handlers.handleDetailSelectAll(market.id, checked)}
-          onDetailPercentageChange={(detailId, value) => handlers.handleDetailPercentageChange(market.id, detailId, value)}
+          onDetailPercentageChange={(stationId, value) => handlers.handleDetailPercentageChange(market.id, stationId, value)}
         />
       ))}
     </div>

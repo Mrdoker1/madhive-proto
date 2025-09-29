@@ -1,42 +1,31 @@
-export interface MarketDetailData {
+import type { StationData } from '@/data/stationsData';
+import type { MarketInfo } from '@/data/marketsData';
+
+export interface MarketWithStationsData {
   id: string;
   name: string;
+  displayName: string;
+  rank: number;
+  marketSize: number;
   percentage: number;
   budget: number;
-  cpm: string;
-  marketSize: number;
   selected: boolean;
+  stations: StationSelectionData[];
 }
 
-export interface MarketData {
-  id: string;
-  name: string;
+export interface StationSelectionData extends StationData {
+  selected: boolean;
   percentage: number;
   budget: number;
-  cpm: string;
-  marketSize: number;
-  selected: boolean;
-  broadcaster: string;
-  details: MarketDetailData[];
 }
 
-export interface MarketsState {
-  markets: MarketData[];
-  expandedDetails: Set<string>;
-}
-
-export interface ValidationState {
-  totalPercentage: number;
-  hasSubMarketOverallocation: boolean;
-  isOverHundredPercent: boolean;
-}
 
 export interface MarketHandlers {
-  handleMarketSelect: (marketId: string, checked: boolean) => void;
-  handlePercentageChange: (marketId: string, value: string) => void;
-  handleDetailSelect: (marketId: string, detailId: string, checked: boolean) => void;
-  handleDetailPercentageChange: (marketId: string, detailId: string, value: string) => void;
-  handleDetailSelectAll: (marketId: string, checked: boolean) => void;
   handleSelectAll: (checked: boolean) => void;
+  handleSelect: (marketId: string, checked: boolean) => void;
+  handlePercentageChange: (marketId: string, value: string) => void;
   handleToggleDetailExpand: (marketId: string) => void;
+  handleDetailSelect: (marketId: string, stationId: string, checked: boolean) => void;
+  handleDetailSelectAll: (marketId: string, checked: boolean) => void;
+  handleDetailPercentageChange: (marketId: string, stationId: string, value: string) => void;
 }
