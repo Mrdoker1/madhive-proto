@@ -11,7 +11,7 @@ export interface CampaignGeneralData {
   cpeCode: string;
   campaignOwner: string;
   campaignApprover: string;
-  spotLengths: string[];
+  spotLength: string;
 }
 
 export interface CampaignBudgetData {
@@ -92,7 +92,7 @@ const initialState: CampaignState = {
     cpeCode: '',
     campaignOwner: '',
     campaignApprover: '',
-    spotLengths: []
+    spotLength: ''
   },
   budget: {
     totalBudget: 0,

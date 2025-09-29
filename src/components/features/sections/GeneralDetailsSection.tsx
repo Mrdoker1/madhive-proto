@@ -24,7 +24,7 @@ const GeneralDetailsSection: React.FC<GeneralDetailsSectionProps> = ({
     cpeCode: '',
     campaignOwner: '',
     campaignApprover: '',
-    spotLengths: [] as string[]
+    spotLength: ''
   });
 
   // Синхронизируем локальное состояние с глобальным при загрузке
@@ -37,7 +37,7 @@ const GeneralDetailsSection: React.FC<GeneralDetailsSectionProps> = ({
       cpeCode: globalGeneralData.cpeCode || '',
       campaignOwner: globalGeneralData.campaignOwner || '',
       campaignApprover: globalGeneralData.campaignApprover || '',
-      spotLengths: globalGeneralData.spotLengths || []
+      spotLength: globalGeneralData.spotLength || ''
     });
   }, [globalGeneralData]);
 
@@ -50,12 +50,14 @@ const GeneralDetailsSection: React.FC<GeneralDetailsSectionProps> = ({
         ...prev, 
         [field]: newValue,
         brand: '', // Сбрасываем бренд при смене рекламодателя
-        agency: '' // Сбрасываем агентство при смене рекламодателя
+        agency: '', // Сбрасываем агентство при смене рекламодателя
+        spotLength: '' // Сбрасываем spot length при смене рекламодателя
       }));
       dispatch(updateGeneralData({ 
         advertiser: newValue,
         brand: '', // Сбрасываем бренд в глобальном состоянии
-        agency: '' // Сбрасываем агентство в глобальном состоянии
+        agency: '', // Сбрасываем агентство в глобальном состоянии
+        spotLength: '' // Сбрасываем spot length в глобальном состоянии
       }));
     } else {
       setFormData(prev => ({
@@ -77,28 +79,26 @@ const GeneralDetailsSection: React.FC<GeneralDetailsSectionProps> = ({
       } else if (field === 'campaignApprover') {
         dispatch(updateGeneralData({ campaignApprover: newValue }));
       }
+      
+      // Сбрасываем spot length при изменении advertiser, brand или agency
+      if (field === 'brand' || field === 'agency') {
+        setFormData(prev => ({ ...prev, spotLength: '' }));
+        dispatch(updateGeneralData({ spotLength: '' }));
+      }
     }
   };
 
-  // Обработчик для чекбоксов Spot Length
-  const handleSpotLengthChange = (value: string, checked: boolean) => {
-    let newSpotLengths: string[];
-    
-    if (checked) {
-      // Добавляем значение
-      newSpotLengths = [...formData.spotLengths, value];
-    } else {
-      // Убираем значение
-      newSpotLengths = formData.spotLengths.filter(length => length !== value);
-    }
+  // Обработчик для выбора Spot Length
+  const handleSpotLengthChange = (value: string | null) => {
+    const newValue = value || '';
     
     setFormData(prev => ({
       ...prev,
-      spotLengths: newSpotLengths
+      spotLength: newValue
     }));
     
     // Обновляем глобальное состояние
-    dispatch(updateGeneralData({ spotLengths: newSpotLengths }));
+    dispatch(updateGeneralData({ spotLength: newValue }));
   };
 
   // Получаем бренды для выбранного рекламодателя
@@ -106,6 +106,10 @@ const GeneralDetailsSection: React.FC<GeneralDetailsSectionProps> = ({
   
   // Получаем агентства для выбранного рекламодателя
   const availableAgencyOptions = formData.advertiser ? agencyOptions[formData.advertiser] || [] : [];
+  
+  // Получаем доступные длительности роликов
+  const availableSpotLengthOptions = formData.advertiser && formData.brand && formData.agency ? 
+    spotLengthOptions[formData.advertiser]?.[formData.brand]?.[formData.agency] || [] : [];
 
   return (
     <div className={className}>
@@ -153,7 +157,6 @@ const GeneralDetailsSection: React.FC<GeneralDetailsSectionProps> = ({
             value={formData.agency}
             onChange={(value) => handleInputChange('agency', value)}
             disabled={!formData.advertiser}
-            required
           />
         </Grid.Col>
         <Grid.Col span={6}>
@@ -189,22 +192,20 @@ const GeneralDetailsSection: React.FC<GeneralDetailsSectionProps> = ({
         </Grid.Col>
       </Grid>
 
-      {/* Строка с Spot Length */}
-      <div style={{ marginBottom: '24px' }}>
-        <Text size="sm" fw={500} mb="xs">
-          Spot Length <span style={{ color: 'red' }}>*</span>
-        </Text>
-        <div style={{ display: 'flex', gap: '24px' }}>
-          {spotLengthOptions.map((option) => (
-            <Checkbox
-              key={option.value}
-              label={option.label}
-              checked={formData.spotLengths.includes(option.value)}
-              onChange={(event) => handleSpotLengthChange(option.value, event.currentTarget.checked)}
-            />
-          ))}
-        </div>
-      </div>
+      {/* Spot Length */}
+      <Grid mb="lg">
+        <Grid.Col span={6}>
+          <Select
+            label="Spot Length"
+            placeholder={formData.advertiser && formData.brand && formData.agency ? "- Select Spot Length -" : "Select Advertiser, Brand and Agency first"}
+            data={availableSpotLengthOptions}
+            value={formData.spotLength}
+            onChange={handleSpotLengthChange}
+            disabled={!formData.advertiser || !formData.brand || !formData.agency}
+            required
+          />
+        </Grid.Col>
+      </Grid>
     </div>
   );
 };
