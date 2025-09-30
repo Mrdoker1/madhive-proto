@@ -22,8 +22,8 @@ export async function fetchForecastMetrics(channelId: string, budget: number, to
   // Max Reach = максимально достижимый reach если потратить весь totalBudget на этот канал
   const maxPossibleReach = calculateReachByFormula(channelId, totalBudget, totalBudget);
   
-  // Reach% = процент от максимально достижимого reach при полном бюджете
-  const reachPercent = maxPossibleReach > 0 ? Math.round((calculatedReach / maxPossibleReach) * 100) : 0;
+  // Reach% = процент бюджета канала от общего бюджета (позиция слайдера)
+  const reachPercent = totalBudget > 0 ? Math.round((budget / totalBudget) * 100) : 0;
   
   
   return {
