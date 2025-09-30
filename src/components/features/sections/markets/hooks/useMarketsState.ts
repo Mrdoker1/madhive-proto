@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
 import { updateMarketsData, updateEstimations } from '@/store/slices/campaignSlice';
 import { marketsData } from '@/data/marketsData';
@@ -79,7 +79,7 @@ export const useMarketsState = () => {
     if (filteredMarketIds.length === 0) {
       setFilteredMarketIds(marketsWithStations.map(market => market.id));
     }
-  }, [linearData.broadcasters, filteredMarketIds.length]);
+  }, [linearData.broadcasters]);
 
   // Filter markets based on selected filter and update budgets
   useEffect(() => {
@@ -118,7 +118,7 @@ export const useMarketsState = () => {
     });
 
     setMarkets(marketsWithSelection);
-  }, [filteredMarketIds, marketsReduxData.selectedMarkets, budgetData.totalBudget, markets]);
+  }, [filteredMarketIds, marketsReduxData.selectedMarkets, budgetData.totalBudget]);
 
   // Update Market Estimation when markets change
   useEffect(() => {
@@ -139,22 +139,31 @@ export const useMarketsState = () => {
     }
   }, [selectedMarketsWithStations, expandedDetails.size]);
 
-  // Handler for markets filter change
-  const handleMarketsFilterChange = (selectedMarketNames: string[]) => {
+  // Handler for markets filter change (memoized)
+  const handleMarketsFilterChange = useCallback((selectedMarketNames: string[]) => {
     // Конвертируем названия маркетов в ID
     const selectedIds = selectedMarketNames
       .map(name => marketsData.find(m => m.name === name)?.id)
       .filter(Boolean) as string[];
     
     setFilteredMarketIds(selectedIds);
-  };
+  }, []);
 
-  // Get available markets for filter
-  const availableMarketsForFilter = markets.map(market => ({
-    id: market.id,
-    name: market.name,
-    displayName: market.displayName
-  }));
+  // Get available markets for filter (memoized)
+  const availableMarketsForFilter = useMemo(() => 
+    markets.map(market => ({
+      id: market.id,
+      name: market.name,
+      displayName: market.displayName
+    })), [markets]
+  );
+
+  // Get filtered market names (memoized)
+  const filteredMarketNames = useMemo(() => 
+    filteredMarketIds.map(id => 
+      marketsData.find(m => m.id === id)?.name || ''
+    ).filter(Boolean), [filteredMarketIds]
+  );
 
   return {
     // State
@@ -164,9 +173,7 @@ export const useMarketsState = () => {
     allSelected,
     someSelected,
     availableMarkets: availableMarketsForFilter,
-    filteredMarketNames: filteredMarketIds.map(id => 
-      marketsData.find(m => m.id === id)?.name || ''
-    ).filter(Boolean),
+    filteredMarketNames,
     
     // Internal setters (for handlers)
     setMarkets,

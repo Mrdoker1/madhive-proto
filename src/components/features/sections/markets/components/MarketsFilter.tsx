@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { MultiSelect } from '@mantine/core';
 // import type { MarketData } from '../types';
 
@@ -21,11 +21,13 @@ const MarketsFilter: React.FC<MarketsFilterProps> = ({
   selectedMarkets,
   onMarketsChange
 }) => {
-  // Формируем данные для MultiSelect
-  const marketOptions = availableMarkets.map(market => ({
-    value: market.name,
-    label: market.name // Используем name вместо displayName для удаления цифр
-  }));
+  // Формируем данные для MultiSelect (memoized)
+  const marketOptions = useMemo(() => 
+    availableMarkets.map(market => ({
+      value: market.name,
+      label: market.name // Используем name вместо displayName для удаления цифр
+    })), [availableMarkets]
+  );
 
   return (
     <MultiSelect
