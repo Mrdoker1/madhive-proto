@@ -1,64 +1,33 @@
 import { SLIDER_CONFIG } from './constants';
-import { CHART_CONFIG, CHANNEL_REACH_COEFFICIENTS } from '../../constants';
+import { calculateReachByFormula, CHANNEL_CONFIGS } from '../../channelConfig';
 
 /**
- * Вычисляет reach на основе бюджета (синхронизировано с графиком)
+ * Мок функция для получения метрик прогнозирования (синхронизировано с новой формулой)
  */
-function calculateReachForSlider(channelId: string, budget: number, totalBudget: number = CHART_CONFIG.DEFAULT_BUDGET): number {
-  if (budget <= 0) return CHART_CONFIG.MIN_REACH;
-  
-  const channelCoefficient = CHANNEL_REACH_COEFFICIENTS[channelId] || 0.015;
-  
-  // Нормализуем коэффициент канала (0.008-0.025 -> 0.7-1.0)
-  const normalizedCoeff = (channelCoefficient - 0.008) / (0.025 - 0.008) * 0.3 + 0.7;
-  
-  // Целевой максимальный reach для этого канала (70-100% от MAX_REACH)
-  const channelMaxReach = CHART_CONFIG.MAX_REACH * normalizedCoeff;
-  
-  // Вычисляем "сырой" reach с сильным влиянием бюджета
-  const budgetProgress = budget / totalBudget;
-  
-  // Агрессивный рост с использованием степенной функции
-  let rawReach;
-  
-  if (budgetProgress <= CHART_CONFIG.THRESHOLD_PERCENTAGE) {
-    // До 20%: умеренный рост
-    const progress = budgetProgress / CHART_CONFIG.THRESHOLD_PERCENTAGE;
-    rawReach = CHART_CONFIG.MIN_REACH + (channelMaxReach * 0.3) * Math.pow(progress, 1.5);
-  } else {
-    // После 20%: более агрессивный рост
-    const baseReach = CHART_CONFIG.MIN_REACH + (channelMaxReach * 0.3);
-    const excessProgress = (budgetProgress - CHART_CONFIG.THRESHOLD_PERCENTAGE) / (1 - CHART_CONFIG.THRESHOLD_PERCENTAGE);
-    
-    // Степенная функция для сильного роста, но с ограничением
-    const additionalReach = (channelMaxReach - baseReach) * Math.pow(excessProgress, 0.8);
-    rawReach = baseReach + additionalReach;
-  }
-  
-  // Применяем "мягкое ограничение" для предотвращения превышения максимума
-  const saturatedReach = channelMaxReach * Math.tanh(rawReach / channelMaxReach);
-  
-  return Math.min(saturatedReach, channelMaxReach);
-}
-
-/**
- * Мок функция для получения метрик прогнозирования (синхронизировано с графиком)
- */
-export async function fetchForecastMetrics(channelId: string, budget: number, totalBudget: number = CHART_CONFIG.DEFAULT_BUDGET) {
+export async function fetchForecastMetrics(channelId: string, budget: number, totalBudget: number = 390000) {
   // Имитируем API вызов
   await new Promise(resolve => setTimeout(resolve, SLIDER_CONFIG.API_DELAY));
   
-  // Используем ту же логику что и график
-  const calculatedReach = calculateReachForSlider(channelId, budget, totalBudget);
-  const channelCoefficient = CHANNEL_REACH_COEFFICIENTS[channelId] || 0.015;
-  const normalizedCoeff = (channelCoefficient - 0.008) / (0.025 - 0.008) * 0.3 + 0.7;
-  const channelMaxReach = CHART_CONFIG.MAX_REACH * normalizedCoeff;
+  // Используем новую формулу из channelConfig.ts
+  const calculatedReach = calculateReachByFormula(channelId, budget, totalBudget);
+  const config = CHANNEL_CONFIGS[channelId];
   
-  // Вычисляем процент от максимального reach канала
-  const reachPercent = Math.round((calculatedReach / channelMaxReach) * 100);
+  if (!config) {
+    return {
+      maxReach: 0,
+      reachPercent: 0
+    };
+  }
+  
+  // Max Reach = максимально достижимый reach если потратить весь totalBudget на этот канал
+  const maxPossibleReach = calculateReachByFormula(channelId, totalBudget, totalBudget);
+  
+  // Reach% = процент от максимально достижимого reach при полном бюджете
+  const reachPercent = maxPossibleReach > 0 ? Math.round((calculatedReach / maxPossibleReach) * 100) : 0;
+  
   
   return {
-    maxReach: Math.round(calculatedReach),
+    maxReach: Math.round(maxPossibleReach), // Максимально достижимый reach при полном бюджете
     reachPercent: Math.min(99, Math.max(1, reachPercent))
   };
 }

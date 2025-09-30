@@ -139,7 +139,7 @@ const FlightByWeek: React.FC<FlightByWeekProps> = ({
   const generatedWeeks = useMemo(() => {
     if (!startDate || !endDate) return [];
     return generateWeeks(startDate, endDate);
-  }, [startDate, endDate, hiatusStartDate, hiatusEndDate, stableHiatusRanges, generateWeeks]);
+  }, [startDate, endDate, generateWeeks]);
 
   // Мемоизируем недели с бюджетом
   const weeksWithBudget = useMemo(() => {

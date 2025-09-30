@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { TextInput, Text, Card } from '@mantine/core';
 import { IconCurrencyDollar } from '@tabler/icons-react';
 import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
@@ -40,8 +40,8 @@ const RightSidebar: React.FC<RightSidebarProps> = ({ className = '' }) => {
     }).format(amount);
   };
 
-  // Маппинг аудитории на количество людей (реалистичные цифры)
-  const audienceMapping = {
+  // Маппинг аудитории на количество людей (мемоизированный)
+  const audienceMapping = useMemo(() => ({
     gender: {
       'Male': 1247832,
       'Female': 1363571
@@ -74,10 +74,10 @@ const RightSidebar: React.FC<RightSidebarProps> = ({ className = '' }) => {
       'Two children': 1034567,
       '>2 children': 523189
     }
-  };
+  }), []); // Пустой массив зависимостей, так как данные статичные
 
-  // Функция для расчета общей аудитории
-  const calculateAudienceEstimation = () => {
+  // Функция для расчета общей аудитории (мемоизированная)
+  const calculateAudienceEstimation = useCallback(() => {
     // Если нет Market Estimation, то и Audience Estimation должен быть 0
     if (marketEstimation === 0) {
       return 0;
@@ -113,7 +113,7 @@ const RightSidebar: React.FC<RightSidebarProps> = ({ className = '' }) => {
     });
     
     return Math.round(totalPopulation * audienceMultiplier);
-  };
+  }, [marketEstimation, audienceData, audienceMapping]);
 
   // Автоматически обновляем Audience Estimation при изменении выбранной аудитории или market estimation
   useEffect(() => {
@@ -121,7 +121,7 @@ const RightSidebar: React.FC<RightSidebarProps> = ({ className = '' }) => {
     if (calculatedAudience !== audienceEstimation) {
       dispatch(updateEstimations({ audienceEstimation: calculatedAudience }));
     }
-  }, [audienceData, audienceEstimation, marketEstimation, dispatch]);
+  }, [audienceData, audienceEstimation, marketEstimation, dispatch, calculateAudienceEstimation]);
 
   // Обработчик изменения бюджета
   const handleBudgetChange = (event: React.ChangeEvent<HTMLInputElement>) => {

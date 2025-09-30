@@ -249,7 +249,7 @@ const FlightRangeSection: React.FC<FlightRangeSectionProps> = ({
       setDayWeeks([]);
       setDayHiatusBlocks([]);
     }
-  }, [weekData, currentHiatusRanges]);
+  }, [weekData, currentHiatusRanges, activeDateRange.start, activeDateRange.end]);
 
   return (
     <div className={`${className}`}>

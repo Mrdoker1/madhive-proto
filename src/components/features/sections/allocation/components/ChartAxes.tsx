@@ -1,5 +1,6 @@
 import React from 'react';
 import { CHART_CONFIG } from '../constants';
+import { BASE_REACH_SCALE } from '../channelConfig';
 
 interface ChartAxesProps {
   chartWidth: number;
@@ -40,11 +41,20 @@ export const ChartAxes: React.FC<ChartAxesProps> = ({
       />
       
       {/* Y Axis labels */}
-      {[0, 2, 4, 6, 8, 10, 12, 14, 16].map((value, index) => (
+      {(() => {
+        // Используем тот же масштаб reach что и в channelConfig.ts
+        const maxReach = BASE_REACH_SCALE;
+        const maxReachK = Math.ceil(maxReach / 1000);
+        const stepSize = Math.max(2, Math.ceil(maxReachK / 8)); // 8-9 шагов максимум
+        const steps = [];
+        for (let i = 0; i <= maxReachK; i += stepSize) {
+          steps.push(i);
+        }
+        return steps.map((value, index) => (
         <g key={value}>
           <text 
             x={offsetX - 5} 
-            y={yAxisEnd - (index * 37.5)} 
+            y={yAxisEnd - (index * (chartHeight / (steps.length - 1)))} 
             textAnchor="end" 
             alignmentBaseline="middle"
             fontSize="12" 
@@ -54,14 +64,15 @@ export const ChartAxes: React.FC<ChartAxesProps> = ({
           </text>
           <line 
             x1={offsetX - 3} 
-            y1={yAxisEnd - (index * 37.5)} 
+            y1={yAxisEnd - (index * (chartHeight / (steps.length - 1)))} 
             x2={offsetX} 
-            y2={yAxisEnd - (index * 37.5)} 
+            y2={yAxisEnd - (index * (chartHeight / (steps.length - 1)))} 
             stroke="#E5E7EB" 
             strokeWidth="1"
           />
         </g>
-      ))}
+        ));
+      })()}
       
       {/* X Axis labels */}
       {(() => {
@@ -94,6 +105,29 @@ export const ChartAxes: React.FC<ChartAxesProps> = ({
           );
         });
       })()}
+
+      {/* Y Axis label */}
+      <text 
+        x={offsetX - 35} 
+        y={offsetY + chartHeight / 2} 
+        textAnchor="middle"
+        fontSize="12" 
+        fill="#000"
+        transform={`rotate(-90, ${offsetX - 35}, ${offsetY + chartHeight / 2})`}
+      >
+        Reach
+      </text>
+
+      {/* X Axis label */}
+      <text 
+        x={offsetX + chartWidth / 2} 
+        y={yAxisEnd + 40} 
+        textAnchor="middle"
+        fontSize="12" 
+        fill="#000"
+      >
+        Budget ($)
+      </text>
     </>
   );
 };

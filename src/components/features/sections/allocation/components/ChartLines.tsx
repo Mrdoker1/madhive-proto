@@ -1,7 +1,8 @@
 import React from 'react';
 import { ChannelPoint } from '../types';
 import { CHART_CONFIG } from '../constants';
-import { createParabolicPath, calculateChartPosition } from '../utils';
+import { calculateChartPosition } from '../utils';
+import { createStaticCurvePath, BASE_REACH_SCALE } from '../channelConfig';
 
 interface ChartLinesProps {
   points: ChannelPoint[];
@@ -21,26 +22,18 @@ export const ChartLines: React.FC<ChartLinesProps> = ({
   offsetY
 }) => {
   const maxBudget = totalBudget || CHART_CONFIG.DEFAULT_BUDGET;
+  const maxReach = BASE_REACH_SCALE;
 
   return (
     <>
       {points.map(point => {
-        // Позиция точки пользователя на графике
-        const chartPosition = calculateChartPosition(
-          point.budget,
-          point.reach,
+        // Создаем статическую кривую по формуле для каждого канала
+        const pathData = createStaticCurvePath(
+          point.id,
           maxBudget,
-          CHART_CONFIG.MAX_REACH,
           chartWidth,
-          chartHeight
-        );
-        
-        // Создаем параболическую кривую: от (0,0) до точки, затем горизонтально
-        const pathData = createParabolicPath(
-          chartPosition.x, 
-          chartPosition.y, 
-          chartWidth, 
-          chartHeight
+          chartHeight,
+          maxReach
         );
         
         return (

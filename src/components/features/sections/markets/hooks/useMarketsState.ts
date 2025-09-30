@@ -79,7 +79,7 @@ export const useMarketsState = () => {
     if (filteredMarketIds.length === 0) {
       setFilteredMarketIds(marketsWithStations.map(market => market.id));
     }
-  }, [linearData.broadcasters]);
+  }, [linearData.broadcasters, filteredMarketIds.length]);
 
   // Filter markets based on selected filter and update budgets
   useEffect(() => {
@@ -118,7 +118,7 @@ export const useMarketsState = () => {
     });
 
     setMarkets(marketsWithSelection);
-  }, [filteredMarketIds, marketsReduxData.selectedMarkets, budgetData.totalBudget]);
+  }, [filteredMarketIds, marketsReduxData.selectedMarkets, budgetData.totalBudget, markets]);
 
   // Update Market Estimation when markets change
   useEffect(() => {
@@ -137,7 +137,7 @@ export const useMarketsState = () => {
       const firstMarketId = selectedMarketsWithStations[0].id;
       setExpandedDetails(new Set([firstMarketId]));
     }
-  }, [selectedMarketsWithStations.length > 0 ? selectedMarketsWithStations[0]?.id : null]);
+  }, [selectedMarketsWithStations, expandedDetails.size]);
 
   // Handler for markets filter change
   const handleMarketsFilterChange = (selectedMarketNames: string[]) => {

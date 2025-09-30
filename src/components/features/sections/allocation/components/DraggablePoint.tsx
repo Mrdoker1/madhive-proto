@@ -3,7 +3,8 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { DraggablePointProps } from '../types';
 import { CHART_CONFIG } from '../constants';
-import { calculateChartPosition, mouseToValues, clampToChart, calculateReachFromBudget } from '../utils';
+import { calculateChartPosition } from '../utils';
+import { BASE_REACH_SCALE } from '../channelConfig';
 
 export const DraggablePoint: React.FC<DraggablePointProps> = ({
   point,
@@ -16,14 +17,17 @@ export const DraggablePoint: React.FC<DraggablePointProps> = ({
   const svgRef = useRef<SVGCircleElement>(null);
   
   const maxBudget = totalBudget || CHART_CONFIG.DEFAULT_BUDGET;
-  const { OFFSET_X, OFFSET_Y, MAX_REACH } = CHART_CONFIG;
+  const { OFFSET_X, OFFSET_Y } = CHART_CONFIG;
+  
+  // Используем тот же масштаб reach что и в channelConfig.ts
+  const maxReach = BASE_REACH_SCALE;
   
   // Позиция точки на графике
   const chartPosition = calculateChartPosition(
     point.budget,
     point.reach,
     maxBudget,
-    MAX_REACH,
+    maxReach,
     chartWidth,
     chartHeight
   );
@@ -89,7 +93,7 @@ export const DraggablePoint: React.FC<DraggablePointProps> = ({
       fill={point.color}
       style={{
         cursor: isDragging ? 'grabbing' : 'grab',
-        transition: isDragging ? 'none' : 'all 0.1s ease'
+        transition: 'none' // Убрана анимация для мгновенного обновления
       }}
       onMouseDown={handleMouseDown}
     />

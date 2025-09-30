@@ -1,22 +1,14 @@
-export const channelColors: Record<string, string> = {
-  linear_tv: '#6633CC', // Purple
-  ctv: '#FF9BD3',       // Pink
-  display: '#FFA100',   // Orange
-  audio: '#33CCCC',     // Teal
-  social: '#00A3FF',    // Blue
-  search: '#AB00FF',    // Violet
-  email: '#F97316'      // Orange-red
-};
+// DEPRECATED: Используйте CHANNEL_CONFIGS из channelConfig.ts
+// Цвета и названия теперь централизованы в channelConfig.ts
+import { CHANNEL_CONFIGS } from './channelConfig';
 
-export const channelNames: Record<string, string> = {
-  linear_tv: 'Linear TV',
-  ctv: 'CTV',
-  display: 'Display',
-  audio: 'Audio',
-  social: 'Social',
-  search: 'Search',
-  email: 'Email'
-};
+export const channelColors: Record<string, string> = Object.fromEntries(
+  Object.entries(CHANNEL_CONFIGS).map(([id, config]) => [id, config.color])
+);
+
+export const channelNames: Record<string, string> = Object.fromEntries(
+  Object.entries(CHANNEL_CONFIGS).map(([id, config]) => [id, config.name])
+);
 
 // Коэффициенты эффективности каналов (влияют на максимальный reach канала)
 export const CHANNEL_REACH_COEFFICIENTS: Record<string, number> = {
