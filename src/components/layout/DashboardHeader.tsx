@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { TextInput, ActionIcon } from '@mantine/core';
+import { TextInput, ActionIcon, Button } from '@mantine/core';
 import { IconSearch, IconSettings, IconInfoCircle } from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
 
@@ -21,7 +21,7 @@ const DashboardHeader: React.FC = () => {
         height: '64px',
         display: 'flex',
         alignItems: 'center',
-        padding: '0 24px'
+        padding: '0 40px'
       }}
     >
       {/* Left - Title */}
@@ -76,25 +76,12 @@ const DashboardHeader: React.FC = () => {
         </ActionIcon>
 
         {/* New Campaign Button */}
-        <button
+        <Button
           onClick={handleNewCampaignClick}
-          style={{
-            height: '40px',
-            padding: '0 20px',
-            backgroundColor: 'var(--primary-color)',
-            color: '#FFFFFF',
-            border: 'none',
-            borderRadius: '8px',
-            fontSize: '14px',
-            fontWeight: 600,
-            cursor: 'pointer',
-            transition: 'opacity 0.2s'
-          }}
-          onMouseEnter={(e) => e.currentTarget.style.opacity = '0.9'}
-          onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+          variant="filled"
         >
           New Campaign
-        </button>
+        </Button>
       </div>
     </header>
   );

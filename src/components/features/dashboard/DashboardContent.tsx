@@ -7,7 +7,7 @@ import CampaignTable from './CampaignTable';
 
 const DashboardContent: React.FC = () => {
   return (
-    <div style={{ padding: '32px' }}>
+    <div style={{ paddingLeft: '40px', paddingRight: '40px', paddingTop: '32px', paddingBottom: '32px' }}>
       {/* Metrics Section */}
       <MetricsSection />
 

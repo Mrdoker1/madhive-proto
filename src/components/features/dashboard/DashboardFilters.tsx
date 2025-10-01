@@ -22,7 +22,7 @@ const DashboardFilters: React.FC = () => {
       style={{
         backgroundColor: 'var(--header-background)',
         borderBottom: '1px solid var(--border-color)',
-        padding: '16px 24px',
+        padding: '16px 40px',
         display: 'flex',
         alignItems: 'center',
         gap: '16px'
