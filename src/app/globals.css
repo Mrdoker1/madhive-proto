@@ -113,6 +113,28 @@ body {
   color: #374151 !important;
 }
 
+/* Pagination theming */
+.mantine-Pagination-root {
+  --_pagination-control-bd: var(--border-color);
+}
+.mantine-Pagination-control {
+  border-color: var(--border-color) !important;
+  color: var(--foreground) !important;
+  background: #FFFFFF !important;
+  box-shadow: none !important;
+}
+.mantine-Pagination-control:hover {
+  background: var(--hover-background) !important;
+}
+.mantine-Pagination-control[data-active] {
+  background: var(--primary-color) !important;
+  color: #FFFFFF !important;
+  border-color: var(--primary-color) !important;
+}
+.mantine-Pagination-control[data-disabled] {
+  opacity: 0.6;
+}
+
 @layer utilities {
   .text-balance {
     text-wrap: balance;

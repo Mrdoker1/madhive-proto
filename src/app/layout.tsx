@@ -9,6 +9,26 @@ const inter = Inter({ subsets: ["latin"] });
 
 const theme = createTheme({
   components: {
+    Pagination: {
+      styles: {
+        control: {
+          borderColor: 'var(--border-color)',
+          color: 'var(--foreground)',
+          background: '#FFFFFF',
+          boxShadow: 'none',
+          '&:hover': {
+            background: 'var(--hover-background)'
+          },
+          '&[data-active]': {
+            background: 'var(--primary-color)',
+            color: '#FFFFFF',
+            borderColor: 'var(--primary-color)',
+            boxShadow: '0 0 0 2px var(--primary-color) inset',
+            fontWeight: 700
+          }
+        }
+      }
+    },
     Select: {
       defaultProps: {
         styles: {
@@ -205,8 +225,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="m-0 p-0">
-      <body className={`${inter.className} m-0 p-0`}>
+    <html lang="en" className="m-0 p-0" suppressHydrationWarning>
+      <body className={`${inter.className} m-0 p-0`} suppressHydrationWarning>
         <StoreProvider>
           <MantineProvider theme={theme}>
             <AppLayout>

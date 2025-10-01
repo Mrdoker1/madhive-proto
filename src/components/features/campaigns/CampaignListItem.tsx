@@ -18,27 +18,29 @@ export default function CampaignListItem({ c }: { c: CampaignSummary }) {
       className="grid items-center"
       style={{
         gridTemplateColumns: '260px 160px 160px 240px 360px 220px 180px',
-        height: '72px',
-        paddingLeft: '16px',
-        paddingRight: '16px',
+        paddingLeft: 0,
+        paddingRight: 0,
+        paddingTop: 0,
+        paddingBottom: 0,
         borderTop: '1px solid var(--border-color)',
+        width: 'fit-content',
         fontSize: '12px'
       }}
     >
       {/* Name */}
-      <div style={{ position: 'sticky', left: '16px', zIndex: 1, background: '#FFFFFF' }}>
+      <div style={{ position: 'sticky', left: '0', zIndex: 1, background: 'var(--page-background)', paddingLeft: '16px', paddingRight: '16px', paddingTop: '16px', paddingBottom: '16px' }}>
         <Link href="#" style={{ color: '#2563eb', textDecoration: 'none', fontWeight: 500, fontSize: '12px' }}>
           {c.name}
         </Link>
       </div>
 
       {/* Pacing Status */}
-      <div style={{ position: 'sticky', left: '276px', zIndex: 1, background: '#FFFFFF', paddingRight: '12px' }}>
+      <div style={{ position: 'sticky', left: '260px', zIndex: 1, background: 'var(--page-background)', paddingLeft: '16px', paddingRight: '12px', paddingTop: '16px', paddingBottom: '16px' }}>
         <CampaignStatusBadge status={c.status} />
       </div>
 
       {/* Delivered by Days */}
-      <div style={{ width: '150px', height: '40px', paddingLeft: '20px' }}>
+      <div style={{ width: '150px', height: '60px', paddingLeft: '20px', paddingTop: '8px', paddingBottom: '8px' }}>
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart data={data} margin={{ top: 8, bottom: 0, left: 0, right: 0 }}>
             <defs>
@@ -54,7 +56,7 @@ export default function CampaignListItem({ c }: { c: CampaignSummary }) {
       </div>
 
       {/* Channels */}
-      <div className="flex flex-wrap items-center" style={{ gap: '6px', paddingLeft: '20px' }}>
+      <div className="flex flex-wrap items-center" style={{ gap: '6px', paddingLeft: '20px', paddingTop: '8px', paddingBottom: '8px' }}>
         {c.channels.map((ch) => (
           <span
             key={ch}
@@ -72,7 +74,7 @@ export default function CampaignListItem({ c }: { c: CampaignSummary }) {
       </div>
 
       {/* Progress (bar + label below) */}
-      <div style={{ paddingLeft: '20px' }}>
+      <div style={{ paddingLeft: '20px', paddingTop: '8px', paddingBottom: '8px' }}>
         <div style={{ width: '200px' }}>
           <Progress 
             value={c.progressPercent} 
@@ -93,15 +95,13 @@ export default function CampaignListItem({ c }: { c: CampaignSummary }) {
       </div>
 
       {/* Pacing % */}
-      <div>
+      <div style={{ paddingTop: '8px', paddingBottom: '8px' }}>
         <div style={{ fontWeight: 600, fontSize: '12px' }}>{c.pacingPercent.toFixed(2)}%</div>
         <div style={{ fontSize: '12px', color: '#6b7280' }}>({formatNumber(c.pacingDelivered)} / {formatNumber(c.pacingTarget)})</div>
       </div>
 
       {/* Delivered Impression */}
-      <div style={{ textAlign: 'right', fontSize: '12px' }}>{formatNumber(c.deliveredImpressions)}</div>
+      <div style={{ textAlign: 'right', fontSize: '12px', paddingTop: '8px', paddingBottom: '8px' }}>{formatNumber(c.deliveredImpressions)}</div>
     </div>
   );
 }
-
-
