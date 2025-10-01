@@ -7,9 +7,12 @@ import SectionWrapper from "@/components/ui/SectionWrapper";
 import { BreadcrumbStep } from "@/components/ui/Breadcrumbs";
 import NextButton from "@/components/ui/NextButton";
 import CampaignSummarySection from "@/components/features/sections/CampaignSummarySection";
+import { useAppDispatch } from '@/hooks/useRedux';
+import { saveCampaign, resetCampaign } from '@/store/slices/campaignSlice';
 
 export default function SummaryPage() {
   const router = useRouter();
+  const dispatch = useAppDispatch();
 
   // Бредкрамбсы для страницы Summary - все предыдущие шаги выполнены
   const breadcrumbSteps: BreadcrumbStep[] = [
@@ -38,7 +41,12 @@ export default function SummaryPage() {
 
   const handleNextClick = () => {
     console.log('Создание кампании завершено!');
-    // Здесь можно добавить логику создания кампании или перехода на dashboard
+    // Сохраняем кампанию в Redux
+    dispatch(saveCampaign());
+    // Сбрасываем форму для новой кампании
+    dispatch(resetCampaign());
+    // Переходим на страницу со списком кампаний
+    router.push('/campaign');
   };
 
   const handleBackClick = () => {

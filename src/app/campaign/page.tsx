@@ -4,26 +4,63 @@ import React from 'react';
 import PageLayout from '@/components/layout/PageLayout';
 import { useRouter } from 'next/navigation';
 import CampaignList from '@/components/features/campaigns/CampaignList';
-import { campaignsMock } from '@/data/campaignsData';
+import { campaignsMock, CampaignSummary } from '@/data/campaignsData';
 import { Select, Pagination } from '@mantine/core';
 import { useState, useMemo } from 'react';
+import { useAppSelector } from '@/hooks/useRedux';
+import type { SavedCampaign } from '@/store/slices/campaignSlice';
+
+// Функция для конвертации SavedCampaign в CampaignSummary
+function convertToCampaignSummary(saved: SavedCampaign): CampaignSummary {
+  const channels = saved.channels.selectedChannels.map(ch => {
+    if (ch === 'linear_tv') return 'Linear TV';
+    if (ch === 'ctv') return 'CTV';
+    if (ch === 'social') return 'Social';
+    if (ch === 'audio') return 'Audio';
+    if (ch === 'display') return 'Display';
+    return ch;
+  });
+
+  return {
+    id: saved.id,
+    name: saved.general.campaignName || 'Untitled Campaign',
+    status: 'On Target' as const,
+    sparkline: Array.from({ length: 30 }, () => Math.random() * 100 + 50),
+    channels: channels.length > 0 ? channels : ['Linear TV'],
+    progressPercent: 0,
+    progressDelivered: 0,
+    progressGoal: saved.budget.totalBudget || 0,
+    pacingPercent: 0,
+    pacingDelivered: 0,
+    pacingTarget: 0,
+    deliveredImpressions: 0
+  };
+}
 
 export default function CampaignListPage() {
   const router = useRouter();
   const [pageSize, setPageSize] = useState<number>(20);
   const [page, setPage] = useState<number>(1);
+  
+  const savedCampaigns = useAppSelector((state) => state.campaign.savedCampaigns);
 
   const handleNewCampaign = () => {
     router.push('/campaign/omnichannel/new');
   };
 
-  const totalItems = campaignsMock.length;
+  // Объединяем сохранённые кампании с mock данными
+  const allCampaigns = useMemo(() => {
+    const converted = savedCampaigns.map(convertToCampaignSummary);
+    return [...converted, ...campaignsMock];
+  }, [savedCampaigns]);
+
+  const totalItems = allCampaigns.length;
   const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
   const pageSafe = Math.min(page, totalPages);
   const startIdx = (pageSafe - 1) * pageSize;
   const endIdx = Math.min(startIdx + pageSize, totalItems);
 
-  const currentItems = useMemo(() => campaignsMock.slice(startIdx, endIdx), [startIdx, endIdx]);
+  const currentItems = useMemo(() => allCampaigns.slice(startIdx, endIdx), [allCampaigns, startIdx, endIdx]);
 
   const footer = (
     <div className="flex items-center justify-between" style={{ padding: '12px 24px', background: 'var(--header-background)', borderTop: '1px solid var(--border-color)' }}>
@@ -50,15 +87,7 @@ export default function CampaignListPage() {
           siblings={1} 
           boundaries={1} 
           size="sm"
-          color="#291036"
           radius="md"
-          variant="filled"
-          styles={{
-            control: {
-              borderColor: 'var(--border-color)',
-              color: '#291036',
-            },
-          }}
         />
       </div>
     </div>

@@ -10,23 +10,8 @@ const inter = Inter({ subsets: ["latin"] });
 const theme = createTheme({
   components: {
     Pagination: {
-      styles: {
-        control: {
-          borderColor: 'var(--border-color)',
-          color: 'var(--foreground)',
-          background: '#FFFFFF',
-          boxShadow: 'none',
-          '&:hover': {
-            background: 'var(--hover-background)'
-          },
-          '&[data-active]': {
-            background: 'var(--primary-color)',
-            color: '#FFFFFF',
-            borderColor: 'var(--primary-color)',
-            boxShadow: '0 0 0 2px var(--primary-color) inset',
-            fontWeight: 700
-          }
-        }
+      classNames: {
+        control: 'pagination-control'
       }
     },
     Select: {

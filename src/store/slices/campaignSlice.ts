@@ -61,6 +61,20 @@ export interface CampaignChannelsData {
   selectedChannels: string[];
 }
 
+export interface SavedCampaign {
+  id: string;
+  general: CampaignGeneralData;
+  budget: CampaignBudgetData;
+  goal: CampaignGoalData;
+  flight: CampaignFlightData;
+  linear: CampaignLinearData;
+  audience: CampaignAudienceData;
+  markets: CampaignMarketsData;
+  dayparts: CampaignDaypartsData;
+  channels: CampaignChannelsData;
+  createdAt: string;
+}
+
 export interface CampaignState {
   general: CampaignGeneralData;
   budget: CampaignBudgetData;
@@ -78,6 +92,9 @@ export interface CampaignState {
     audienceEstimation: number;
     marketEstimation: number;
   };
+  
+  // Список сохранённых кампаний
+  savedCampaigns: SavedCampaign[];
 }
 
 // Начальное состояние
@@ -134,7 +151,8 @@ const initialState: CampaignState = {
     budgetEstimation: 0,
     audienceEstimation: 0,
     marketEstimation: 0
-  }
+  },
+  savedCampaigns: []
 };
 
 const campaignSlice = createSlice({
@@ -192,10 +210,32 @@ const campaignSlice = createSlice({
     },
 
     // Utility Actions
-    resetCampaign: () => initialState,
+    resetCampaign: (state) => {
+      // Сохраняем список кампаний при сбросе
+      const savedCampaigns = state.savedCampaigns;
+      return { ...initialState, savedCampaigns };
+    },
     
     setCampaignData: (state, action: PayloadAction<Partial<CampaignState>>) => {
       return { ...state, ...action.payload };
+    },
+    
+    // Saved Campaigns Actions
+    saveCampaign: (state) => {
+      const newCampaign: SavedCampaign = {
+        id: `campaign_${Date.now()}`,
+        general: state.general,
+        budget: state.budget,
+        goal: state.goal,
+        flight: state.flight,
+        linear: state.linear,
+        audience: state.audience,
+        markets: state.markets,
+        dayparts: state.dayparts,
+        channels: state.channels,
+        createdAt: new Date().toISOString()
+      };
+      state.savedCampaigns.unshift(newCampaign); // Добавляем в начало списка
     }
   }
 });
@@ -212,7 +252,8 @@ export const {
   updateChannelsData,
   updateEstimations,
   resetCampaign,
-  setCampaignData
+  setCampaignData,
+  saveCampaign
 } = campaignSlice.actions;
 
 export default campaignSlice.reducer;

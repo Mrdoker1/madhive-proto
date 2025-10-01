@@ -31,6 +31,12 @@ export default function Home() {
               <TableTbody>
                 {[
                   {
+                    title: 'Campaign List',
+                    description: 'View all campaigns with filtering and pagination',
+                    linearHref: '/campaign',
+                    omnichannelHref: '/campaign'
+                  },
+                  {
                     title: 'New Campaign',
                     description: 'General campaign information, budget settings, goals, and flight range configuration',
                     linearHref: '/campaign/linear/new',
