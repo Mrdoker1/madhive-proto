@@ -4,6 +4,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import DashboardHeader from '@/components/layout/DashboardHeader';
 import DashboardFilters from '@/components/features/dashboard/DashboardFilters';
+import DashboardContent from '@/components/features/dashboard/DashboardContent';
 
 export default function DashboardPage() {
   return (
@@ -39,33 +40,7 @@ export default function DashboardPage() {
         transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
         style={{ backgroundColor: 'var(--page-background)' }}
       >
-        <div style={{ padding: '32px' }}>
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            minHeight: '400px',
-            gap: '16px'
-          }}>
-            <h2 style={{ 
-              fontSize: '24px', 
-              fontWeight: 600, 
-              color: '#000000',
-              margin: 0
-            }}>
-              Dashboard Content
-            </h2>
-            <p style={{ 
-              fontSize: '14px', 
-              color: '#6B7280',
-              fontStyle: 'italic',
-              margin: 0
-            }}>
-              TBD: Placeholder for Dashboard metrics, charts, and widgets
-            </p>
-          </div>
-        </div>
+        <DashboardContent />
       </motion.main>
     </motion.div>
   );
