@@ -8,7 +8,7 @@ export default function Home() {
       <div style={{ backgroundColor: 'var(--page-background)' }} className="h-full">
         <div className="container mx-auto flex flex-col items-center justify-center min-h-full">
           <h2 style={{ color: 'black' }} >Madhive Proto</h2>
-          <p style={{ color: 'black', paddingBottom: '24px', fontSize: '12px' }}>TBD: Placeholder for Dashboard Page</p>
+          <p style={{ color: 'black', paddingBottom: '24px', fontSize: '12px' }}>Campaign management prototype with linear and omnichannel advertising workflows</p>
           
           <div className="mt-8 w-full max-w-6xl flex justify-center">
             <Table style={{ tableLayout: 'fixed', width: '100%', maxWidth: '800px' }}>
