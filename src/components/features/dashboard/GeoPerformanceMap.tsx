@@ -41,13 +41,17 @@ const GeoPerformanceMap: React.FC = () => {
     // Инициализация карты
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
-      style: 'mapbox://styles/mapbox/light-v11',
+      style: 'mapbox://styles/mapbox/streets-v12',
       center: [-95.7129, 37.0902],
-      zoom: 3.5
+      zoom: 3.5,
+      projection: 'mercator' // Плоская проекция вместо глобуса
     });
 
     map.current.on('load', () => {
       if (!map.current) return;
+
+      // Меняем цвет воды на серый
+      map.current.setPaintProperty('water', 'fill-color', '#E5E7EB');
 
       // Создаем маппинг STATE_NAME -> цвет для всех штатов
       const stateColorMap: Record<string, string> = {};
