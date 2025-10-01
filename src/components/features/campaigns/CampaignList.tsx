@@ -25,7 +25,7 @@ export default function CampaignList({ items }: { items: CampaignSummary[] }) {
         }}
       >
         <div style={{ position: 'sticky', left: '0', zIndex: 1, background: 'var(--page-background)', paddingLeft: '16px', paddingRight: '16px', paddingTop: '8px', paddingBottom: '8px' }}>Name</div>
-        <div style={{ position: 'sticky', left: `${nameColWidth}px`, zIndex: 1, background: 'var(--page-background)', paddingLeft: '16px', paddingRight: '12px', paddingTop: '8px', paddingBottom: '8px' }}>Pacing Status</div>
+        <div style={{ position: 'sticky', left: `${nameColWidth}px`, zIndex: 1, background: 'var(--page-background)', paddingLeft: '16px', paddingRight: '12px', paddingTop: '8px', paddingBottom: '8px', borderRight: '1px solid var(--border-color)' }}>Pacing Status</div>
         <div style={{ paddingLeft: '20px' }}>Delivered by Days</div>
         <div style={{ paddingLeft: '20px' }}>Channels</div>
         <div style={{ paddingLeft: '20px' }}>Progress (Total Delivered/Goal)</div>

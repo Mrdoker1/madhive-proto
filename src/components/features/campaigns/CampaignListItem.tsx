@@ -28,14 +28,14 @@ export default function CampaignListItem({ c }: { c: CampaignSummary }) {
       }}
     >
       {/* Name */}
-      <div style={{ position: 'sticky', left: '0', zIndex: 1, background: 'var(--page-background)', paddingLeft: '16px', paddingRight: '16px', paddingTop: '16px', paddingBottom: '16px' }}>
+      <div style={{ position: 'sticky', left: '0', zIndex: 1, background: 'var(--page-background)', paddingLeft: '16px', paddingRight: '16px', paddingTop: '20px', paddingBottom: '20px' }}>
         <Link href="#" style={{ color: '#2563eb', textDecoration: 'none', fontWeight: 500, fontSize: '12px' }}>
           {c.name}
         </Link>
       </div>
 
       {/* Pacing Status */}
-      <div style={{ position: 'sticky', left: '260px', zIndex: 1, background: 'var(--page-background)', paddingLeft: '16px', paddingRight: '12px', paddingTop: '16px', paddingBottom: '16px' }}>
+      <div style={{ position: 'sticky', left: '260px', zIndex: 1, background: 'var(--page-background)', paddingLeft: '16px', paddingRight: '12px', paddingTop: '20px', paddingBottom: '20px', borderRight: '1px solid var(--border-color)' }}>
         <CampaignStatusBadge status={c.status} />
       </div>
 
