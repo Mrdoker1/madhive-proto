@@ -14,6 +14,11 @@ interface PageLayoutProps {
   onBreadcrumbClick?: (step: BreadcrumbStep) => void; // Обработчик клика на breadcrumb
   showRightSidebar?: boolean; // Показывать правый сайдбар
   footerContent?: React.ReactNode; // Контент который будет зафиксирован внизу
+  // Опции правой кнопки в PageHeader
+  headerShowRightButton?: boolean;
+  headerRightButtonText?: string;
+  headerRightButtonActive?: boolean;
+  onHeaderRightButtonClick?: () => void;
 }
 
 const PageLayout: React.FC<PageLayoutProps> = ({ 
@@ -23,7 +28,11 @@ const PageLayout: React.FC<PageLayoutProps> = ({
   showProgress = false,
   onBreadcrumbClick,
   showRightSidebar = false,
-  footerContent
+  footerContent,
+  headerShowRightButton = false,
+  headerRightButtonText = 'Next',
+  headerRightButtonActive = true,
+  onHeaderRightButtonClick
 }) => {
   return (
     <motion.div 
@@ -73,7 +82,13 @@ const PageLayout: React.FC<PageLayoutProps> = ({
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.3, delay: 0.1 }}
               >
-                <PageHeader title={title} />
+                <PageHeader 
+                  title={title}
+                  showRightButton={headerShowRightButton}
+                  rightButtonText={headerRightButtonText}
+                  rightButtonActive={headerRightButtonActive}
+                  onRightButtonClick={onHeaderRightButtonClick}
+                />
               </motion.div>
             )}
           </AnimatePresence>
