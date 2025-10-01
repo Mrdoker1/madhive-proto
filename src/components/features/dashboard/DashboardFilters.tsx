@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Select } from '@mantine/core';
+import { Select, Button } from '@mantine/core';
+import { IconRefresh } from '@tabler/icons-react';
 
 const DashboardFilters: React.FC = () => {
   const [campaignType, setCampaignType] = useState<string | null>('linear');
@@ -146,37 +147,22 @@ const DashboardFilters: React.FC = () => {
       />
 
       {/* Reset Button */}
-      <button
+      <Button
+        variant="subtle"
         onClick={handleReset}
-        style={{
-          height: '40px',
-          padding: '0 16px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px',
-          backgroundColor: 'transparent',
-          border: '1px solid var(--border-color)',
-          borderRadius: '8px',
-          fontSize: '14px',
-          fontWeight: 500,
-          color: '#000000',
-          cursor: 'pointer',
-          transition: 'all 0.2s',
-          marginLeft: 'auto'
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.backgroundColor = 'var(--hover-background)';
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.backgroundColor = 'transparent';
+        leftSection={<IconRefresh size={16} />}
+        styles={{
+          root: {
+            height: '40px',
+            padding: '0 16px',
+            color: '#000000',
+            fontSize: '14px',
+            fontWeight: 500
+          }
         }}
       >
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M14 8C14 4.68629 11.3137 2 8 2C4.68629 2 2 4.68629 2 8C2 11.3137 4.68629 14 8 14C9.29167 14 10.4917 13.5833 11.4667 12.8667" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-          <path d="M14 2V6H10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
         Reset
-      </button>
+      </Button>
     </div>
   );
 };
