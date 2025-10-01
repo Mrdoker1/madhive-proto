@@ -31,6 +31,12 @@ export default function Home() {
               <TableTbody>
                 {[
                   {
+                    title: 'Dashboard',
+                    description: 'Main dashboard with metrics, charts, and campaign overview',
+                    linearHref: '/dashboard',
+                    omnichannelHref: '/dashboard'
+                  },
+                  {
                     title: 'Campaign List',
                     description: 'View all campaigns with filtering and pagination',
                     linearHref: '/campaign',

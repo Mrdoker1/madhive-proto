@@ -2,11 +2,14 @@
 
 import React, { useState } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 export interface SidebarItem {
   id: string;
   icon: string;
   alt: string;
+  href?: string;
   isActive?: boolean;
 }
 
@@ -19,21 +22,21 @@ const Sidebar: React.FC<SidebarProps> = ({
   items = [],
   onItemClick 
 }) => {
-  const [activeItemId, setActiveItemId] = useState<string | null>(
-    items.find(item => item.isActive)?.id || null
-  );
+  const pathname = usePathname();
 
   // Базовые элементы сайдбара
   const defaultItems: SidebarItem[] = [
     {
       id: 'dashboard',
       icon: '/assets/icons/sidebar/dashboard.svg',
-      alt: 'Dashboard'
+      alt: 'Dashboard',
+      href: '/dashboard'
     },
     {
-      id: 'horn',
+      id: 'campaign',
       icon: '/assets/icons/sidebar/horn.svg',
-      alt: 'Horn'
+      alt: 'Campaigns',
+      href: '/campaign'
     }
   ];
 
@@ -41,8 +44,13 @@ const Sidebar: React.FC<SidebarProps> = ({
   const allItems = [...defaultItems, ...items];
 
   const handleItemClick = (itemId: string) => {
-    setActiveItemId(itemId);
     onItemClick?.(itemId);
+  };
+
+  // Определяем активный элемент на основе текущего пути
+  const isItemActive = (item: SidebarItem) => {
+    if (!item.href) return false;
+    return pathname === item.href || pathname?.startsWith(item.href + '/');
   };
 
   return (
@@ -56,56 +64,82 @@ const Sidebar: React.FC<SidebarProps> = ({
     >
       {/* Элементы меню */}
       <div className="flex flex-col">
-        {allItems.map((item) => (
-          <div
-            key={item.id}
-            className={`relative flex items-center justify-center cursor-pointer transition-colors duration-200`}
-            style={{ 
-              width: '64px', 
-              height: '64px',
-              backgroundColor: activeItemId === item.id 
-                ? 'var(--active-background)' 
-                : 'transparent'
-            }}
-            onMouseEnter={(e) => {
-              if (activeItemId !== item.id) {
-                e.currentTarget.style.backgroundColor = 'var(--hover-background)';
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (activeItemId !== item.id) {
-                e.currentTarget.style.backgroundColor = 'transparent';
-              }
-            }}
-            onClick={() => handleItemClick(item.id)}
-          >
-            {/* Левая линия для активного элемента */}
-            {activeItemId === item.id && (
-              <div
-                className="absolute top-1/2 transform -translate-y-1/2"
+        {allItems.map((item) => {
+          const isActive = isItemActive(item);
+          
+          const itemContent = (
+            <>
+              {/* Левая линия для активного элемента */}
+              {isActive && (
+                <div
+                  className="absolute top-1/2 transform -translate-y-1/2"
+                  style={{
+                    left: '0px',
+                    width: '2px',
+                    height: '56px',
+                    backgroundColor: 'var(--primary-color)'
+                  }}
+                />
+              )}
+              
+              <Image
+                src={item.icon}
+                alt={item.alt}
+                width={24}
+                height={24}
+                className="w-6 h-6"
                 style={{
-                  left: '0px',
-                  width: '2px',
-                  height: '56px',
-                  backgroundColor: 'var(--primary-color)'
+                  filter: isActive 
+                    ? 'brightness(0) saturate(100%) invert(8%) sepia(45%) saturate(2285%) hue-rotate(264deg) brightness(98%) contrast(98%)'
+                    : 'brightness(0) saturate(100%) invert(44%) sepia(8%) saturate(878%) hue-rotate(314deg) brightness(91%) contrast(86%)'
                 }}
               />
-            )}
-            
-            <Image
-              src={item.icon}
-              alt={item.alt}
-              width={24}
-              height={24}
-              className="w-6 h-6"
-              style={{
-                filter: activeItemId === item.id 
-                  ? 'brightness(0) saturate(100%) invert(8%) sepia(45%) saturate(2285%) hue-rotate(264deg) brightness(98%) contrast(98%)'
-                  : 'brightness(0) saturate(100%) invert(44%) sepia(8%) saturate(878%) hue-rotate(314deg) brightness(91%) contrast(86%)'
-              }}
-            />
-          </div>
-        ))}
+            </>
+          );
+
+          const itemStyles = {
+            width: '64px', 
+            height: '64px',
+            backgroundColor: isActive 
+              ? 'var(--active-background)' 
+              : 'transparent'
+          };
+
+          const itemHandlers = {
+            onMouseEnter: (e: React.MouseEvent<HTMLElement>) => {
+              if (!isActive) {
+                e.currentTarget.style.backgroundColor = 'var(--hover-background)';
+              }
+            },
+            onMouseLeave: (e: React.MouseEvent<HTMLElement>) => {
+              if (!isActive) {
+                e.currentTarget.style.backgroundColor = 'transparent';
+              }
+            },
+            onClick: () => handleItemClick(item.id)
+          };
+
+          return item.href ? (
+            <Link
+              key={item.id}
+              href={item.href}
+              className="relative flex items-center justify-center cursor-pointer transition-colors duration-200"
+              style={itemStyles}
+              {...itemHandlers}
+            >
+              {itemContent}
+            </Link>
+          ) : (
+            <div
+              key={item.id}
+              className="relative flex items-center justify-center cursor-pointer transition-colors duration-200"
+              style={itemStyles}
+              {...itemHandlers}
+            >
+              {itemContent}
+            </div>
+          );
+        })}
       </div>
     </aside>
   );
