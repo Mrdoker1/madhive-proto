@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Text, ActionIcon, TextInput } from '@mantine/core';
+import { Text, ActionIcon, TextInput, Tooltip } from '@mantine/core';
 import { IconTrash, IconCurrencyDollar } from '@tabler/icons-react';
 import Image from 'next/image';
 import { useAppSelector } from '@/hooks/useRedux';
@@ -53,18 +53,31 @@ export const ChannelSlider: React.FC<ChannelSliderProps> = ({
     onRemove(allocation.id);
   };
 
+  // Вычисляем процент бюджета
+  const budgetPercent = totalBudget > 0 ? (allocation.budget / totalBudget) * 100 : 0;
+  const isLowBudget = budgetPercent < 10 && budgetPercent > 0;
+
   return (
-    <div style={{ 
-      marginBottom: '32px',
-      backgroundColor: 'transparent'
-    }}>
-      {/* Все элементы в одну строку */}
+    <Tooltip
+      label="Think about reallocate"
+      disabled={!isLowBudget}
+      position="top"
+      withArrow
+    >
       <div style={{ 
-        display: 'flex', 
-        alignItems: 'center', 
-        flexWrap: 'nowrap',
-        minHeight: '40px' // Минимальная высота для выравнивания
+        marginBottom: '32px',
+        backgroundColor: isLowBudget ? '#FFF5FB' : 'transparent',
+        padding: '8px',
+        borderRadius: '8px',
+        transition: 'background-color 0.2s ease'
       }}>
+        {/* Все элементы в одну строку */}
+        <div style={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          flexWrap: 'nowrap',
+          minHeight: '40px' // Минимальная высота для выравнивания
+        }}>
         {/* Иконка канала - 32px черная */}
         <Image
           src={`/assets/icons/channels/${allocation.id}.svg`}
@@ -127,7 +140,7 @@ export const ChannelSlider: React.FC<ChannelSliderProps> = ({
             value={allocation.budget}
             max={totalBudget}
             step={100} // Шаг в 100 долларов для точного контроля
-            color={allocation.color} // Цвет канала
+            color={allocation.color} // Оставляем оригинальный цвет канала
             onChange={handleSliderChange}
           />
         </div>
@@ -142,7 +155,8 @@ export const ChannelSlider: React.FC<ChannelSliderProps> = ({
         >
           <IconTrash size={16} />
         </ActionIcon>
+        </div>
       </div>
-    </div>
+    </Tooltip>
   );
 };
