@@ -11,7 +11,7 @@ export interface CampaignGeneralData {
   cpeCode: string;
   campaignOwner: string;
   campaignApprover: string;
-  spotLength: string;
+  spotLength: string[]; // Массив выбранных длительностей: ['15', '30', '60']
 }
 
 export interface CampaignBudgetData {
@@ -109,7 +109,7 @@ const initialState: CampaignState = {
     cpeCode: '',
     campaignOwner: '',
     campaignApprover: '',
-    spotLength: ''
+    spotLength: ['60'] // По умолчанию выбран :60
   },
   budget: {
     totalBudget: 0,

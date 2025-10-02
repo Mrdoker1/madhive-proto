@@ -299,9 +299,9 @@ const CampaignSummarySection: React.FC = () => {
             {/* Spot Length */}
             <SummaryRow
               label="Spot Length"
-              value={campaign.general.spotLength ? `${campaign.general.spotLength} sec` : ''}
-              editRoute="/campaign/linear/new#linear-details"
-              isEmpty={!campaign.general.spotLength}
+              value={campaign.general.spotLength.length > 0 ? campaign.general.spotLength.map(s => `:${s}`).join(', ') : ''}
+              editRoute="/campaign/linear/new#general-details"
+              isEmpty={campaign.general.spotLength.length === 0}
             />
           </TableTbody>
         </Table>

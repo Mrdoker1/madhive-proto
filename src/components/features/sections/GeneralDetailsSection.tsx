@@ -1,10 +1,10 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { TextInput, Select, Grid, Checkbox, Text } from '@mantine/core';
+import { TextInput, Select, Grid, Checkbox, Text, Group } from '@mantine/core';
 import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
 import { updateGeneralData } from '@/store/slices/campaignSlice';
-import { advertiserOptions, brandOptions, agencyOptions, spotLengthOptions } from '@/data/generalDetailsData';
+import { advertiserOptions, brandOptions, agencyOptions } from '@/data/generalDetailsData';
 
 interface GeneralDetailsSectionProps {
   className?: string;
@@ -24,7 +24,7 @@ const GeneralDetailsSection: React.FC<GeneralDetailsSectionProps> = ({
     cpeCode: '',
     campaignOwner: '',
     campaignApprover: '',
-    spotLength: ''
+    spotLength: ['60']
   });
 
   // Синхронизируем локальное состояние с глобальным при загрузке
@@ -37,7 +37,7 @@ const GeneralDetailsSection: React.FC<GeneralDetailsSectionProps> = ({
       cpeCode: globalGeneralData.cpeCode || '',
       campaignOwner: globalGeneralData.campaignOwner || '',
       campaignApprover: globalGeneralData.campaignApprover || '',
-      spotLength: globalGeneralData.spotLength || ''
+      spotLength: globalGeneralData.spotLength || ['60']
     });
   }, [globalGeneralData]);
 
@@ -51,13 +51,13 @@ const GeneralDetailsSection: React.FC<GeneralDetailsSectionProps> = ({
         [field]: newValue,
         brand: '', // Сбрасываем бренд при смене рекламодателя
         agency: '', // Сбрасываем агентство при смене рекламодателя
-        spotLength: '' // Сбрасываем spot length при смене рекламодателя
+        spotLength: ['60'] // Сбрасываем к дефолту :60 при смене рекламодателя
       }));
       dispatch(updateGeneralData({ 
         advertiser: newValue,
         brand: '', // Сбрасываем бренд в глобальном состоянии
         agency: '', // Сбрасываем агентство в глобальном состоянии
-        spotLength: '' // Сбрасываем spot length в глобальном состоянии
+        spotLength: ['60'] // Сбрасываем к дефолту :60 в глобальном состоянии
       }));
     } else {
       setFormData(prev => ({
@@ -82,23 +82,26 @@ const GeneralDetailsSection: React.FC<GeneralDetailsSectionProps> = ({
       
       // Сбрасываем spot length при изменении advertiser, brand или agency
       if (field === 'brand' || field === 'agency') {
-        setFormData(prev => ({ ...prev, spotLength: '' }));
-        dispatch(updateGeneralData({ spotLength: '' }));
+        setFormData(prev => ({ ...prev, spotLength: ['60'] }));
+        dispatch(updateGeneralData({ spotLength: ['60'] }));
       }
     }
   };
 
-  // Обработчик для выбора Spot Length
-  const handleSpotLengthChange = (value: string | null) => {
-    const newValue = value || '';
+  // Обработчик для чекбоксов Spot Length
+  const handleSpotLengthChange = (value: string) => {
+    const currentSpotLengths = formData.spotLength;
+    const newSpotLengths = currentSpotLengths.includes(value)
+      ? currentSpotLengths.filter(v => v !== value)
+      : [...currentSpotLengths, value];
     
     setFormData(prev => ({
       ...prev,
-      spotLength: newValue
+      spotLength: newSpotLengths
     }));
     
     // Обновляем глобальное состояние
-    dispatch(updateGeneralData({ spotLength: newValue }));
+    dispatch(updateGeneralData({ spotLength: newSpotLengths }));
   };
 
   // Получаем бренды для выбранного рекламодателя
@@ -106,10 +109,6 @@ const GeneralDetailsSection: React.FC<GeneralDetailsSectionProps> = ({
   
   // Получаем агентства для выбранного рекламодателя
   const availableAgencyOptions = formData.advertiser ? agencyOptions[formData.advertiser] || [] : [];
-  
-  // Получаем доступные длительности роликов
-  const availableSpotLengthOptions = formData.advertiser && formData.brand && formData.agency ? 
-    spotLengthOptions[formData.advertiser]?.[formData.brand]?.[formData.agency] || [] : [];
 
   return (
     <div className={className}>
@@ -195,15 +194,28 @@ const GeneralDetailsSection: React.FC<GeneralDetailsSectionProps> = ({
       {/* Spot Length */}
       <Grid mb="lg">
         <Grid.Col span={6}>
-          <Select
-            label="Spot Length"
-            placeholder={formData.advertiser && formData.brand && formData.agency ? "- Select Spot Length -" : "Select Advertiser, Brand and Agency first"}
-            data={availableSpotLengthOptions}
-            value={formData.spotLength}
-            onChange={handleSpotLengthChange}
-            disabled={!formData.advertiser || !formData.brand || !formData.agency}
-            required
-          />
+          <div>
+            <Text size="sm" fw={500} mb={8}>
+              Spot Length <span style={{ color: 'red' }}>*</span>
+            </Text>
+            <Group gap="md">
+              <Checkbox
+                label=":15"
+                checked={formData.spotLength.includes('15')}
+                onChange={() => handleSpotLengthChange('15')}
+              />
+              <Checkbox
+                label=":30"
+                checked={formData.spotLength.includes('30')}
+                onChange={() => handleSpotLengthChange('30')}
+              />
+              <Checkbox
+                label=":60"
+                checked={formData.spotLength.includes('60')}
+                onChange={() => handleSpotLengthChange('60')}
+              />
+            </Group>
+          </div>
         </Grid.Col>
       </Grid>
     </div>
