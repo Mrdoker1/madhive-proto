@@ -268,7 +268,7 @@ const CampaignSummarySection: React.FC = () => {
             <SummaryRow
               label="Campaign Name"
               value={campaign.general.campaignName}
-              editRoute="/new-campaign"
+              editRoute="/campaign/linear/new#general-details"
               isEmpty={!campaign.general.campaignName}
             />
 
@@ -276,7 +276,7 @@ const CampaignSummarySection: React.FC = () => {
             <SummaryRow
               label="Campaign Duration"
               value={getCampaignDuration()}
-              editRoute="/new-campaign"
+              editRoute="/campaign/linear/new#flight-range"
               isEmpty={!campaign.flight.startDate || !campaign.flight.endDate}
             />
 
@@ -284,7 +284,7 @@ const CampaignSummarySection: React.FC = () => {
             <SummaryRow
               label="Advertiser"
               value={campaign.general.advertiser}
-              editRoute="/new-campaign"
+              editRoute="/campaign/linear/new#general-details"
               isEmpty={!campaign.general.advertiser}
             />
 
@@ -292,7 +292,7 @@ const CampaignSummarySection: React.FC = () => {
             <SummaryRow
               label="Agency"
               value={campaign.general.agency}
-              editRoute="/new-campaign"
+              editRoute="/campaign/linear/new#general-details"
               isEmpty={!campaign.general.agency}
             />
 
@@ -300,7 +300,7 @@ const CampaignSummarySection: React.FC = () => {
             <SummaryRow
               label="Spot Length"
               value={campaign.general.spotLength ? `${campaign.general.spotLength} sec` : ''}
-              editRoute="/new-campaign"
+              editRoute="/campaign/linear/new#linear-details"
               isEmpty={!campaign.general.spotLength}
             />
           </TableTbody>
@@ -316,7 +316,7 @@ const CampaignSummarySection: React.FC = () => {
             <SummaryRow
               label="Budget"
               value={formatCurrency(campaign.budget.totalBudget)}
-              editRoute="/new-campaign"
+              editRoute="/campaign/linear/new#total-budget"
               isEmpty={campaign.budget.totalBudget === 0}
             />
 
@@ -324,7 +324,7 @@ const CampaignSummarySection: React.FC = () => {
             <SummaryRow
               label="Audience"
               value={formatAudienceString()}
-              editRoute="/channel-details"
+              editRoute="/campaign/linear/details#audiences"
               isEmpty={
                 campaign.audience.gender.length === 0 && 
                 campaign.audience.age.length === 0 && 
@@ -336,7 +336,7 @@ const CampaignSummarySection: React.FC = () => {
             <SummaryRow
               label="Markets"
               value={formatMarketsString()}
-              editRoute="/channel-details"
+              editRoute="/campaign/linear/details#markets"
               isEmpty={campaign.markets.selectedMarkets.length === 0}
             />
 
@@ -344,7 +344,7 @@ const CampaignSummarySection: React.FC = () => {
             <SummaryRow
               label="Daypart Summary"
               value={formatDaypartSummary()}
-              editRoute="/channel-details"
+              editRoute="/campaign/linear/details#dayparts"
               isEmpty={
                 Object.values(campaign.dayparts.selectedSlots).every(
                   daySlots => Object.values(daySlots).every(slot => !slot)
