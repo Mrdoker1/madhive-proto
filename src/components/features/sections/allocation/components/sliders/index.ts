@@ -1,5 +1,6 @@
 export { SimpleSlider } from './SimpleSlider';
 export { ChannelSlider } from './ChannelSlider';
+export { SuggestedChannelSlider } from './SuggestedChannelSlider';
 
 // Экспорт типов
 export type { ChannelAllocation, SimpleSliderProps, ChannelSliderProps } from './types';

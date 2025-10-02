@@ -1,0 +1,144 @@
+'use client';
+
+import React from 'react';
+import { Text, ActionIcon } from '@mantine/core';
+import { IconPlus } from '@tabler/icons-react';
+import Image from 'next/image';
+
+interface SuggestedChannelSliderProps {
+  channelId: string;
+  channelName: string;
+  channelColor: string;
+  roiIncrease: number;
+  onAdd: (channelId: string) => void;
+}
+
+export const SuggestedChannelSlider: React.FC<SuggestedChannelSliderProps> = ({ 
+  channelId,
+  channelName,
+  channelColor,
+  roiIncrease,
+  onAdd
+}) => {
+  const handleAdd = () => {
+    onAdd(channelId);
+  };
+
+  return (
+    <div style={{ 
+      marginTop: '32px',
+      marginBottom: '32px',
+      padding: '24px',
+      border: '2px dashed #D1D5DB',
+      borderRadius: '8px'
+    }}>
+      {/* Текст с предложением */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px',
+        marginBottom: '16px'
+      }}>
+        <Text size="12px" fw={400} c="#6B7280">
+          More channels to consider: Found your target audience on this channel, adding this tactic will increase your ROI by{roiIncrease}%
+        </Text>
+        <Image
+          src="/assets/icons/other/spark.svg"
+          alt="AI suggestion"
+          width={16}
+          height={16}
+        />
+      </div>
+
+      {/* Слайдер канала (неактивный) */}
+      <div style={{ 
+        display: 'flex', 
+        alignItems: 'center', 
+        flexWrap: 'nowrap',
+        minHeight: '40px',
+        opacity: 0.7
+      }}>
+        {/* Иконка канала - 32px черная */}
+        <Image
+          src={`/assets/icons/channels/${channelId}.svg`}
+          alt={channelName}
+          width={32}
+          height={32}
+          style={{ filter: 'brightness(0)', flexShrink: 0, marginRight: '8px' }}
+        />
+        
+        {/* Название канала - 12px */}
+        <Text size="12px" fw={500} c="#1F2937" style={{ minWidth: '80px', flexShrink: 0, marginRight: '16px' }}>
+          {channelName}
+        </Text>
+        
+        {/* Placeholder для бюджета */}
+        <div style={{
+          width: '140px',
+          height: '40px',
+          border: '1px solid #E5E7EB',
+          borderRadius: '6px',
+          backgroundColor: '#F9FAFB',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          flexShrink: 0,
+          marginRight: '16px'
+        }}>
+          <Text size="14px" c="#9CA3AF">Not allocated</Text>
+        </div>
+        
+        {/* Placeholder для слайдера */}
+        <div style={{ 
+          flex: 1, 
+          minWidth: '200px', 
+          marginRight: '16px'
+        }}>
+          {/* Метрики (скрыты) */}
+          <div style={{
+            display: 'flex',
+            justifyContent: 'flex-end',
+            gap: '16px',
+            fontSize: '12px',
+            color: '#D1D5DB',
+            marginBottom: '4px'
+          }}>
+            <span>Max Reach: ---</span>
+            <span>Reach%: ---%</span>
+          </div>
+          
+          {/* Неактивный слайдер */}
+          <div style={{
+            height: '6px',
+            backgroundColor: '#E5E7EB',
+            borderRadius: '3px',
+            position: 'relative'
+          }}>
+            <div style={{
+              position: 'absolute',
+              left: 0,
+              top: 0,
+              height: '100%',
+              width: '0%',
+              backgroundColor: channelColor,
+              borderRadius: '3px',
+              opacity: 0.3
+            }} />
+          </div>
+        </div>
+        
+        {/* Кнопка добавления */}
+        <ActionIcon
+          variant="subtle"
+          color="gray"
+          size="sm"
+          onClick={handleAdd}
+          style={{ flexShrink: 0 }}
+        >
+          <IconPlus size={16} />
+        </ActionIcon>
+      </div>
+    </div>
+  );
+};
+

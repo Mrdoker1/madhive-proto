@@ -2,7 +2,8 @@
 
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { Text, Group } from '@mantine/core';
-import { useAppSelector } from '@/hooks/useRedux';
+import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
+import { updateChannelsData } from '@/store/slices/campaignSlice';
 import { ChannelPoint, ChannelAllocation, ChartDimensions } from './types';
 import { channelColors, channelNames, CHART_CONFIG, CHANNEL_REACH_COEFFICIENTS } from './constants';
 import { DraggablePoint } from './components/DraggablePoint';
@@ -11,13 +12,15 @@ import { ChartAxes } from './components/ChartAxes';
 import { ChartLines } from './components/ChartLines';
 import { 
   ChannelAllocation as SliderChannelAllocation, 
-  ChannelSlider, 
+  ChannelSlider,
+  SuggestedChannelSlider,
   fetchForecastMetrics
 } from './components/sliders';
 import { redistributeBudgetSmart } from './utils';
 import { calculateReachByFormula, CHANNEL_CONFIGS, calculateDefaultBudgetAllocation } from './channelConfig';
 
 export const AllocationSection: React.FC = () => {
+  const dispatch = useAppDispatch();
   const channelsData = useAppSelector((state) => state.campaign.channels);
   const totalBudget = useAppSelector((state) => state.campaign.budget.totalBudget);
   const chartContainerRef = useRef<HTMLDivElement>(null);
@@ -25,6 +28,13 @@ export const AllocationSection: React.FC = () => {
   
   const selectedChannels = channelsData.selectedChannels;
   const channelCount = selectedChannels.length;
+  
+  // Все доступные каналы
+  const allAvailableChannels = Object.keys(CHANNEL_CONFIGS);
+  // Каналы, которые не выбраны
+  const unselectedChannels = allAvailableChannels.filter(ch => !selectedChannels.includes(ch));
+  // Предлагаемый канал (первый из неиспользованных)
+  const suggestedChannel = unselectedChannels.length > 0 ? unselectedChannels[0] : null;
   
   // Единое состояние для каналов (содержит данные для графика и слайдеров)
   const [channelData, setChannelData] = useState<Record<string, ChannelPoint & SliderChannelAllocation>>({});
@@ -260,6 +270,14 @@ export const AllocationSection: React.FC = () => {
       return newData;
     });
   };
+
+  // Добавление предложенного канала
+  const handleAddSuggestedChannel = useCallback((channelId: string) => {
+    // Добавляем канал в Redux
+    dispatch(updateChannelsData({
+      selectedChannels: [...selectedChannels, channelId]
+    }));
+  }, [dispatch, selectedChannels]);
   
   // Вычисляем allocations для budget bar
   const totalAllocatedBudget = points.reduce((sum, point) => sum + point.budget, 0);
@@ -422,6 +440,17 @@ export const AllocationSection: React.FC = () => {
                   isLoading={isLoading[channel.id]}
                 />
               ))}
+              
+              {/* Предложение добавить канал */}
+              {suggestedChannel && (
+                <SuggestedChannelSlider
+                  channelId={suggestedChannel}
+                  channelName={CHANNEL_CONFIGS[suggestedChannel].name}
+                  channelColor={CHANNEL_CONFIGS[suggestedChannel].color}
+                  roiIncrease={Math.floor(Math.random() * 15) + 5} // Случайное значение 5-20%
+                  onAdd={handleAddSuggestedChannel}
+                />
+              )}
             </div>
           )}
         </div>
