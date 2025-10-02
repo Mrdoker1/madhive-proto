@@ -12,15 +12,14 @@ export const useMarketsState = () => {
   const linearData = useAppSelector((state) => state.campaign.linear);
   const budgetData = useAppSelector((state) => state.campaign.budget);
   
+  const [allAvailableMarkets, setAllAvailableMarkets] = useState<MarketWithStationsData[]>([]);
   const [markets, setMarkets] = useState<MarketWithStationsData[]>([]);
   const [expandedDetails, setExpandedDetails] = useState<Set<string>>(new Set());
   const [filteredMarketIds, setFilteredMarketIds] = useState<string[]>([]);
 
 
   // Derived state
-  const selectedMarketsWithStations = markets.filter(market => 
-    market.selected && market.stations.some(station => station.selected)
-  );
+  const selectedMarketsWithStations = markets.filter(market => market.selected);
   const allSelected = markets.length > 0 && markets.every(market => market.selected);
   const someSelected = markets.some(market => market.selected);
 
@@ -73,52 +72,38 @@ export const useMarketsState = () => {
     // Сортируем по рангу
     marketsWithStations.sort((a, b) => a.rank - b.rank);
 
-    setMarkets(marketsWithStations);
+    // Сохраняем все доступные маркеты
+    setAllAvailableMarkets(marketsWithStations);
     
-    // По умолчанию показываем все доступные маркеты
-    if (filteredMarketIds.length === 0) {
-      setFilteredMarketIds(marketsWithStations.map(market => market.id));
-    }
+    // Сбрасываем фильтр при смене бродкастеров (пользователь выберет маркеты вручную)
+    setFilteredMarketIds([]);
+    setMarkets([]);
   }, [linearData.broadcasters]);
 
-  // Filter markets based on selected filter and update budgets
+  // Filter markets based on selected filter - только при изменении фильтра
   useEffect(() => {
-    if (markets.length === 0) return;
+    if (allAvailableMarkets.length === 0) return;
 
-    const filteredMarkets = markets.filter(market => 
+    const filteredMarkets = allAvailableMarkets.filter(market => 
       filteredMarketIds.includes(market.id)
     );
 
-    // Проставляем статус selected на основе сохраненных данных и пересчитываем бюджет
-    const marketsWithSelection = filteredMarkets.map(market => {
-      const isSelected = marketsReduxData.selectedMarkets.includes(market.name);
-      const marketBudget = isSelected ? (budgetData.totalBudget * market.percentage) / 100 : 0;
-      
-      // Пересчитываем бюджет станций
-      const updatedStations = market.stations.map(station => {
-        if (station.selected && isSelected) {
-          const selectedStations = market.stations.filter(s => s.selected);
-          return {
-            ...station,
-            budget: selectedStations.length > 0 ? marketBudget / selectedStations.length : 0
-          };
-        }
-        return {
-          ...station,
-          budget: 0
-        };
-      });
+    // Инициализируем маркеты с пустым состоянием
+    const initializedMarkets = filteredMarkets.map(market => ({
+      ...market,
+      selected: false,
+      percentage: 0,
+      budget: 0,
+      stations: market.stations.map(station => ({
+        ...station,
+        selected: false,
+        percentage: 0,
+        budget: 0
+      }))
+    }));
 
-      return {
-        ...market,
-        selected: isSelected,
-        budget: marketBudget,
-        stations: updatedStations
-      };
-    });
-
-    setMarkets(marketsWithSelection);
-  }, [filteredMarketIds, marketsReduxData.selectedMarkets, budgetData.totalBudget]);
+    setMarkets(initializedMarkets);
+  }, [filteredMarketIds]);
 
   // Update Market Estimation when markets change
   useEffect(() => {
@@ -131,13 +116,17 @@ export const useMarketsState = () => {
     }
   }, [markets, dispatch]);
 
-  // Auto-expand first detailed table for testing
+  // Auto-expand detailed tables when markets are selected
   useEffect(() => {
-    if (selectedMarketsWithStations.length > 0 && expandedDetails.size === 0) {
-      const firstMarketId = selectedMarketsWithStations[0].id;
-      setExpandedDetails(new Set([firstMarketId]));
+    if (selectedMarketsWithStations.length > 0) {
+      // Автоматически раскрываем все выбранные маркеты
+      const newExpanded = new Set(selectedMarketsWithStations.map(m => m.id));
+      setExpandedDetails(newExpanded);
+    } else {
+      // Закрываем все, если ничего не выбрано
+      setExpandedDetails(new Set());
     }
-  }, [selectedMarketsWithStations, expandedDetails.size]);
+  }, [selectedMarketsWithStations.length]);
 
   // Handler for markets filter change (memoized)
   const handleMarketsFilterChange = useCallback((selectedMarketNames: string[]) => {
@@ -151,11 +140,11 @@ export const useMarketsState = () => {
 
   // Get available markets for filter (memoized)
   const availableMarketsForFilter = useMemo(() => 
-    markets.map(market => ({
+    allAvailableMarkets.map(market => ({
       id: market.id,
       name: market.name,
       displayName: market.displayName
-    })), [markets]
+    })), [allAvailableMarkets]
   );
 
   // Get filtered market names (memoized)
