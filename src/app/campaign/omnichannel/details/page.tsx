@@ -10,6 +10,8 @@ import NextButton from "@/components/ui/NextButton";
 import ChannelPills, { ChannelPill } from "@/components/ui/ChannelPills";
 import AudiencesSection from "@/components/features/sections/AudiencesSection";
 import InterestsSection from "@/components/features/sections/InterestsSection";
+import GeoSection from "@/components/features/sections/GeoSection";
+import DaypartsSection from "@/components/features/sections/DaypartsSection";
 import { Text } from '@mantine/core';
 
 type ChannelType = 'linear' | 'ctv' | 'preroll' | 'audio';
@@ -70,7 +72,8 @@ export default function OmnichannelDetailsPage() {
         return [
           { id: 'audiences', label: 'Audiences', anchor: '#audiences' },
           { id: 'interests', label: 'Interests', anchor: '#interests' },
-          { id: 'markets', label: 'Markets', anchor: '#markets' }
+          { id: 'geo', label: 'Geo', anchor: '#geo' },
+          { id: 'dayparts', label: 'Dayparts', anchor: '#dayparts' }
         ];
       case 'preroll':
         return [
@@ -143,10 +146,12 @@ export default function OmnichannelDetailsPage() {
               <InterestsSection />
             </SectionWrapper>
 
-            <SectionWrapper id="markets" title="Markets">
-              <Text size="sm" c="dimmed">
-                Select markets for CTV campaign.
-              </Text>
+            <SectionWrapper id="geo" title="Geo">
+              <GeoSection />
+            </SectionWrapper>
+
+            <SectionWrapper id="dayparts" title="Dayparts">
+              <DaypartsSection />
             </SectionWrapper>
           </>
         );
