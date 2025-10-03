@@ -179,6 +179,13 @@ const theme = createTheme({
           }
         }
       }
+    },
+    Badge: {
+      styles: {
+        root: {
+          textTransform: 'none'
+        }
+      }
     }
   }
 });

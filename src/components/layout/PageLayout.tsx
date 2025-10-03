@@ -19,6 +19,8 @@ interface PageLayoutProps {
   headerRightButtonText?: string;
   headerRightButtonActive?: boolean;
   onHeaderRightButtonClick?: () => void;
+  // Дополнительные действия/контент в заголовке (справа от title)
+  headerActions?: React.ReactNode;
 }
 
 const PageLayout: React.FC<PageLayoutProps> = ({ 
@@ -32,7 +34,8 @@ const PageLayout: React.FC<PageLayoutProps> = ({
   headerShowRightButton = false,
   headerRightButtonText = 'Next',
   headerRightButtonActive = true,
-  onHeaderRightButtonClick
+  onHeaderRightButtonClick,
+  headerActions
 }) => {
   return (
     <motion.div 
@@ -88,6 +91,7 @@ const PageLayout: React.FC<PageLayoutProps> = ({
                   rightButtonText={headerRightButtonText}
                   rightButtonActive={headerRightButtonActive}
                   onRightButtonClick={onHeaderRightButtonClick}
+                  actions={headerActions}
                 />
               </motion.div>
             )}

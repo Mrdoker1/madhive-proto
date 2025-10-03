@@ -13,6 +13,8 @@ interface PageHeaderProps {
   rightButtonActive?: boolean;
   /** Обработчик клика правой кнопки */
   onRightButtonClick?: () => void;
+  /** Дополнительный контент рядом с заголовком */
+  actions?: React.ReactNode;
 }
 
 const PageHeader: React.FC<PageHeaderProps> = ({ 
@@ -21,6 +23,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({
   rightButtonText = 'Next',
   rightButtonActive = true,
   onRightButtonClick,
+  actions,
 }) => {
   return (
     <div 
@@ -33,16 +36,20 @@ const PageHeader: React.FC<PageHeaderProps> = ({
         paddingRight: '40px'
       }}
     >
-      <h1 
-        style={{ 
-          fontSize: '24px',
-          fontWeight: 500,
-          margin: 0,
-          color: '#000000'
-        }}
-      >
-        {title}
-      </h1>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
+        <h1 
+          style={{ 
+            fontSize: '24px',
+            fontWeight: 500,
+            margin: 0,
+            color: '#000000'
+          }}
+        >
+          {title}
+        </h1>
+        
+        {actions}
+      </div>
 
       {showRightButton && (
         <Button
