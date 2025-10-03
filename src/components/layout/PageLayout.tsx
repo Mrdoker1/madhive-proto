@@ -13,6 +13,7 @@ interface PageLayoutProps {
   showProgress?: boolean; // Показывать прогресс в breadcrumbs
   onBreadcrumbClick?: (step: BreadcrumbStep) => void; // Обработчик клика на breadcrumb
   showRightSidebar?: boolean; // Показывать правый сайдбар
+  rightSidebarContent?: React.ReactNode; // Кастомный контент для правого сайдбара
   footerContent?: React.ReactNode; // Контент который будет зафиксирован внизу
   // Опции правой кнопки в PageHeader
   headerShowRightButton?: boolean;
@@ -30,6 +31,7 @@ const PageLayout: React.FC<PageLayoutProps> = ({
   showProgress = false,
   onBreadcrumbClick,
   showRightSidebar = false,
+  rightSidebarContent,
   footerContent,
   headerShowRightButton = false,
   headerRightButtonText = 'Next',
@@ -145,7 +147,7 @@ const PageLayout: React.FC<PageLayoutProps> = ({
                 scale: { duration: 0.3 }
               }}
             >
-              <RightSidebar />
+              {rightSidebarContent || <RightSidebar />}
             </motion.div>
           )}
         </AnimatePresence>

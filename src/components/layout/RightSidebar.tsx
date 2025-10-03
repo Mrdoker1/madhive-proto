@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { TextInput, Text, Card } from '@mantine/core';
+import { Text, Card } from '@mantine/core';
 import { IconCurrencyDollar } from '@tabler/icons-react';
 import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
 import { updateBudgetData, updateEstimations } from '@/store/slices/campaignSlice';
@@ -151,81 +151,71 @@ const RightSidebar: React.FC<RightSidebarProps> = ({ className = '' }) => {
       <div className="space-y-6" style={{ display: 'flex', flexDirection: 'column', padding: '24px', gap: '16px' }}>
         {/* Budget Estimation */}
         <div>
-          <TextInput
-            label="Budget Estimation"
-            placeholder="Enter budget amount"
-            leftSection={<IconCurrencyDollar size={16} color="#666" />}
-            value={budgetInput}
-            onChange={handleBudgetChange}
-            styles={{
-              label: {
-                fontSize: '14px',
-                fontWeight: 500,
-                color: 'var(--form-label-color)',
-                marginBottom: '8px'
-              },
-              input: {
-                fontSize: '14px',
-                padding: '12px 16px',
-                paddingLeft: '40px', // Добавляем отступ для иконки
-                border: '1px solid var(--form-input-border)',
-                borderRadius: '6px',
-                backgroundColor: '#FFFFFF'
-              }
-            }}
-          />
+          <Text size="sm" fw={500} style={{ color: 'var(--form-label-color)', marginBottom: '8px' }}>
+            Budget Estimation
+          </Text>
+          
+          <div style={{ 
+            backgroundColor: '#FFFFFF',
+            borderRadius: '8px',
+            padding: '8px 16px',
+            marginBottom: '16px'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+              <IconCurrencyDollar size={20} color="#666" />
+              <input
+                type="text"
+                value={budgetInput}
+                onChange={handleBudgetChange}
+                placeholder="Enter budget"
+                style={{
+                  border: 'none',
+                  outline: 'none',
+                  fontSize: '24px',
+                  fontWeight: 600,
+                  textAlign: 'center',
+                  backgroundColor: 'transparent',
+                  width: '100%'
+                }}
+              />
+            </div>
+          </div>
         </div>
 
         {/* Audience Estimation */}
         <div>
-          <TextInput
-            label="Audience Estimation"
-            placeholder="Select audience criteria"
-            value={audienceEstimation > 0 ? audienceEstimation.toLocaleString('en-US') : ''}
-            readOnly
-            styles={{
-              label: {
-                fontSize: '14px',
-                fontWeight: 500,
-                color: 'var(--form-label-color)',
-                marginBottom: '8px'
-              },
-              input: {
-                fontSize: '14px',
-                padding: '12px 16px',
-                border: '1px solid var(--form-input-border)',
-                borderRadius: '6px',
-                backgroundColor: '#F8F9FA', // Слегка серый фон для readOnly поля
-                cursor: 'default'
-              }
-            }}
-          />
+          <Text size="sm" fw={500} style={{ color: 'var(--form-label-color)', marginBottom: '8px' }}>
+            Audience Estimation
+          </Text>
+          
+          <div style={{ 
+            backgroundColor: '#FFFFFF',
+            borderRadius: '8px',
+            padding: '8px 16px',
+            marginBottom: '16px'
+          }}>
+            <Text size="xl" fw={600} ta="center">
+              {audienceEstimation > 0 ? audienceEstimation.toLocaleString('en-US') : '--'}
+            </Text>
+          </div>
         </div>
 
         {/* Market Estimation */}
         <div>
-          <TextInput
-            label="Market Estimation"
-            placeholder="Select markets to see estimation"
-            value={marketEstimation > 0 ? marketEstimation.toLocaleString('en-US') : ''}
-            readOnly
-            styles={{
-              label: {
-                fontSize: '14px',
-                fontWeight: 500,
-                color: 'var(--form-label-color)',
-                marginBottom: '8px'
-              },
-              input: {
-                fontSize: '14px',
-                padding: '12px 16px',
-                border: '1px solid var(--form-input-border)',
-                borderRadius: '6px',
-                backgroundColor: '#F8F9FA', // Слегка серый фон для readOnly поля
-                cursor: 'default'
-              }
-            }}
-          />
+          <Text size="sm" fw={500} style={{ color: 'var(--form-label-color)', marginBottom: '8px' }}>
+            Market Estimation
+          </Text>
+          
+          <div style={{ 
+            backgroundColor: '#FFFFFF',
+            borderRadius: '8px',
+            padding: '8px 16px',
+            marginBottom: '16px'
+          }}>
+            <Text size="xl" fw={600} ta="center">
+              {marketEstimation > 0 ? marketEstimation.toLocaleString('en-US') : '--'}
+            </Text>
+          </div>
         </div>
 
         {/* AI Suggestions */}

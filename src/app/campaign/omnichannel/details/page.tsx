@@ -12,6 +12,7 @@ import AudiencesSection from "@/components/features/sections/AudiencesSection";
 import InterestsSection from "@/components/features/sections/InterestsSection";
 import GeoSection from "@/components/features/sections/GeoSection";
 import DaypartsSection from "@/components/features/sections/DaypartsSection";
+import OmnichannelRightSidebar from "@/components/layout/OmnichannelRightSidebar";
 import { Text } from '@mantine/core';
 
 type ChannelType = 'linear' | 'ctv' | 'preroll' | 'audio';
@@ -213,6 +214,7 @@ export default function OmnichannelDetailsPage() {
         breadcrumbs={breadcrumbSteps} 
         title="Channel Details (4)"
         showRightSidebar={true}
+        rightSidebarContent={<OmnichannelRightSidebar />}
         headerActions={
           <ChannelPills
             channels={channelPills}
