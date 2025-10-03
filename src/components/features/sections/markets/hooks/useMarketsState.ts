@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
 import { updateMarketsData, updateEstimations } from '@/store/slices/campaignSlice';
 import { marketsData } from '@/data/marketsData';
@@ -16,6 +16,7 @@ export const useMarketsState = () => {
   const [markets, setMarkets] = useState<MarketWithStationsData[]>([]);
   const [expandedDetails, setExpandedDetails] = useState<Set<string>>(new Set());
   const [filteredMarketIds, setFilteredMarketIds] = useState<string[]>([]);
+  const previousFilteredMarketIdsRef = useRef<string[]>([]);
 
 
   // Derived state
@@ -78,41 +79,106 @@ export const useMarketsState = () => {
     // Сбрасываем фильтр при смене бродкастеров (пользователь выберет маркеты вручную)
     setFilteredMarketIds([]);
     setMarkets([]);
+    previousFilteredMarketIdsRef.current = [];
   }, [linearData.broadcasters]);
 
   // Filter markets based on selected filter - только при изменении фильтра
   useEffect(() => {
     if (allAvailableMarkets.length === 0) return;
 
+    // Проверяем, действительно ли изменились filteredMarketIds
+    const previousIds = previousFilteredMarketIdsRef.current;
+    const idsChanged = 
+      previousIds.length !== filteredMarketIds.length ||
+      !previousIds.every((id, index) => id === filteredMarketIds[index]);
+    
+    if (!idsChanged) return;
+    
+    previousFilteredMarketIdsRef.current = filteredMarketIds;
+
     const filteredMarkets = allAvailableMarkets.filter(market => 
       filteredMarketIds.includes(market.id)
     );
 
-    // Инициализируем маркеты с пустым состоянием
-    const initializedMarkets = filteredMarkets.map(market => ({
-      ...market,
-      selected: false,
-      percentage: 0,
-      budget: 0,
-      stations: market.stations.map(station => ({
-        ...station,
-        selected: false,
-        percentage: 0,
-        budget: 0
-      }))
-    }));
+    // Используем функциональное обновление для доступа к актуальному состоянию
+    setMarkets(currentMarkets => {
+      // Определяем новые маркеты (которые не были в старом списке)
+      const oldMarketIds = new Set(currentMarkets.map(m => m.id));
+      const newMarketIds = filteredMarkets
+        .filter(market => !oldMarketIds.has(market.id))
+        .map(market => market.id);
 
-    setMarkets(initializedMarkets);
-  }, [filteredMarketIds]);
+      // Подсчитываем количество выбранных маркетов после добавления новых
+      const currentSelectedCount = currentMarkets.filter(m => m.selected).length;
+      const totalSelectedCount = currentSelectedCount + newMarketIds.length;
+      
+      // Вычисляем процент для каждого маркета
+      const percentagePerMarket = totalSelectedCount > 0 
+        ? Math.round((100 / totalSelectedCount) * 100) / 100 
+        : 0;
 
-  // Update Market Estimation when markets change
+      // Инициализируем маркеты
+      const initializedMarkets = filteredMarkets.map(market => {
+        // Если это существующий маркет, сохраняем его данные но пересчитываем процент
+        const existingMarket = currentMarkets.find(m => m.id === market.id);
+        if (existingMarket) {
+          const budget = (budgetData.totalBudget * percentagePerMarket) / 100;
+          const selectedStationsCount = existingMarket.stations.filter(s => s.selected).length;
+          const budgetPerStation = selectedStationsCount > 0 ? budget / selectedStationsCount : 0;
+
+          return {
+            ...existingMarket,
+            percentage: existingMarket.selected ? percentagePerMarket : 0,
+            budget: existingMarket.selected ? budget : 0,
+            stations: existingMarket.stations.map(station => ({
+              ...station,
+              budget: station.selected && existingMarket.selected ? budgetPerStation : 0
+            }))
+          };
+        }
+        
+        // Если это новый маркет, автоматически выбираем его
+        const budget = (budgetData.totalBudget * percentagePerMarket) / 100;
+        const budgetPerStation = market.stations.length > 0 ? budget / market.stations.length : 0;
+        const stationPercentage = market.stations.length > 0 
+          ? Math.round((100 / market.stations.length) * 100) / 100 
+          : 0;
+
+        return {
+          ...market,
+          selected: true, // Автоматически выбираем новый маркет
+          percentage: percentagePerMarket,
+          budget: budget,
+          stations: market.stations.map(station => ({
+            ...station,
+            selected: true,
+            percentage: stationPercentage,
+            budget: budgetPerStation
+          }))
+        };
+      });
+
+      return initializedMarkets;
+    });
+  }, [filteredMarketIds, budgetData.totalBudget, allAvailableMarkets]);
+
+  // Update Redux when markets change
   useEffect(() => {
+    // Обновляем список выбранных маркетов в Redux
+    const selectedMarketNames = markets
+      .filter(m => m.selected)
+      .map(m => m.name);
+    dispatch(updateMarketsData({ selectedMarkets: selectedMarketNames }));
+
+    // Обновляем estimations
     if (markets.length > 0) {
       // Используем динамический импорт для избежания циклических зависимостей
       import('../utils/marketCalculations').then(({ calculateMarketEstimation }) => {
         const marketEstimation = calculateMarketEstimation(markets);
         dispatch(updateEstimations({ marketEstimation }));
       });
+    } else {
+      dispatch(updateEstimations({ marketEstimation: 0 }));
     }
   }, [markets, dispatch]);
 
@@ -168,6 +234,8 @@ export const useMarketsState = () => {
     setMarkets,
     setExpandedDetails,
     handleMarketsFilterChange,
+    setFilteredMarketIds,
+    filteredMarketIds,
     
     // Redux data
     budgetData,

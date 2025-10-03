@@ -23,6 +23,8 @@ const MarketsSection = () => {
     setMarkets,
     setExpandedDetails,
     handleMarketsFilterChange,
+    setFilteredMarketIds,
+    filteredMarketIds,
     budgetData,
     dispatch
   } = useMarketsState();
@@ -32,6 +34,8 @@ const MarketsSection = () => {
     setMarkets,
     expandedDetails,
     setExpandedDetails,
+    setFilteredMarketIds,
+    filteredMarketIds,
     budgetData,
     dispatch
   });
