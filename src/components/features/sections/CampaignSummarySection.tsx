@@ -128,8 +128,8 @@ const CampaignSummarySection: React.FC = () => {
     // Группируем дни по временным интервалам
     const timeRanges: Record<string, string[]> = {};
     
-    // Список дней для правильного порядка
-    const dayOrder = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    // Список дней для правильного порядка (начинается с Monday)
+    const dayOrder = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
     const dayNames = {
       'Sun': 'Sun',
       'Mon': 'Mon', 
