@@ -249,9 +249,9 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({ class
               onClick={() => setAudienceSize('Small')}
               style={{ 
                 flex: 1, 
-                padding: '8px', 
+                padding: '2px', 
                 textAlign: 'center', 
-                backgroundColor: audienceSize === 'Small' ? '#2A1037' : '#F0F0F0',
+                backgroundColor: audienceSize === 'Small' ? '#B46565' : '#EBE6EC',
                 color: audienceSize === 'Small' ? '#FFFFFF' : '#000000',
                 borderRadius: '6px',
                 fontSize: '14px',
@@ -264,9 +264,9 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({ class
               onClick={() => setAudienceSize('Good')}
               style={{ 
                 flex: 1, 
-                padding: '8px', 
+                padding: '2px', 
                 textAlign: 'center', 
-                backgroundColor: audienceSize === 'Good' ? '#2A1037' : '#F0F0F0',
+                backgroundColor: audienceSize === 'Good' ? '#AFB465' : '#EBE6EC',
                 color: audienceSize === 'Good' ? '#FFFFFF' : '#000000',
                 borderRadius: '6px',
                 fontSize: '14px',
@@ -279,9 +279,9 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({ class
               onClick={() => setAudienceSize('Strong')}
               style={{ 
                 flex: 1, 
-                padding: '8px', 
+                padding: '2px', 
                 textAlign: 'center', 
-                backgroundColor: audienceSize === 'Strong' ? '#4ADE80' : '#F0F0F0',
+                backgroundColor: audienceSize === 'Strong' ? '#65B48C' : '#EBE6EC',
                 color: audienceSize === 'Strong' ? '#FFFFFF' : '#000000',
                 borderRadius: '6px',
                 fontSize: '14px',
