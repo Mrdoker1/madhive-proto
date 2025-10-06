@@ -33,28 +33,76 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({ class
     { id: 'audio', label: 'Audio' }
   ];
 
+  // Процентное соотношение каналов
+  const channelPercentages: Record<string, number> = {
+    linear: 50,
+    ctv: 25,
+    preroll: 10,
+    audio: 15,
+    display: 10 // Оставляем для обратной совместимости
+  };
+
+  // Функция для определения цвета легенды
+  const getLegendColor = (channelId: string): string => {
+    if (activeChannel === 'total') {
+      return CHANNEL_COLORS[channelId] || '#CCCCCC';
+    }
+    // Если выбран конкретный канал, только он цветной, остальные серые
+    return activeChannel === channelId ? CHANNEL_COLORS[channelId] : '#CCCCCC';
+  };
+
   return (
     <div 
-      className={`w-80 flex-shrink-0 h-full overflow-auto ${className}`}
+      className={`w-80 flex-shrink-0 ${className}`}
       style={{ 
         backgroundColor: '#F3F2EB',
         maxWidth: '400px',
         borderRadius: '8px',
         marginTop: '24px',
-        marginBottom: '100px',
-        marginLeft: '24px'
+        marginBottom: '24px',
+        marginLeft: '24px',
+        display: 'flex',
+        flexDirection: 'column',
+        overflow: 'hidden',
+        height: 'calc(100vh - 48px)'
       }}
     >
-      <div className="space-y-6" style={{ display: 'flex', flexDirection: 'column', padding: '24px', gap: '16px' }}>
-        {/* Channel Pills */}
-        <div>
-          <ChannelPills
-            channels={channelPills}
-            activeChannel={activeChannel}
-            onChange={(channelId) => setActiveChannel(channelId as ChannelType)}
-          />
-        </div>
+      {/* Sticky Header with Pills */}
+      <div style={{ 
+        position: 'sticky',
+        top: 0,
+        backgroundColor: '#F3F2EB',
+        zIndex: 10,
+        paddingTop: '24px',
+        paddingLeft: '24px',
+        paddingRight: '24px',
+        borderTopLeftRadius: '8px',
+        borderTopRightRadius: '8px'
+      }}>
+        <ChannelPills
+          channels={channelPills}
+          activeChannel={activeChannel}
+          onChange={(channelId) => setActiveChannel(channelId as ChannelType)}
+        />
+        {/* Divider */}
+        <div style={{ 
+          width: 'calc(100% + 48px)', 
+          height: '1px', 
+          backgroundColor: '#D1D5DB', 
+          marginLeft: '-24px',
+          marginTop: '16px'
+        }} />
+      </div>
 
+      {/* Scrollable Content */}
+      <div className="space-y-6" style={{ 
+        display: 'flex', 
+        flexDirection: 'column', 
+        padding: '24px',
+        gap: '16px',
+        overflowY: 'auto',
+        flex: 1
+      }}>
         {/* Budget Estimation */}
         <div>
           <Text size="sm" fw={500} style={{ color: 'var(--form-label-color)', marginBottom: '8px' }}>
@@ -84,10 +132,19 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({ class
             overflow: 'hidden',
             marginBottom: '12px'
           }}>
-            <div style={{ width: '10%', backgroundColor: CHANNEL_COLORS.display }} />
-            <div style={{ width: '15%', backgroundColor: CHANNEL_COLORS.audio }} />
-            <div style={{ width: '25%', backgroundColor: CHANNEL_COLORS.ctv }} />
-            <div style={{ width: '50%', backgroundColor: CHANNEL_COLORS.linear }} />
+            {activeChannel === 'total' ? (
+              <>
+                <div style={{ width: '10%', backgroundColor: CHANNEL_COLORS.preroll }} />
+                <div style={{ width: '15%', backgroundColor: CHANNEL_COLORS.audio }} />
+                <div style={{ width: '25%', backgroundColor: CHANNEL_COLORS.ctv }} />
+                <div style={{ width: '50%', backgroundColor: CHANNEL_COLORS.linear }} />
+              </>
+            ) : (
+              <>
+                <div style={{ width: `${channelPercentages[activeChannel] || 0}%`, backgroundColor: CHANNEL_COLORS[activeChannel] }} />
+                <div style={{ width: `${100 - (channelPercentages[activeChannel] || 0)}%`, backgroundColor: '#E5E5E5' }} />
+              </>
+            )}
           </div>
           
           {/* Legend */}
@@ -99,19 +156,19 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({ class
             marginBottom: '16px'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: CHANNEL_COLORS.linear }} />
+              <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: getLegendColor('linear') }} />
               <span>Linear TV</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: CHANNEL_COLORS.ctv }} />
+              <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: getLegendColor('ctv') }} />
               <span>CTV</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: CHANNEL_COLORS.display }} />
-              <span>Display</span>
+              <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: getLegendColor('preroll') }} />
+              <span>Preroll</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: CHANNEL_COLORS.audio }} />
+              <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: getLegendColor('audio') }} />
               <span>Audio</span>
             </div>
           </div>
@@ -146,10 +203,19 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({ class
             overflow: 'hidden',
             marginBottom: '12px'
           }}>
-            <div style={{ width: '10%', backgroundColor: CHANNEL_COLORS.display }} />
-            <div style={{ width: '15%', backgroundColor: CHANNEL_COLORS.audio }} />
-            <div style={{ width: '25%', backgroundColor: CHANNEL_COLORS.ctv }} />
-            <div style={{ width: '50%', backgroundColor: CHANNEL_COLORS.linear }} />
+            {activeChannel === 'total' ? (
+              <>
+                <div style={{ width: '10%', backgroundColor: CHANNEL_COLORS.preroll }} />
+                <div style={{ width: '15%', backgroundColor: CHANNEL_COLORS.audio }} />
+                <div style={{ width: '25%', backgroundColor: CHANNEL_COLORS.ctv }} />
+                <div style={{ width: '50%', backgroundColor: CHANNEL_COLORS.linear }} />
+              </>
+            ) : (
+              <>
+                <div style={{ width: `${channelPercentages[activeChannel] || 0}%`, backgroundColor: CHANNEL_COLORS[activeChannel] }} />
+                <div style={{ width: `${100 - (channelPercentages[activeChannel] || 0)}%`, backgroundColor: '#E5E5E5' }} />
+              </>
+            )}
           </div>
           
           {/* Legend */}
@@ -160,19 +226,19 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({ class
             color: '#666'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: CHANNEL_COLORS.linear }} />
+              <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: getLegendColor('linear') }} />
               <span>Linear TV</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: CHANNEL_COLORS.ctv }} />
+              <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: getLegendColor('ctv') }} />
               <span>CTV</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: CHANNEL_COLORS.display }} />
-              <span>Display</span>
+              <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: getLegendColor('preroll') }} />
+              <span>Preroll</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: CHANNEL_COLORS.audio }} />
+              <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: getLegendColor('audio') }} />
               <span>Audio</span>
             </div>
           </div>
@@ -250,11 +316,21 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({ class
           
           {/* Progress Bar - empty/gray for no data */}
           <div style={{ 
+            display: 'flex',
             height: '8px', 
             borderRadius: '4px',
-            backgroundColor: '#E5E5E5',
+            overflow: 'hidden',
             marginBottom: '12px'
-          }} />
+          }}>
+            {activeChannel === 'total' ? (
+              <div style={{ width: '100%', height: '100%', backgroundColor: '#E5E5E5' }} />
+            ) : (
+              <>
+                <div style={{ width: `${channelPercentages[activeChannel] || 0}%`, backgroundColor: CHANNEL_COLORS[activeChannel], opacity: 0.3 }} />
+                <div style={{ width: `${100 - (channelPercentages[activeChannel] || 0)}%`, backgroundColor: '#E5E5E5' }} />
+              </>
+            )}
+          </div>
           
           {/* Legend */}
           <div style={{ 
@@ -264,19 +340,19 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({ class
             color: '#666'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: CHANNEL_COLORS.linear }} />
+              <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: getLegendColor('linear') }} />
               <span>Linear TV</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: CHANNEL_COLORS.ctv }} />
+              <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: getLegendColor('ctv') }} />
               <span>CTV</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: CHANNEL_COLORS.display }} />
-              <span>Display</span>
+              <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: getLegendColor('preroll') }} />
+              <span>Preroll</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: CHANNEL_COLORS.audio }} />
+              <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: getLegendColor('audio') }} />
               <span>Audio</span>
             </div>
           </div>
@@ -290,7 +366,11 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({ class
             root: {
               backgroundColor: '#FFFFFF',
               borderRadius: '8px',
-              position: 'relative'
+              position: 'relative',
+              overflow: 'visible',
+              minHeight: 'auto',
+              height: 'auto',
+              marginBottom: '100px'
             }
           }}
         >
