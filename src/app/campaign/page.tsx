@@ -25,7 +25,7 @@ function convertToCampaignSummary(saved: SavedCampaign): CampaignSummary {
     id: saved.id,
     name: saved.general.campaignName || 'Untitled Campaign',
     status: 'On Target' as const,
-    sparkline: Array.from({ length: 30 }, () => Math.random() * 100 + 50),
+    sparkline: Array.from({ length: 30 }, () => 50),
     channels: channels.length > 0 ? channels : ['Linear TV'],
     progressPercent: 0,
     progressDelivered: 0,
