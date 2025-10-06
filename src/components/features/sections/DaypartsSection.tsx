@@ -19,12 +19,12 @@ const DaypartsSection = () => {
   
   // Dayparts definition with time ranges
   const dayparts = [
-    { name: 'Early Morning', hours: [6, 7, 8] },
-    { name: 'Daytime', hours: [9, 10, 11, 12, 13, 14, 15] },
-    { name: 'Early Fringe', hours: [16, 17, 18] },
-    { name: 'Prime Time', hours: [19, 20, 21, 22] },
-    { name: 'Late Night', hours: [23, 0, 1] },
-    { name: 'Overnight', hours: [2, 3, 4, 5] }
+    { name: 'Early Morning', hours: [6, 7, 8], timeRange: '6 AM – 9 AM' },
+    { name: 'Daytime', hours: [9, 10, 11, 12, 13, 14, 15], timeRange: '9 AM – 4 PM' },
+    { name: 'Early Fringe', hours: [16, 17, 18], timeRange: '4 PM – 7 PM' },
+    { name: 'Prime Time', hours: [19, 20, 21, 22], timeRange: '7 PM – 11 PM' },
+    { name: 'Late Night', hours: [23, 0, 1], timeRange: '11 PM – 2 AM' },
+    { name: 'Overnight', hours: [2, 3, 4, 5], timeRange: '2 AM – 6 AM' }
   ];
 
   // Вспомогательная функция для глубокого копирования selectedSlots
@@ -163,13 +163,13 @@ const DaypartsSection = () => {
           width: '100%'
         }}
       >
-          {/* Заголовок с днями */}
-          <div style={{ 
-            display: 'flex', 
-            marginBottom: '8px', 
-            gap: '4px'
-          }}>
-            <div style={{ width: '120px', flexShrink: 0 }}></div> {/* Пустое место для колонки dayparts */}
+              {/* Заголовок с днями */}
+              <div style={{ 
+                display: 'flex', 
+                marginBottom: '8px', 
+                gap: '4px'
+              }}>
+                <div style={{ width: '210px', flexShrink: 0 }}></div> {/* Пустое место для колонки dayparts */}
             {days.map(day => (
               <div
                 key={day}
@@ -201,7 +201,7 @@ const DaypartsSection = () => {
               {/* Название daypart */}
               <div
                 style={{
-                  width: '120px',
+                  width: '210px',
                   height: '24px',
                   fontSize: '12px',
                   fontWeight: '500',
@@ -209,10 +209,12 @@ const DaypartsSection = () => {
                   alignItems: 'center',
                   color: '#333',
                   flexShrink: 0,
-                  paddingRight: '8px'
+                  paddingRight: '12px',
+                  gap: '8px'
                 }}
               >
-                {daypart.name}
+                <span style={{ fontWeight: '500', minWidth: '100px' }}>{daypart.name}</span>
+                <span style={{ color: '#999', fontWeight: '400', fontSize: '11px' }}>{daypart.timeRange}</span>
               </div>
 
               {/* Ячейки для каждого дня */}
