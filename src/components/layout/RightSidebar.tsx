@@ -23,10 +23,18 @@ const RightSidebar: React.FC<RightSidebarProps> = ({ className = '' }) => {
   // Локальное состояние для редактирования бюджета
   const [budgetInput, setBudgetInput] = useState('');
 
+  // Функция для форматирования числа с разделителями
+  const formatNumber = (value: string): string => {
+    const cleanValue = value.replace(/[^\d.]/g, '');
+    const parts = cleanValue.split('.');
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    return parts.join('.');
+  };
+
   // Синхронизируем локальное состояние с глобальным при загрузке
   useEffect(() => {
     if (totalBudget > 0) {
-      setBudgetInput(totalBudget.toString());
+      setBudgetInput(formatNumber(totalBudget.toString()));
     }
   }, [totalBudget]);
 
@@ -126,12 +134,15 @@ const RightSidebar: React.FC<RightSidebarProps> = ({ className = '' }) => {
   // Обработчик изменения бюджета
   const handleBudgetChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
+    // Убираем запятые для валидации
+    const cleanValue = value.replace(/,/g, '');
+    
     // Разрешаем только цифры и точку для десятичных чисел
-    if (/^\d*\.?\d*$/.test(value)) {
-      setBudgetInput(value);
+    if (/^\d*\.?\d*$/.test(cleanValue)) {
+      setBudgetInput(formatNumber(cleanValue));
       
       // Обновляем глобальный стейт
-      const numericValue = parseFloat(value) || 0;
+      const numericValue = parseFloat(cleanValue) || 0;
       dispatch(updateBudgetData({ totalBudget: numericValue }));
     }
   };

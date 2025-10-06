@@ -19,21 +19,40 @@ const TotalBudgetSection: React.FC<TotalBudgetSectionProps> = ({
   const globalBudget = useAppSelector((state) => state.campaign.budget.totalBudget);
   const [totalBudget, setTotalBudget] = useState('');
 
+  // Функция для форматирования числа с разделителями
+  const formatNumber = (value: string): string => {
+    // Убираем все нецифровые символы кроме точки
+    const cleanValue = value.replace(/[^\d.]/g, '');
+    const parts = cleanValue.split('.');
+    // Форматируем целую часть с разделителями
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    return parts.join('.');
+  };
+
+  // Функция для парсинга форматированного числа
+  const parseFormattedNumber = (value: string): number => {
+    return parseFloat(value.replace(/,/g, '')) || 0;
+  };
+
   // Синхронизируем локальное состояние с глобальным при загрузке
   useEffect(() => {
     if (globalBudget > 0) {
-      setTotalBudget(globalBudget.toString());
+      setTotalBudget(formatNumber(globalBudget.toString()));
     }
   }, [globalBudget]);
 
   const handleBudgetChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
+    // Убираем запятые для валидации
+    const cleanValue = value.replace(/,/g, '');
+    
     // Разрешаем только цифры и точку для десятичных чисел
-    if (/^\d*\.?\d*$/.test(value)) {
-      setTotalBudget(value);
+    if (/^\d*\.?\d*$/.test(cleanValue)) {
+      // Сохраняем с форматированием
+      setTotalBudget(formatNumber(cleanValue));
       
       // Обновляем глобальный стейт
-      const numericValue = parseFloat(value) || 0;
+      const numericValue = parseFloat(cleanValue) || 0;
       dispatch(updateBudgetData({ totalBudget: numericValue }));
       
       // Вызываем onChange для обратной совместимости
