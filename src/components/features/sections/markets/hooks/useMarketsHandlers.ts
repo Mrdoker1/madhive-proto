@@ -9,8 +9,6 @@ interface UseMarketsHandlersProps {
   setMarkets: (markets: MarketWithStationsData[]) => void;
   expandedDetails: Set<string>;
   setExpandedDetails: (expanded: Set<string>) => void;
-  setFilteredMarketIds: (ids: string[]) => void;
-  filteredMarketIds: string[];
   budgetData: { totalBudget: number };
   dispatch: AppDispatch;
 }
@@ -22,8 +20,6 @@ export const useMarketsHandlers = ({
   setMarkets,
   expandedDetails,
   setExpandedDetails,
-  setFilteredMarketIds,
-  filteredMarketIds,
   budgetData,
   dispatch
 }: UseMarketsHandlersProps): MarketHandlers => {
@@ -63,8 +59,21 @@ export const useMarketsHandlers = ({
       const marketEstimation = calculateMarketEstimation(updatedMarkets);
       dispatch(updateEstimations({ marketEstimation }));
     } else {
-      // Если снимаем выбор со всех маркетов, убираем все из фильтра (селекта)
-      setFilteredMarketIds([]);
+      // Если снимаем выбор со всех маркетов
+      const updatedMarkets = markets.map(market => ({
+        ...market,
+        selected: false,
+        percentage: 0,
+        budget: 0,
+        stations: market.stations.map(station => ({
+          ...station,
+          selected: false,
+          percentage: 0,
+          budget: 0
+        }))
+      }));
+
+      setMarkets(updatedMarkets);
       
       // Update Redux
       dispatch(updateMarketsData({ selectedMarkets: [] }));
@@ -72,16 +81,9 @@ export const useMarketsHandlers = ({
       // Update estimations
       dispatch(updateEstimations({ marketEstimation: 0 }));
     }
-  }, [markets, budgetData.totalBudget, setMarkets, dispatch, setFilteredMarketIds]);
+  }, [markets, budgetData.totalBudget, setMarkets, dispatch]);
 
   const handleSelect = useCallback((marketId: string, checked: boolean) => {
-    // Если снимаем выбор с маркета, убираем его из фильтра (селекта)
-    if (!checked) {
-      const newFilteredIds = filteredMarketIds.filter(id => id !== marketId);
-      setFilteredMarketIds(newFilteredIds);
-      return; // Остальное обработается через useEffect в useMarketsState
-    }
-
     // Сначала обновляем статус выбранного маркета
     const preliminaryMarkets = markets.map(market => {
       if (market.id === marketId) {
@@ -148,7 +150,7 @@ export const useMarketsHandlers = ({
     // Update estimations
     const marketEstimation = calculateMarketEstimation(updatedMarkets);
     dispatch(updateEstimations({ marketEstimation }));
-  }, [markets, budgetData.totalBudget, setMarkets, dispatch, filteredMarketIds, setFilteredMarketIds]);
+  }, [markets, budgetData.totalBudget, setMarkets, dispatch]);
 
   const handlePercentageChange = useCallback((marketId: string, value: string) => {
     const percentage = Math.max(0, Math.min(100, parseFloat(value) || 0));
