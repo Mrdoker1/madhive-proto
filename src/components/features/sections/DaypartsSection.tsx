@@ -7,25 +7,50 @@ interface DaypartsState {
   [day: string]: { [hour: number]: boolean };
 }
 
+// Dayparts definition with colors
+const daypartDefinitions = [
+  { name: 'Late Fringe', color: '#7CB342', hours: [0, 1] },
+  { name: 'Overnight', color: '#FFD54F', hours: [2, 3, 4, 5] },
+  { name: 'Early Morning', color: '#81C784', hours: [6, 7, 8, 9] },
+  { name: 'Daytime', color: '#EF5350', hours: [10, 11, 12, 13, 14, 15] },
+  { name: 'Early Fringe', color: '#66BB6A', hours: [16, 17, 18] },
+  { name: 'Prime Access', color: '#9575CD', hours: [19] },
+  { name: 'Prime Time', color: '#B39DDB', hours: [20, 21, 22] },
+  { name: 'Late News', color: '#7CB342', hours: [23] }
+];
+
+// Get daypart info for a specific hour
+const getDaypartForHour = (hour: number) => {
+  return daypartDefinitions.find(dp => dp.hours.includes(hour));
+};
+
+// Create hours array (0-23) with daypart info
+const createHoursData = () => {
+  const hours = [];
+  for (let hour = 0; hour < 24; hour++) {
+    const daypart = getDaypartForHour(hour);
+    const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+    const period = hour < 12 ? 'am' : 'pm';
+    hours.push({
+      hour,
+      display: `${displayHour}:00 ${period}`,
+      daypart: daypart?.name || '',
+      color: daypart?.color || '#999'
+    });
+  }
+  return hours;
+};
+
 const DaypartsSection = () => {
   const dispatch = useAppDispatch();
   const daypartsData = useAppSelector((state) => state.campaign.dayparts);
   const [isSelecting, setIsSelecting] = useState(false);
-  const [selectionStart, setSelectionStart] = useState<{ day: string; daypart: string } | null>(null);
-  const [selectionEnd, setSelectionEnd] = useState<{ day: string; daypart: string } | null>(null);
+  const [selectionStart, setSelectionStart] = useState<{ day: string; hour: number } | null>(null);
+  const [selectionEnd, setSelectionEnd] = useState<{ day: string; hour: number } | null>(null);
   const [originalCellState, setOriginalCellState] = useState<boolean | null>(null);
 
   const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-  
-  // Dayparts definition with time ranges
-  const dayparts = [
-    { name: 'Early Morning', hours: [6, 7, 8], timeRange: '6 AM – 9 AM' },
-    { name: 'Daytime', hours: [9, 10, 11, 12, 13, 14, 15], timeRange: '9 AM – 4 PM' },
-    { name: 'Early Fringe', hours: [16, 17, 18], timeRange: '4 PM – 7 PM' },
-    { name: 'Prime Time', hours: [19, 20, 21, 22], timeRange: '7 PM – 11 PM' },
-    { name: 'Late Night', hours: [23, 0, 1], timeRange: '11 PM – 2 AM' },
-    { name: 'Overnight', hours: [2, 3, 4, 5], timeRange: '2 AM – 6 AM' }
-  ];
+  const hoursData = createHoursData();
 
   // Вспомогательная функция для глубокого копирования selectedSlots
   const deepCopySelectedSlots = (slots: Record<string, Record<number, boolean>>): DaypartsState => {
@@ -37,29 +62,28 @@ const DaypartsSection = () => {
   };
 
   // Check if cell is in preview area
-  const isCellInPreview = (day: string, daypartName: string): boolean => {
+  const isCellInPreview = (day: string, hour: number): boolean => {
     if (!isSelecting || !selectionStart || !selectionEnd) return false;
     
     const dayStart = days.indexOf(selectionStart.day);
     const dayEnd = days.indexOf(selectionEnd.day);
-    const daypartStart = dayparts.findIndex(d => d.name === selectionStart.daypart);
-    const daypartEnd = dayparts.findIndex(d => d.name === selectionEnd.daypart);
+    const hourStart = selectionStart.hour;
+    const hourEnd = selectionEnd.hour;
     const currentDay = days.indexOf(day);
-    const currentDaypart = dayparts.findIndex(d => d.name === daypartName);
 
     const minDay = Math.min(dayStart, dayEnd);
     const maxDay = Math.max(dayStart, dayEnd);
-    const minDaypart = Math.min(daypartStart, daypartEnd);
-    const maxDaypart = Math.max(daypartStart, daypartEnd);
+    const minHour = Math.min(hourStart, hourEnd);
+    const maxHour = Math.max(hourStart, hourEnd);
 
     return currentDay >= minDay && currentDay <= maxDay && 
-           currentDaypart >= minDaypart && currentDaypart <= maxDaypart;
+           hour >= minHour && hour <= maxHour;
   };
 
   // Handle mouse enter for bulk selection preview
-  const handleMouseEnter = (day: string, daypartName: string) => {
+  const handleMouseEnter = (day: string, hour: number) => {
     if (isSelecting && selectionStart) {
-      setSelectionEnd({ day, daypart: daypartName });
+      setSelectionEnd({ day, hour });
     }
   };
 
@@ -69,13 +93,13 @@ const DaypartsSection = () => {
     
     const dayStart = days.indexOf(selectionStart.day);
     const dayEnd = days.indexOf(selectionEnd.day);
-    const daypartStart = dayparts.findIndex(d => d.name === selectionStart.daypart);
-    const daypartEnd = dayparts.findIndex(d => d.name === selectionEnd.daypart);
+    const hourStart = selectionStart.hour;
+    const hourEnd = selectionEnd.hour;
 
     const minDay = Math.min(dayStart, dayEnd);
     const maxDay = Math.max(dayStart, dayEnd);
-    const minDaypart = Math.min(daypartStart, daypartEnd);
-    const maxDaypart = Math.max(daypartStart, daypartEnd);
+    const minHour = Math.min(hourStart, hourEnd);
+    const maxHour = Math.max(hourStart, hourEnd);
 
     const newSelectedSlots = deepCopySelectedSlots(daypartsData.selectedSlots);
     const actionToApply = !originalCellState;
@@ -84,11 +108,8 @@ const DaypartsSection = () => {
       const dayName = days[d];
       if (!newSelectedSlots[dayName]) newSelectedSlots[dayName] = {};
       
-      for (let dp = minDaypart; dp <= maxDaypart; dp++) {
-        const daypart = dayparts[dp];
-        daypart.hours.forEach(hour => {
-          newSelectedSlots[dayName][hour] = actionToApply;
-        });
+      for (let h = minHour; h <= maxHour; h++) {
+        newSelectedSlots[dayName][h] = actionToApply;
       }
     }
     
@@ -96,30 +117,26 @@ const DaypartsSection = () => {
   };
 
   // Handle cell click with bulk selection support
-  const handleCellClick = (day: string, daypartName: string, allHoursSelected: boolean) => {
-    const daypart = dayparts.find(d => d.name === daypartName);
-    if (!daypart) return;
+  const handleCellClick = (day: string, hour: number) => {
+    const cellSelected = isCellSelected(day, hour);
 
     if (!isSelecting) {
       // First click: start selection
       setIsSelecting(true);
-      setSelectionStart({ day, daypart: daypartName });
-      setSelectionEnd({ day, daypart: daypartName });
-      setOriginalCellState(allHoursSelected);
+      setSelectionStart({ day, hour });
+      setSelectionEnd({ day, hour });
+      setOriginalCellState(cellSelected);
       
       // Apply toggle for single cell
       const newSelectedSlots = deepCopySelectedSlots(daypartsData.selectedSlots);
       if (!newSelectedSlots[day]) {
         newSelectedSlots[day] = {};
       }
-      const newState = !allHoursSelected;
-      daypart.hours.forEach(hour => {
-        newSelectedSlots[day][hour] = newState;
-      });
+      newSelectedSlots[day][hour] = !cellSelected;
       dispatch(updateDaypartsData({ selectedSlots: newSelectedSlots }));
     } else {
       // Second click: finish selection
-      setSelectionEnd({ day, daypart: daypartName });
+      setSelectionEnd({ day, hour });
       applyBulkSelection();
       
       // Reset selection state
@@ -134,11 +151,9 @@ const DaypartsSection = () => {
     const newSelectedSlots: DaypartsState = {};
     days.forEach(day => {
       newSelectedSlots[day] = {};
-      dayparts.forEach(daypart => {
-        daypart.hours.forEach(hour => {
-          newSelectedSlots[day][hour] = true;
-        });
-      });
+      for (let hour = 0; hour < 24; hour++) {
+        newSelectedSlots[day][hour] = true;
+      }
     });
     dispatch(updateDaypartsData({ selectedSlots: newSelectedSlots }));
   };
@@ -147,96 +162,203 @@ const DaypartsSection = () => {
     dispatch(updateDaypartsData({ selectedSlots: {} }));
   };
 
+  // Quick select for a specific daypart
+  const selectDaypart = (daypartName: string) => {
+    const daypart = daypartDefinitions.find(dp => dp.name === daypartName);
+    if (!daypart) return;
+
+    const newSelectedSlots = deepCopySelectedSlots(daypartsData.selectedSlots);
+    days.forEach(day => {
+      if (!newSelectedSlots[day]) newSelectedSlots[day] = {};
+      daypart.hours.forEach(hour => {
+        newSelectedSlots[day][hour] = true;
+      });
+    });
+    dispatch(updateDaypartsData({ selectedSlots: newSelectedSlots }));
+  };
+
+  const clearDaypart = (daypartName: string) => {
+    const daypart = daypartDefinitions.find(dp => dp.name === daypartName);
+    if (!daypart) return;
+
+    const newSelectedSlots = deepCopySelectedSlots(daypartsData.selectedSlots);
+    days.forEach(day => {
+      if (newSelectedSlots[day]) {
+        daypart.hours.forEach(hour => {
+          newSelectedSlots[day][hour] = false;
+        });
+      }
+    });
+    dispatch(updateDaypartsData({ selectedSlots: newSelectedSlots }));
+  };
+
   return (
     <div>
-      {/* Описание */}
-      <Text size="sm" c="dimmed" mb="xl">
-        Daypart allows you to specify precisely when an ad will run throughout the week
-        <br />
-        Click empty slots to add time, click filled slots to remove time
-      </Text>
+      {/* Описание и кнопки управления */}
+      <Group justify="space-between" align="flex-start" mb="lg" wrap="nowrap">
+        <Text size="sm" c="dimmed" style={{ flex: 1 }}>
+          Choose ad delivery by <strong>hour</strong> across the week. Drag to select a range. Click daypart names to select entire dayparts.
+        </Text>
+        <Group gap="xs" wrap="nowrap" style={{ flexShrink: 0 }}>
+          <Button size="xs" variant="outline" onClick={selectAll}>
+            Select All
+          </Button>
+          <Button size="xs" variant="subtle" onClick={reset}>
+            Reset
+          </Button>
+        </Group>
+      </Group>
 
       {/* Таблица времени */}
       <div 
         style={{ 
           userSelect: 'none', 
-          width: '100%'
+          width: '100%',
+          overflowX: 'auto'
         }}
       >
-              {/* Заголовок с днями */}
-              <div style={{ 
-                display: 'flex', 
-                marginBottom: '8px', 
-                gap: '4px'
-              }}>
-                <div style={{ width: '210px', flexShrink: 0 }}></div> {/* Пустое место для колонки dayparts */}
-            {days.map(day => (
-              <div
-                key={day}
-                style={{
-                  width: '24px',
-                  height: '20px',
-                  fontSize: '10px',
-                  fontWeight: '500',
-                  textAlign: 'center',
-                  color: '#333',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexShrink: 0
-                }}
-              >
-                {day}
-              </div>
-            ))}
-          </div>
+        {/* Заголовок с днями */}
+        <div style={{ 
+          display: 'flex', 
+          marginBottom: '8px', 
+          gap: '4px'
+        }}>
+          <div style={{ width: '220px', flexShrink: 0 }}></div>
+          {days.map(day => (
+            <div
+              key={day}
+              style={{
+                width: '24px',
+                height: '20px',
+                fontSize: '10px',
+                fontWeight: '500',
+                textAlign: 'center',
+                color: '#333',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0
+              }}
+            >
+              {day}
+            </div>
+          ))}
+        </div>
 
-          {/* Строки dayparts */}
-          {dayparts.map(daypart => (
-            <div key={daypart.name} style={{ 
+        {/* Строки часов */}
+        {hoursData.map((hourData, index) => {
+          const showDaypartLabel = index === 0 || hoursData[index - 1].daypart !== hourData.daypart;
+          
+          // Проверяем, все ли часы этого дейпарта выбраны
+          const daypart = getDaypartForHour(hourData.hour);
+          const allDaypartSelected = daypart ? days.every(day => 
+            daypart.hours.every(hour => isCellSelected(day, hour))
+          ) : false;
+          
+          return (
+            <div key={hourData.hour} style={{ 
               display: 'flex', 
               marginBottom: '4px',
               gap: '4px'
             }}>
-              {/* Название daypart */}
+              {/* Daypart и время */}
               <div
                 style={{
-                  width: '210px',
+                  width: '220px',
                   height: '24px',
-                  fontSize: '12px',
-                  fontWeight: '500',
+                  fontSize: '11px',
                   display: 'flex',
                   alignItems: 'center',
                   color: '#333',
                   flexShrink: 0,
-                  paddingRight: '12px',
                   gap: '8px'
                 }}
               >
-                <span style={{ fontWeight: '500', minWidth: '100px' }}>{daypart.name}</span>
-                <span style={{ color: '#999', fontWeight: '400', fontSize: '11px' }}>{daypart.timeRange}</span>
+                {/* Фиксированная область для кнопки дейпарта */}
+                <div style={{ 
+                  width: '130px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  flexShrink: 0
+                }}>
+                  {showDaypartLabel && (
+                    <>
+                      <div
+                        style={{
+                          width: '10px',
+                          height: '10px',
+                          backgroundColor: hourData.color,
+                          borderRadius: '2px',
+                          flexShrink: 0
+                        }}
+                      />
+                      <Button
+                        size="xs"
+                        variant={allDaypartSelected ? 'filled' : 'subtle'}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (allDaypartSelected) {
+                            clearDaypart(hourData.daypart);
+                          } else {
+                            selectDaypart(hourData.daypart);
+                          }
+                        }}
+                        styles={{
+                          root: {
+                            height: '24px',
+                            fontSize: '11px',
+                            padding: '0 8px'
+                          }
+                        }}
+                      >
+                        {hourData.daypart}
+                      </Button>
+                    </>
+                  )}
+                </div>
+                
+                {/* Область для цветной полоски и времени */}
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}>
+                  <div
+                    style={{
+                      width: '6px',
+                      height: '24px',
+                      backgroundColor: hourData.color,
+                      borderRadius: '1px',
+                      flexShrink: 0
+                    }}
+                  />
+                  <span style={{ 
+                    fontWeight: '400', 
+                    fontSize: '10px',
+                    minWidth: '55px'
+                  }}>
+                    {hourData.display}
+                  </span>
+                </div>
               </div>
 
               {/* Ячейки для каждого дня */}
               {days.map(day => {
-                // Check if all hours in this daypart are selected for this day
-                const allHoursSelected = daypart.hours.every(hour => isCellSelected(day, hour));
-                const someHoursSelected = daypart.hours.some(hour => isCellSelected(day, hour));
-                const isInPreview = isCellInPreview(day, daypart.name);
+                const selected = isCellSelected(day, hourData.hour);
+                const isInPreview = isCellInPreview(day, hourData.hour);
                 
-                let backgroundColor = '#EBE6EC'; // default
+                let backgroundColor = '#EBE6EC';
                 
                 if (isInPreview) {
-                  backgroundColor = 'rgba(41, 16, 54, 0.3)'; // preview
-                } else if (allHoursSelected) {
-                  backgroundColor = '#291036'; // all selected
-                } else if (someHoursSelected) {
-                  backgroundColor = 'rgba(41, 16, 54, 0.5)'; // partially selected
+                  backgroundColor = 'rgba(41, 16, 54, 0.3)';
+                } else if (selected) {
+                  backgroundColor = '#291036';
                 }
                 
                 return (
                   <div
-                    key={`${day}-${daypart.name}`}
+                    key={`${day}-${hourData.hour}`}
                     style={{
                       width: '24px',
                       height: '24px',
@@ -246,24 +368,15 @@ const DaypartsSection = () => {
                       transition: 'background-color 0.1s ease',
                       flexShrink: 0
                     }}
-                    onClick={() => handleCellClick(day, daypart.name, allHoursSelected)}
-                    onMouseEnter={() => handleMouseEnter(day, daypart.name)}
+                    onClick={() => handleCellClick(day, hourData.hour)}
+                    onMouseEnter={() => handleMouseEnter(day, hourData.hour)}
                   />
                 );
               })}
             </div>
-          ))}
+          );
+        })}
       </div>
-
-      {/* Кнопки управления */}
-      <Group justify="flex-end" mt="lg" gap="4px">
-        <Button variant="outline" onClick={selectAll}>
-          Select All
-        </Button>
-        <Button variant="subtle" onClick={reset}>
-          Reset
-        </Button>
-      </Group>
     </div>
   );
 };
