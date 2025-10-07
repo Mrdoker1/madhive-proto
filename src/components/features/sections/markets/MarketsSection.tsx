@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { Text, Button, Group } from '@mantine/core';
+import { Text, Group, Pagination, Select } from '@mantine/core';
 import { useAppSelector } from '@/hooks/useRedux';
 import MarketDetailTable from './components/MarketDetailTable';
 import { useMarketsState } from './hooks/useMarketsState';
@@ -9,11 +9,10 @@ import { useMarketsHandlers } from './hooks/useMarketsHandlers';
 import MainMarketsTable from './components/MainMarketsTable';
 import MarketsFilter from './components/MarketsFilter';
 
-const MARKETS_PER_PAGE = 10;
-
 const MarketsSection = () => {
   const linearData = useAppSelector((state) => state.campaign.linear);
-  const [showAllMarkets, setShowAllMarkets] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState('10');
   
   const {
     markets,
@@ -49,15 +48,23 @@ const MarketsSection = () => {
     });
   };
 
-  // Ограничиваем количество показываемых markets
-  const displayedMarkets = useMemo(() => {
-    if (showAllMarkets || markets.length <= MARKETS_PER_PAGE) {
-      return markets;
-    }
-    return markets.slice(0, MARKETS_PER_PAGE);
-  }, [markets, showAllMarkets]);
+  // Вычисляем общее количество страниц
+  const perPage = parseInt(itemsPerPage);
+  const totalPages = Math.ceil(markets.length / perPage);
 
-  const hasMoreMarkets = markets.length > MARKETS_PER_PAGE;
+  // Ограничиваем количество показываемых markets для текущей страницы
+  const displayedMarkets = useMemo(() => {
+    const startIndex = (currentPage - 1) * perPage;
+    const endIndex = startIndex + perPage;
+    return markets.slice(startIndex, endIndex);
+  }, [markets, currentPage, perPage]);
+
+  // Сброс на первую страницу при изменении количества markets или элементов на странице
+  useMemo(() => {
+    if (currentPage > totalPages && totalPages > 0) {
+      setCurrentPage(1);
+    }
+  }, [markets.length, currentPage, totalPages, itemsPerPage]);
 
   return (
     <div>
@@ -90,15 +97,34 @@ const MarketsSection = () => {
         handlers={handlers}
       />
 
-      {/* Show More/Less Button */}
-      {hasMoreMarkets && (
-        <Group justify="center" mt="md">
-          <Button
-            variant="subtle"
-            onClick={() => setShowAllMarkets(!showAllMarkets)}
-          >
-            {showAllMarkets ? 'Show Less' : `Show More (${markets.length - MARKETS_PER_PAGE} more)`}
-          </Button>
+      {/* Pagination and Items per page */}
+      {markets.length > 0 && (
+        <Group justify="space-between" align="center" mt="lg">
+          <Group gap="xs" align="center">
+            <Text size="sm" c="dimmed">Show</Text>
+            <Select
+              value={itemsPerPage}
+              onChange={(value) => {
+                setItemsPerPage(value || '10');
+                setCurrentPage(1);
+              }}
+              data={['10', '25', '50', '100']}
+              size="xs"
+              w={70}
+            />
+            <Text size="sm" c="dimmed">items</Text>
+          </Group>
+          
+          {totalPages > 1 && (
+            <Pagination
+              total={totalPages}
+              value={currentPage}
+              onChange={setCurrentPage}
+              size="sm"
+            />
+          )}
+          
+          <div style={{ width: '180px' }}></div>
         </Group>
       )}
 
