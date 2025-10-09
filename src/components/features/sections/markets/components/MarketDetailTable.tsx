@@ -118,7 +118,7 @@ const MarketDetailTable: React.FC<MarketDetailTableProps> = ({
               <IconChevronRight size={16} />
             }
           </div>
-          <Text fw={500} size="sm">{market.displayName}</Text>
+          <Text fw={500} size="sm">{market.name} ({market.stations.length})</Text>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
           <Text size="xs" c="dimmed">

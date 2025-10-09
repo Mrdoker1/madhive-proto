@@ -61,7 +61,7 @@ export default function GenerateProposalPage() {
       <PageLayout 
         breadcrumbs={breadcrumbSteps} 
         title="Generate Proposal"
-        showRightSidebar={true}
+        showRightSidebar={false}
         footerContent={
           <NextButton 
             active={true}
@@ -86,7 +86,7 @@ export default function GenerateProposalPage() {
               />
             </div>
             {/* Основной контент */}
-            <div style={{ paddingLeft: '20px', width: '100%', maxWidth: '800px' }}>
+            <div style={{ paddingLeft: '20px', width: '100%', maxWidth: '1200px' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '40px' }}>
               
               {/* Proposal Section */}

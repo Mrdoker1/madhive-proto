@@ -132,7 +132,7 @@ const MainMarketsTable: React.FC<MainMarketsTableProps> = ({
             </TableTd>
             <TableTd>
               <Text size="xs">
-                {market.displayName}
+                {market.name} ({market.stations.length})
               </Text>
             </TableTd>
             <TableTd>

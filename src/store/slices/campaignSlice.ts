@@ -47,10 +47,29 @@ export interface CampaignAudienceData {
   householdSize: string[];
 }
 
+export interface StationBudget {
+  id: string;
+  name: string;
+  selected: boolean;
+  percentage: number;
+  budget: number;
+}
+
+export interface MarketBudget {
+  id: string;
+  name: string;
+  displayName: string;
+  selected: boolean;
+  percentage: number;
+  budget: number;
+  stations: StationBudget[];
+}
+
 export interface CampaignMarketsData {
   selectedMarkets: string[];
   selectedRegion?: string;
   mode: 'include' | 'exclude';
+  marketsDetails?: MarketBudget[]; // Детальная информация о markets и stations
 }
 
 export interface CampaignDaypartsData {

@@ -15,7 +15,6 @@ export const useMarketsState = () => {
   const [markets, setMarkets] = useState<MarketWithStationsData[]>([]);
   const [expandedDetails, setExpandedDetails] = useState<Set<string>>(new Set());
 
-
   // Derived state
   const selectedMarketsWithStations = markets.filter(market => market.selected);
   const allSelected = markets.length > 0 && markets.every(market => market.selected);
@@ -42,15 +41,22 @@ export const useMarketsState = () => {
         const marketInfo = marketsData.find(m => m.id === marketId);
         if (!marketInfo) return null;
 
+        // Проверяем есть ли этот market в сохраненных данных Redux
+        const savedMarket = marketsReduxData.marketsDetails?.find(m => m.id === marketId);
+
         // Получаем станции для этого маркета и выбранных бродкастеров
         const stations = broadcasterIds.flatMap(broadcasterId => 
           getStationsByMarketAndBroadcaster(marketId, broadcasterId)
-        ).map(station => ({
-          ...station,
-          selected: false,
-          percentage: 0,
-          budget: 0
-        }));
+        ).map(station => {
+          // Проверяем была ли станция выбрана ранее
+          const savedStation = savedMarket?.stations.find(s => s.id === station.id);
+          return {
+            ...station,
+            selected: savedStation?.selected || false,
+            percentage: savedStation?.percentage || 0,
+            budget: savedStation?.budget || 0
+          };
+        });
 
         return {
           id: marketInfo.id,
@@ -58,9 +64,9 @@ export const useMarketsState = () => {
           displayName: marketInfo.displayName,
           rank: marketInfo.rank,
           marketSize: marketInfo.marketSize,
-          percentage: 0,
-          budget: 0,
-          selected: false, // НЕ выбираем изначально
+          percentage: savedMarket?.percentage || 0,
+          budget: savedMarket?.budget || 0,
+          selected: savedMarket?.selected || false, // Восстанавливаем из Redux
           stations
         };
       })
@@ -69,7 +75,7 @@ export const useMarketsState = () => {
     // Сортируем по рангу
     marketsWithStations.sort((a, b) => a.rank - b.rank);
 
-    // Показываем все доступные маркеты, но без выбора
+    // Показываем все доступные маркеты, восстанавливая выбор из Redux
     setMarkets(marketsWithStations);
   }, [linearData.broadcasters]);
 
@@ -110,7 +116,28 @@ export const useMarketsState = () => {
     const selectedMarketNames = markets
       .filter(m => m.selected)
       .map(m => m.name);
-    dispatch(updateMarketsData({ selectedMarkets: selectedMarketNames }));
+    
+    const marketsDetails = markets
+      .filter(market => market.selected)
+      .map(market => ({
+        id: market.id,
+        name: market.name,
+        displayName: market.displayName,
+        selected: market.selected,
+        percentage: market.percentage,
+        budget: market.budget,
+        stations: market.stations
+          .filter(station => station.selected)
+          .map(station => ({
+            id: station.id,
+            name: station.name,
+            selected: station.selected,
+            percentage: station.percentage,
+            budget: station.budget
+          }))
+      }));
+    
+    dispatch(updateMarketsData({ selectedMarkets: selectedMarketNames, marketsDetails }));
 
     // Обновляем estimations
     if (markets.length > 0) {

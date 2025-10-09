@@ -64,6 +64,33 @@ export const stationsData: StationData[] = [
     audienceSize: 3696000
   },
   {
+    id: 'hearst-xlyy-los-2',
+    name: 'XLYY-TV.com',
+    marketId: 'los-angeles-ca',
+    broadcasterId: 'hearst',
+    cpm: '$23.35',
+    marketShare: 28,
+    audienceSize: 3050000
+  },
+  {
+    id: 'abc-wpph-los-2',
+    name: 'WPPH-TV.com',
+    marketId: 'los-angeles-ca',
+    broadcasterId: 'abc',
+    cpm: '$25.34',
+    marketShare: 17,
+    audienceSize: 2033000
+  },
+  {
+    id: 'gray-yznb-los-2',
+    name: 'YZNB-TV.com',
+    marketId: 'los-angeles-ca',
+    broadcasterId: 'gray',
+    cpm: '$23.69',
+    marketShare: 23,
+    audienceSize: 2587000
+  },
+  {
     id: 'cbs-zvju-chicago',
     name: 'ZVJU-TV',
     marketId: 'chicago-il',
@@ -98,6 +125,42 @@ export const stationsData: StationData[] = [
     cpm: '$25.19',
     marketShare: 25,
     audienceSize: 2400000
+  },
+  {
+    id: 'cbs-zvju-chicago-2',
+    name: 'ZVJU-TV.com',
+    marketId: 'chicago-il',
+    broadcasterId: 'cbs',
+    cpm: '$25.24',
+    marketShare: 16,
+    audienceSize: 1411000
+  },
+  {
+    id: 'abc-xkvl-chicago-2',
+    name: 'XKVL-TV.com',
+    marketId: 'chicago-il',
+    broadcasterId: 'abc',
+    cpm: '$25.35',
+    marketShare: 10,
+    audienceSize: 1008000
+  },
+  {
+    id: 'univision-yeon-chicago-2',
+    name: 'YEON-TV.com',
+    marketId: 'chicago-il',
+    broadcasterId: 'univision',
+    cpm: '$24.26',
+    marketShare: 23,
+    audienceSize: 1882000
+  },
+  {
+    id: 'hubbard-broadcasting-[jwh-chicago-2',
+    name: '[JWH-TV.com',
+    marketId: 'chicago-il',
+    broadcasterId: 'hubbard-broadcasting',
+    cpm: '$25.19',
+    marketShare: 20,
+    audienceSize: 1680000
   },
   {
     id: 'nbc-[akw-dallas',

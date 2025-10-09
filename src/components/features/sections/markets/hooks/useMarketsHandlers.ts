@@ -53,7 +53,24 @@ export const useMarketsHandlers = ({
 
       // Update Redux
       const selectedMarketNames = updatedMarkets.map(m => m.name);
-      dispatch(updateMarketsData({ selectedMarkets: selectedMarketNames }));
+      const marketsDetails = updatedMarkets.map(market => ({
+        id: market.id,
+        name: market.name,
+        displayName: market.displayName,
+        selected: market.selected,
+        percentage: market.percentage,
+        budget: market.budget,
+        stations: market.stations
+          .filter(station => station.selected)
+          .map(station => ({
+            id: station.id,
+            name: station.name,
+            selected: station.selected,
+            percentage: station.percentage,
+            budget: station.budget
+          }))
+      }));
+      dispatch(updateMarketsData({ selectedMarkets: selectedMarketNames, marketsDetails }));
 
       // Update estimations
       const marketEstimation = calculateMarketEstimation(updatedMarkets);
@@ -76,7 +93,7 @@ export const useMarketsHandlers = ({
       setMarkets(updatedMarkets);
       
       // Update Redux
-      dispatch(updateMarketsData({ selectedMarkets: [] }));
+      dispatch(updateMarketsData({ selectedMarkets: [], marketsDetails: [] }));
 
       // Update estimations
       dispatch(updateEstimations({ marketEstimation: 0 }));
@@ -145,7 +162,32 @@ export const useMarketsHandlers = ({
     const selectedMarketNames = updatedMarkets
       .filter(market => market.selected)
       .map(market => market.name);
-    dispatch(updateMarketsData({ selectedMarkets: selectedMarketNames }));
+    
+    // Сохраняем детальную информацию о markets и stations
+    const marketsDetails = updatedMarkets
+      .filter(market => market.selected)
+      .map(market => ({
+        id: market.id,
+        name: market.name,
+        displayName: market.displayName,
+        selected: market.selected,
+        percentage: market.percentage,
+        budget: market.budget,
+        stations: market.stations
+          .filter(station => station.selected)
+          .map(station => ({
+            id: station.id,
+            name: station.name,
+            selected: station.selected,
+            percentage: station.percentage,
+            budget: station.budget
+          }))
+      }));
+    
+    dispatch(updateMarketsData({ 
+      selectedMarkets: selectedMarketNames,
+      marketsDetails 
+    }));
 
     // Update estimations
     const marketEstimation = calculateMarketEstimation(updatedMarkets);
