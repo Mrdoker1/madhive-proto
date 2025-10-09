@@ -123,8 +123,6 @@ const MarketsSection = () => {
               size="sm"
             />
           )}
-          
-          <div style={{ width: '180px' }}></div>
         </Group>
       )}
 
