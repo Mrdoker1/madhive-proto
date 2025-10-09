@@ -8,6 +8,7 @@ import { useAppSelector } from '@/hooks/useRedux';
 import { getAvailableMarkets, getStationsByMarket } from '@/data/stationsData';
 import { getMarketById } from '@/data/marketsData';
 import { getBroadcasterByName } from '@/data/broadcastersData';
+import { StationBudget } from '@/store/slices/campaignSlice';
 
 interface ProgramSelection {
   [stationId: string]: {
@@ -80,10 +81,9 @@ const ProposalSection = () => {
           ...market,
           rank: existing.rank,
           marketSize: existing.marketSize,
-          stations: market.stations.map(station => ({
+          stations: market.stations.map((station: StationBudget) => ({
             ...station,
             marketId: market.id,
-            broadcasterId: station.broadcasterId || '',
             cpm: '$20.00',
             marketShare: 0,
             audienceSize: 0
@@ -95,16 +95,23 @@ const ProposalSection = () => {
     return Array.from(marketMap.values());
   }, [allAvailableMarkets, marketsDetails]);
   
+  // Создаем стабильный список ID markets из marketsDetails
+  const marketIds = useMemo(() => {
+    return marketsDetails.map(m => m.id).join(',');
+  }, [marketsDetails]);
+  
   // Локальное состояние для видимости markets
   // Показываем только те markets которые были выбраны на предыдущем шаге
   const [visibleMarkets, setVisibleMarkets] = useState<Set<string>>(() => {
     return new Set(marketsDetails.map(m => m.id));
   });
   
-  // Обновляем visibleMarkets когда меняется marketsDetails
+  // Обновляем visibleMarkets когда меняется список ID markets
   useEffect(() => {
-    setVisibleMarkets(new Set(marketsDetails.map(m => m.id)));
-  }, [marketsDetails]);
+    if (marketIds) {
+      setVisibleMarkets(new Set(marketIds.split(',').filter(Boolean)));
+    }
+  }, [marketIds]);
   
   // Фильтруем только видимые markets
   const selectedMarketsWithStations = useMemo(() => {
@@ -118,12 +125,17 @@ const ProposalSection = () => {
     return null;
   });
   
-  // Обновляем активный таб при изменении marketsDetails
+  // Получаем первый market ID для инициализации активного таба
+  const firstMarketId = useMemo(() => {
+    return marketsDetails.length > 0 ? marketsDetails[0].id : null;
+  }, [marketIds]); // Используем стабильную зависимость marketIds
+  
+  // Обновляем активный таб при изменении списка markets
   useEffect(() => {
-    if (marketsDetails.length > 0 && !activeMarketTab) {
-      setActiveMarketTab(marketsDetails[0].id);
+    if (firstMarketId && !activeMarketTab) {
+      setActiveMarketTab(firstMarketId);
     }
-  }, [marketsDetails, activeMarketTab]);
+  }, [firstMarketId, activeMarketTab]);
   
   const [programSelections, setProgramSelections] = useState<ProgramSelection>({});
   const [searchQuery, setSearchQuery] = useState('');
@@ -152,7 +164,7 @@ const ProposalSection = () => {
   const stationPrograms = useMemo(() => {
     const programs: Record<string, Program[]> = {};
     selectedMarketsWithStations.forEach(market => {
-      market.stations.forEach(station => {
+      market.stations.forEach((station: StationBudget) => {
         programs[station.id] = getProgramsByStation(station.id);
       });
     });
@@ -374,7 +386,7 @@ const ProposalSection = () => {
 
     return (
       <Accordion>
-        {availableStations.map((station) => {
+        {availableStations.map((station: StationBudget) => {
           const programs = stationPrograms[station.id] || [];
           const totals = calculateStationTotals(station.id);
           const budgetExceeded = checkBudgetExceeded(station.id, station.budget);
@@ -483,12 +495,18 @@ const ProposalSection = () => {
                     key={market.id}
                     onClick={() => toggleMarketVisibility(market.id)}
                     leftSection={
-                      <Checkbox
-                        checked={visibleMarkets.has(market.id)}
-                        onChange={() => {}}
-                        onClick={(e) => e.stopPropagation()}
-                        color="var(--primary-color)"
-                      />
+                      <div onClick={(e) => e.stopPropagation()}>
+                        <Checkbox
+                          checked={visibleMarkets.has(market.id)}
+                          onChange={() => toggleMarketVisibility(market.id)}
+                          color="var(--primary-color)"
+                          style={{ cursor: 'pointer' }}
+                          styles={{
+                            input: { cursor: 'pointer' },
+                            label: { cursor: 'pointer' }
+                          }}
+                        />
+                      </div>
                     }
                   >
                     <Text size="sm">{market.displayName}</Text>
