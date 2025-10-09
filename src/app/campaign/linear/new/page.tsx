@@ -39,6 +39,11 @@ export default function NewCampaignPage() {
       status: 'pending'
     },
     { 
+      id: 'generate-proposal', 
+      label: 'Generate Proposal', 
+      status: 'pending'
+    },
+    { 
       id: 'summary', 
       label: 'Summary', 
       status: 'pending'

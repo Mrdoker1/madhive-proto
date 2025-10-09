@@ -32,6 +32,11 @@ export default function ChannelDetailsPage() {
       status: 'current' // текущий шаг
     },
     { 
+      id: 'generate-proposal', 
+      label: 'Generate Proposal', 
+      status: 'pending' // ожидает
+    },
+    { 
       id: 'summary', 
       label: 'Summary', 
       status: 'pending' // ожидает
@@ -47,9 +52,9 @@ export default function ChannelDetailsPage() {
   ];
 
   const handleNextClick = () => {
-    console.log('Переход к следующему шагу - Summary');
-    // Переходим на страницу summary
-    router.push('/campaign/linear/summary');
+    console.log('Переход к следующему шагу - Generate Proposal');
+    // Переходим на страницу proposal
+    router.push('/campaign/linear/proposal');
   };
 
   const handleBackClick = () => {

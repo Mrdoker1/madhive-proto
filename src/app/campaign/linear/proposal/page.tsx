@@ -1,20 +1,17 @@
 'use client';
 
-import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import PageLayout from "@/components/layout/PageLayout";
+import NavigationAnchors, { AnchorItem } from "@/components/ui/NavigationAnchors";
 import SectionWrapper from "@/components/ui/SectionWrapper";
 import { BreadcrumbStep } from "@/components/ui/Breadcrumbs";
 import NextButton from "@/components/ui/NextButton";
-import CampaignSummarySection from "@/components/features/sections/CampaignSummarySection";
-import { useAppDispatch } from '@/hooks/useRedux';
-import { saveCampaign, resetCampaign } from '@/store/slices/campaignSlice';
+import ProposalSection from "@/components/features/sections/ProposalSection";
 
-export default function SummaryPage() {
+export default function GenerateProposalPage() {
   const router = useRouter();
-  const dispatch = useAppDispatch();
-
-  // Бредкрамбсы для страницы Summary - все предыдущие шаги выполнены
+  
+  // Бредкрамбсы для страницы Generate Proposal
   const breadcrumbSteps: BreadcrumbStep[] = [
     { 
       id: 'new-campaign', 
@@ -25,50 +22,51 @@ export default function SummaryPage() {
     { 
       id: 'general', 
       label: 'General', 
-      status: 'completed' // выполнен
+      status: 'completed'
     },
     { 
       id: 'channel-details', 
       label: 'Channel Details', 
-      status: 'completed' // выполнен
+      status: 'completed'
     },
     { 
       id: 'generate-proposal', 
       label: 'Generate Proposal', 
-      status: 'completed' // выполнен
+      status: 'current'
     },
     { 
       id: 'summary', 
       label: 'Summary', 
-      status: 'current' // текущий шаг
+      status: 'pending'
     }
   ];
 
+  // Якоря для навигации по странице
+  const anchorItems: AnchorItem[] = [
+    { id: 'proposal', label: 'Proposal', anchor: '#proposal' }
+  ];
+
   const handleNextClick = () => {
-    console.log('Создание кампании завершено!');
-    // Сохраняем кампанию в Redux
-    dispatch(saveCampaign());
-    // Сбрасываем форму для новой кампании
-    dispatch(resetCampaign());
-    // Переходим на страницу со списком кампаний
-    router.push('/campaign');
+    console.log('Переход к следующему шагу - Summary');
+    router.push('/campaign/linear/summary');
   };
 
   const handleBackClick = () => {
-    console.log('Возврат к предыдущему шагу - Generate Proposal');
-    router.push('/campaign/linear/proposal');
+    console.log('Возврат к предыдущему шагу - Channel Details');
+    router.push('/campaign/linear/details');
   };
 
   return (
     <>
       <PageLayout 
         breadcrumbs={breadcrumbSteps} 
-        title="Summary"
+        title="Generate Proposal"
+        showRightSidebar={true}
         footerContent={
           <NextButton 
             active={true}
             onClick={handleNextClick}
-            text="Create Campaign"
+            text="Next"
             showBack={true}
             onBackClick={handleBackClick}
             backText="Back"
@@ -77,16 +75,26 @@ export default function SummaryPage() {
       >
         <div style={{ backgroundColor: 'var(--page-background)', paddingTop: '32px', paddingBottom: '96px', paddingLeft: '32px', paddingRight: '32px', minHeight: '100%' }}>
           <div style={{ display: 'flex', justifyContent: 'center', margin: '0 auto' }}>
-            {/* Основной контент без левой навигации */}
-            <div style={{ width: '100%', maxWidth: '960px' }}>
+            {/* Левая колонка с навигацией */}
+            <div className="w-64" style={{ paddingRight: '20px', position: 'sticky', top: '32px', height: 'fit-content' }}>
+              <NavigationAnchors 
+                items={anchorItems}
+                orientation="vertical"
+                activeColor="#2A1037"
+                textColor="#666666"
+                className="space-y-6"
+              />
+            </div>
+            {/* Основной контент */}
+            <div style={{ paddingLeft: '20px', width: '100%', maxWidth: '800px' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '40px' }}>
               
-              {/* Campaign Review Section */}
+              {/* Proposal Section */}
               <SectionWrapper 
-                id="campaign-review" 
-                title="Almost done. Please carefully review campaign information."
+                id="proposal" 
+                title="Proposal"
               >
-                <CampaignSummarySection />
+                <ProposalSection />
               </SectionWrapper>
               
               </div>
@@ -97,3 +105,4 @@ export default function SummaryPage() {
     </>
   );
 }
+
