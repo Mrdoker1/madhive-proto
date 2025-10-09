@@ -426,10 +426,13 @@ const ProposalSection = () => {
     );
   };
 
-  if (marketsDetails.length === 0) {
+  // Проверяем наличие broadcasters
+  const hasBroadcasters = selectedBroadcasters.length > 0;
+  
+  if (!hasBroadcasters) {
     return (
       <Text c="dimmed" size="sm">
-        No markets selected. Please select markets in the Channel Details step.
+        No broadcasters selected. Please select broadcasters in the Linear Details section on the Channel Details step.
       </Text>
     );
   }
@@ -534,21 +537,33 @@ const ProposalSection = () => {
       </Group>
 
       {/* Табы для Markets */}
-      <Tabs value={activeMarketTab} onChange={setActiveMarketTab} color="var(--primary-color)">
-        <Tabs.List>
-          {selectedMarketsWithStations.map((market) => (
-            <Tabs.Tab key={market.id} value={market.id}>
-              {market.name} ({market.stations.length})
-            </Tabs.Tab>
-          ))}
-        </Tabs.List>
+      {selectedMarketsWithStations.length === 0 ? (
+        <div style={{ 
+          marginTop: '24px',
+          textAlign: 'center', 
+          color: '#666',
+          fontSize: '14px',
+          padding: '40px 20px'
+        }}>
+          Select markets using "Add item" button to display programs
+        </div>
+      ) : (
+        <Tabs value={activeMarketTab} onChange={setActiveMarketTab} color="var(--primary-color)">
+          <Tabs.List>
+            {selectedMarketsWithStations.map((market) => (
+              <Tabs.Tab key={market.id} value={market.id}>
+                {market.name} ({market.stations.length})
+              </Tabs.Tab>
+            ))}
+          </Tabs.List>
 
-        {selectedMarketsWithStations.map((market) => (
-          <Tabs.Panel key={market.id} value={market.id} pt="md">
-            {renderStationsAccordions(market.id)}
-          </Tabs.Panel>
-        ))}
-      </Tabs>
+          {selectedMarketsWithStations.map((market) => (
+            <Tabs.Panel key={market.id} value={market.id} pt="md">
+              {renderStationsAccordions(market.id)}
+            </Tabs.Panel>
+          ))}
+        </Tabs>
+      )}
     </div>
   );
 };
