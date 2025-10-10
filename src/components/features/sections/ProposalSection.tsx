@@ -541,23 +541,53 @@ const ProposalSection = () => {
               <Accordion.Control>
                 <Group justify="space-between" pr="md" style={{ width: '100%' }}>
                   <Text fw={500}>{station.name} ({programs.length})</Text>
-                  <Group gap="xs" align="center">
-                    <Badge variant="light" color="var(--primary-color)" size="sm">
-                      Impressions: {formatNumber(totals.totalImpressions)}
-                    </Badge>
-                    <Badge variant="light" color="var(--primary-color)" size="sm">
-                      CPM: {formatCPM(totals.avgCPM)}
-                    </Badge>
-                    <Badge variant="light" color="var(--primary-color)" size="sm">
-                      <Group gap={4} align="center">
-                        <span>Total: {formatCurrency(totals.totalRate)}</span>
+                  <Group gap={20} align="center">
+                    <div style={{ 
+                      display: 'flex', 
+                      flexDirection: 'column', 
+                      alignItems: 'flex-end',
+                      gap: '4px'
+                    }}>
+                      <Text size="10px" c="dimmed" style={{ lineHeight: 1 }}>
+                        Impressions
+                      </Text>
+                      <Text size="sm" fw={600} style={{ lineHeight: 1 }}>
+                        {formatNumber(totals.totalImpressions)}
+                      </Text>
+                    </div>
+                    <div style={{ 
+                      display: 'flex', 
+                      flexDirection: 'column', 
+                      alignItems: 'flex-end',
+                      gap: '4px'
+                    }}>
+                      <Text size="10px" c="dimmed" style={{ lineHeight: 1 }}>
+                        CPM
+                      </Text>
+                      <Text size="sm" fw={600} style={{ lineHeight: 1 }}>
+                        {formatCPM(totals.avgCPM)}
+                      </Text>
+                    </div>
+                    <div style={{ 
+                      display: 'flex', 
+                      flexDirection: 'column', 
+                      alignItems: 'flex-end',
+                      gap: '4px'
+                    }}>
+                      <Text size="10px" c="dimmed" style={{ lineHeight: 1 }}>
+                        Total
+                      </Text>
+                      <Group gap={4} align="center" style={{ lineHeight: 1 }}>
+                        <Text size="sm" fw={600} style={{ lineHeight: 1 }}>
+                          {formatCurrency(totals.totalRate)}
+                        </Text>
                         {budgetExceeded && (
                           <Tooltip label="Selected programs exceed the allocated budget" position="top">
                             <IconAlertCircle size={14} color="red" />
                           </Tooltip>
                         )}
                       </Group>
-                    </Badge>
+                    </div>
                   </Group>
                 </Group>
               </Accordion.Control>
@@ -649,16 +679,43 @@ const ProposalSection = () => {
           </Menu>
         </Group>
 
-        <Group gap="md" align="center">
-          <div>
-            <Text size="xs" c="dimmed" mb={4}>Budget</Text>
-            <Text size="sm" fw={500}>
+        <Group gap={20} align="center">
+          <div style={{ 
+            display: 'flex', 
+            flexDirection: 'column', 
+            alignItems: 'flex-end',
+            gap: '4px'
+          }}>
+            <Text size="10px" c="dimmed" style={{ lineHeight: 1 }}>
+              Impressions
+            </Text>
+            <Text size="sm" fw={600} style={{ lineHeight: 1 }}>
+              {formatNumber(calculateGrandTotals.totalImpressions)}
+            </Text>
+          </div>
+          <div style={{ 
+            display: 'flex', 
+            flexDirection: 'column', 
+            alignItems: 'flex-end',
+            gap: '4px'
+          }}>
+            <Text size="10px" c="dimmed" style={{ lineHeight: 1 }}>
+              Budget
+            </Text>
+            <Text size="sm" fw={600} style={{ lineHeight: 1 }}>
               {formatCurrency(calculateGrandTotals.totalRate)} / {formatCurrency(totalBudget)}
             </Text>
           </div>
-          <div>
-            <Text size="xs" c="dimmed" mb={4}>Target CPM</Text>
-            <Text size="sm" fw={500}>
+          <div style={{ 
+            display: 'flex', 
+            flexDirection: 'column', 
+            alignItems: 'flex-end',
+            gap: '4px'
+          }}>
+            <Text size="10px" c="dimmed" style={{ lineHeight: 1 }}>
+              Target CPM
+            </Text>
+            <Text size="sm" fw={600} style={{ lineHeight: 1 }}>
               {formatCPM(calculateGrandTotals.avgCPM)}
             </Text>
           </div>
