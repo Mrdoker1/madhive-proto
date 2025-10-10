@@ -139,8 +139,6 @@ const ProposalSection = () => {
   
   const [programSelections, setProgramSelections] = useState<ProgramSelection>({});
   const [searchQuery, setSearchQuery] = useState('');
-  const [groupBy, setGroupBy] = useState<string>('outlet');
-  const [flightFilter, setFlightFilter] = useState<string>('all');
   
   // Функция для toggle видимости market
   const toggleMarketVisibility = (marketId: string) => {
@@ -442,28 +440,6 @@ const ProposalSection = () => {
       {/* Фильтры и контролы */}
       <Group justify="space-between" mb="lg">
         <Group gap="md">
-          <Select
-            value={groupBy}
-            onChange={(value) => setGroupBy(value || 'outlet')}
-            data={[
-              { value: 'outlet', label: 'Group by Outlet' },
-              { value: 'daypart', label: 'Group by Daypart' },
-              { value: 'date', label: 'Group by Date' }
-            ]}
-            w={180}
-            size="sm"
-          />
-          <Select
-            value={flightFilter}
-            onChange={(value) => setFlightFilter(value || 'all')}
-            data={[
-              { value: 'all', label: 'Flight' },
-              { value: 'q1', label: 'Q1 2025' },
-              { value: 'q2', label: 'Q2 2025' }
-            ]}
-            w={150}
-            size="sm"
-          />
           <TextInput
             placeholder="Search"
             value={searchQuery}
@@ -484,7 +460,7 @@ const ProposalSection = () => {
                 variant="outline"
                 size="sm"
               >
-                Add item
+                Add market
               </Button>
             </Menu.Target>
 
@@ -545,7 +521,7 @@ const ProposalSection = () => {
           fontSize: '14px',
           padding: '40px 20px'
         }}>
-          Select markets using "Add item" button to display programs
+          Select markets using "Add market" button to display programs
         </div>
       ) : (
         <Tabs value={activeMarketTab} onChange={setActiveMarketTab} color="var(--primary-color)">
