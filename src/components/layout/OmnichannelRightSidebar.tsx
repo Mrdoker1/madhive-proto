@@ -12,10 +12,13 @@ const CHANNEL_COLORS: Record<string, string> = {
   ctv: '#FF0099', 
   preroll: '#10B981', // Зеленый для Preroll
   audio: '#33CCCC',
-  display: '#FFA100'
+  display: '#FFA100',
+  social: '#8B5CF6',
+  search: '#F59E0B',
+  email: '#EF4444'
 };
 
-type ChannelType = 'total' | 'linear' | 'ctv' | 'preroll' | 'audio';
+type ChannelType = 'total' | 'linear' | 'ctv' | 'preroll' | 'audio' | 'social' | 'search' | 'email';
 
 interface OmnichannelRightSidebarProps {
   className?: string;
@@ -30,7 +33,10 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({ class
     { id: 'linear', label: 'Linear' },
     { id: 'ctv', label: 'CTV' },
     { id: 'preroll', label: 'Preroll' },
-    { id: 'audio', label: 'Audio' }
+    { id: 'audio', label: 'Audio' },
+    { id: 'social', label: 'Social' },
+    { id: 'search', label: 'Search' },
+    { id: 'email', label: 'Email' }
   ];
 
   // Процентное соотношение каналов
@@ -39,7 +45,10 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({ class
     ctv: 25,
     preroll: 10,
     audio: 15,
-    display: 10 // Оставляем для обратной совместимости
+    display: 10,
+    social: 10,
+    search: 5,
+    email: 5
   };
 
   // Функция для определения цвета легенды
@@ -149,15 +158,16 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({ class
           
           {/* Legend */}
           <div style={{ 
-            display: 'flex', 
-            justifyContent: 'space-around',
+            display: 'grid',
+            gridTemplateColumns: 'repeat(4, 1fr)',
+            gap: '8px 4px',
             fontSize: '11px',
             color: '#666',
             marginBottom: '16px'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
               <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: getLegendColor('linear') }} />
-              <span>Linear TV</span>
+              <span>Linear</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
               <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: getLegendColor('ctv') }} />
@@ -170,6 +180,18 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({ class
             <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
               <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: getLegendColor('audio') }} />
               <span>Audio</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: getLegendColor('social') }} />
+              <span>Social</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: getLegendColor('search') }} />
+              <span>Search</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: getLegendColor('email') }} />
+              <span>Email</span>
             </div>
           </div>
         </div>
@@ -220,14 +242,15 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({ class
           
           {/* Legend */}
           <div style={{ 
-            display: 'flex', 
-            justifyContent: 'space-around',
+            display: 'grid',
+            gridTemplateColumns: 'repeat(4, 1fr)',
+            gap: '8px 4px',
             fontSize: '11px',
             color: '#666'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
               <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: getLegendColor('linear') }} />
-              <span>Linear TV</span>
+              <span>Linear</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
               <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: getLegendColor('ctv') }} />
@@ -240,6 +263,18 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({ class
             <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
               <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: getLegendColor('audio') }} />
               <span>Audio</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: getLegendColor('social') }} />
+              <span>Social</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: getLegendColor('search') }} />
+              <span>Search</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: getLegendColor('email') }} />
+              <span>Email</span>
             </div>
           </div>
           
@@ -334,14 +369,15 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({ class
           
           {/* Legend */}
           <div style={{ 
-            display: 'flex', 
-            justifyContent: 'space-around',
+            display: 'grid',
+            gridTemplateColumns: 'repeat(4, 1fr)',
+            gap: '8px 4px',
             fontSize: '11px',
             color: '#666'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
               <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: getLegendColor('linear') }} />
-              <span>Linear TV</span>
+              <span>Linear</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
               <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: getLegendColor('ctv') }} />
@@ -354,6 +390,18 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({ class
             <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
               <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: getLegendColor('audio') }} />
               <span>Audio</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: getLegendColor('social') }} />
+              <span>Social</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: getLegendColor('search') }} />
+              <span>Search</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: getLegendColor('email') }} />
+              <span>Email</span>
             </div>
           </div>
         </div>

@@ -15,11 +15,11 @@ import DaypartsSection from "@/components/features/sections/DaypartsSection";
 import OmnichannelRightSidebar from "@/components/layout/OmnichannelRightSidebar";
 import { Text } from '@mantine/core';
 
-type ChannelType = 'linear' | 'ctv' | 'preroll' | 'audio';
+type ChannelType = 'preroll' | 'ctv' | 'audio' | 'social' | 'search' | 'email';
 
 export default function OmnichannelDetailsPage() {
   const router = useRouter();
-  const [activeChannel, setActiveChannel] = useState<ChannelType>('linear');
+  const [activeChannel, setActiveChannel] = useState<ChannelType>('ctv');
 
   // Бредкрамбсы для страницы Channel Details
   const breadcrumbSteps: BreadcrumbStep[] = [
@@ -51,46 +51,24 @@ export default function OmnichannelDetailsPage() {
     }
   ];
 
-  // Pills для переключения каналов
+  // Pills для переключения каналов (все из Select Channels кроме Linear TV)
   const channelPills: ChannelPill[] = [
-    { id: 'linear', label: 'Linear' },
     { id: 'ctv', label: 'CTV' },
-    { id: 'preroll', label: 'Preroll' },
-    { id: 'audio', label: 'Audio' }
+    { id: 'preroll', label: 'Pre Roll' },
+    { id: 'audio', label: 'Audio' },
+    { id: 'social', label: 'Social' },
+    { id: 'search', label: 'Search' },
+    { id: 'email', label: 'Email' }
   ];
 
-  // Якоря для навигации по странице - меняются в зависимости от канала
+  // Якоря для навигации - одинаковые для всех каналов
   const getAnchorItems = (): AnchorItem[] => {
-    switch (activeChannel) {
-      case 'linear':
-        return [
-          { id: 'linear-details', label: 'Linear Details', anchor: '#linear-details' },
-          { id: 'audiences', label: 'Audiences', anchor: '#audiences' },
-          { id: 'markets', label: 'Markets', anchor: '#markets' },
-          { id: 'dayparts', label: 'Dayparts', anchor: '#dayparts' }
-        ];
-      case 'ctv':
-        return [
-          { id: 'audiences', label: 'Audiences', anchor: '#audiences' },
-          { id: 'interests', label: 'Interests', anchor: '#interests' },
-          { id: 'geo', label: 'Geo', anchor: '#geo' },
-          { id: 'dayparts', label: 'Dayparts', anchor: '#dayparts' }
-        ];
-      case 'preroll':
-        return [
-          { id: 'preroll-details', label: 'Preroll Details', anchor: '#preroll-details' },
-          { id: 'audiences', label: 'Audiences', anchor: '#audiences' },
-          { id: 'targeting', label: 'Targeting', anchor: '#targeting' }
-        ];
-      case 'audio':
-        return [
-          { id: 'audio-details', label: 'Audio Details', anchor: '#audio-details' },
-          { id: 'audiences', label: 'Audiences', anchor: '#audiences' },
-          { id: 'platforms', label: 'Platforms', anchor: '#platforms' }
-        ];
-      default:
-        return [];
-    }
+    return [
+      { id: 'audiences', label: 'Audiences', anchor: '#audiences' },
+      { id: 'interests', label: 'Interests', anchor: '#interests' },
+      { id: 'geo', label: 'Geo', anchor: '#geo' },
+      { id: 'dayparts', label: 'Dayparts', anchor: '#dayparts' }
+    ];
   };
 
   const handleNextClick = () => {
@@ -104,105 +82,72 @@ export default function OmnichannelDetailsPage() {
   };
 
 
-  // Рендер контента в зависимости от выбранного канала
+  // Рендер контента в зависимости от канала
   const renderChannelContent = () => {
+    // Общий контент для Pre Roll, CTV, Audio, Email
+    const commonContent = (
+      <>
+        <SectionWrapper id="audiences" title="Audiences">
+          <AudiencesSection />
+        </SectionWrapper>
+
+        <SectionWrapper id="interests" title="Interests">
+          <InterestsSection />
+        </SectionWrapper>
+
+        <SectionWrapper id="geo" title="Geo">
+          <GeoSection />
+        </SectionWrapper>
+
+        <SectionWrapper id="dayparts" title="Dayparts">
+          <DaypartsSection />
+        </SectionWrapper>
+      </>
+    );
+
     switch (activeChannel) {
-      case 'linear':
-        return (
-          <>
-            <SectionWrapper id="linear-details" title="Linear Details">
-              <Text size="sm" c="dimmed">
-                Configure linear TV advertising settings.
-              </Text>
-            </SectionWrapper>
-
-            <SectionWrapper id="audiences" title="Audiences">
-              <Text size="sm" c="dimmed">
-                Define target audiences for linear campaign.
-              </Text>
-            </SectionWrapper>
-
-            <SectionWrapper id="markets" title="Markets">
-              <Text size="sm" c="dimmed">
-                Select markets for linear campaign.
-              </Text>
-            </SectionWrapper>
-
-            <SectionWrapper id="dayparts" title="Dayparts">
-              <Text size="sm" c="dimmed">
-                Configure timing preferences for linear campaign.
-              </Text>
-            </SectionWrapper>
-          </>
-        );
-
-      case 'ctv':
-        return (
-          <>
-            <SectionWrapper id="audiences" title="Audiences">
-              <AudiencesSection />
-            </SectionWrapper>
-
-            <SectionWrapper id="interests" title="Interests">
-              <InterestsSection />
-            </SectionWrapper>
-
-            <SectionWrapper id="geo" title="Geo">
-              <GeoSection />
-            </SectionWrapper>
-
-            <SectionWrapper id="dayparts" title="Dayparts">
-              <DaypartsSection />
-            </SectionWrapper>
-          </>
-        );
-
       case 'preroll':
-        return (
-          <>
-            <SectionWrapper id="preroll-details" title="Preroll Details">
-              <Text size="sm" c="dimmed">
-                Configure preroll video advertising settings.
-              </Text>
-            </SectionWrapper>
-
-            <SectionWrapper id="audiences" title="Audiences">
-              <Text size="sm" c="dimmed">
-                Define target audiences for preroll campaign.
-              </Text>
-            </SectionWrapper>
-
-            <SectionWrapper id="targeting" title="Targeting">
-              <Text size="sm" c="dimmed">
-                Configure targeting options for preroll campaign.
-              </Text>
-            </SectionWrapper>
-          </>
-        );
-
+      case 'ctv':
       case 'audio':
+      case 'email':
+        return commonContent;
+      
+      case 'social':
         return (
           <>
-            <SectionWrapper id="audio-details" title="Audio Details">
-              <Text size="sm" c="dimmed">
-                Configure audio advertising settings.
-              </Text>
-            </SectionWrapper>
-
             <SectionWrapper id="audiences" title="Audiences">
-              <Text size="sm" c="dimmed">
-                Define target audiences for audio campaign.
-              </Text>
+              <Text size="sm" c="dimmed">Social channel audiences configuration</Text>
             </SectionWrapper>
-
-            <SectionWrapper id="platforms" title="Platforms">
-              <Text size="sm" c="dimmed">
-                Select audio platforms for campaign.
-              </Text>
+            <SectionWrapper id="interests" title="Interests">
+              <Text size="sm" c="dimmed">Social channel interests</Text>
+            </SectionWrapper>
+            <SectionWrapper id="geo" title="Geo">
+              <Text size="sm" c="dimmed">Social channel geo targeting</Text>
+            </SectionWrapper>
+            <SectionWrapper id="dayparts" title="Dayparts">
+              <Text size="sm" c="dimmed">Social channel dayparts</Text>
             </SectionWrapper>
           </>
         );
-
+      
+      case 'search':
+        return (
+          <>
+            <SectionWrapper id="audiences" title="Audiences">
+              <Text size="sm" c="dimmed">Search channel audiences configuration</Text>
+            </SectionWrapper>
+            <SectionWrapper id="interests" title="Interests">
+              <Text size="sm" c="dimmed">Search channel keywords</Text>
+            </SectionWrapper>
+            <SectionWrapper id="geo" title="Geo">
+              <Text size="sm" c="dimmed">Search channel geo targeting</Text>
+            </SectionWrapper>
+            <SectionWrapper id="dayparts" title="Dayparts">
+              <Text size="sm" c="dimmed">Search channel dayparts</Text>
+            </SectionWrapper>
+          </>
+        );
+      
       default:
         return null;
     }
