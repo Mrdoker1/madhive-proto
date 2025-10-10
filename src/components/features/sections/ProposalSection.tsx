@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { Tabs, Accordion, Table, Checkbox, Group, Text, Badge, TextInput, Select, Button, Tooltip, Menu } from '@mantine/core';
 import { IconSearch, IconPlus, IconAlertCircle } from '@tabler/icons-react';
 import { getProgramsByStation, Program } from '@/data/programsData';
@@ -16,11 +16,25 @@ interface ProgramSelection {
   };
 }
 
+// Dayparts definition
+const daypartDefinitions = [
+  { name: 'Late Fringe', color: '#7CB342', hours: [0, 1] },
+  { name: 'Overnight', color: '#FFD54F', hours: [2, 3, 4, 5] },
+  { name: 'Early Morning', color: '#81C784', hours: [6, 7, 8, 9] },
+  { name: 'Daytime', color: '#EF5350', hours: [10, 11, 12, 13, 14, 15] },
+  { name: 'Early Fringe', color: '#66BB6A', hours: [16, 17, 18] },
+  { name: 'Prime Access', color: '#9575CD', hours: [19] },
+  { name: 'Prime Time', color: '#B39DDB', hours: [20, 21, 22] },
+  { name: 'Late News', color: '#7CB342', hours: [23] }
+];
+
 const ProposalSection = () => {
   // Получаем детальную информацию о markets и stations из Redux
   const marketsDetails = useAppSelector((state) => state.campaign.markets.marketsDetails || []);
   const totalBudget = useAppSelector((state) => state.campaign.budget.totalBudget);
   const selectedBroadcasters = useAppSelector((state) => state.campaign.linear.broadcasters);
+  const flightData = useAppSelector((state) => state.campaign.flight);
+  const daypartsData = useAppSelector((state) => state.campaign.dayparts);
   
   // Конвертируем имена broadcasters в ID
   const broadcasterIds = useMemo(() => {
@@ -140,6 +154,137 @@ const ProposalSection = () => {
   const [programSelections, setProgramSelections] = useState<ProgramSelection>({});
   const [searchQuery, setSearchQuery] = useState('');
   
+  // Извлекаем выбранные дни недели из dayparts
+  const selectedDaysOfWeek = useMemo(() => {
+    const selectedSlots = daypartsData.selectedSlots;
+    if (!selectedSlots || Object.keys(selectedSlots).length === 0) {
+      return null; // Нет выбранных слотов - используем дефолтные дни
+    }
+    
+    // Получаем уникальные дни, у которых есть хотя бы один выбранный слот
+    const days = Object.keys(selectedSlots).filter(day => {
+      const daySlots = selectedSlots[day];
+      return Object.values(daySlots).some(selected => selected);
+    });
+    
+    return days.length > 0 ? days : null;
+  }, [daypartsData.selectedSlots]);
+  
+  // Извлекаем выбранные часы и определяем активные dayparts
+  const activeDaypartsInfo = useMemo(() => {
+    const selectedSlots = daypartsData.selectedSlots;
+    if (!selectedSlots || Object.keys(selectedSlots).length === 0) {
+      return null; // Нет выбранных слотов - используем дефолтные dayparts
+    }
+    
+    // Собираем все выбранные часы (уникальные)
+    const selectedHours = new Set<number>();
+    Object.values(selectedSlots).forEach(daySlots => {
+      Object.entries(daySlots).forEach(([hour, selected]) => {
+        if (selected) {
+          selectedHours.add(parseInt(hour));
+        }
+      });
+    });
+    
+    if (selectedHours.size === 0) {
+      return null;
+    }
+    
+    // Определяем какие dayparts активны и собираем их часы
+    const activeDayparts = daypartDefinitions
+      .map(daypart => {
+        // Фильтруем только те часы из daypart, которые выбраны
+        const activeHours = daypart.hours.filter(hour => selectedHours.has(hour));
+        if (activeHours.length > 0) {
+          return {
+            name: daypart.name,
+            hours: activeHours
+          };
+        }
+        return null;
+      })
+      .filter(Boolean) as Array<{ name: string; hours: number[] }>;
+    
+    return activeDayparts.length > 0 ? activeDayparts : null;
+  }, [daypartsData.selectedSlots]);
+  
+  // Функция для генерации случайной даты в диапазоне
+  const getRandomDateInRange = useCallback((startDate: string, endDate: string): string => {
+    const start = new Date(startDate).getTime();
+    const end = new Date(endDate).getTime();
+    const randomTime = start + Math.random() * (end - start);
+    const randomDate = new Date(randomTime);
+    return randomDate.toISOString().split('T')[0];
+  }, []);
+  
+  // Функция для форматирования часа в AM/PM формат
+  const formatHourToTime = useCallback((hour: number): string => {
+    if (hour === 0) return '12:00 AM';
+    if (hour < 12) return `${hour}:00 AM`;
+    if (hour === 12) return '12:00 PM';
+    return `${hour - 12}:00 PM`;
+  }, []);
+  
+  // Функция для получения случайного элемента из массива
+  const getRandomItem = useCallback(<T,>(array: T[]): T => {
+    return array[Math.floor(Math.random() * array.length)];
+  }, []);
+  
+  // Функция для обновления дат и дней программы на основе Flight Range и Dayparts
+  const updateProgramDates = useCallback((program: Program): Program => {
+    let updatedProgram = { ...program };
+    
+    // Обновляем даты, если Flight Range выбран
+    if (flightData.startDate && flightData.endDate) {
+      const startDate = flightData.startDate;
+      const endDate = flightData.endDate;
+      
+      // Генерируем случайные даты в пределах диапазона
+      const programStartDate = getRandomDateInRange(startDate, endDate);
+      const programEndDate = getRandomDateInRange(programStartDate, endDate);
+      
+      updatedProgram = {
+        ...updatedProgram,
+        airStartDate: programStartDate,
+        airEndDate: programEndDate
+      };
+    }
+    
+    // Обновляем дни недели, если Dayparts выбраны
+    if (selectedDaysOfWeek) {
+      updatedProgram = {
+        ...updatedProgram,
+        daysOfWeek: selectedDaysOfWeek
+      };
+    }
+    
+    // Обновляем daypart и airTime, если Dayparts выбраны
+    if (activeDaypartsInfo) {
+      // Выбираем случайный активный daypart
+      const randomDaypart = getRandomItem(activeDaypartsInfo);
+      
+      // Выбираем случайный час из этого daypart
+      const randomHour = getRandomItem(randomDaypart.hours);
+      
+      updatedProgram = {
+        ...updatedProgram,
+        daypart: randomDaypart.name,
+        airTime: formatHourToTime(randomHour)
+      };
+    }
+    
+    return updatedProgram;
+  }, [
+    flightData.startDate, 
+    flightData.endDate, 
+    getRandomDateInRange, 
+    selectedDaysOfWeek,
+    activeDaypartsInfo,
+    getRandomItem,
+    formatHourToTime
+  ]);
+  
   // Функция для toggle видимости market
   const toggleMarketVisibility = (marketId: string) => {
     setVisibleMarkets(prev => {
@@ -158,16 +303,18 @@ const ProposalSection = () => {
     });
   };
 
-  // Получаем все программы для всех станций
+  // Получаем все программы для всех станций с обновленными датами
   const stationPrograms = useMemo(() => {
     const programs: Record<string, Program[]> = {};
     selectedMarketsWithStations.forEach(market => {
       market.stations.forEach((station: StationBudget) => {
-        programs[station.id] = getProgramsByStation(station.id);
+        const originalPrograms = getProgramsByStation(station.id);
+        // Применяем обновление дат к каждой программе
+        programs[station.id] = originalPrograms.map(program => updateProgramDates(program));
       });
     });
     return programs;
-  }, [selectedMarketsWithStations]);
+  }, [selectedMarketsWithStations, updateProgramDates]);
 
   // Функция для получения выбранных программ станции
   const getSelectedPrograms = (stationId: string): Program[] => {
@@ -456,9 +603,15 @@ const ProposalSection = () => {
           <Menu shadow="md" width={300} closeOnItemClick={false}>
             <Menu.Target>
               <Button
-                leftSection={<IconPlus size={16} />}
+                leftSection={<IconPlus size={14} />}
                 variant="outline"
                 size="sm"
+                styles={{ 
+                  root: {
+                    height: '36px',
+                    fontSize: '12px'
+                  }
+                }}
               >
                 Add market
               </Button>
