@@ -582,7 +582,10 @@ const ProposalSection = () => {
                           {formatCurrency(totals.totalRate)}
                         </Text>
                         {budgetExceeded && (
-                          <Tooltip label="Selected programs exceed the allocated budget" position="top">
+                          <Tooltip 
+                            label={`Selected programs exceed the allocated budget: ${formatCurrency(totals.totalRate)} / ${formatCurrency(station.budget)}`} 
+                            position="top"
+                          >
                             <IconAlertCircle size={14} color="red" />
                           </Tooltip>
                         )}
