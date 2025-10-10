@@ -734,7 +734,7 @@ const ProposalSection = () => {
           fontSize: '14px',
           padding: '40px 20px'
         }}>
-          Select markets using "Add market" button to display programs
+          Select markets using &quot;Add market&quot; button to display programs
         </div>
       ) : (
         <Tabs value={activeMarketTab} onChange={setActiveMarketTab} color="var(--primary-color)">
