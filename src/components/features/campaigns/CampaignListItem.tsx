@@ -11,13 +11,17 @@ function formatNumber(n: number): string {
   return n.toLocaleString('en-US');
 }
 
+function formatCurrency(n: number): string {
+  return `$${n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
+
 export default function CampaignListItem({ c }: { c: CampaignSummary }) {
   const data = c.sparkline.map((v, i) => ({ i, v }));
   return (
     <div
       className="grid items-center"
       style={{
-        gridTemplateColumns: '260px 160px 160px 240px 360px 220px 180px',
+        gridTemplateColumns: '220px 160px 160px 240px 300px 220px 160px 160px 160px 160px',
         paddingLeft: 0,
         paddingRight: 0,
         paddingTop: 0,
@@ -35,7 +39,7 @@ export default function CampaignListItem({ c }: { c: CampaignSummary }) {
       </div>
 
       {/* Pacing Status */}
-      <div style={{ position: 'sticky', left: '260px', zIndex: 1, background: 'var(--page-background)', paddingLeft: '16px', paddingRight: '12px', paddingTop: '20px', paddingBottom: '20px', borderRight: '1px solid var(--border-color)' }}>
+      <div style={{ position: 'sticky', left: '220px', zIndex: 1, background: 'var(--page-background)', paddingLeft: '16px', paddingRight: '12px', paddingTop: '20px', paddingBottom: '20px', borderRight: '1px solid var(--border-color)' }}>
         <CampaignStatusBadge status={c.status} />
       </div>
 
@@ -96,12 +100,27 @@ export default function CampaignListItem({ c }: { c: CampaignSummary }) {
 
       {/* Pacing % */}
       <div style={{ paddingTop: '8px', paddingBottom: '8px' }}>
-        <div style={{ fontWeight: 600, fontSize: '12px' }}>{c.pacingPercent.toFixed(2)}%</div>
-        <div style={{ fontSize: '12px', color: '#6b7280' }}>({formatNumber(c.pacingDelivered)} / {formatNumber(c.pacingTarget)})</div>
+        {c.pacingPercent !== null ? (
+          <>
+            <div style={{ fontWeight: 600, fontSize: '12px' }}>{c.pacingPercent.toFixed(2)}%</div>
+            <div style={{ fontSize: '12px', color: '#6b7280' }}>({formatNumber(c.pacingDelivered)} / {formatNumber(c.pacingTarget)})</div>
+          </>
+        ) : (
+          <div style={{ fontSize: '12px', color: '#6b7280' }}>--</div>
+        )}
       </div>
 
       {/* Delivered Impression */}
       <div style={{ textAlign: 'right', fontSize: '12px', paddingTop: '8px', paddingBottom: '8px' }}>{formatNumber(c.deliveredImpressions)}</div>
+
+      {/* Delivered Spend */}
+      <div style={{ textAlign: 'right', fontSize: '12px', paddingTop: '8px', paddingBottom: '8px' }}>{formatCurrency(c.deliveredSpend)}</div>
+
+      {/* Remaining Impression */}
+      <div style={{ textAlign: 'right', fontSize: '12px', paddingTop: '8px', paddingBottom: '8px' }}>{formatNumber(c.remainingImpression)}</div>
+
+      {/* Remaining Budget */}
+      <div style={{ textAlign: 'right', fontSize: '12px', paddingTop: '8px', paddingBottom: '8px', paddingRight: '16px' }}>{formatCurrency(c.remainingBudget)}</div>
     </div>
   );
 }

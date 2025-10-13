@@ -21,19 +21,24 @@ function convertToCampaignSummary(saved: SavedCampaign): CampaignSummary {
     return ch;
   });
 
+  const totalBudget = saved.budget.totalBudget || 0;
+
   return {
     id: saved.id,
     name: saved.general.campaignName || 'Untitled Campaign',
-    status: 'On Target' as const,
-    sparkline: Array.from({ length: 30 }, () => 50),
+    status: 'Not Started' as const,
+    sparkline: Array.from({ length: 24 }, () => 0),
     channels: channels.length > 0 ? channels : ['Linear TV'],
     progressPercent: 0,
     progressDelivered: 0,
-    progressGoal: saved.budget.totalBudget || 0,
-    pacingPercent: 0,
+    progressGoal: totalBudget,
+    pacingPercent: null,
     pacingDelivered: 0,
     pacingTarget: 0,
-    deliveredImpressions: 0
+    deliveredImpressions: 0,
+    deliveredSpend: 0,
+    remainingImpression: 0,
+    remainingBudget: totalBudget
   };
 }
 

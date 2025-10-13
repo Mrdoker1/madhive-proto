@@ -16,16 +16,17 @@ interface ProgramSelection {
   };
 }
 
-// Dayparts definition
+// Dayparts definition with colors
+// Colors follow the natural progression of the day to avoid confusion
 const daypartDefinitions = [
-  { name: 'Late Fringe', color: '#7CB342', hours: [0, 1] },
-  { name: 'Overnight', color: '#FFD54F', hours: [2, 3, 4, 5] },
-  { name: 'Early Morning', color: '#81C784', hours: [6, 7, 8, 9] },
-  { name: 'Daytime', color: '#EF5350', hours: [10, 11, 12, 13, 14, 15] },
-  { name: 'Early Fringe', color: '#66BB6A', hours: [16, 17, 18] },
-  { name: 'Prime Access', color: '#9575CD', hours: [19] },
-  { name: 'Prime Time', color: '#B39DDB', hours: [20, 21, 22] },
-  { name: 'Late News', color: '#7CB342', hours: [23] }
+  { name: 'Late Fringe', color: '#5C6BC0', hours: [0, 1] },        // Indigo - late night
+  { name: 'Overnight', color: '#3F51B5', hours: [2, 3, 4, 5] },    // Deep blue - night
+  { name: 'Early Morning', color: '#FFB74D', hours: [6, 7, 8, 9] }, // Warm orange - sunrise
+  { name: 'Daytime', color: '#4FC3F7', hours: [10, 11, 12, 13, 14, 15] }, // Sky blue - daytime
+  { name: 'Early Fringe', color: '#FFD54F', hours: [16, 17, 18] }, // Golden yellow - afternoon
+  { name: 'Prime Access', color: '#9575CD', hours: [19] },         // Purple - prime start
+  { name: 'Prime Time', color: '#7E57C2', hours: [20, 21, 22] },   // Deeper purple - prime
+  { name: 'Late News', color: '#5C6BC0', hours: [23] }             // Indigo - late night
 ];
 
 const ProposalSection = () => {
@@ -153,6 +154,7 @@ const ProposalSection = () => {
   
   const [programSelections, setProgramSelections] = useState<ProgramSelection>({});
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedDaypartFilter, setSelectedDaypartFilter] = useState<string | null>(null);
   
   // Извлекаем выбранные дни недели из dayparts
   const selectedDaysOfWeek = useMemo(() => {
@@ -385,6 +387,20 @@ const ProposalSection = () => {
   const formatCurrency = (num: number) => `$${num.toLocaleString('en-US')}`;
   const formatCPM = (num: number) => `$${num.toFixed(2)}`;
 
+  // Функция для получения первой буквы дня недели
+  const getDayLetter = (day: string): string => {
+    const dayMap: Record<string, string> = {
+      'Mon': 'M',
+      'Tue': 'T',
+      'Wed': 'W',
+      'Thu': 'T',
+      'Fri': 'F',
+      'Sat': 'S',
+      'Sun': 'S'
+    };
+    return dayMap[day] || day.charAt(0);
+  };
+
   // Рендер таблицы программ для станции
   const renderProgramsTable = (stationId: string, allocatedBudget: number) => {
     const programs = stationPrograms[stationId] || [];
@@ -394,10 +410,12 @@ const ProposalSection = () => {
     const totals = calculateStationTotals(stationId);
     const budgetExceeded = checkBudgetExceeded(stationId, allocatedBudget);
 
-    // Фильтрация по поиску
-    const filteredPrograms = programs.filter(program =>
-      program.name.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    // Фильтрация по поиску и daypart
+    const filteredPrograms = programs.filter(program => {
+      const matchesSearch = program.name.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesDaypart = !selectedDaypartFilter || program.daypart === selectedDaypartFilter;
+      return matchesSearch && matchesDaypart;
+    });
 
     return (
       <div>
@@ -422,6 +440,9 @@ const ProposalSection = () => {
                 <Text size="xs" fw={500}>Program Name</Text>
               </Table.Th>
               <Table.Th>
+                <Text size="xs" fw={500}>Daypart</Text>
+              </Table.Th>
+              <Table.Th>
                 <Text size="xs" fw={500}>Air Time</Text>
               </Table.Th>
               <Table.Th>
@@ -432,9 +453,6 @@ const ProposalSection = () => {
               </Table.Th>
               <Table.Th>
                 <Text size="xs" fw={500}>Days of Week</Text>
-              </Table.Th>
-              <Table.Th>
-                <Text size="xs" fw={500}>Daypart</Text>
               </Table.Th>
               <Table.Th>
                 <Text size="xs" fw={500}>Rate</Text>
@@ -452,53 +470,85 @@ const ProposalSection = () => {
               <Table.Tr>
                 <Table.Td colSpan={10} style={{ textAlign: 'center', padding: '20px' }}>
                   <Text c="dimmed" size="xs">
-                    {searchQuery ? 'No programs found' : 'No programs available'}
+                    {searchQuery || selectedDaypartFilter ? 'No programs found' : 'No programs available'}
                   </Text>
                 </Table.Td>
               </Table.Tr>
             ) : (
-              filteredPrograms.map((program) => (
-                <Table.Tr key={program.id}>
-                  <Table.Td>
-                    <Checkbox
-                      checked={selections[program.id] || false}
-                      onChange={() => toggleProgram(stationId, program.id)}
-                      color="var(--primary-color)"
-                    />
-                  </Table.Td>
-                  <Table.Td>
-                    <Text size="xs">{program.name}</Text>
-                  </Table.Td>
-                  <Table.Td>
-                    <Text size="xs">{program.airTime}</Text>
-                  </Table.Td>
-                  <Table.Td>
-                    <Text size="xs">{program.airStartDate}</Text>
-                  </Table.Td>
-                  <Table.Td>
-                    <Text size="xs">{program.airEndDate}</Text>
-                  </Table.Td>
-                  <Table.Td>
-                    <Group gap={4}>
-                      {program.daysOfWeek.map(day => (
-                        <Badge key={day} size="xs" variant="light" color="var(--primary-color)">{day}</Badge>
-                      ))}
-                    </Group>
-                  </Table.Td>
-                  <Table.Td>
-                    <Text size="xs">{program.daypart}</Text>
-                  </Table.Td>
-                  <Table.Td>
-                    <Text size="xs">{formatCurrency(program.rate)}</Text>
-                  </Table.Td>
-                  <Table.Td>
-                    <Text size="xs">{formatNumber(program.impressions)}</Text>
-                  </Table.Td>
-                  <Table.Td>
-                    <Text size="xs">{formatCPM(program.cpm)}</Text>
-                  </Table.Td>
-                </Table.Tr>
-              ))
+              filteredPrograms.map((program) => {
+                const daypartInfo = daypartDefinitions.find(dp => dp.name === program.daypart);
+                
+                return (
+                  <Table.Tr key={program.id}>
+                    <Table.Td>
+                      <Checkbox
+                        checked={selections[program.id] || false}
+                        onChange={() => toggleProgram(stationId, program.id)}
+                        color="var(--primary-color)"
+                      />
+                    </Table.Td>
+                    <Table.Td>
+                      <Text size="xs">{program.name}</Text>
+                    </Table.Td>
+                    <Table.Td>
+                      <Group gap={6} wrap="nowrap">
+                        <div
+                          style={{
+                            width: '8px',
+                            height: '8px',
+                            backgroundColor: daypartInfo?.color || '#999',
+                            borderRadius: '2px',
+                            flexShrink: 0
+                          }}
+                        />
+                        <Text size="xs">{program.daypart}</Text>
+                      </Group>
+                    </Table.Td>
+                    <Table.Td>
+                      <Text size="xs">{program.airTime}</Text>
+                    </Table.Td>
+                    <Table.Td>
+                      <Text size="xs">{program.airStartDate}</Text>
+                    </Table.Td>
+                    <Table.Td>
+                      <Text size="xs">{program.airEndDate}</Text>
+                    </Table.Td>
+                    <Table.Td>
+                      <Group gap={4}>
+                        {program.daysOfWeek.map((day, index) => (
+                          <div
+                            key={`${day}-${index}`}
+                            style={{
+                              width: '20px',
+                              height: '20px',
+                              borderRadius: '50%',
+                              backgroundColor: '#291036',
+                              color: 'white',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              fontSize: '10px',
+                              fontWeight: 600,
+                              flexShrink: 0
+                            }}
+                          >
+                            {getDayLetter(day)}
+                          </div>
+                        ))}
+                      </Group>
+                    </Table.Td>
+                    <Table.Td>
+                      <Text size="xs">{formatCurrency(program.rate)}</Text>
+                    </Table.Td>
+                    <Table.Td>
+                      <Text size="xs">{formatNumber(program.impressions)}</Text>
+                    </Table.Td>
+                    <Table.Td>
+                      <Text size="xs">{formatCPM(program.cpm)}</Text>
+                    </Table.Td>
+                  </Table.Tr>
+                );
+              })
             )}
           </Table.Tbody>
         </Table>
@@ -633,6 +683,23 @@ const ProposalSection = () => {
               }
             }}
           />
+          <Select
+            placeholder="All Dayparts"
+            value={selectedDaypartFilter}
+            onChange={(value) => setSelectedDaypartFilter(value)}
+            data={daypartDefinitions.map(dp => ({
+              value: dp.name,
+              label: dp.name
+            }))}
+            w={200}
+            size="sm"
+            clearable
+            styles={{
+              input: {
+                fontSize: '12px'
+              }
+            }}
+          />
           <Menu shadow="md" width={300} closeOnItemClick={false}>
             <Menu.Target>
               <Button
@@ -736,7 +803,35 @@ const ProposalSection = () => {
         }}>
           Select markets using &quot;Add market&quot; button to display programs
         </div>
+      ) : selectedMarketsWithStations.length >= 6 ? (
+        // For 6+ markets: use dropdown selector for better UX
+        <div>
+          <Select
+            value={activeMarketTab}
+            onChange={(value) => setActiveMarketTab(value)}
+            data={selectedMarketsWithStations.map((market) => ({
+              value: market.id,
+              label: `${market.name} (${market.stations.length} stations)`
+            }))}
+            placeholder="Select market"
+            size="sm"
+            mb="md"
+            styles={{
+              input: {
+                fontWeight: 500
+              }
+            }}
+          />
+          {selectedMarketsWithStations.map((market) => (
+            activeMarketTab === market.id && (
+              <div key={market.id}>
+                {renderStationsAccordions(market.id)}
+              </div>
+            )
+          ))}
+        </div>
       ) : (
+        // For less than 6 markets: use tabs
         <Tabs value={activeMarketTab} onChange={setActiveMarketTab} color="var(--primary-color)">
           <Tabs.List>
             {selectedMarketsWithStations.map((market) => (

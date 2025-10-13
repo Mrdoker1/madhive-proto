@@ -8,15 +8,16 @@ interface DaypartsState {
 }
 
 // Dayparts definition with colors
+// Colors follow the natural progression of the day to avoid confusion
 const daypartDefinitions = [
-  { name: 'Late Fringe', color: '#7CB342', hours: [0, 1] },
-  { name: 'Overnight', color: '#FFD54F', hours: [2, 3, 4, 5] },
-  { name: 'Early Morning', color: '#81C784', hours: [6, 7, 8, 9] },
-  { name: 'Daytime', color: '#EF5350', hours: [10, 11, 12, 13, 14, 15] },
-  { name: 'Early Fringe', color: '#66BB6A', hours: [16, 17, 18] },
-  { name: 'Prime Access', color: '#9575CD', hours: [19] },
-  { name: 'Prime Time', color: '#B39DDB', hours: [20, 21, 22] },
-  { name: 'Late News', color: '#7CB342', hours: [23] }
+  { name: 'Late Fringe', color: '#5C6BC0', hours: [0, 1] },        // Indigo - late night
+  { name: 'Overnight', color: '#3F51B5', hours: [2, 3, 4, 5] },    // Deep blue - night
+  { name: 'Early Morning', color: '#FFB74D', hours: [6, 7, 8, 9] }, // Warm orange - sunrise
+  { name: 'Daytime', color: '#4FC3F7', hours: [10, 11, 12, 13, 14, 15] }, // Sky blue - daytime
+  { name: 'Early Fringe', color: '#FFD54F', hours: [16, 17, 18] }, // Golden yellow - afternoon
+  { name: 'Prime Access', color: '#9575CD', hours: [19] },         // Purple - prime start
+  { name: 'Prime Time', color: '#7E57C2', hours: [20, 21, 22] },   // Deeper purple - prime
+  { name: 'Late News', color: '#5C6BC0', hours: [23] }             // Indigo - late night
 ];
 
 // Get daypart info for a specific hour

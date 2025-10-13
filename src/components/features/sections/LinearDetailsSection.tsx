@@ -31,7 +31,7 @@ const LinearDetailsSection = () => {
     <div>
       <MultiSelect
         label="Broadcasters"
-        placeholder="Select channels"
+        placeholder="Select Broadcasters"
         data={broadcastersData.map(broadcaster => broadcaster.name)}
         value={linearData.broadcasters}
         onChange={handleBroadcastersChange}
