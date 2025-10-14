@@ -78,6 +78,7 @@ export interface CampaignDaypartsData {
 
 export interface CampaignChannelsData {
   selectedChannels: string[];
+  budgetAllocation?: Record<string, number>; // Распределение бюджета по каналам
 }
 
 export interface SavedCampaign {

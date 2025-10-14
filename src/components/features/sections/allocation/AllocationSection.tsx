@@ -103,10 +103,13 @@ export const AllocationSection: React.FC = () => {
       
       setChannelData(newChannelData);
       setIsLoading(loadingStates);
+      
+      // Сохраняем распределение бюджета в Redux
+      dispatch(updateChannelsData({ budgetAllocation }));
     };
 
     initializeChannelData();
-  }, [selectedChannels, totalBudget]);
+  }, [selectedChannels, totalBudget, dispatch]);
 
   const points = Object.values(channelData);
   
@@ -168,6 +171,9 @@ export const AllocationSection: React.FC = () => {
       
       setChannelData(finalData);
       
+      // Сохраняем распределение бюджета в Redux
+      dispatch(updateChannelsData({ budgetAllocation: newBudgets }));
+      
     } catch (error) {
       console.error('Failed to fetch metrics:', error);
     } finally {
@@ -178,7 +184,7 @@ export const AllocationSection: React.FC = () => {
       });
       setIsLoading(prev => ({ ...prev, ...loadingClearUpdates }));
     }
-  }, [totalBudget, channelData]);
+  }, [totalBudget, channelData, dispatch]);
 
   // Обработчик изменения бюджета с умным перераспределением
   const handleBudgetChange = async (channelId: string, newBudget: number) => {

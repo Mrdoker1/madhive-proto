@@ -3,6 +3,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Text, Card, Group } from '@mantine/core';
 import Image from 'next/image';
+import { useAppSelector } from '@/hooks/useRedux';
 import ChannelPills, { ChannelPill } from '@/components/ui/ChannelPills';
 
 // Цвета каналов из allocation
@@ -30,6 +31,10 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({
 }) => {
   const [activeChannel, setActiveChannel] = useState<ChannelType>('total');
   const [audienceSize, setAudienceSize] = useState<'Small' | 'Good' | 'Strong'>('Strong');
+  
+  // Получаем распределение бюджета и total budget из Redux
+  const budgetAllocation = useAppSelector((state) => state.campaign.channels.budgetAllocation);
+  const totalBudget = useAppSelector((state) => state.campaign.budget.totalBudget) || 390250;
 
   const allChannelPills: ChannelPill[] = [
     { id: 'total', label: 'Total' },
@@ -75,16 +80,39 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({
     ? allLegendChannels.filter(channel => selectedChannels.includes(channel.id))
     : allLegendChannels;
 
-  // Процентное соотношение каналов
-  const channelPercentages: Record<string, number> = {
-    linear: 50,
-    ctv: 25,
-    preroll: 10,
-    audio: 15,
-    display: 10,
-    social: 10,
-    search: 5,
-    email: 5
+  // Маппинг ID каналов (preroll в UI = display в store)
+  const getStorageChannelId = (uiChannelId: string): string => {
+    return uiChannelId === 'preroll' ? 'display' : uiChannelId;
+  };
+
+  // Вычисляем процент бюджета для канала
+  const getChannelBudgetPercent = (channelId: string): number => {
+    if (!budgetAllocation || totalBudget === 0) return 0;
+    const storageId = getStorageChannelId(channelId);
+    const channelBudget = budgetAllocation[storageId] || 0;
+    return (channelBudget / totalBudget) * 100;
+  };
+
+  // Вычисляем распределение для выбранных каналов в режиме Total
+  const getTotalProgressBars = () => {
+    if (selectedChannels.length === 0 || !budgetAllocation) {
+      return <div style={{ width: '100%', backgroundColor: '#E5E5E5' }} />;
+    }
+
+    // Используем реальное распределение бюджета из Redux
+    return selectedChannels.map(channelId => {
+      const percentOfTotal = getChannelBudgetPercent(channelId);
+      
+      return (
+        <div 
+          key={channelId}
+          style={{ 
+            width: `${percentOfTotal}%`, 
+            backgroundColor: CHANNEL_COLORS[channelId] || '#E5E5E5' 
+          }} 
+        />
+      );
+    });
   };
 
   // Функция для определения цвета легенды
@@ -160,12 +188,26 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({
             padding: '8px 16px',
             marginBottom: '8px'
           }}>
-            <Text size="xl" fw={600} ta="center">$ 390,250</Text>
+            <Text size="xl" fw={600} ta="center">
+              {activeChannel === 'total' ? (
+                `$ ${totalBudget.toLocaleString('en-US')}`
+              ) : budgetAllocation && budgetAllocation[getStorageChannelId(activeChannel)] ? (
+                `$ ${budgetAllocation[getStorageChannelId(activeChannel)].toLocaleString('en-US')}`
+              ) : (
+                '$ 0'
+              )}
+            </Text>
           </div>
           
           {activeChannel === 'total' && selectedChannels.length > 0 && (
             <Text size="xs" c="dimmed" ta="right" mb="md">
-              of $ 390,250.00 in {selectedChannels.length} Channel{selectedChannels.length !== 1 ? 's' : ''}
+              of $ {totalBudget.toLocaleString('en-US')} in {selectedChannels.length} Channel{selectedChannels.length !== 1 ? 's' : ''}
+            </Text>
+          )}
+          
+          {activeChannel !== 'total' && budgetAllocation && budgetAllocation[getStorageChannelId(activeChannel)] && (
+            <Text size="xs" c="dimmed" ta="right" mb="md">
+              {getChannelBudgetPercent(activeChannel).toFixed(1)}% of total budget
             </Text>
           )}
           
@@ -178,16 +220,17 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({
             marginBottom: '12px'
           }}>
             {activeChannel === 'total' ? (
-              <>
-                <div style={{ width: '40%', backgroundColor: CHANNEL_COLORS.ctv }} />
-                <div style={{ width: '30%', backgroundColor: CHANNEL_COLORS.audio }} />
-                <div style={{ width: '20%', backgroundColor: CHANNEL_COLORS.preroll }} />
-                <div style={{ width: '10%', backgroundColor: CHANNEL_COLORS.social }} />
-              </>
+              getTotalProgressBars()
             ) : (
               <>
-                <div style={{ width: `${channelPercentages[activeChannel] || 0}%`, backgroundColor: CHANNEL_COLORS[activeChannel] }} />
-                <div style={{ width: `${100 - (channelPercentages[activeChannel] || 0)}%`, backgroundColor: '#E5E5E5' }} />
+                <div style={{ 
+                  width: `${getChannelBudgetPercent(activeChannel)}%`, 
+                  backgroundColor: CHANNEL_COLORS[activeChannel] 
+                }} />
+                <div style={{ 
+                  width: `${100 - getChannelBudgetPercent(activeChannel)}%`, 
+                  backgroundColor: '#E5E5E5' 
+                }} />
               </>
             )}
           </div>
@@ -222,7 +265,7 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({
             padding: '8px 16px',
             marginBottom: '8px'
           }}>
-            <Text size="xl" fw={600} ta="center">889,998,000</Text>
+            <Text size="xl" fw={600} ta="center" c="dimmed">--</Text>
           </div>
           
           {activeChannel === 'total' && selectedChannels.length > 0 && (
@@ -231,7 +274,7 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({
             </Text>
           )}
           
-          {/* Progress Bar */}
+          {/* Progress Bar - пустой для Audience (нет данных) */}
           <div style={{ 
             display: 'flex', 
             height: '8px', 
@@ -239,19 +282,7 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({
             overflow: 'hidden',
             marginBottom: '12px'
           }}>
-            {activeChannel === 'total' ? (
-              <>
-                <div style={{ width: '40%', backgroundColor: CHANNEL_COLORS.ctv }} />
-                <div style={{ width: '30%', backgroundColor: CHANNEL_COLORS.audio }} />
-                <div style={{ width: '20%', backgroundColor: CHANNEL_COLORS.preroll }} />
-                <div style={{ width: '10%', backgroundColor: CHANNEL_COLORS.social }} />
-              </>
-            ) : (
-              <>
-                <div style={{ width: `${channelPercentages[activeChannel] || 0}%`, backgroundColor: CHANNEL_COLORS[activeChannel] }} />
-                <div style={{ width: `${100 - (channelPercentages[activeChannel] || 0)}%`, backgroundColor: '#E5E5E5' }} />
-              </>
-            )}
+            <div style={{ width: '100%', backgroundColor: '#E5E5E5' }} />
           </div>
           
           {/* Legend */}
@@ -264,7 +295,7 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({
           }}>
             {visibleLegendChannels.map(channel => (
               <div key={channel.id} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: getLegendColor(channel.id) }} />
+                <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#CCCCCC' }} />
                 <span>{channel.label}</span>
               </div>
             ))}
@@ -332,7 +363,7 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({
             padding: '8px 16px',
             marginBottom: '8px'
           }}>
-            <Text size="xl" fw={600} ta="center">--</Text>
+            <Text size="xl" fw={600} ta="center" c="dimmed">--</Text>
           </div>
           
           {activeChannel === 'total' && selectedChannels.length > 0 && (
@@ -349,17 +380,10 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({
             overflow: 'hidden',
             marginBottom: '12px'
           }}>
-            {activeChannel === 'total' ? (
-              <div style={{ width: '100%', height: '100%', backgroundColor: '#E5E5E5' }} />
-            ) : (
-              <>
-                <div style={{ width: `${channelPercentages[activeChannel] || 0}%`, backgroundColor: CHANNEL_COLORS[activeChannel], opacity: 0.3 }} />
-                <div style={{ width: `${100 - (channelPercentages[activeChannel] || 0)}%`, backgroundColor: '#E5E5E5' }} />
-              </>
-            )}
+            <div style={{ width: '100%', height: '100%', backgroundColor: '#E5E5E5' }} />
           </div>
           
-          {/* Legend */}
+          {/* Legend - серая для Market (нет данных) */}
           <div style={{ 
             display: 'grid',
             gridTemplateColumns: `repeat(${Math.min(visibleLegendChannels.length, 3)}, 1fr)`,
@@ -369,7 +393,7 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({
           }}>
             {visibleLegendChannels.map(channel => (
               <div key={channel.id} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: getLegendColor(channel.id) }} />
+                <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#CCCCCC' }} />
                 <span>{channel.label}</span>
               </div>
             ))}
