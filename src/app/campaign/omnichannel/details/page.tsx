@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import PageLayout from "@/components/layout/PageLayout";
 import NavigationAnchors, { AnchorItem } from "@/components/ui/NavigationAnchors";
 import SectionWrapper from "@/components/ui/SectionWrapper";
@@ -14,12 +14,39 @@ import GeoSection from "@/components/features/sections/GeoSection";
 import DaypartsSection from "@/components/features/sections/DaypartsSection";
 import OmnichannelRightSidebar from "@/components/layout/OmnichannelRightSidebar";
 import { Text } from '@mantine/core';
+import { useAppSelector } from '@/hooks/useRedux';
 
 type ChannelType = 'preroll' | 'ctv' | 'audio' | 'social' | 'search' | 'email';
 
+// Маппинг между ID каналов в SelectChannelsSection и ChannelType
+const CHANNEL_ID_MAP: Record<string, ChannelType> = {
+  'display': 'preroll', // Display = Pre Roll
+  'ctv': 'ctv',
+  'audio': 'audio',
+  'social': 'social',
+  'search': 'search',
+  'email': 'email'
+};
+
 export default function OmnichannelDetailsPage() {
   const router = useRouter();
-  const [activeChannel, setActiveChannel] = useState<ChannelType>('ctv');
+  const selectedChannelsFromRedux = useAppSelector((state) => state.campaign.channels.selectedChannels);
+  
+  // Фильтруем выбранные каналы (исключаем linear_tv, он не показывается на этой странице)
+  const availableChannels = useMemo(() => {
+    return selectedChannelsFromRedux
+      .filter(channelId => channelId !== 'linear_tv' && CHANNEL_ID_MAP[channelId])
+      .map(channelId => CHANNEL_ID_MAP[channelId]);
+  }, [selectedChannelsFromRedux]);
+  
+  // Устанавливаем активный канал - первый из доступных
+  const [activeChannel, setActiveChannel] = useState<ChannelType | null>(null);
+  
+  useEffect(() => {
+    if (availableChannels.length > 0 && !activeChannel) {
+      setActiveChannel(availableChannels[0]);
+    }
+  }, [availableChannels, activeChannel]);
 
   // Бредкрамбсы для страницы Channel Details
   const breadcrumbSteps: BreadcrumbStep[] = [
@@ -51,8 +78,8 @@ export default function OmnichannelDetailsPage() {
     }
   ];
 
-  // Pills для переключения каналов (все из Select Channels кроме Linear TV)
-  const channelPills: ChannelPill[] = [
+  // Pills для переключения каналов (только выбранные пользователем)
+  const allChannelPills: ChannelPill[] = [
     { id: 'ctv', label: 'CTV' },
     { id: 'preroll', label: 'Pre Roll' },
     { id: 'audio', label: 'Audio' },
@@ -60,6 +87,11 @@ export default function OmnichannelDetailsPage() {
     { id: 'search', label: 'Search' },
     { id: 'email', label: 'Email' }
   ];
+  
+  // Фильтруем pills только для выбранных каналов
+  const channelPills = useMemo(() => {
+    return allChannelPills.filter(pill => availableChannels.includes(pill.id as ChannelType));
+  }, [availableChannels]);
 
   // Якоря для навигации - одинаковые для всех каналов
   const getAnchorItems = (): AnchorItem[] => {
@@ -84,6 +116,23 @@ export default function OmnichannelDetailsPage() {
 
   // Рендер контента в зависимости от канала
   const renderChannelContent = () => {
+    // Если нет выбранных каналов, показываем сообщение
+    if (availableChannels.length === 0) {
+      return (
+        <div style={{ 
+          textAlign: 'center', 
+          padding: '48px 24px',
+          backgroundColor: '#F3F2EB',
+          borderRadius: '8px'
+        }}>
+          <Text size="lg" fw={500} mb="md">Каналы не выбраны</Text>
+          <Text size="sm" c="dimmed" mb="lg">
+            Пожалуйста, вернитесь на предыдущую страницу и выберите хотя бы один канал.
+          </Text>
+        </div>
+      );
+    }
+
     // Общий контент для Pre Roll, CTV, Audio, Email
     const commonContent = (
       <>
@@ -157,15 +206,17 @@ export default function OmnichannelDetailsPage() {
     <>
       <PageLayout 
         breadcrumbs={breadcrumbSteps} 
-        title="Channel Details (4)"
+        title={`Channel Details (${availableChannels.length})`}
         showRightSidebar={true}
-        rightSidebarContent={<OmnichannelRightSidebar />}
+        rightSidebarContent={<OmnichannelRightSidebar selectedChannels={availableChannels} />}
         headerActions={
-          <ChannelPills
-            channels={channelPills}
-            activeChannel={activeChannel}
-            onChange={(channelId) => setActiveChannel(channelId as ChannelType)}
-          />
+          channelPills.length > 0 ? (
+            <ChannelPills
+              channels={channelPills}
+              activeChannel={activeChannel || channelPills[0]?.id as ChannelType}
+              onChange={(channelId) => setActiveChannel(channelId as ChannelType)}
+            />
+          ) : null
         }
         footerContent={
           <NextButton 

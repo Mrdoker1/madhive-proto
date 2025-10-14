@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Text, Card, Group } from '@mantine/core';
 import Image from 'next/image';
 import ChannelPills, { ChannelPill } from '@/components/ui/ChannelPills';
@@ -22,13 +22,17 @@ type ChannelType = 'total' | 'linear' | 'ctv' | 'preroll' | 'audio' | 'social' |
 
 interface OmnichannelRightSidebarProps {
   className?: string;
+  selectedChannels?: string[]; // Массив выбранных каналов (preroll, ctv, audio, etc.)
 }
 
-const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({ className = '' }) => {
+const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({ 
+  className = '',
+  selectedChannels = [] 
+}) => {
   const [activeChannel, setActiveChannel] = useState<ChannelType>('total');
   const [audienceSize, setAudienceSize] = useState<'Small' | 'Good' | 'Strong'>('Strong');
 
-  const channelPills: ChannelPill[] = [
+  const allChannelPills: ChannelPill[] = [
     { id: 'total', label: 'Total' },
     { id: 'linear', label: 'Linear' },
     { id: 'ctv', label: 'CTV' },
@@ -38,6 +42,25 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({ class
     { id: 'search', label: 'Search' },
     { id: 'email', label: 'Email' }
   ];
+  
+  // Фильтруем pills: Total всегда показываем + выбранные каналы
+  const channelPills = useMemo(() => {
+    if (selectedChannels.length === 0) {
+      return allChannelPills; // Если ничего не выбрано, показываем все
+    }
+    
+    return allChannelPills.filter(pill => 
+      pill.id === 'total' || selectedChannels.includes(pill.id)
+    );
+  }, [selectedChannels]);
+  
+  // Если активный канал не в списке доступных, переключаемся на Total
+  useEffect(() => {
+    const isActiveChannelAvailable = channelPills.some(pill => pill.id === activeChannel);
+    if (!isActiveChannelAvailable) {
+      setActiveChannel('total');
+    }
+  }, [channelPills, activeChannel]);
 
   // Процентное соотношение каналов
   const channelPercentages: Record<string, number> = {

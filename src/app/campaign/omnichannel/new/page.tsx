@@ -1,8 +1,9 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
-import { updateBudgetData } from '@/store/slices/campaignSlice';
+import { updateBudgetData, updateGeneralData, updateChannelsData } from '@/store/slices/campaignSlice';
 import PageLayout from "@/components/layout/PageLayout";
 import NavigationAnchors, { AnchorItem } from "@/components/ui/NavigationAnchors";
 import SectionWrapper from "@/components/ui/SectionWrapper";
@@ -19,6 +20,12 @@ export default function OmnichannelNewCampaignPage() {
   
   // Получаем данные из глобального стейта
   const totalBudget = useAppSelector((state) => state.campaign.budget.totalBudget);
+  
+  // При загрузке страницы устанавливаем тип кампании как Omnichannel и сбрасываем выбранные каналы
+  useEffect(() => {
+    dispatch(updateGeneralData({ campaignType: 'Omnichannel' }));
+    dispatch(updateChannelsData({ selectedChannels: [] }));
+  }, [dispatch]);
   
   // Бредкрамбсы для страницы Omnichannel Campaign
   const breadcrumbSteps: BreadcrumbStep[] = [
