@@ -100,10 +100,10 @@ export const redistributeBudgetSmart = (
 export const debugSmartRedistribution = (totalBudget: number = CHART_CONFIG.DEFAULT_BUDGET) => {
   console.log('\n=== Smart Budget Redistribution Test ===');
   
-  // Пример: Linear TV, Email, Social
-  const testChannels = ['linear_tv', 'email', 'social'];
+  // Пример: CTV, Email, Social
+  const testChannels = ['ctv', 'email', 'social'];
   const initialBudgets: Record<string, number> = {
-    'linear_tv': totalBudget / 3,
+    'ctv': totalBudget / 3,
     'email': totalBudget / 3, 
     'social': totalBudget / 3
   };
@@ -114,11 +114,11 @@ export const debugSmartRedistribution = (totalBudget: number = CHART_CONFIG.DEFA
     console.log(`  ${id}: $${Math.round(initialBudgets[id]/1000)}K (coeff: ${coeff})`);
   });
   
-  // Увеличиваем бюджет Linear TV до 60% от общего
-  const newLinearTvBudget = totalBudget * 0.6;
-  const redistributed = redistributeBudgetSmart(initialBudgets, 'linear_tv', newLinearTvBudget, totalBudget);
+  // Увеличиваем бюджет CTV до 60% от общего
+  const newCtvBudget = totalBudget * 0.6;
+  const redistributed = redistributeBudgetSmart(initialBudgets, 'ctv', newCtvBudget, totalBudget);
   
-  console.log(`\nAfter increasing Linear TV to $${Math.round(newLinearTvBudget/1000)}K:`);
+  console.log(`\nAfter increasing CTV to $${Math.round(newCtvBudget/1000)}K:`);
   Object.entries(redistributed).forEach(([id, budget]) => {
     const coeff = CHANNEL_REACH_COEFFICIENTS[id];
     const change = budget - initialBudgets[id];

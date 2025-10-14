@@ -12,13 +12,12 @@ export const channelNames: Record<string, string> = Object.fromEntries(
 
 // Коэффициенты эффективности каналов (влияют на максимальный reach канала)
 export const CHANNEL_REACH_COEFFICIENTS: Record<string, number> = {
-  'linear_tv': 0.025,    // Самый эффективный канал (достигает 100% от MAX_REACH)
-  'ctv': 0.022,         // Высокая эффективность (достигает ~95% от MAX_REACH)
+  'ctv': 0.025,         // Самый эффективный канал (достигает 100% от MAX_REACH)
+  'display': 0.022,     // Высокая эффективность (достигает ~95% от MAX_REACH)
   'search': 0.020,      // Хорошая эффективность (достигает ~90% от MAX_REACH)
-  'display': 0.018,      // Средняя эффективность (достигает ~85% от MAX_REACH)
-  'audio': 0.015,       // Ниже среднего (достигает ~80% от MAX_REACH)
-  'social': 0.012,      // Низкая эффективность (достигает ~75% от MAX_REACH)
-  'email': 0.008        // Самая низкая эффективность (достигает ~70% от MAX_REACH)
+  'audio': 0.018,       // Средняя эффективность (достигает ~85% от MAX_REACH)
+  'social': 0.015,      // Ниже среднего (достигает ~80% от MAX_REACH)
+  'email': 0.012        // Низкая эффективность (достигает ~75% от MAX_REACH)
 };
 
 export const CHART_CONFIG = {
