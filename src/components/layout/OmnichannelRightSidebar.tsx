@@ -8,7 +8,6 @@ import ChannelPills, { ChannelPill } from '@/components/ui/ChannelPills';
 // Цвета каналов из allocation
 const CHANNEL_COLORS: Record<string, string> = {
   total: '#000000',
-  linear: '#6633CC',
   ctv: '#FF0099', 
   preroll: '#10B981', // Зеленый для Preroll
   audio: '#33CCCC',

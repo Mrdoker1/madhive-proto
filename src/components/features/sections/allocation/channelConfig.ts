@@ -58,7 +58,7 @@ export const CHANNEL_CONFIGS: Record<string, ChannelConfig> = {
   'social': {
     id: 'social',
     name: 'Social',
-    color: '#EF4444',          // Изменен цвет Social чтобы не конфликтовать с Linear TV
+    color: '#8B5CF6',          // Purple color for Social media
     maxReach: 60,              // 60% от общего reach - высокий потенциал
     efficiency: 2.0,           // Снижен для лучшего масштабирования
     budgetWeight: 15,          // 15% budget weight

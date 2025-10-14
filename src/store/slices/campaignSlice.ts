@@ -164,7 +164,7 @@ const initialState: CampaignState = {
     selectedSlots: {}
   },
   channels: {
-    selectedChannels: ['linear_tv']
+    selectedChannels: []
   },
   estimations: {
     budgetEstimation: 0,
