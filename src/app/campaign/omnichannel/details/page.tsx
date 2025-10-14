@@ -125,9 +125,9 @@ export default function OmnichannelDetailsPage() {
           backgroundColor: '#F3F2EB',
           borderRadius: '8px'
         }}>
-          <Text size="lg" fw={500} mb="md">Каналы не выбраны</Text>
+          <Text size="lg" fw={500} mb="md">No Channels Selected</Text>
           <Text size="sm" c="dimmed" mb="lg">
-            Пожалуйста, вернитесь на предыдущую страницу и выберите хотя бы один канал.
+            Please go back to the previous page and select at least one channel.
           </Text>
         </div>
       );
