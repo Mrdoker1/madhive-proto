@@ -2,6 +2,7 @@
 
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { Text, Group } from '@mantine/core';
+import { AnimatePresence } from 'framer-motion';
 import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
 import { updateChannelsData } from '@/store/slices/campaignSlice';
 import { ChannelPoint, ChannelAllocation, ChartDimensions } from './types';
@@ -397,26 +398,28 @@ export const AllocationSection: React.FC = () => {
               totalBudget={totalBudget}
             />
             
-            <ChartLines 
-              points={points}
-              chartWidth={chartWidth}
-              chartHeight={chartHeight}
-              totalBudget={totalBudget}
-              offsetX={CHART_CONFIG.OFFSET_X}
-              offsetY={CHART_CONFIG.OFFSET_Y}
-            />
-            
-            {/* Draggable points */}
-            {points.map(point => (
-              <DraggablePoint
-                key={`point-${point.id}`}
-                point={point}
+            <AnimatePresence mode="popLayout">
+              <ChartLines 
+                points={points}
                 chartWidth={chartWidth}
                 chartHeight={chartHeight}
                 totalBudget={totalBudget}
-                onPointChange={handlePointChange}
+                offsetX={CHART_CONFIG.OFFSET_X}
+                offsetY={CHART_CONFIG.OFFSET_Y}
               />
-            ))}
+              
+              {/* Draggable points */}
+              {points.map(point => (
+                <DraggablePoint
+                  key={`point-${point.id}`}
+                  point={point}
+                  chartWidth={chartWidth}
+                  chartHeight={chartHeight}
+                  totalBudget={totalBudget}
+                  onPointChange={handlePointChange}
+                />
+              ))}
+            </AnimatePresence>
           </svg>
         </div>
       </div>
@@ -431,26 +434,30 @@ export const AllocationSection: React.FC = () => {
               <Text size="12px" fw={400} c="#1F2937" mb="20px">
                 Budget allocation by channel:
               </Text>
-              {allChannels.map(channel => (
-                <ChannelSlider 
-                  key={channel.id} 
-                  allocation={channel} 
-                  onBudgetChange={handleBudgetChange}
-                  onRemove={handleRemoveChannel}
-                  isLoading={isLoading[channel.id]}
-                />
-              ))}
+              <AnimatePresence mode="popLayout">
+                {allChannels.map(channel => (
+                  <ChannelSlider 
+                    key={channel.id} 
+                    allocation={channel} 
+                    onBudgetChange={handleBudgetChange}
+                    onRemove={handleRemoveChannel}
+                    isLoading={isLoading[channel.id]}
+                  />
+                ))}
+              </AnimatePresence>
               
               {/* Предложение добавить канал */}
-              {suggestedChannel && (
-                <SuggestedChannelSlider
-                  channelId={suggestedChannel}
-                  channelName={CHANNEL_CONFIGS[suggestedChannel].name}
-                  channelColor={CHANNEL_CONFIGS[suggestedChannel].color}
-                  roiIncrease={Math.floor(Math.random() * 15) + 5} // Случайное значение 5-20%
-                  onAdd={handleAddSuggestedChannel}
-                />
-              )}
+              <AnimatePresence>
+                {suggestedChannel && (
+                  <SuggestedChannelSlider
+                    channelId={suggestedChannel}
+                    channelName={CHANNEL_CONFIGS[suggestedChannel].name}
+                    channelColor={CHANNEL_CONFIGS[suggestedChannel].color}
+                    roiIncrease={Math.floor(Math.random() * 15) + 5} // Случайное значение 5-20%
+                    onAdd={handleAddSuggestedChannel}
+                  />
+                )}
+              </AnimatePresence>
             </div>
           )}
         </div>

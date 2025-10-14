@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { motion } from 'framer-motion';
 import { Text, ActionIcon } from '@mantine/core';
 import { IconPlus } from '@tabler/icons-react';
 import Image from 'next/image';
@@ -25,13 +26,22 @@ export const SuggestedChannelSlider: React.FC<SuggestedChannelSliderProps> = ({
   };
 
   return (
-    <div style={{ 
-      marginTop: '32px',
-      marginBottom: '32px',
-      padding: '24px',
-      border: '2px dashed #D1D5DB',
-      borderRadius: '8px'
-    }}>
+    <motion.div 
+      style={{ 
+        marginTop: '32px',
+        marginBottom: '32px',
+        padding: '24px',
+        border: '2px dashed #D1D5DB',
+        borderRadius: '8px'
+      }}
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.95 }}
+      transition={{
+        duration: 0.4,
+        ease: "easeOut"
+      }}
+    >
       {/* Текст с предложением */}
       <div style={{
         display: 'flex',
@@ -138,7 +148,7 @@ export const SuggestedChannelSlider: React.FC<SuggestedChannelSliderProps> = ({
           <IconPlus size={16} />
         </ActionIcon>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { Text, ActionIcon, TextInput, Tooltip } from '@mantine/core';
 import { IconTrash, IconCurrencyDollar } from '@tabler/icons-react';
 import Image from 'next/image';
@@ -64,13 +65,21 @@ export const ChannelSlider: React.FC<ChannelSliderProps> = ({
       position="top"
       withArrow
     >
-      <div style={{ 
-        marginBottom: '32px',
-        backgroundColor: isLowBudget ? '#FFF5FB' : 'transparent',
-        padding: '8px',
-        borderRadius: '8px',
-        transition: 'background-color 0.2s ease'
-      }}>
+      <motion.div 
+        style={{ 
+          marginBottom: '32px',
+          backgroundColor: isLowBudget ? '#FFF5FB' : 'transparent',
+          padding: '8px',
+          borderRadius: '8px',
+        }}
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, x: -50 }}
+        transition={{ 
+          duration: 0.3,
+          ease: "easeOut"
+        }}
+      >
         {/* Все элементы в одну строку */}
         <div style={{ 
           display: 'flex', 
@@ -156,7 +165,7 @@ export const ChannelSlider: React.FC<ChannelSliderProps> = ({
           <IconTrash size={16} />
         </ActionIcon>
         </div>
-      </div>
+      </motion.div>
     </Tooltip>
   );
 };

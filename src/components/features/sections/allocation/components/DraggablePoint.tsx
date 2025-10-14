@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useCallback, useRef, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { DraggablePointProps } from '../types';
 import { CHART_CONFIG } from '../constants';
 import { calculateChartPosition } from '../utils';
@@ -85,7 +86,7 @@ export const DraggablePoint: React.FC<DraggablePointProps> = ({
   }, [isDragging, handleMouseMove, handleMouseUp]);
   
   return (
-    <circle
+    <motion.circle
       ref={svgRef}
       cx={svgX}
       cy={svgY}
@@ -93,9 +94,23 @@ export const DraggablePoint: React.FC<DraggablePointProps> = ({
       fill={point.color}
       style={{
         cursor: isDragging ? 'grabbing' : 'grab',
-        transition: 'none' // Убрана анимация для мгновенного обновления
       }}
       onMouseDown={handleMouseDown}
+      initial={{ opacity: 0, scale: 0 }}
+      animate={{ 
+        opacity: 1, 
+        scale: isDragging ? 1.3 : 1,
+        cx: svgX,
+        cy: svgY
+      }}
+      exit={{ opacity: 0, scale: 0 }}
+      transition={{
+        type: "spring",
+        stiffness: 300,
+        damping: 20,
+        opacity: { duration: 0.3 },
+        scale: { duration: 0.2 }
+      }}
     />
   );
 };

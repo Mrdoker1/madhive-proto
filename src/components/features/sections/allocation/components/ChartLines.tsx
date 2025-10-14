@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import { ChannelPoint } from '../types';
 import { CHART_CONFIG } from '../constants';
 import { calculateChartPosition } from '../utils';
@@ -26,7 +27,7 @@ export const ChartLines: React.FC<ChartLinesProps> = ({
 
   return (
     <>
-      {points.map(point => {
+      {points.map((point, index) => {
         // Создаем статическую кривую по формуле для каждого канала
         const pathData = createStaticCurvePath(
           point.id,
@@ -37,7 +38,7 @@ export const ChartLines: React.FC<ChartLinesProps> = ({
         );
         
         return (
-          <path
+          <motion.path
             key={`line-${point.id}`}
             d={pathData}
             fill="none"
@@ -45,6 +46,14 @@ export const ChartLines: React.FC<ChartLinesProps> = ({
             strokeWidth="4"
             strokeOpacity="0.8"
             style={{ transform: `translate(${offsetX}px, ${offsetY}px)` }}
+            initial={{ opacity: 0, pathLength: 0 }}
+            animate={{ opacity: 0.8, pathLength: 1 }}
+            exit={{ opacity: 0, pathLength: 0 }}
+            transition={{
+              duration: 0.6,
+              delay: index * 0.1,
+              ease: "easeInOut"
+            }}
           />
         );
       })}
