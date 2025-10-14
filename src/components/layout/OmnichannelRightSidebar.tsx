@@ -60,6 +60,21 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({
     }
   }, [channelPills, activeChannel]);
 
+  // Список всех возможных каналов для легенды
+  const allLegendChannels = [
+    { id: 'ctv', label: 'CTV' },
+    { id: 'preroll', label: 'Preroll' },
+    { id: 'audio', label: 'Audio' },
+    { id: 'social', label: 'Social' },
+    { id: 'search', label: 'Search' },
+    { id: 'email', label: 'Email' }
+  ];
+
+  // Фильтруем легенду только для выбранных каналов
+  const visibleLegendChannels = selectedChannels.length > 0
+    ? allLegendChannels.filter(channel => selectedChannels.includes(channel.id))
+    : allLegendChannels;
+
   // Процентное соотношение каналов
   const channelPercentages: Record<string, number> = {
     linear: 50,
@@ -148,9 +163,9 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({
             <Text size="xl" fw={600} ta="center">$ 390,250</Text>
           </div>
           
-          {activeChannel === 'total' && (
+          {activeChannel === 'total' && selectedChannels.length > 0 && (
             <Text size="xs" c="dimmed" ta="right" mb="md">
-              of $ 390,250.00 in 6 Channels
+              of $ 390,250.00 in {selectedChannels.length} Channel{selectedChannels.length !== 1 ? 's' : ''}
             </Text>
           )}
           
@@ -180,36 +195,18 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({
           {/* Legend */}
           <div style={{ 
             display: 'grid',
-            gridTemplateColumns: 'repeat(3, 1fr)',
+            gridTemplateColumns: `repeat(${Math.min(visibleLegendChannels.length, 3)}, 1fr)`,
             gap: '8px 4px',
             fontSize: '11px',
             color: '#666',
             marginBottom: '16px'
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: getLegendColor('ctv') }} />
-              <span>CTV</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: getLegendColor('preroll') }} />
-              <span>Preroll</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: getLegendColor('audio') }} />
-              <span>Audio</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: getLegendColor('social') }} />
-              <span>Social</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: getLegendColor('search') }} />
-              <span>Search</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: getLegendColor('email') }} />
-              <span>Email</span>
-            </div>
+            {visibleLegendChannels.map(channel => (
+              <div key={channel.id} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: getLegendColor(channel.id) }} />
+                <span>{channel.label}</span>
+              </div>
+            ))}
           </div>
         </div>
 
@@ -228,9 +225,9 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({
             <Text size="xl" fw={600} ta="center">889,998,000</Text>
           </div>
           
-          {activeChannel === 'total' && (
+          {activeChannel === 'total' && selectedChannels.length > 0 && (
             <Text size="xs" c="dimmed" ta="right" mb="md">
-              of -- in 6 Channels
+              of -- in {selectedChannels.length} Channel{selectedChannels.length !== 1 ? 's' : ''}
             </Text>
           )}
           
@@ -260,35 +257,17 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({
           {/* Legend */}
           <div style={{ 
             display: 'grid',
-            gridTemplateColumns: 'repeat(3, 1fr)',
+            gridTemplateColumns: `repeat(${Math.min(visibleLegendChannels.length, 3)}, 1fr)`,
             gap: '8px 4px',
             fontSize: '11px',
             color: '#666'
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: getLegendColor('ctv') }} />
-              <span>CTV</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: getLegendColor('preroll') }} />
-              <span>Preroll</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: getLegendColor('audio') }} />
-              <span>Audio</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: getLegendColor('social') }} />
-              <span>Social</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: getLegendColor('search') }} />
-              <span>Search</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: getLegendColor('email') }} />
-              <span>Email</span>
-            </div>
+            {visibleLegendChannels.map(channel => (
+              <div key={channel.id} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: getLegendColor(channel.id) }} />
+                <span>{channel.label}</span>
+              </div>
+            ))}
           </div>
           
           <Text size="sm" fw={500} mb="xs" mt="lg">Your Audience size is: {audienceSize}</Text>
@@ -356,9 +335,9 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({
             <Text size="xl" fw={600} ta="center">--</Text>
           </div>
           
-          {activeChannel === 'total' && (
+          {activeChannel === 'total' && selectedChannels.length > 0 && (
             <Text size="xs" c="dimmed" ta="right" mb="md">
-              of -- in 6 Channels
+              of -- in {selectedChannels.length} Channel{selectedChannels.length !== 1 ? 's' : ''}
             </Text>
           )}
           
@@ -383,35 +362,17 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({
           {/* Legend */}
           <div style={{ 
             display: 'grid',
-            gridTemplateColumns: 'repeat(3, 1fr)',
+            gridTemplateColumns: `repeat(${Math.min(visibleLegendChannels.length, 3)}, 1fr)`,
             gap: '8px 4px',
             fontSize: '11px',
             color: '#666'
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: getLegendColor('ctv') }} />
-              <span>CTV</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: getLegendColor('preroll') }} />
-              <span>Preroll</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: getLegendColor('audio') }} />
-              <span>Audio</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: getLegendColor('social') }} />
-              <span>Social</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: getLegendColor('search') }} />
-              <span>Search</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: getLegendColor('email') }} />
-              <span>Email</span>
-            </div>
+            {visibleLegendChannels.map(channel => (
+              <div key={channel.id} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: getLegendColor(channel.id) }} />
+                <span>{channel.label}</span>
+              </div>
+            ))}
           </div>
         </div>
 
