@@ -18,7 +18,7 @@ const CHANNEL_COLORS: Record<string, string> = {
   email: '#EF4444'
 };
 
-type ChannelType = 'total' | 'linear' | 'ctv' | 'preroll' | 'audio' | 'social' | 'search' | 'email';
+type ChannelType = 'total' | 'ctv' | 'preroll' | 'audio' | 'social' | 'search' | 'email';
 
 interface OmnichannelRightSidebarProps {
   className?: string;
@@ -34,7 +34,6 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({
 
   const allChannelPills: ChannelPill[] = [
     { id: 'total', label: 'Total' },
-    { id: 'linear', label: 'Linear' },
     { id: 'ctv', label: 'CTV' },
     { id: 'preroll', label: 'Preroll' },
     { id: 'audio', label: 'Audio' },
@@ -152,7 +151,7 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({
           
           {activeChannel === 'total' && (
             <Text size="xs" c="dimmed" ta="right" mb="md">
-              of $ 390,250.00 in 4 Channels
+              of $ 390,250.00 in 6 Channels
             </Text>
           )}
           
@@ -166,10 +165,10 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({
           }}>
             {activeChannel === 'total' ? (
               <>
-                <div style={{ width: '10%', backgroundColor: CHANNEL_COLORS.preroll }} />
-                <div style={{ width: '15%', backgroundColor: CHANNEL_COLORS.audio }} />
-                <div style={{ width: '25%', backgroundColor: CHANNEL_COLORS.ctv }} />
-                <div style={{ width: '50%', backgroundColor: CHANNEL_COLORS.linear }} />
+                <div style={{ width: '40%', backgroundColor: CHANNEL_COLORS.ctv }} />
+                <div style={{ width: '30%', backgroundColor: CHANNEL_COLORS.audio }} />
+                <div style={{ width: '20%', backgroundColor: CHANNEL_COLORS.preroll }} />
+                <div style={{ width: '10%', backgroundColor: CHANNEL_COLORS.social }} />
               </>
             ) : (
               <>
@@ -182,16 +181,12 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({
           {/* Legend */}
           <div style={{ 
             display: 'grid',
-            gridTemplateColumns: 'repeat(4, 1fr)',
+            gridTemplateColumns: 'repeat(3, 1fr)',
             gap: '8px 4px',
             fontSize: '11px',
             color: '#666',
             marginBottom: '16px'
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: getLegendColor('linear') }} />
-              <span>Linear</span>
-            </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
               <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: getLegendColor('ctv') }} />
               <span>CTV</span>
@@ -236,7 +231,7 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({
           
           {activeChannel === 'total' && (
             <Text size="xs" c="dimmed" ta="right" mb="md">
-              of -- in 4 Channels
+              of -- in 6 Channels
             </Text>
           )}
           
@@ -250,10 +245,10 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({
           }}>
             {activeChannel === 'total' ? (
               <>
-                <div style={{ width: '10%', backgroundColor: CHANNEL_COLORS.preroll }} />
-                <div style={{ width: '15%', backgroundColor: CHANNEL_COLORS.audio }} />
-                <div style={{ width: '25%', backgroundColor: CHANNEL_COLORS.ctv }} />
-                <div style={{ width: '50%', backgroundColor: CHANNEL_COLORS.linear }} />
+                <div style={{ width: '40%', backgroundColor: CHANNEL_COLORS.ctv }} />
+                <div style={{ width: '30%', backgroundColor: CHANNEL_COLORS.audio }} />
+                <div style={{ width: '20%', backgroundColor: CHANNEL_COLORS.preroll }} />
+                <div style={{ width: '10%', backgroundColor: CHANNEL_COLORS.social }} />
               </>
             ) : (
               <>
@@ -266,15 +261,11 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({
           {/* Legend */}
           <div style={{ 
             display: 'grid',
-            gridTemplateColumns: 'repeat(4, 1fr)',
+            gridTemplateColumns: 'repeat(3, 1fr)',
             gap: '8px 4px',
             fontSize: '11px',
             color: '#666'
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: getLegendColor('linear') }} />
-              <span>Linear</span>
-            </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
               <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: getLegendColor('ctv') }} />
               <span>CTV</span>
@@ -368,7 +359,7 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({
           
           {activeChannel === 'total' && (
             <Text size="xs" c="dimmed" ta="right" mb="md">
-              of -- in 4 Channels
+              of -- in 6 Channels
             </Text>
           )}
           
@@ -393,15 +384,11 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({
           {/* Legend */}
           <div style={{ 
             display: 'grid',
-            gridTemplateColumns: 'repeat(4, 1fr)',
+            gridTemplateColumns: 'repeat(3, 1fr)',
             gap: '8px 4px',
             fontSize: '11px',
             color: '#666'
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: getLegendColor('linear') }} />
-              <span>Linear</span>
-            </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
               <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: getLegendColor('ctv') }} />
               <span>CTV</span>

@@ -14,8 +14,7 @@ interface Channel {
 }
 
 const channels: Channel[] = [
-  { id: 'linear_tv', name: 'Linear TV', icon: '/assets/icons/channels/linear_tv.svg' },
-  { id: 'display', name: 'Display', icon: '/assets/icons/channels/display.svg' },
+  { id: 'display', name: 'Pre Roll', icon: '/assets/icons/channels/display.svg' },
   { id: 'ctv', name: 'CTV', icon: '/assets/icons/channels/ctv.svg' },
   { id: 'audio', name: 'Audio', icon: '/assets/icons/channels/audio.svg' },
   { id: 'social', name: 'Social', icon: '/assets/icons/channels/social.svg' },
