@@ -44,7 +44,8 @@ const GeoPerformanceMap: React.FC = () => {
       style: 'mapbox://styles/mapbox/streets-v12',
       center: [-95.7129, 37.0902],
       zoom: 3.5,
-      projection: 'mercator' // Плоская проекция вместо глобуса
+      projection: 'mercator', // Плоская проекция вместо глобуса
+      scrollZoom: false // Отключаем стандартный скролл зум
     });
 
     map.current.on('load', () => {
@@ -138,7 +139,30 @@ const GeoPerformanceMap: React.FC = () => {
       });
     });
 
+    // Обработчик для зума по Ctrl+Scroll
+    const handleWheel = (e: WheelEvent) => {
+      if (!map.current) return;
+      
+      // Зум только при нажатом Ctrl (или Cmd на Mac)
+      if (e.ctrlKey || e.metaKey) {
+        e.preventDefault();
+        
+        const delta = -e.deltaY;
+        const zoom = map.current.getZoom();
+        const zoomChange = delta > 0 ? 0.5 : -0.5;
+        
+        map.current.easeTo({
+          zoom: zoom + zoomChange,
+          duration: 100
+        });
+      }
+    };
+
+    const mapElement = mapContainer.current;
+    mapElement.addEventListener('wheel', handleWheel, { passive: false });
+
     return () => {
+      mapElement?.removeEventListener('wheel', handleWheel);
       map.current?.remove();
     };
   }, []);
