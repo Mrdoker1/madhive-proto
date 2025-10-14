@@ -19,22 +19,10 @@ export interface ChannelConfig {
 
 // Базовые значения для расчета reach каналов согласно предоставленным данным
 export const CHANNEL_CONFIGS: Record<string, ChannelConfig> = {
-  'linear_tv': {
-    id: 'linear_tv',
-    name: 'Linear TV',
-    color: '#6633CC',          // Красный цвет - отличается от других
-    maxReach: 70,              // 70% от общего reach - очень высокий потенциал
-    efficiency: 1.8,           // Снижен для лучшего масштабирования
-    budgetWeight: 45,          // 45% budget weight - традиционно большая доля
-    reachWeight: 50,           // 50% reach weight - высокий reach потенциал
-    saturationSmall: 200,      // Увеличено для лучшего масштабирования
-    saturationMedium: 150,     // Увеличено для лучшего масштабирования
-    saturationLarge: 100       // Увеличено для лучшего масштабирования
-  },
   'display': {
     id: 'display',
-    name: 'Display',
-    color: '#FFA100',
+    name: 'Pre Roll',
+    color: '#10B981',
     maxReach: 45,              // 45% от общего reach - самый низкий
     efficiency: 1.5,           // Снижен для более медленного роста
     budgetWeight: 12,          // 12% budget weight
