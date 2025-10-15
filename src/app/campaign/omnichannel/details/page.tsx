@@ -12,6 +12,7 @@ import AudiencesSection from "@/components/features/sections/AudiencesSection";
 import InterestsSection from "@/components/features/sections/InterestsSection";
 import GeoSection from "@/components/features/sections/GeoSection";
 import DaypartsSection from "@/components/features/sections/DaypartsSection";
+import KeyWordsSection from "@/components/features/sections/KeyWordsSection";
 import OmnichannelRightSidebar from "@/components/layout/OmnichannelRightSidebar";
 import { Text } from '@mantine/core';
 import { useAppSelector } from '@/hooks/useRedux';
@@ -93,8 +94,17 @@ export default function OmnichannelDetailsPage() {
     return allChannelPills.filter(pill => availableChannels.includes(pill.id as ChannelType));
   }, [availableChannels]);
 
-  // Якоря для навигации - одинаковые для всех каналов
+  // Якоря для навигации - разные для каждого канала
   const getAnchorItems = (): AnchorItem[] => {
+    if (activeChannel === 'search') {
+      return [
+        { id: 'keywords', label: 'Key Words', anchor: '#keywords' },
+        { id: 'audiences', label: 'Audiences', anchor: '#audiences' },
+        { id: 'geo', label: 'Geo', anchor: '#geo' },
+        { id: 'dayparts', label: 'Dayparts', anchor: '#dayparts' }
+      ];
+    }
+    
     return [
       { id: 'audiences', label: 'Audiences', anchor: '#audiences' },
       { id: 'interests', label: 'Interests', anchor: '#interests' },
@@ -159,40 +169,23 @@ export default function OmnichannelDetailsPage() {
       case 'ctv':
       case 'audio':
       case 'email':
-        return commonContent;
-      
       case 'social':
-        return (
-          <>
-            <SectionWrapper id="audiences" title="Audiences">
-              <Text size="sm" c="dimmed">Social channel audiences configuration</Text>
-            </SectionWrapper>
-            <SectionWrapper id="interests" title="Interests">
-              <Text size="sm" c="dimmed">Social channel interests</Text>
-            </SectionWrapper>
-            <SectionWrapper id="geo" title="Geo">
-              <Text size="sm" c="dimmed">Social channel geo targeting</Text>
-            </SectionWrapper>
-            <SectionWrapper id="dayparts" title="Dayparts">
-              <Text size="sm" c="dimmed">Social channel dayparts</Text>
-            </SectionWrapper>
-          </>
-        );
+        return commonContent;
       
       case 'search':
         return (
           <>
-            <SectionWrapper id="audiences" title="Audiences">
-              <Text size="sm" c="dimmed">Search channel audiences configuration</Text>
+            <SectionWrapper id="keywords" title="Key Words">
+              <KeyWordsSection />
             </SectionWrapper>
-            <SectionWrapper id="interests" title="Interests">
-              <Text size="sm" c="dimmed">Search channel keywords</Text>
+            <SectionWrapper id="audiences" title="Audiences">
+              <AudiencesSection />
             </SectionWrapper>
             <SectionWrapper id="geo" title="Geo">
-              <Text size="sm" c="dimmed">Search channel geo targeting</Text>
+              <GeoSection />
             </SectionWrapper>
             <SectionWrapper id="dayparts" title="Dayparts">
-              <Text size="sm" c="dimmed">Search channel dayparts</Text>
+              <DaypartsSection />
             </SectionWrapper>
           </>
         );
