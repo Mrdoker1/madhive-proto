@@ -21,11 +21,12 @@ export default function CampaignList({ items }: { items: CampaignSummary[] }) {
           paddingBottom: 0,
           backgroundColor: 'var(--header-background)',
           color: '#6b7280',
-          fontSize: '12px'
+          fontSize: '12px',
+          width: 'fit-content'
         }}
       >
-        <div style={{ position: 'sticky', left: '0', zIndex: 1, background: 'var(--page-background)', paddingLeft: '16px', paddingRight: '16px', paddingTop: '8px', paddingBottom: '8px' }}>Name</div>
-        <div style={{ position: 'sticky', left: `${nameColWidth}px`, zIndex: 1, background: 'var(--page-background)', paddingLeft: '16px', paddingRight: '12px', paddingTop: '8px', paddingBottom: '8px', borderRight: '1px solid var(--border-color)' }}>Pacing Status</div>
+        <div style={{ position: 'sticky', left: '0', zIndex: 1, background: 'var(--header-background)', paddingLeft: '16px', paddingRight: '16px', paddingTop: '8px', paddingBottom: '8px' }}>Name</div>
+        <div style={{ position: 'sticky', left: `${nameColWidth}px`, zIndex: 1, background: 'var(--header-background)', paddingLeft: '16px', paddingRight: '12px', paddingTop: '8px', paddingBottom: '8px', borderRight: '1px solid var(--border-color)' }}>Pacing Status</div>
         <div style={{ paddingLeft: '20px' }}>Delivered in Last 7 days</div>
         <div style={{ paddingLeft: '20px' }}>Channels</div>
         <div style={{ paddingLeft: '20px' }}>Progress (Delivered/Goal)</div>
