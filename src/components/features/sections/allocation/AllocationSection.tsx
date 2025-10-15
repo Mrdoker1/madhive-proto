@@ -257,25 +257,39 @@ export const AllocationSection: React.FC = () => {
 
   // Удаление канала с перераспределением бюджета
   const handleRemoveChannel = (channelId: string) => {
-    setChannelData(prev => {
-      const newData = { ...prev };
-      const removedChannelBudget = newData[channelId]?.budget || 0;
-      delete newData[channelId];
-      
-      // Перераспределяем бюджет удаленного канала между оставшимися
-      const remainingChannels = Object.keys(newData);
-      if (remainingChannels.length > 0) {
-        const budgetPerChannel = removedChannelBudget / remainingChannels.length;
-        remainingChannels.forEach(otherId => {
-          newData[otherId] = {
-            ...newData[otherId],
-            budget: newData[otherId].budget + budgetPerChannel
-          };
-        });
-      }
-      
-      return newData;
+    // Удаляем канал из Redux selectedChannels
+    const updatedSelectedChannels = selectedChannels.filter(id => id !== channelId);
+    
+    // Вычисляем новое распределение бюджета
+    const newData = { ...channelData };
+    const removedChannelBudget = newData[channelId]?.budget || 0;
+    delete newData[channelId];
+    
+    // Перераспределяем бюджет удаленного канала между оставшимися
+    const remainingChannels = Object.keys(newData);
+    if (remainingChannels.length > 0) {
+      const budgetPerChannel = removedChannelBudget / remainingChannels.length;
+      remainingChannels.forEach(otherId => {
+        newData[otherId] = {
+          ...newData[otherId],
+          budget: newData[otherId].budget + budgetPerChannel
+        };
+      });
+    }
+    
+    // Обновляем Redux с новым списком каналов и бюджетами
+    const updatedBudgetAllocation: Record<string, number> = {};
+    Object.keys(newData).forEach(id => {
+      updatedBudgetAllocation[id] = newData[id].budget;
     });
+    
+    dispatch(updateChannelsData({
+      selectedChannels: updatedSelectedChannels,
+      budgetAllocation: updatedBudgetAllocation
+    }));
+    
+    // Обновляем локальное состояние
+    setChannelData(newData);
   };
 
   // Добавление предложенного канала
