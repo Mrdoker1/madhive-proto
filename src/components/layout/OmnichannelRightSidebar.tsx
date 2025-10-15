@@ -9,13 +9,13 @@ import ChannelPills, { ChannelPill } from '@/components/ui/ChannelPills';
 // Цвета каналов из allocation
 const CHANNEL_COLORS: Record<string, string> = {
   total: '#000000',
-  ctv: '#FF0099', 
-  preroll: '#10B981', // Зеленый для Preroll
+  ctv: '#FF9BD3', 
+  preroll: '#6633CC',
   audio: '#33CCCC',
-  display: '#FFA100',
-  social: '#8B5CF6',
-  search: '#F59E0B',
-  email: '#EF4444'
+  display: '#6633CC',
+  social: '#FF0099',
+  search: '#00A3FF',
+  email: '#FFA100'
 };
 
 type ChannelType = 'total' | 'ctv' | 'preroll' | 'audio' | 'social' | 'search' | 'email';

@@ -22,7 +22,7 @@ export const CHANNEL_CONFIGS: Record<string, ChannelConfig> = {
   'display': {
     id: 'display',
     name: 'Pre Roll',
-    color: '#10B981',
+    color: '#6633CC',
     maxReach: 45,              // 45% от общего reach - самый низкий
     efficiency: 1.5,           // Снижен для более медленного роста
     budgetWeight: 12,          // 12% budget weight
@@ -34,7 +34,7 @@ export const CHANNEL_CONFIGS: Record<string, ChannelConfig> = {
   'ctv': {
     id: 'ctv',
     name: 'CTV',
-    color: '#FF0099',
+    color: '#FF9BD3',
     maxReach: 65,              // 65% от общего reach - самый высокий
     efficiency: 2.5,           // Снижен для лучшего масштабирования
     budgetWeight: 55,          // 55% budget weight
@@ -58,7 +58,7 @@ export const CHANNEL_CONFIGS: Record<string, ChannelConfig> = {
   'social': {
     id: 'social',
     name: 'Social',
-    color: '#8B5CF6',          // Purple color for Social media
+    color: '#FF0099',
     maxReach: 60,              // 60% от общего reach - высокий потенциал
     efficiency: 2.0,           // Снижен для лучшего масштабирования
     budgetWeight: 15,          // 15% budget weight
@@ -70,7 +70,7 @@ export const CHANNEL_CONFIGS: Record<string, ChannelConfig> = {
   'search': {
     id: 'search',
     name: 'Search',
-    color: '#F59E0B',
+    color: '#00A3FF',
     maxReach: 40,              // 40% от общего reach - средний потенциал
     efficiency: 3.5,           // Снижен для лучшего масштабирования
     budgetWeight: 8,           // 8% budget weight
@@ -82,7 +82,7 @@ export const CHANNEL_CONFIGS: Record<string, ChannelConfig> = {
   'email': {
     id: 'email',
     name: 'Email',
-    color: '#8B5CF6',
+    color: '#FFA100',
     maxReach: 25,              // 25% от общего reach - самый низкий потенциал
     efficiency: 4.0,           // Снижен для лучшего масштабирования
     budgetWeight: 2,           // 2% budget weight
