@@ -1,24 +1,33 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { MultiSelect, Button, Group, Text, Select } from '@mantine/core';
-import { keyWordsData, selectedKeyWordsMock, generatedKeyWordsMock } from '@/data/keyWordsData';
+import { MultiSelect, Button, Group, Text, Select, TextInput } from '@mantine/core';
+import { keyWordsData, categoryOptions, keywordsByAdvertiser } from '@/data/keyWordsData';
 import { useAppSelector } from '@/hooks/useRedux';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const KeyWordsSection = () => {
   const advertiserFromRedux = useAppSelector((state) => state.campaign.general.advertiser);
   
-  const [selectedKeyWords, setSelectedKeyWords] = useState<string[]>(selectedKeyWordsMock);
   const [advertiser, setAdvertiser] = useState<string>('');
-  const [category, setCategory] = useState<string>('Automobile');
-  const [generatedKeyWords, setGeneratedKeyWords] = useState<string[]>(generatedKeyWordsMock);
+  const [selectedKeyWords, setSelectedKeyWords] = useState<string[]>([]);
+  const [category, setCategory] = useState<string>('SUVs');
+  const [generatedKeyWords, setGeneratedKeyWords] = useState<string[]>([]);
   const [showGenerator, setShowGenerator] = useState<boolean>(false);
+  const [customKeyword, setCustomKeyword] = useState<string>('');
 
-  // Синхронизируем advertiser с Redux
+  // Синхронизируем advertiser с Redux и обновляем данные
   useEffect(() => {
     if (advertiserFromRedux) {
       setAdvertiser(advertiserFromRedux);
+      
+      // Получаем данные для конкретного advertiser
+      const advertiserData = keywordsByAdvertiser[advertiserFromRedux];
+      if (advertiserData) {
+        setSelectedKeyWords(advertiserData.currentKeywords);
+        setGeneratedKeyWords(advertiserData.generatedKeywords);
+        setCategory(advertiserData.defaultCategory);
+      }
     }
   }, [advertiserFromRedux]);
 
@@ -28,6 +37,13 @@ const KeyWordsSection = () => {
 
   const handleGenerateKeyWords = () => {
     setShowGenerator(!showGenerator);
+  };
+
+  const handleAddCustomKeyword = () => {
+    if (customKeyword.trim()) {
+      setSelectedKeyWords([...selectedKeyWords, customKeyword.trim()]);
+      setCustomKeyword('');
+    }
   };
 
   const handleResetGenerated = () => {
@@ -42,9 +58,35 @@ const KeyWordsSection = () => {
 
   return (
     <div>
-      {/* Key Words MultiSelect */}
+      <Text size="sm" fw={500} mb="xs" style={{ color: 'var(--form-label-color)' }}>
+        Include
+      </Text>
+      
+      {/* Add Custom Keyword */}
+      <Group gap="xs" mb="md">
+        <TextInput
+          placeholder="Enter custom keyword"
+          value={customKeyword}
+          onChange={(e) => setCustomKeyword(e.currentTarget.value)}
+          onKeyPress={(e) => {
+            if (e.key === 'Enter') {
+              handleAddCustomKeyword();
+            }
+          }}
+          style={{ flex: 1 }}
+        />
+        <Button 
+          variant="outline" 
+          onClick={handleAddCustomKeyword}
+          disabled={!customKeyword.trim()}
+        >
+          Add Keyword
+        </Button>
+      </Group>
+
+      {/* Current Keywords MultiSelect */}
       <MultiSelect
-        label="Key Words"
+        label="Current Keywords"
         placeholder="Select keywords"
         data={keyWordsData}
         value={selectedKeyWords}
@@ -105,7 +147,7 @@ const KeyWordsSection = () => {
                 <Select
                   label="Category"
                   placeholder="Select category"
-                  data={['Automobile', 'Technology', 'Healthcare', 'Retail']}
+                  data={categoryOptions}
                   value={category}
                   onChange={(value) => setCategory(value || '')}
                   styles={{
@@ -117,17 +159,23 @@ const KeyWordsSection = () => {
               {/* Generated Key Words */}
               <MultiSelect
                 label="Generated Key Words"
-                placeholder="Generated keywords will appear here"
+                placeholder=""
                 data={generatedKeyWords.map((kw, idx) => ({ value: `${kw}-${idx}`, label: kw }))}
                 value={generatedKeyWords.map((kw, idx) => `${kw}-${idx}`)}
-                onChange={(values) => {
-                  const keywords = values.map(v => v.split('-')[0]);
-                  setGeneratedKeyWords(keywords);
-                }}
+                onChange={() => {}}
+                readOnly
                 searchable={false}
-                clearable
+                clearable={false}
                 maxDropdownHeight={200}
                 mb="lg"
+                styles={{
+                  input: {
+                    cursor: 'default'
+                  },
+                  pill: {
+                    borderRadius: '4px'
+                  }
+                }}
               />
 
               {/* Generator Buttons */}
