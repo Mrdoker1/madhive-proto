@@ -81,6 +81,23 @@ export interface CampaignChannelsData {
   budgetAllocation?: Record<string, number>; // Распределение бюджета по каналам
 }
 
+// Данные для секций по каждому каналу в omnichannel кампании
+export interface ChannelSectionData {
+  audience: CampaignAudienceData;
+  geo: {
+    selectedZipCodes: string[];
+    country: string;
+    targetNationally: boolean;
+  };
+  dayparts: CampaignDaypartsData;
+}
+
+// Omnichannel specific data
+export interface OmnichannelData {
+  carryOverMode: boolean; // Режим "carry over" - данные распространяются на все каналы
+  channelData: Record<string, ChannelSectionData>; // Данные по каждому каналу отдельно
+}
+
 export interface SavedCampaign {
   id: string;
   general: CampaignGeneralData;
@@ -105,6 +122,7 @@ export interface CampaignState {
   markets: CampaignMarketsData;
   dayparts: CampaignDaypartsData;
   channels: CampaignChannelsData;
+  omnichannel: OmnichannelData;
   
   // Вычисляемые поля
   estimations: {
@@ -167,6 +185,10 @@ const initialState: CampaignState = {
   channels: {
     selectedChannels: []
   },
+  omnichannel: {
+    carryOverMode: true, // По умолчанию режим carry over активен
+    channelData: {}
+  },
   estimations: {
     budgetEstimation: 0,
     audienceEstimation: 0,
@@ -224,6 +246,72 @@ const campaignSlice = createSlice({
       state.channels = { ...state.channels, ...action.payload };
     },
 
+    // Omnichannel Data Actions
+    setCarryOverMode: (state, action: PayloadAction<boolean>) => {
+      state.omnichannel.carryOverMode = action.payload;
+    },
+    
+    updateChannelSectionData: (
+      state, 
+      action: PayloadAction<{ 
+        channel: string; 
+        section: 'audience' | 'geo' | 'dayparts'; 
+        data: any;
+      }>
+    ) => {
+      const { channel, section, data } = action.payload;
+      
+      if (!state.omnichannel.channelData[channel]) {
+        state.omnichannel.channelData[channel] = {
+          audience: {
+            gender: [],
+            age: [],
+            income: [],
+            education: [],
+            householdSize: []
+          },
+          geo: {
+            selectedZipCodes: [],
+            country: 'United States',
+            targetNationally: true
+          },
+          dayparts: {
+            selectedSlots: {}
+          }
+        };
+      }
+      
+      state.omnichannel.channelData[channel][section] = { 
+        ...state.omnichannel.channelData[channel][section], 
+        ...data 
+      };
+    },
+    
+    initializeChannelData: (state, action: PayloadAction<string[]>) => {
+      const channels = action.payload;
+      channels.forEach(channel => {
+        if (!state.omnichannel.channelData[channel]) {
+          state.omnichannel.channelData[channel] = {
+            audience: {
+              gender: [],
+              age: [],
+              income: [],
+              education: [],
+              householdSize: []
+            },
+            geo: {
+              selectedZipCodes: [],
+              country: 'United States',
+              targetNationally: true
+            },
+            dayparts: {
+              selectedSlots: {}
+            }
+          };
+        }
+      });
+    },
+
     // Estimations Actions
     updateEstimations: (state, action: PayloadAction<Partial<CampaignState['estimations']>>) => {
       state.estimations = { ...state.estimations, ...action.payload };
@@ -270,6 +358,9 @@ export const {
   updateMarketsData,
   updateDaypartsData,
   updateChannelsData,
+  setCarryOverMode,
+  updateChannelSectionData,
+  initializeChannelData,
   updateEstimations,
   resetCampaign,
   setCampaignData,

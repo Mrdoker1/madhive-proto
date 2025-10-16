@@ -1,10 +1,15 @@
 import { Text, Button, Group } from '@mantine/core';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
-import { updateDaypartsData } from '@/store/slices/campaignSlice';
+import { updateDaypartsData, updateChannelSectionData, setCarryOverMode } from '@/store/slices/campaignSlice';
 
 interface DaypartsState {
   [day: string]: { [hour: number]: boolean };
+}
+
+interface DaypartsSectionProps {
+  channel?: string;
+  isFirstChannel?: boolean;
 }
 
 // Dayparts definition with colors
@@ -42,9 +47,16 @@ const createHoursData = () => {
   return hours;
 };
 
-const DaypartsSection = () => {
+const DaypartsSection = ({ channel, isFirstChannel = true }: DaypartsSectionProps) => {
   const dispatch = useAppDispatch();
-  const daypartsData = useAppSelector((state) => state.campaign.dayparts);
+  const carryOverMode = useAppSelector((state) => state.campaign.omnichannel.carryOverMode);
+  const channelData = useAppSelector((state) => state.campaign.omnichannel.channelData);
+  
+  // Получаем данные для текущего канала или используем общие данные для linear
+  const daypartsData = channel 
+    ? (channelData[channel]?.dayparts || { selectedSlots: {} })
+    : useAppSelector((state) => state.campaign.dayparts);
+  
   const [isSelecting, setIsSelecting] = useState(false);
   const [selectionStart, setSelectionStart] = useState<{ day: string; hour: number } | null>(null);
   const [selectionEnd, setSelectionEnd] = useState<{ day: string; hour: number } | null>(null);
@@ -56,6 +68,40 @@ const DaypartsSection = () => {
   // Вспомогательная функция для глубокого копирования selectedSlots
   const deepCopySelectedSlots = (slots: Record<string, Record<number, boolean>>): DaypartsState => {
     return structuredClone(slots);
+  };
+
+  // Функция для обновления данных с учетом carry over
+  const updateSlots = (newSlots: DaypartsState) => {
+    // Если это omnichannel и мы НЕ на первой вкладке, отключаем carry over режим
+    if (channel && !isFirstChannel && carryOverMode) {
+      dispatch(setCarryOverMode(false));
+    }
+    
+    if (channel) {
+      // Omnichannel: обновляем данные для конкретного канала
+      dispatch(updateChannelSectionData({
+        channel,
+        section: 'dayparts',
+        data: { selectedSlots: newSlots }
+      }));
+      
+      // Если carry over режим активен, копируем данные на все каналы
+      if (carryOverMode && isFirstChannel) {
+        const allChannels = Object.keys(channelData);
+        allChannels.forEach(ch => {
+          if (ch !== channel) {
+            dispatch(updateChannelSectionData({
+              channel: ch,
+              section: 'dayparts',
+              data: { selectedSlots: newSlots }
+            }));
+          }
+        });
+      }
+    } else {
+      // Linear: используем старую логику
+      dispatch(updateDaypartsData({ selectedSlots: newSlots }));
+    }
   };
 
   const isCellSelected = (day: string, hour: number): boolean => {
@@ -114,7 +160,7 @@ const DaypartsSection = () => {
       }
     }
     
-    dispatch(updateDaypartsData({ selectedSlots: newSelectedSlots }));
+    updateSlots(newSelectedSlots);
   };
 
   // Handle cell click with bulk selection support
@@ -134,7 +180,7 @@ const DaypartsSection = () => {
         newSelectedSlots[day] = {};
       }
       newSelectedSlots[day][hour] = !cellSelected;
-      dispatch(updateDaypartsData({ selectedSlots: newSelectedSlots }));
+      updateSlots(newSelectedSlots);
     } else {
       // Second click: finish selection
       setSelectionEnd({ day, hour });
@@ -156,11 +202,11 @@ const DaypartsSection = () => {
         newSelectedSlots[day][hour] = true;
       }
     });
-    dispatch(updateDaypartsData({ selectedSlots: newSelectedSlots }));
+    updateSlots(newSelectedSlots);
   };
 
   const reset = () => {
-    dispatch(updateDaypartsData({ selectedSlots: {} }));
+    updateSlots({});
   };
 
   // Quick select for a specific daypart
@@ -175,7 +221,7 @@ const DaypartsSection = () => {
         newSelectedSlots[day][hour] = true;
       });
     });
-    dispatch(updateDaypartsData({ selectedSlots: newSelectedSlots }));
+    updateSlots(newSelectedSlots);
   };
 
   const clearDaypart = (daypartName: string) => {
@@ -190,7 +236,7 @@ const DaypartsSection = () => {
         });
       }
     });
-    dispatch(updateDaypartsData({ selectedSlots: newSelectedSlots }));
+    updateSlots(newSelectedSlots);
   };
 
   return (

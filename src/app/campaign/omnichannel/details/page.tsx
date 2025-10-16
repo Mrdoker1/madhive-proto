@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import PageLayout from "@/components/layout/PageLayout";
 import NavigationAnchors, { AnchorItem } from "@/components/ui/NavigationAnchors";
 import SectionWrapper from "@/components/ui/SectionWrapper";
@@ -14,8 +14,11 @@ import GeoSection from "@/components/features/sections/GeoSection";
 import DaypartsSection from "@/components/features/sections/DaypartsSection";
 import KeyWordsSection from "@/components/features/sections/KeyWordsSection";
 import OmnichannelRightSidebar from "@/components/layout/OmnichannelRightSidebar";
+import CarryOverNotification from "@/components/ui/CarryOverNotification";
 import { Text } from '@mantine/core';
-import { useAppSelector } from '@/hooks/useRedux';
+import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
+import { setCarryOverMode, initializeChannelData } from '@/store/slices/campaignSlice';
+import { AnimatePresence } from 'framer-motion';
 
 type ChannelType = 'preroll' | 'ctv' | 'audio' | 'social' | 'search' | 'email';
 
@@ -31,7 +34,10 @@ const CHANNEL_ID_MAP: Record<string, ChannelType> = {
 
 export default function OmnichannelDetailsPage() {
   const router = useRouter();
+  const dispatch = useAppDispatch();
   const selectedChannelsFromRedux = useAppSelector((state) => state.campaign.channels.selectedChannels);
+  const carryOverMode = useAppSelector((state) => state.campaign.omnichannel.carryOverMode);
+  const channelData = useAppSelector((state) => state.campaign.omnichannel.channelData);
   
   // Фильтруем выбранные каналы (исключаем linear_tv, он не показывается на этой странице)
   const availableChannels = useMemo(() => {
@@ -42,12 +48,29 @@ export default function OmnichannelDetailsPage() {
   
   // Устанавливаем активный канал - первый из доступных
   const [activeChannel, setActiveChannel] = useState<ChannelType | null>(null);
+  const firstChannelRef = useRef<ChannelType | null>(null);
   
+  // Инициализация данных для каждого канала при первой загрузке
   useEffect(() => {
-    if (availableChannels.length > 0 && !activeChannel) {
-      setActiveChannel(availableChannels[0]);
+    if (availableChannels.length > 0) {
+      dispatch(initializeChannelData(availableChannels));
+      if (!activeChannel) {
+        setActiveChannel(availableChannels[0]);
+        firstChannelRef.current = availableChannels[0];
+      }
     }
-  }, [availableChannels, activeChannel]);
+  }, [availableChannels, activeChannel, dispatch]);
+  
+  // Отслеживание смены вкладки для отключения carry over режима
+  const handleChannelChange = (channelId: ChannelType) => {
+    // Если пользователь переключился на другую вкладку (не первую),
+    // и carry over режим еще активен
+    if (carryOverMode && channelId !== firstChannelRef.current) {
+      // Режим остается активным до первого изменения данных на другой вкладке
+      // Отключение произойдет в секциях при изменении
+    }
+    setActiveChannel(channelId);
+  };
 
   // Бредкрамбсы для страницы Channel Details
   const breadcrumbSteps: BreadcrumbStep[] = [
@@ -132,12 +155,11 @@ export default function OmnichannelDetailsPage() {
         <div style={{ 
           textAlign: 'center', 
           padding: '48px 24px',
-          backgroundColor: '#F3F2EB',
+          backgroundColor: 'white',
           borderRadius: '8px'
         }}>
-          <Text size="lg" fw={500} mb="md">No Channels Selected</Text>
           <Text size="sm" c="dimmed" mb="lg">
-            Please go back to the previous page and select at least one channel.
+          No Channels Selected. Please go back to the previous page and select at least one channel.
           </Text>
         </div>
       );
@@ -147,7 +169,10 @@ export default function OmnichannelDetailsPage() {
     const commonContent = (
       <>
         <SectionWrapper id="audiences" title="Audiences">
-          <AudiencesSection />
+          <AudiencesSection 
+            channel={activeChannel || 'preroll'} 
+            isFirstChannel={activeChannel === firstChannelRef.current}
+          />
         </SectionWrapper>
 
         <SectionWrapper id="interests" title="Interests">
@@ -155,11 +180,17 @@ export default function OmnichannelDetailsPage() {
         </SectionWrapper>
 
         <SectionWrapper id="geo" title="Geo">
-          <GeoSection />
+          <GeoSection 
+            channel={activeChannel || 'preroll'}
+            isFirstChannel={activeChannel === firstChannelRef.current}
+          />
         </SectionWrapper>
 
         <SectionWrapper id="dayparts" title="Dayparts">
-          <DaypartsSection />
+          <DaypartsSection 
+            channel={activeChannel || 'preroll'}
+            isFirstChannel={activeChannel === firstChannelRef.current}
+          />
         </SectionWrapper>
       </>
     );
@@ -179,13 +210,22 @@ export default function OmnichannelDetailsPage() {
               <KeyWordsSection />
             </SectionWrapper>
             <SectionWrapper id="audiences" title="Audiences">
-              <AudiencesSection />
+              <AudiencesSection 
+                channel={activeChannel} 
+                isFirstChannel={activeChannel === firstChannelRef.current}
+              />
             </SectionWrapper>
             <SectionWrapper id="geo" title="Geo">
-              <GeoSection />
+              <GeoSection 
+                channel={activeChannel}
+                isFirstChannel={activeChannel === firstChannelRef.current}
+              />
             </SectionWrapper>
             <SectionWrapper id="dayparts" title="Dayparts">
-              <DaypartsSection />
+              <DaypartsSection 
+                channel={activeChannel}
+                isFirstChannel={activeChannel === firstChannelRef.current}
+              />
             </SectionWrapper>
           </>
         );
@@ -207,7 +247,7 @@ export default function OmnichannelDetailsPage() {
             <ChannelPills
               channels={channelPills}
               activeChannel={activeChannel || channelPills[0]?.id as ChannelType}
-              onChange={(channelId) => setActiveChannel(channelId as ChannelType)}
+              onChange={(channelId) => handleChannelChange(channelId as ChannelType)}
             />
           ) : null
         }
@@ -236,6 +276,11 @@ export default function OmnichannelDetailsPage() {
             </div>
             {/* Основной контент */}
             <div style={{ paddingLeft: '20px', width: '100%', maxWidth: '800px' }}>
+              {/* Нотификация carry over */}
+              <AnimatePresence>
+                {carryOverMode && <CarryOverNotification key="carry-over-notification" />}
+              </AnimatePresence>
+              
               <div style={{ display: 'flex', flexDirection: 'column', gap: '40px' }}>
                 {renderChannelContent()}
               </div>

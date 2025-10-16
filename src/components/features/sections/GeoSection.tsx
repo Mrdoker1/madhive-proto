@@ -1,15 +1,68 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Select, Checkbox, MultiSelect, Button, Group, Text } from '@mantine/core';
 import { zipCodesData } from '@/data/zipCodesData';
+import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
+import { updateChannelSectionData, setCarryOverMode } from '@/store/slices/campaignSlice';
 
-const GeoSection = () => {
-  const [selectedZipCodes, setSelectedZipCodes] = useState<string[]>([]);
+interface GeoSectionProps {
+  channel?: string;
+  isFirstChannel?: boolean;
+}
+
+const GeoSection = ({ channel, isFirstChannel = true }: GeoSectionProps) => {
+  const dispatch = useAppDispatch();
+  const carryOverMode = useAppSelector((state) => state.campaign.omnichannel.carryOverMode);
+  const channelData = useAppSelector((state) => state.campaign.omnichannel.channelData);
+  
+  // Получаем данные для текущего канала
+  const geoData = channel 
+    ? (channelData[channel]?.geo || { selectedZipCodes: [], country: 'United States', targetNationally: true })
+    : { selectedZipCodes: [], country: 'United States', targetNationally: true };
+  
+  const [selectedZipCodes, setSelectedZipCodes] = useState<string[]>(geoData.selectedZipCodes);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Синхронизируем локальный стейт с Redux когда меняется канал
+  useEffect(() => {
+    setSelectedZipCodes(geoData.selectedZipCodes);
+  }, [channel, geoData.selectedZipCodes]);
+
+  const handleZipCodesChange = (values: string[]) => {
+    // Если это omnichannel и мы НЕ на первой вкладке, отключаем carry over режим
+    if (channel && !isFirstChannel && carryOverMode) {
+      dispatch(setCarryOverMode(false));
+    }
+    
+    setSelectedZipCodes(values);
+    
+    // Обновляем данные в Redux
+    if (channel) {
+      dispatch(updateChannelSectionData({
+        channel,
+        section: 'geo',
+        data: { selectedZipCodes: values }
+      }));
+      
+      // Если carry over режим активен, копируем данные на все каналы
+      if (carryOverMode && isFirstChannel) {
+        const allChannels = Object.keys(channelData);
+        allChannels.forEach(ch => {
+          if (ch !== channel) {
+            dispatch(updateChannelSectionData({
+              channel: ch,
+              section: 'geo',
+              data: { selectedZipCodes: values }
+            }));
+          }
+        });
+      }
+    }
+  };
+
   const handleReset = () => {
-    setSelectedZipCodes([]);
+    handleZipCodesChange([]);
   };
 
   const handleAddGeo = () => {
@@ -62,7 +115,7 @@ const GeoSection = () => {
         placeholder="Select zip codes"
         data={zipCodesData}
         value={selectedZipCodes}
-        onChange={setSelectedZipCodes}
+        onChange={handleZipCodesChange}
         searchable
         clearable
         maxDropdownHeight={200}

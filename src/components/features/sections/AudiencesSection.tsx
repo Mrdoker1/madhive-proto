@@ -1,11 +1,25 @@
 import { Checkbox, Text, Grid } from '@mantine/core';
 import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
-import { updateAudienceData } from '@/store/slices/campaignSlice';
+import { updateAudienceData, updateChannelSectionData, setCarryOverMode } from '@/store/slices/campaignSlice';
 import { audienceCategories } from '@/data/audienceData';
 
-const AudiencesSection = () => {
+interface AudiencesSectionProps {
+  channel?: string;
+  isFirstChannel?: boolean;
+}
+
+const AudiencesSection = ({ channel, isFirstChannel = true }: AudiencesSectionProps) => {
   const dispatch = useAppDispatch();
-  const audienceData = useAppSelector((state) => state.campaign.audience);
+  const carryOverMode = useAppSelector((state) => state.campaign.omnichannel.carryOverMode);
+  const channelData = useAppSelector((state) => state.campaign.omnichannel.channelData);
+  
+  // Если это omnichannel кампания и есть канал, используем данные для конкретного канала
+  // В режиме carry over используем данные первого канала для всех
+  const audienceData = channel 
+    ? (carryOverMode || isFirstChannel 
+        ? channelData[channel]?.audience || { gender: [], age: [], income: [], education: [], householdSize: [] }
+        : channelData[channel]?.audience || { gender: [], age: [], income: [], education: [], householdSize: [] })
+    : useAppSelector((state) => state.campaign.audience);
 
   const handleCheckboxChange = (category: keyof typeof audienceData, value: string, checked: boolean) => {
     const currentValues = audienceData[category] || [];
@@ -13,7 +27,37 @@ const AudiencesSection = () => {
       ? [...currentValues, value]
       : currentValues.filter(item => item !== value);
     
-    dispatch(updateAudienceData({ [category]: newValues }));
+    // Если это omnichannel и мы НЕ на первой вкладке, отключаем carry over режим
+    if (channel && !isFirstChannel && carryOverMode) {
+      dispatch(setCarryOverMode(false));
+    }
+    
+    // Обновляем данные
+    if (channel) {
+      // Omnichannel: обновляем данные для конкретного канала
+      dispatch(updateChannelSectionData({
+        channel,
+        section: 'audience',
+        data: { [category]: newValues }
+      }));
+      
+      // Если carry over режим активен, копируем данные на все каналы
+      if (carryOverMode && isFirstChannel) {
+        const allChannels = Object.keys(channelData);
+        allChannels.forEach(ch => {
+          if (ch !== channel) {
+            dispatch(updateChannelSectionData({
+              channel: ch,
+              section: 'audience',
+              data: { [category]: newValues }
+            }));
+          }
+        });
+      }
+    } else {
+      // Linear: используем старую логику
+      dispatch(updateAudienceData({ [category]: newValues }));
+    }
   };
 
 
