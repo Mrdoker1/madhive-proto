@@ -115,7 +115,7 @@ export default function OmnichannelDetailsPage() {
   // Фильтруем pills только для выбранных каналов
   const channelPills = useMemo(() => {
     return allChannelPills.filter(pill => availableChannels.includes(pill.id as ChannelType));
-  }, [availableChannels]);
+  }, [availableChannels, allChannelPills]);
 
   // Якоря для навигации - разные для каждого канала
   const getAnchorItems = (): AnchorItem[] => {

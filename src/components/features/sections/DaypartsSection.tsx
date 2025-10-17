@@ -51,11 +51,12 @@ const DaypartsSection = ({ channel, isFirstChannel = true }: DaypartsSectionProp
   const dispatch = useAppDispatch();
   const carryOverMode = useAppSelector((state) => state.campaign.omnichannel.carryOverMode);
   const channelData = useAppSelector((state) => state.campaign.omnichannel.channelData);
+  const linearDaypartsData = useAppSelector((state) => state.campaign.dayparts);
   
   // Получаем данные для текущего канала или используем общие данные для linear
   const daypartsData = channel 
     ? (channelData[channel]?.dayparts || { selectedSlots: {} })
-    : useAppSelector((state) => state.campaign.dayparts);
+    : linearDaypartsData;
   
   const [isSelecting, setIsSelecting] = useState(false);
   const [selectionStart, setSelectionStart] = useState<{ day: string; hour: number } | null>(null);

@@ -12,14 +12,13 @@ const AudiencesSection = ({ channel, isFirstChannel = true }: AudiencesSectionPr
   const dispatch = useAppDispatch();
   const carryOverMode = useAppSelector((state) => state.campaign.omnichannel.carryOverMode);
   const channelData = useAppSelector((state) => state.campaign.omnichannel.channelData);
+  const linearAudienceData = useAppSelector((state) => state.campaign.audience);
   
   // Если это omnichannel кампания и есть канал, используем данные для конкретного канала
   // В режиме carry over используем данные первого канала для всех
   const audienceData = channel 
-    ? (carryOverMode || isFirstChannel 
-        ? channelData[channel]?.audience || { gender: [], age: [], income: [], education: [], householdSize: [] }
-        : channelData[channel]?.audience || { gender: [], age: [], income: [], education: [], householdSize: [] })
-    : useAppSelector((state) => state.campaign.audience);
+    ? (channelData[channel]?.audience || { gender: [], age: [], income: [], education: [], householdSize: [] })
+    : linearAudienceData;
 
   const handleCheckboxChange = (category: keyof typeof audienceData, value: string, checked: boolean) => {
     const currentValues = audienceData[category] || [];
