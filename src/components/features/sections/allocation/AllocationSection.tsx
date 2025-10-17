@@ -41,6 +41,7 @@ export const AllocationSection: React.FC = () => {
   const [channelData, setChannelData] = useState<Record<string, ChannelPoint & SliderChannelAllocation>>({});
   const [isLoading, setIsLoading] = useState<Record<string, boolean>>({});
 
+
   // Отслеживаем размеры контейнера
   useEffect(() => {
     const updateDimensions = () => {

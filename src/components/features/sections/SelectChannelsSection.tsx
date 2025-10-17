@@ -5,7 +5,8 @@ import { Button, Grid, Text, Group } from '@mantine/core';
 import { IconCheck } from '@tabler/icons-react';
 import Image from 'next/image';
 import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
-import { updateChannelsData } from '@/store/slices/campaignSlice';
+import { updateChannelsData, initializeChannelData, updateChannelEstimations, removeChannelData } from '@/store/slices/campaignSlice';
+import { calculateAudienceEstimation, calculateMarketEstimation } from '@/utils/estimationCalculators';
 
 interface Channel {
   id: string;
@@ -32,6 +33,9 @@ export const SelectChannelsSection: React.FC<SelectChannelsSectionProps> = ({
 }) => {
   const dispatch = useAppDispatch();
   const channelsData = useAppSelector((state) => state.campaign.channels);
+  const budgetAllocation = useAppSelector((state) => state.campaign.channels.budgetAllocation); // ✅ channels, не budget!
+  const channelData = useAppSelector((state) => state.campaign.omnichannel.channelData);
+  
   const [selectedChannels, setSelectedChannels] = useState<Set<string>>(
     new Set(channelsData.selectedChannels)
   );
@@ -41,10 +45,62 @@ export const SelectChannelsSection: React.FC<SelectChannelsSectionProps> = ({
     setSelectedChannels(new Set(channelsData.selectedChannels));
   }, [channelsData.selectedChannels]);
 
+  // Пересчитываем estimations когда budgetAllocation меняется
+  useEffect(() => {
+    if (budgetAllocation && channelsData.selectedChannels.length > 0) {
+      channelsData.selectedChannels.forEach(ch => {
+        const channelBudget = budgetAllocation[ch] || 0;
+        // Используем базовые значения (пустые фильтры)
+        const baseAudienceData = { gender: [], age: [], income: [], education: [], householdSize: [] };
+        const interests: string[] = [];
+        const geoData = { selectedZipCodes: [] };
+        
+        const audienceEstimation = calculateAudienceEstimation(baseAudienceData, interests, channelBudget, ch);
+        const marketEstimation = calculateMarketEstimation(geoData.selectedZipCodes, channelBudget, ch);
+        
+        dispatch(updateChannelEstimations({
+          channel: ch,
+          audienceEstimation,
+          marketEstimation
+        }));
+      });
+    }
+  }, [budgetAllocation, channelsData.selectedChannels, dispatch]); // ✅ Убрал channelData из зависимостей!
+
+  // Функция для инициализации и пересчета estimations для каналов
+  const updateChannelEstimationsForChannels = (channels: string[]) => {
+    // Инициализируем данные для новых каналов
+    dispatch(initializeChannelData(channels));
+    
+    // Пересчитываем estimations для всех каналов сразу после инициализации
+    // Используем setTimeout чтобы дать Redux обновить store
+    setTimeout(() => {
+      channels.forEach(ch => {
+        const channelBudget = budgetAllocation?.[ch] || 0;
+        const baseAudienceData = { gender: [], age: [], income: [], education: [], householdSize: [] };
+        const interests: string[] = [];
+        const geoData = { selectedZipCodes: [] };
+        
+        const audienceEstimation = calculateAudienceEstimation(baseAudienceData, interests, channelBudget, ch);
+        const marketEstimation = calculateMarketEstimation(geoData.selectedZipCodes, channelBudget, ch);
+        
+        dispatch(updateChannelEstimations({
+          channel: ch,
+          audienceEstimation,
+          marketEstimation
+        }));
+      });
+    }, 0);
+  };
+
   const handleChannelToggle = (channelId: string) => {
     const newSelection = new Set(selectedChannels);
-    if (newSelection.has(channelId)) {
+    const isRemoving = newSelection.has(channelId);
+    
+    if (isRemoving) {
       newSelection.delete(channelId);
+      // Удаляем данные отключенного канала
+      dispatch(removeChannelData(channelId));
     } else {
       newSelection.add(channelId);
     }
@@ -53,6 +109,12 @@ export const SelectChannelsSection: React.FC<SelectChannelsSectionProps> = ({
     
     // Обновляем Redux store
     dispatch(updateChannelsData({ selectedChannels: newChannelsList }));
+    
+    // Пересчитываем estimations только для активных каналов
+    if (!isRemoving) {
+      updateChannelEstimationsForChannels(newChannelsList);
+    }
+    
     onSelectionChange?.(newChannelsList);
   };
 
@@ -63,14 +125,24 @@ export const SelectChannelsSection: React.FC<SelectChannelsSectionProps> = ({
     
     // Обновляем Redux store
     dispatch(updateChannelsData({ selectedChannels: allChannelIds }));
+    
+    // Пересчитываем estimations
+    updateChannelEstimationsForChannels(allChannelIds);
+    
     onSelectionChange?.(allChannelIds);
   };
 
   const handleReset = () => {
+    // Удаляем данные всех отключаемых каналов
+    selectedChannels.forEach(channelId => {
+      dispatch(removeChannelData(channelId));
+    });
+    
     setSelectedChannels(new Set());
     
     // Обновляем Redux store
     dispatch(updateChannelsData({ selectedChannels: [] }));
+    
     onSelectionChange?.([]);
   };
 

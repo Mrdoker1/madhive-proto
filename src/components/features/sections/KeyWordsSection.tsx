@@ -24,7 +24,7 @@ const KeyWordsSection = () => {
       // Получаем данные для конкретного advertiser
       const advertiserData = keywordsByAdvertiser[advertiserFromRedux];
       if (advertiserData) {
-        setSelectedKeyWords(advertiserData.currentKeywords);
+        // Current Keywords пустые по умолчанию
         setGeneratedKeyWords(advertiserData.generatedKeywords);
         setCategory(advertiserData.defaultCategory);
       }

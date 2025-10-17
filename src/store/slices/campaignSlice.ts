@@ -90,6 +90,11 @@ export interface ChannelSectionData {
     targetNationally: boolean;
   };
   dayparts: CampaignDaypartsData;
+  interests: string[]; // Для Interests section
+  estimations: {
+    audienceEstimation: number;
+    marketEstimation: number;
+  };
 }
 
 // Omnichannel specific data
@@ -255,7 +260,7 @@ const campaignSlice = createSlice({
       state, 
       action: PayloadAction<{ 
         channel: string; 
-        section: 'audience' | 'geo' | 'dayparts'; 
+        section: 'audience' | 'geo' | 'dayparts' | 'interests'; 
         data: any;
       }>
     ) => {
@@ -277,14 +282,24 @@ const campaignSlice = createSlice({
           },
           dayparts: {
             selectedSlots: {}
+          },
+          interests: [],
+          estimations: {
+            audienceEstimation: 0,
+            marketEstimation: 0
           }
         };
       }
       
-      state.omnichannel.channelData[channel][section] = { 
-        ...state.omnichannel.channelData[channel][section], 
-        ...data 
-      };
+      // Handle interests separately as it's a direct array
+      if (section === 'interests') {
+        state.omnichannel.channelData[channel].interests = Array.isArray(data) ? data : [];
+      } else {
+        state.omnichannel.channelData[channel][section] = { 
+          ...state.omnichannel.channelData[channel][section], 
+          ...data 
+        };
+      }
     },
     
     initializeChannelData: (state, action: PayloadAction<string[]>) => {
@@ -306,10 +321,39 @@ const campaignSlice = createSlice({
             },
             dayparts: {
               selectedSlots: {}
+            },
+            interests: [],
+            estimations: {
+              audienceEstimation: 0,
+              marketEstimation: 0
             }
           };
         }
       });
+    },
+    
+    // Обновление estimations для конкретного канала
+    updateChannelEstimations: (
+      state,
+      action: PayloadAction<{
+        channel: string;
+        audienceEstimation: number;
+        marketEstimation: number;
+      }>
+    ) => {
+      const { channel, audienceEstimation, marketEstimation } = action.payload;
+      if (state.omnichannel.channelData[channel]) {
+        state.omnichannel.channelData[channel].estimations = {
+          audienceEstimation,
+          marketEstimation
+        };
+      }
+    },
+    
+    // Удаление данных канала (когда канал отключается)
+    removeChannelData: (state, action: PayloadAction<string>) => {
+      const channel = action.payload;
+      delete state.omnichannel.channelData[channel];
     },
 
     // Estimations Actions
@@ -361,6 +405,8 @@ export const {
   setCarryOverMode,
   updateChannelSectionData,
   initializeChannelData,
+  updateChannelEstimations,
+  removeChannelData,
   updateEstimations,
   resetCampaign,
   setCampaignData,

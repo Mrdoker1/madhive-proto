@@ -1,23 +1,97 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Checkbox, Text, Button, Grid, Badge, CloseButton } from '@mantine/core';
 import { interestCategories, type InterestCategory } from '@/data/interestsData';
+import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
+import { updateChannelSectionData, setCarryOverMode, updateChannelEstimations } from '@/store/slices/campaignSlice';
+import { calculateAudienceEstimation, calculateMarketEstimation } from '@/utils/estimationCalculators';
 
-const InterestsSection = () => {
-  const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
+interface InterestsSectionProps {
+  channel: string;
+  isFirstChannel?: boolean;
+}
+
+const InterestsSection = ({ channel, isFirstChannel = false }: InterestsSectionProps) => {
+  const dispatch = useAppDispatch();
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
 
+  // Получаем данные из Redux для конкретного канала
+  const channelData = useAppSelector((state) => state.campaign.omnichannel.channelData);
+  const carryOverMode = useAppSelector((state) => state.campaign.omnichannel.carryOverMode);
+  const budgetAllocation = useAppSelector((state) => state.campaign.channels.budgetAllocation); // ✅ channels, не budget!
+  const selectedChannels = useAppSelector((state) => state.campaign.channels.selectedChannels);
+  
+  // Убедимся что selectedInterests всегда массив
+  const rawInterests = channelData[channel]?.interests;
+  const selectedInterests = Array.isArray(rawInterests) ? rawInterests : [];
+
   const handleInterestToggle = (interest: string, checked: boolean) => {
-    if (checked) {
-      setSelectedInterests([...selectedInterests, interest]);
-    } else {
-      setSelectedInterests(selectedInterests.filter(i => i !== interest));
+    const newInterests = checked
+      ? [...selectedInterests, interest]
+      : selectedInterests.filter(i => i !== interest);
+
+    // Если это не первый канал и carry over активен, отключаем его
+    if (!isFirstChannel && carryOverMode) {
+      dispatch(setCarryOverMode(false));
+    }
+
+    // Обновляем данные для текущего канала
+    dispatch(updateChannelSectionData({
+      channel,
+      section: 'interests',
+      data: newInterests
+    }));
+
+    // Пересчитываем estimations для канала
+    const audienceData = channelData[channel]?.audience || {
+      gender: [], age: [], income: [], education: [], householdSize: []
+    };
+    const geoData = channelData[channel]?.geo || { selectedZipCodes: [] };
+    const channelBudget = budgetAllocation?.[channel === 'preroll' ? 'display' : channel] || 0;
+
+    const newAudienceEstimation = calculateAudienceEstimation(audienceData, newInterests, channelBudget, channel);
+    const marketEstimation = calculateMarketEstimation(geoData.selectedZipCodes, channelBudget, channel);
+
+    dispatch(updateChannelEstimations({
+      channel,
+      audienceEstimation: newAudienceEstimation,
+      marketEstimation
+    }));
+
+    // Если carry over активен и это первый канал, распространяем изменения на все каналы
+    if (carryOverMode && isFirstChannel) {
+      selectedChannels.forEach((ch) => {
+        if (ch !== channel) {
+          dispatch(updateChannelSectionData({
+            channel: ch,
+            section: 'interests',
+            data: newInterests
+          }));
+
+          // Пересчитываем estimations для других каналов
+          const otherChannelAudience = channelData[ch]?.audience || {
+            gender: [], age: [], income: [], education: [], householdSize: []
+          };
+          const otherChannelGeo = channelData[ch]?.geo || { selectedZipCodes: [] };
+          const budgetKey = ch === 'preroll' ? 'display' : ch;
+          const otherChannelBudget = budgetAllocation?.[budgetKey] || 0;
+
+          const otherAudienceEstimation = calculateAudienceEstimation(otherChannelAudience, newInterests, otherChannelBudget, ch);
+          const otherMarketEstimation = calculateMarketEstimation(otherChannelGeo.selectedZipCodes, otherChannelBudget, ch);
+
+          dispatch(updateChannelEstimations({
+            channel: ch,
+            audienceEstimation: otherAudienceEstimation,
+            marketEstimation: otherMarketEstimation
+          }));
+        }
+      });
     }
   };
 
   const handleRemoveInterest = (interest: string) => {
-    setSelectedInterests(selectedInterests.filter(i => i !== interest));
+    handleInterestToggle(interest, false);
   };
 
   const toggleCategoryExpand = (categoryId: string) => {

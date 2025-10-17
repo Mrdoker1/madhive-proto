@@ -40,9 +40,9 @@ const CarryOverNotification = ({ onDismiss }: CarryOverNotificationProps) => {
           }
         }}
         withCloseButton={false}
-      >
-        Carried over input for Audiences, Geo and Dayparts
-      </Alert>
+              >
+                Carried over input for Audiences, Interests, Geo and Dayparts
+              </Alert>
     </motion.div>
   );
 };

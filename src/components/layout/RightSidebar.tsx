@@ -9,16 +9,48 @@ import Image from 'next/image';
 
 interface RightSidebarProps {
   className?: string;
+  isOmnichannel?: boolean; // Флаг для определения типа кампании
 }
 
-const RightSidebar: React.FC<RightSidebarProps> = ({ className = '' }) => {
+const RightSidebar: React.FC<RightSidebarProps> = ({ className = '', isOmnichannel = false }) => {
   const dispatch = useAppDispatch();
   
   // Получаем данные кампании из глобального стейта
   const totalBudget = useAppSelector((state) => state.campaign.budget.totalBudget);
-  const audienceEstimation = useAppSelector((state) => state.campaign.estimations.audienceEstimation);
-  const marketEstimation = useAppSelector((state) => state.campaign.estimations.marketEstimation);
+  const linearAudienceEstimation = useAppSelector((state) => state.campaign.estimations.audienceEstimation);
+  const linearMarketEstimation = useAppSelector((state) => state.campaign.estimations.marketEstimation);
   const audienceData = useAppSelector((state) => state.campaign.audience);
+  
+  // Для omnichannel получаем данные из каналов
+  const channelData = useAppSelector((state) => state.campaign.omnichannel.channelData);
+  const selectedChannels = useAppSelector((state) => state.campaign.channels.selectedChannels);
+  
+  // Вычисляем суммарные estimations для omnichannel (только для выбранных каналов)
+  const omnichannelAudienceEstimation = useMemo(() => {
+    if (!isOmnichannel) return 0;
+    // Audience НЕ может быть больше Market - это один и тот же пул людей
+    // Берем максимальное значение среди каналов (лучший охват)
+    const audienceValues = selectedChannels
+      .filter(ch => ch !== 'linear_tv')
+      .map(ch => channelData[ch]?.estimations?.audienceEstimation || 0);
+    
+    return audienceValues.length > 0 ? Math.max(...audienceValues) : 0;
+  }, [isOmnichannel, channelData, selectedChannels]);
+  
+  const omnichannelMarketEstimation = useMemo(() => {
+    if (!isOmnichannel) return 0;
+    // Market НЕ суммируется - это размер доступного рынка (одни и те же люди)
+    // Берём максимальное значение из всех выбранных каналов
+    const marketValues = selectedChannels
+      .filter(ch => ch !== 'linear_tv')
+      .map(ch => channelData[ch]?.estimations?.marketEstimation || 0);
+    
+    return marketValues.length > 0 ? Math.max(...marketValues) : 0;
+  }, [isOmnichannel, channelData, selectedChannels]);
+  
+  // Используем правильные значения в зависимости от типа кампании
+  const audienceEstimation = isOmnichannel ? omnichannelAudienceEstimation : linearAudienceEstimation;
+  const marketEstimation = isOmnichannel ? omnichannelMarketEstimation : linearMarketEstimation;
   
   // Локальное состояние для редактирования бюджета
   const [budgetInput, setBudgetInput] = useState('');
@@ -86,12 +118,15 @@ const RightSidebar: React.FC<RightSidebarProps> = ({ className = '' }) => {
 
   // Функция для расчета общей аудитории (мемоизированная)
   const calculateAudienceEstimation = useCallback(() => {
+    // Используем правильное значение market estimation для linear
+    const currentMarketEstimation = isOmnichannel ? omnichannelMarketEstimation : linearMarketEstimation;
+    
     // Если нет Market Estimation, то и Audience Estimation должен быть 0
-    if (marketEstimation === 0) {
+    if (currentMarketEstimation === 0) {
       return 0;
     }
     
-    const totalPopulation = marketEstimation;
+    const totalPopulation = currentMarketEstimation;
     
     // Если ничего не выбрано в аудитории - возвращаем полную аудиторию рынков
     const hasSelections = Object.values(audienceData).some(arr => Array.isArray(arr) && arr.length > 0);
@@ -121,15 +156,18 @@ const RightSidebar: React.FC<RightSidebarProps> = ({ className = '' }) => {
     });
     
     return Math.round(totalPopulation * audienceMultiplier);
-  }, [marketEstimation, audienceData, audienceMapping]);
+  }, [isOmnichannel, omnichannelMarketEstimation, linearMarketEstimation, audienceData, audienceMapping]);
 
   // Автоматически обновляем Audience Estimation при изменении выбранной аудитории или market estimation
+  // Только для linear кампаний (не для omnichannel)
   useEffect(() => {
-    const calculatedAudience = calculateAudienceEstimation();
-    if (calculatedAudience !== audienceEstimation) {
-      dispatch(updateEstimations({ audienceEstimation: calculatedAudience }));
+    if (!isOmnichannel) {
+      const calculatedAudience = calculateAudienceEstimation();
+      if (calculatedAudience !== linearAudienceEstimation) {
+        dispatch(updateEstimations({ audienceEstimation: calculatedAudience }));
+      }
     }
-  }, [audienceData, audienceEstimation, marketEstimation, dispatch, calculateAudienceEstimation]);
+  }, [audienceData, linearAudienceEstimation, linearMarketEstimation, dispatch, calculateAudienceEstimation, isOmnichannel]);
 
   // Обработчик изменения бюджета
   const handleBudgetChange = (event: React.ChangeEvent<HTMLInputElement>) => {

@@ -4,7 +4,8 @@ import { useState, useRef, useEffect } from 'react';
 import { Select, Checkbox, MultiSelect, Button, Group, Text } from '@mantine/core';
 import { zipCodesData } from '@/data/zipCodesData';
 import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
-import { updateChannelSectionData, setCarryOverMode } from '@/store/slices/campaignSlice';
+import { updateChannelSectionData, setCarryOverMode, updateChannelEstimations } from '@/store/slices/campaignSlice';
+import { calculateAudienceEstimation, calculateMarketEstimation } from '@/utils/estimationCalculators';
 
 interface GeoSectionProps {
   channel?: string;
@@ -15,6 +16,7 @@ const GeoSection = ({ channel, isFirstChannel = true }: GeoSectionProps) => {
   const dispatch = useAppDispatch();
   const carryOverMode = useAppSelector((state) => state.campaign.omnichannel.carryOverMode);
   const channelData = useAppSelector((state) => state.campaign.omnichannel.channelData);
+  const budgetAllocation = useAppSelector((state) => state.campaign.channels.budgetAllocation);
   
   // Получаем данные для текущего канала
   const geoData = channel 
@@ -45,6 +47,22 @@ const GeoSection = ({ channel, isFirstChannel = true }: GeoSectionProps) => {
         data: { selectedZipCodes: values }
       }));
       
+      // Пересчитываем estimations для канала
+      const audienceData = channelData[channel]?.audience || {
+        gender: [], age: [], income: [], education: [], householdSize: []
+      };
+      const interests = channelData[channel]?.interests || [];
+      const channelBudget = budgetAllocation?.[channel === 'preroll' ? 'display' : channel] || 0;
+      
+      const audienceEstimation = calculateAudienceEstimation(audienceData, interests, channelBudget, channel);
+      const newMarketEstimation = calculateMarketEstimation(values, channelBudget, channel);
+      
+      dispatch(updateChannelEstimations({
+        channel,
+        audienceEstimation,
+        marketEstimation: newMarketEstimation
+      }));
+      
       // Если carry over режим активен, копируем данные на все каналы
       if (carryOverMode && isFirstChannel) {
         const allChannels = Object.keys(channelData);
@@ -54,6 +72,21 @@ const GeoSection = ({ channel, isFirstChannel = true }: GeoSectionProps) => {
               channel: ch,
               section: 'geo',
               data: { selectedZipCodes: values }
+            }));
+            
+            // Обновляем estimations для других каналов тоже
+            const chAudienceData = channelData[ch]?.audience || {
+              gender: [], age: [], income: [], education: [], householdSize: []
+            };
+            const chInterests = channelData[ch]?.interests || [];
+            const chChannelBudget = budgetAllocation?.[ch === 'preroll' ? 'display' : ch] || 0;
+            const chAudienceEstimation = calculateAudienceEstimation(chAudienceData, chInterests, chChannelBudget, ch);
+            const chMarketEstimation = calculateMarketEstimation(values, chChannelBudget, ch);
+            
+            dispatch(updateChannelEstimations({
+              channel: ch,
+              audienceEstimation: chAudienceEstimation,
+              marketEstimation: chMarketEstimation
             }));
           }
         });

@@ -1,7 +1,8 @@
 import { Checkbox, Text, Grid } from '@mantine/core';
 import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
-import { updateAudienceData, updateChannelSectionData, setCarryOverMode } from '@/store/slices/campaignSlice';
+import { updateAudienceData, updateChannelSectionData, setCarryOverMode, updateChannelEstimations } from '@/store/slices/campaignSlice';
 import { audienceCategories } from '@/data/audienceData';
+import { calculateAudienceEstimation, calculateMarketEstimation } from '@/utils/estimationCalculators';
 
 interface AudiencesSectionProps {
   channel?: string;
@@ -13,6 +14,7 @@ const AudiencesSection = ({ channel, isFirstChannel = true }: AudiencesSectionPr
   const carryOverMode = useAppSelector((state) => state.campaign.omnichannel.carryOverMode);
   const channelData = useAppSelector((state) => state.campaign.omnichannel.channelData);
   const linearAudienceData = useAppSelector((state) => state.campaign.audience);
+  const budgetAllocation = useAppSelector((state) => state.campaign.channels.budgetAllocation);
   
   // Если это omnichannel кампания и есть канал, используем данные для конкретного канала
   // В режиме carry over используем данные первого канала для всех
@@ -34,10 +36,26 @@ const AudiencesSection = ({ channel, isFirstChannel = true }: AudiencesSectionPr
     // Обновляем данные
     if (channel) {
       // Omnichannel: обновляем данные для конкретного канала
+      const updatedAudienceData = { ...audienceData, [category]: newValues };
+      
       dispatch(updateChannelSectionData({
         channel,
         section: 'audience',
         data: { [category]: newValues }
+      }));
+      
+      // Пересчитываем estimations для канала
+      const interests = channelData[channel]?.interests || [];
+      const geoData = channelData[channel]?.geo || { selectedZipCodes: [] };
+      const channelBudget = budgetAllocation?.[channel === 'preroll' ? 'display' : channel] || 0;
+      
+      const newAudienceEstimation = calculateAudienceEstimation(updatedAudienceData, interests, channelBudget, channel);
+      const marketEstimation = calculateMarketEstimation(geoData.selectedZipCodes, channelBudget, channel);
+      
+      dispatch(updateChannelEstimations({
+        channel,
+        audienceEstimation: newAudienceEstimation,
+        marketEstimation
       }));
       
       // Если carry over режим активен, копируем данные на все каналы
@@ -49,6 +67,19 @@ const AudiencesSection = ({ channel, isFirstChannel = true }: AudiencesSectionPr
               channel: ch,
               section: 'audience',
               data: { [category]: newValues }
+            }));
+            
+            // Обновляем estimations для других каналов тоже
+            const chInterests = channelData[ch]?.interests || [];
+            const chGeoData = channelData[ch]?.geo || { selectedZipCodes: [] };
+            const chChannelBudget = budgetAllocation?.[ch === 'preroll' ? 'display' : ch] || 0;
+            const chAudienceEstimation = calculateAudienceEstimation(updatedAudienceData, chInterests, chChannelBudget, ch);
+            const chMarketEstimation = calculateMarketEstimation(chGeoData.selectedZipCodes, chChannelBudget, ch);
+            
+            dispatch(updateChannelEstimations({
+              channel: ch,
+              audienceEstimation: chAudienceEstimation,
+              marketEstimation: chMarketEstimation
             }));
           }
         });

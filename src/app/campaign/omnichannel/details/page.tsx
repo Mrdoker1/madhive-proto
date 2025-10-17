@@ -17,8 +17,9 @@ import OmnichannelRightSidebar from "@/components/layout/OmnichannelRightSidebar
 import CarryOverNotification from "@/components/ui/CarryOverNotification";
 import { Text } from '@mantine/core';
 import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
-import { setCarryOverMode, initializeChannelData } from '@/store/slices/campaignSlice';
+import { setCarryOverMode, initializeChannelData, updateChannelEstimations } from '@/store/slices/campaignSlice';
 import { AnimatePresence } from 'framer-motion';
+import { calculateAudienceEstimation, calculateMarketEstimation } from '@/utils/estimationCalculators';
 
 type ChannelType = 'preroll' | 'ctv' | 'audio' | 'social' | 'search' | 'email';
 
@@ -50,16 +51,33 @@ export default function OmnichannelDetailsPage() {
   const [activeChannel, setActiveChannel] = useState<ChannelType | null>(null);
   const firstChannelRef = useRef<ChannelType | null>(null);
   
+  const budgetAllocation = useAppSelector((state) => state.campaign.channels.budgetAllocation);
+  
   // Инициализация данных для каждого канала при первой загрузке
   useEffect(() => {
     if (availableChannels.length > 0) {
       dispatch(initializeChannelData(availableChannels));
+      
+      // Инициализируем базовые estimations для всех каналов
+      availableChannels.forEach(ch => {
+        const channelBudget = budgetAllocation?.[ch === 'preroll' ? 'display' : ch] || 0;
+        const baseAudienceData = { gender: [], age: [], income: [], education: [], householdSize: [] };
+        const audienceEstimation = calculateAudienceEstimation(baseAudienceData, [], channelBudget, ch);
+        const marketEstimation = calculateMarketEstimation([], channelBudget, ch);
+        
+        dispatch(updateChannelEstimations({
+          channel: ch,
+          audienceEstimation,
+          marketEstimation
+        }));
+      });
+      
       if (!activeChannel) {
         setActiveChannel(availableChannels[0]);
         firstChannelRef.current = availableChannels[0];
       }
     }
-  }, [availableChannels, activeChannel, dispatch]);
+  }, [availableChannels, activeChannel, budgetAllocation, dispatch]);
   
   // Отслеживание смены вкладки для отключения carry over режима
   const handleChannelChange = (channelId: ChannelType) => {
@@ -176,7 +194,10 @@ export default function OmnichannelDetailsPage() {
         </SectionWrapper>
 
         <SectionWrapper id="interests" title="Interests">
-          <InterestsSection />
+          <InterestsSection 
+            channel={activeChannel || 'preroll'}
+            isFirstChannel={activeChannel === firstChannelRef.current}
+          />
         </SectionWrapper>
 
         <SectionWrapper id="geo" title="Geo">

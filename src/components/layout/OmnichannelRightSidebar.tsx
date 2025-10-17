@@ -35,6 +35,7 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({
   // Получаем распределение бюджета и total budget из Redux
   const budgetAllocation = useAppSelector((state) => state.campaign.channels.budgetAllocation);
   const totalBudget = useAppSelector((state) => state.campaign.budget.totalBudget) || 390250;
+  const channelData = useAppSelector((state) => state.campaign.omnichannel.channelData);
 
   const allChannelPills: ChannelPill[] = [
     { id: 'total', label: 'Total' },
@@ -91,6 +92,34 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({
     const storageId = getStorageChannelId(channelId);
     const channelBudget = budgetAllocation[storageId] || 0;
     return (channelBudget / totalBudget) * 100;
+  };
+
+  // Получаем Audience Estimation для канала
+  const getAudienceEstimation = (): number => {
+    if (activeChannel === 'total') {
+      // Для Total - берем максимум (не суммируем, это один пул людей)
+      const audienceValues = selectedChannels.map(ch => 
+        channelData[ch]?.estimations?.audienceEstimation || 0
+      );
+      return audienceValues.length > 0 ? Math.max(...audienceValues) : 0;
+    } else {
+      // Для конкретного канала
+      return channelData[activeChannel]?.estimations?.audienceEstimation || 0;
+    }
+  };
+
+  // Получаем Market Estimation для канала
+  const getMarketEstimation = (): number => {
+    if (activeChannel === 'total') {
+      // Для Total - берём максимальное значение (размер рынка не суммируется)
+      const marketValues = selectedChannels.map(ch => 
+        channelData[ch]?.estimations?.marketEstimation || 0
+      );
+      return marketValues.length > 0 ? Math.max(...marketValues) : 0;
+    } else {
+      // Для конкретного канала
+      return channelData[activeChannel]?.estimations?.marketEstimation || 0;
+    }
   };
 
   // Вычисляем распределение для выбранных каналов в режиме Total
@@ -265,12 +294,14 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({
             padding: '8px 16px',
             marginBottom: '8px'
           }}>
-            <Text size="xl" fw={600} ta="center" c="dimmed">--</Text>
+            <Text size="xl" fw={600} ta="center">
+              {getAudienceEstimation().toLocaleString('en-US')}
+            </Text>
           </div>
           
           {activeChannel === 'total' && selectedChannels.length > 0 && (
             <Text size="xs" c="dimmed" ta="right" mb="md">
-              of -- in {selectedChannels.length} Channel{selectedChannels.length !== 1 ? 's' : ''}
+              across {selectedChannels.length} Channel{selectedChannels.length !== 1 ? 's' : ''}
             </Text>
           )}
           
@@ -361,16 +392,12 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({
             backgroundColor: '#FFFFFF',
             borderRadius: '8px',
             padding: '8px 16px',
-            marginBottom: '8px'
+            marginBottom: '16px'
           }}>
-            <Text size="xl" fw={600} ta="center" c="dimmed">--</Text>
-          </div>
-          
-          {activeChannel === 'total' && selectedChannels.length > 0 && (
-            <Text size="xs" c="dimmed" ta="right" mb="md">
-              of -- in {selectedChannels.length} Channel{selectedChannels.length !== 1 ? 's' : ''}
+            <Text size="xl" fw={600} ta="center">
+              {getMarketEstimation().toLocaleString('en-US')}
             </Text>
-          )}
+          </div>
           
           {/* Progress Bar - empty/gray for no data */}
           <div style={{ 
