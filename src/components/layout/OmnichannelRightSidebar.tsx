@@ -2,8 +2,10 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { Text, Card, Group } from '@mantine/core';
+import { IconCurrencyDollar } from '@tabler/icons-react';
 import Image from 'next/image';
-import { useAppSelector } from '@/hooks/useRedux';
+import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
+import { updateBudgetData } from '@/store/slices/campaignSlice';
 import ChannelPills, { ChannelPill } from '@/components/ui/ChannelPills';
 
 // Цвета каналов из allocation
@@ -23,19 +25,56 @@ type ChannelType = 'total' | 'ctv' | 'preroll' | 'audio' | 'social' | 'search' |
 interface OmnichannelRightSidebarProps {
   className?: string;
   selectedChannels?: string[]; // Массив выбранных каналов (preroll, ctv, audio, etc.)
+  readOnly?: boolean; // Если true, то бюджет нельзя редактировать
 }
 
 const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({ 
   className = '',
-  selectedChannels = [] 
+  selectedChannels = [],
+  readOnly = false
 }) => {
+  const dispatch = useAppDispatch();
   const [activeChannel, setActiveChannel] = useState<ChannelType>('total');
   const [audienceSize, setAudienceSize] = useState<'Small' | 'Good' | 'Strong'>('Strong');
   
   // Получаем распределение бюджета и total budget из Redux
   const budgetAllocation = useAppSelector((state) => state.campaign.channels.budgetAllocation);
-  const totalBudget = useAppSelector((state) => state.campaign.budget.totalBudget) || 390250;
+  const totalBudget = useAppSelector((state) => state.campaign.budget.totalBudget) || 0;
   const channelData = useAppSelector((state) => state.campaign.omnichannel.channelData);
+  
+  // Локальное состояние для редактирования бюджета
+  const [budgetInput, setBudgetInput] = useState('');
+  
+  // Функция для форматирования числа с разделителями
+  const formatNumber = (value: string): string => {
+    const cleanValue = value.replace(/[^\d.]/g, '');
+    const parts = cleanValue.split('.');
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    return parts.join('.');
+  };
+  
+  // Синхронизируем локальное состояние с глобальным при загрузке
+  useEffect(() => {
+    if (totalBudget > 0) {
+      setBudgetInput(formatNumber(totalBudget.toString()));
+    }
+  }, [totalBudget]);
+  
+  // Обработчик изменения бюджета
+  const handleBudgetChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+    // Убираем запятые для валидации
+    const cleanValue = value.replace(/,/g, '');
+    
+    // Разрешаем только цифры и точку для десятичных чисел
+    if (/^\d*\.?\d*$/.test(cleanValue)) {
+      setBudgetInput(formatNumber(cleanValue));
+      
+      // Обновляем глобальный стейт
+      const numericValue = parseFloat(cleanValue) || 0;
+      dispatch(updateBudgetData({ totalBudget: numericValue }));
+    }
+  };
 
   const allChannelPills: ChannelPill[] = [
     { id: 'total', label: 'Total' },
@@ -81,27 +120,28 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({
     ? allLegendChannels.filter(channel => selectedChannels.includes(channel.id))
     : allLegendChannels;
 
-  // Маппинг ID каналов (preroll в UI = display в store)
-  const getStorageChannelId = (uiChannelId: string): string => {
-    return uiChannelId === 'preroll' ? 'display' : uiChannelId;
-  };
-
   // Вычисляем процент бюджета для канала
   const getChannelBudgetPercent = (channelId: string): number => {
     if (!budgetAllocation || totalBudget === 0) return 0;
-    const storageId = getStorageChannelId(channelId);
-    const channelBudget = budgetAllocation[storageId] || 0;
+    const channelBudget = budgetAllocation[channelId] || 0;
     return (channelBudget / totalBudget) * 100;
   };
 
   // Получаем Audience Estimation для канала
   const getAudienceEstimation = (): number => {
     if (activeChannel === 'total') {
-      // Для Total - берем максимум (не суммируем, это один пул людей)
+      // Для Total - суммируем все каналы с учетом overlap
+      // Простая логика: ~30% людей видят рекламу в нескольких каналах
       const audienceValues = selectedChannels.map(ch => 
         channelData[ch]?.estimations?.audienceEstimation || 0
       );
-      return audienceValues.length > 0 ? Math.max(...audienceValues) : 0;
+      
+      if (audienceValues.length === 0) return 0;
+      if (audienceValues.length === 1) return audienceValues[0];
+      
+      // Суммируем и применяем фиксированный коэффициент 0.7
+      const totalSum = audienceValues.reduce((sum, val) => sum + val, 0);
+      return Math.round(totalSum * 0.7);
     } else {
       // Для конкретного канала
       return channelData[activeChannel]?.estimations?.audienceEstimation || 0;
@@ -217,15 +257,42 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({
             padding: '8px 16px',
             marginBottom: '8px'
           }}>
-            <Text size="xl" fw={600} ta="center">
-              {activeChannel === 'total' ? (
-                `$ ${totalBudget.toLocaleString('en-US')}`
-              ) : budgetAllocation && budgetAllocation[getStorageChannelId(activeChannel)] ? (
-                `$ ${budgetAllocation[getStorageChannelId(activeChannel)].toLocaleString('en-US')}`
+            {activeChannel === 'total' ? (
+              readOnly ? (
+                // Режим только для чтения - показываем текст
+                <Text size="xl" fw={600} ta="center">
+                  $ {totalBudget.toLocaleString('en-US')}
+                </Text>
               ) : (
-                '$ 0'
-              )}
-            </Text>
+                // Режим редактирования - показываем input
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                  <IconCurrencyDollar size={20} color="#666" />
+                  <input
+                    type="text"
+                    value={budgetInput}
+                    onChange={handleBudgetChange}
+                    placeholder="Enter budget"
+                    style={{
+                      border: 'none',
+                      outline: 'none',
+                      fontSize: '24px',
+                      fontWeight: 600,
+                      textAlign: 'center',
+                      backgroundColor: 'transparent',
+                      width: '100%'
+                    }}
+                  />
+                </div>
+              )
+            ) : (
+              <Text size="xl" fw={600} ta="center">
+                {budgetAllocation && budgetAllocation[activeChannel] ? (
+                  `$ ${budgetAllocation[activeChannel].toLocaleString('en-US')}`
+                ) : (
+                  '$ 0'
+                )}
+              </Text>
+            )}
           </div>
           
           {activeChannel === 'total' && selectedChannels.length > 0 && (
@@ -234,7 +301,7 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({
             </Text>
           )}
           
-          {activeChannel !== 'total' && budgetAllocation && budgetAllocation[getStorageChannelId(activeChannel)] && (
+          {activeChannel !== 'total' && budgetAllocation && budgetAllocation[activeChannel] && (
             <Text size="xs" c="dimmed" ta="right" mb="md">
               {getChannelBudgetPercent(activeChannel).toFixed(1)}% of total budget
             </Text>
@@ -282,150 +349,154 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({
           </div>
         </div>
 
-        {/* Audience Estimation */}
-        <div>
-          <Text size="sm" fw={500} style={{ color: 'var(--form-label-color)', marginBottom: '8px' }}>
-            Audience Estimation
-          </Text>
-          
-          <div style={{ 
-            backgroundColor: '#FFFFFF',
-            borderRadius: '8px',
-            padding: '8px 16px',
-            marginBottom: '8px'
-          }}>
-            <Text size="xl" fw={600} ta="center">
-              {getAudienceEstimation().toLocaleString('en-US')}
+        {/* Audience Estimation - показываем только если выбран хотя бы один канал И введен бюджет */}
+        {selectedChannels.length > 0 && totalBudget > 0 && (
+          <div>
+            <Text size="sm" fw={500} style={{ color: 'var(--form-label-color)', marginBottom: '8px' }}>
+              Audience Estimation
             </Text>
+            
+            <div style={{ 
+              backgroundColor: '#FFFFFF',
+              borderRadius: '8px',
+              padding: '8px 16px',
+              marginBottom: '8px'
+            }}>
+              <Text size="xl" fw={600} ta="center">
+                {getAudienceEstimation().toLocaleString('en-US')}
+              </Text>
+            </div>
+            
+            {activeChannel === 'total' && selectedChannels.length > 0 && (
+              <Text size="xs" c="dimmed" ta="right" mb="md">
+                across {selectedChannels.length} Channel{selectedChannels.length !== 1 ? 's' : ''}
+              </Text>
+            )}
+            
+            {/* Progress Bar - пустой для Audience (нет данных) */}
+            <div style={{ 
+              display: 'flex', 
+              height: '8px', 
+              borderRadius: '4px',
+              overflow: 'hidden',
+              marginBottom: '12px'
+            }}>
+              <div style={{ width: '100%', backgroundColor: '#E5E5E5' }} />
+            </div>
+            
+            {/* Legend */}
+            <div style={{ 
+              display: 'grid',
+              gridTemplateColumns: `repeat(${Math.min(visibleLegendChannels.length, 3)}, 1fr)`,
+              gap: '8px 4px',
+              fontSize: '11px',
+              color: '#666'
+            }}>
+              {visibleLegendChannels.map(channel => (
+                <div key={channel.id} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#CCCCCC' }} />
+                  <span>{channel.label}</span>
+                </div>
+              ))}
+            </div>
+            
+            <Text size="sm" fw={500} mb="xs" mt="lg">Your Audience size is: {audienceSize}</Text>
+            <Group gap="xs" mb="md">
+              <div 
+                onClick={() => setAudienceSize('Small')}
+                style={{ 
+                  flex: 1, 
+                  padding: '2px', 
+                  textAlign: 'center', 
+                  backgroundColor: audienceSize === 'Small' ? '#B46565' : '#EBE6EC',
+                  color: audienceSize === 'Small' ? '#FFFFFF' : '#000000',
+                  borderRadius: '6px',
+                  fontSize: '14px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease'
+                }}
+              >Small</div>
+              <div 
+                onClick={() => setAudienceSize('Good')}
+                style={{ 
+                  flex: 1, 
+                  padding: '2px', 
+                  textAlign: 'center', 
+                  backgroundColor: audienceSize === 'Good' ? '#AFB465' : '#EBE6EC',
+                  color: audienceSize === 'Good' ? '#FFFFFF' : '#000000',
+                  borderRadius: '6px',
+                  fontSize: '14px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease'
+                }}
+              >Good</div>
+              <div 
+                onClick={() => setAudienceSize('Strong')}
+                style={{ 
+                  flex: 1, 
+                  padding: '2px', 
+                  textAlign: 'center', 
+                  backgroundColor: audienceSize === 'Strong' ? '#65B48C' : '#EBE6EC',
+                  color: audienceSize === 'Strong' ? '#FFFFFF' : '#000000',
+                  borderRadius: '6px',
+                  fontSize: '14px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease'
+                }}
+              >Strong</div>
+            </Group>
           </div>
-          
-          {activeChannel === 'total' && selectedChannels.length > 0 && (
-            <Text size="xs" c="dimmed" ta="right" mb="md">
-              across {selectedChannels.length} Channel{selectedChannels.length !== 1 ? 's' : ''}
-            </Text>
-          )}
-          
-          {/* Progress Bar - пустой для Audience (нет данных) */}
-          <div style={{ 
-            display: 'flex', 
-            height: '8px', 
-            borderRadius: '4px',
-            overflow: 'hidden',
-            marginBottom: '12px'
-          }}>
-            <div style={{ width: '100%', backgroundColor: '#E5E5E5' }} />
-          </div>
-          
-          {/* Legend */}
-          <div style={{ 
-            display: 'grid',
-            gridTemplateColumns: `repeat(${Math.min(visibleLegendChannels.length, 3)}, 1fr)`,
-            gap: '8px 4px',
-            fontSize: '11px',
-            color: '#666'
-          }}>
-            {visibleLegendChannels.map(channel => (
-              <div key={channel.id} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#CCCCCC' }} />
-                <span>{channel.label}</span>
-              </div>
-            ))}
-          </div>
-          
-          <Text size="sm" fw={500} mb="xs" mt="lg">Your Audience size is: {audienceSize}</Text>
-          <Group gap="xs" mb="md">
-            <div 
-              onClick={() => setAudienceSize('Small')}
-              style={{ 
-                flex: 1, 
-                padding: '2px', 
-                textAlign: 'center', 
-                backgroundColor: audienceSize === 'Small' ? '#B46565' : '#EBE6EC',
-                color: audienceSize === 'Small' ? '#FFFFFF' : '#000000',
-                borderRadius: '6px',
-                fontSize: '14px',
-                fontWeight: 600,
-                cursor: 'pointer',
-                transition: 'all 0.2s ease'
-              }}
-            >Small</div>
-            <div 
-              onClick={() => setAudienceSize('Good')}
-              style={{ 
-                flex: 1, 
-                padding: '2px', 
-                textAlign: 'center', 
-                backgroundColor: audienceSize === 'Good' ? '#AFB465' : '#EBE6EC',
-                color: audienceSize === 'Good' ? '#FFFFFF' : '#000000',
-                borderRadius: '6px',
-                fontSize: '14px',
-                fontWeight: 600,
-                cursor: 'pointer',
-                transition: 'all 0.2s ease'
-              }}
-            >Good</div>
-            <div 
-              onClick={() => setAudienceSize('Strong')}
-              style={{ 
-                flex: 1, 
-                padding: '2px', 
-                textAlign: 'center', 
-                backgroundColor: audienceSize === 'Strong' ? '#65B48C' : '#EBE6EC',
-                color: audienceSize === 'Strong' ? '#FFFFFF' : '#000000',
-                borderRadius: '6px',
-                fontSize: '14px',
-                fontWeight: 600,
-                cursor: 'pointer',
-                transition: 'all 0.2s ease'
-              }}
-            >Strong</div>
-          </Group>
-        </div>
+        )}
 
-        {/* Market Estimation */}
-        <div>
-          <Text size="sm" fw={500} style={{ color: 'var(--form-label-color)', marginBottom: '8px' }}>
-            Market Estimation
-          </Text>
-          
-          <div style={{ 
-            backgroundColor: '#FFFFFF',
-            borderRadius: '8px',
-            padding: '8px 16px',
-            marginBottom: '16px'
-          }}>
-            <Text size="xl" fw={600} ta="center">
-              {getMarketEstimation().toLocaleString('en-US')}
+        {/* Market Estimation - показываем только если выбран хотя бы один канал И введен бюджет */}
+        {selectedChannels.length > 0 && totalBudget > 0 && (
+          <div>
+            <Text size="sm" fw={500} style={{ color: 'var(--form-label-color)', marginBottom: '8px' }}>
+              Market Estimation
             </Text>
+            
+            <div style={{ 
+              backgroundColor: '#FFFFFF',
+              borderRadius: '8px',
+              padding: '8px 16px',
+              marginBottom: '16px'
+            }}>
+              <Text size="xl" fw={600} ta="center">
+                {getMarketEstimation().toLocaleString('en-US')}
+              </Text>
+            </div>
+            
+            {/* Progress Bar - empty/gray for no data */}
+            <div style={{ 
+              display: 'flex',
+              height: '8px', 
+              borderRadius: '4px',
+              overflow: 'hidden',
+              marginBottom: '12px'
+            }}>
+              <div style={{ width: '100%', height: '100%', backgroundColor: '#E5E5E5' }} />
+            </div>
+            
+            {/* Legend - серая для Market (нет данных) */}
+            <div style={{ 
+              display: 'grid',
+              gridTemplateColumns: `repeat(${Math.min(visibleLegendChannels.length, 3)}, 1fr)`,
+              gap: '8px 4px',
+              fontSize: '11px',
+              color: '#666'
+            }}>
+              {visibleLegendChannels.map(channel => (
+                <div key={channel.id} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#CCCCCC' }} />
+                  <span>{channel.label}</span>
+                </div>
+              ))}
+            </div>
           </div>
-          
-          {/* Progress Bar - empty/gray for no data */}
-          <div style={{ 
-            display: 'flex',
-            height: '8px', 
-            borderRadius: '4px',
-            overflow: 'hidden',
-            marginBottom: '12px'
-          }}>
-            <div style={{ width: '100%', height: '100%', backgroundColor: '#E5E5E5' }} />
-          </div>
-          
-          {/* Legend - серая для Market (нет данных) */}
-          <div style={{ 
-            display: 'grid',
-            gridTemplateColumns: `repeat(${Math.min(visibleLegendChannels.length, 3)}, 1fr)`,
-            gap: '8px 4px',
-            fontSize: '11px',
-            color: '#666'
-          }}>
-            {visibleLegendChannels.map(channel => (
-              <div key={channel.id} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#CCCCCC' }} />
-                <span>{channel.label}</span>
-              </div>
-            ))}
-          </div>
-        </div>
+        )}
 
         {/* AI Suggestions */}
         <Card

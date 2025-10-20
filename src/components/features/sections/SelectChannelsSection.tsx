@@ -15,7 +15,7 @@ interface Channel {
 }
 
 const channels: Channel[] = [
-  { id: 'display', name: 'Pre Roll', icon: '/assets/icons/channels/display.svg' },
+  { id: 'preroll', name: 'Pre Roll', icon: '/assets/icons/channels/preroll.svg' },
   { id: 'ctv', name: 'CTV', icon: '/assets/icons/channels/ctv.svg' },
   { id: 'audio', name: 'Audio', icon: '/assets/icons/channels/audio.svg' },
   { id: 'social', name: 'Social', icon: '/assets/icons/channels/social.svg' },
@@ -34,11 +34,40 @@ export const SelectChannelsSection: React.FC<SelectChannelsSectionProps> = ({
   const dispatch = useAppDispatch();
   const channelsData = useAppSelector((state) => state.campaign.channels);
   const budgetAllocation = useAppSelector((state) => state.campaign.channels.budgetAllocation); // ✅ channels, не budget!
+  const totalBudget = useAppSelector((state) => state.campaign.budget.totalBudget) || 0;
   const channelData = useAppSelector((state) => state.campaign.omnichannel.channelData);
   
   const [selectedChannels, setSelectedChannels] = useState<Set<string>>(
     new Set(channelsData.selectedChannels)
   );
+
+  // МИГРАЦИЯ: при загрузке проверяем наличие старого ключа 'display' и переименовываем в 'preroll'
+  useEffect(() => {
+    let needsUpdate = false;
+    const updates: any = {};
+    
+    // Мигрируем budgetAllocation: display → preroll
+    if (budgetAllocation && budgetAllocation['display'] !== undefined) {
+      const migratedAllocation = { ...budgetAllocation };
+      migratedAllocation['preroll'] = migratedAllocation['display'];
+      delete migratedAllocation['display'];
+      updates.budgetAllocation = migratedAllocation;
+      needsUpdate = true;
+    }
+    
+    // Мигрируем selectedChannels: display → preroll
+    if (channelsData.selectedChannels.includes('display')) {
+      const migratedChannels = channelsData.selectedChannels.map(ch => 
+        ch === 'display' ? 'preroll' : ch
+      );
+      updates.selectedChannels = migratedChannels;
+      needsUpdate = true;
+    }
+    
+    if (needsUpdate) {
+      dispatch(updateChannelsData(updates));
+    }
+  }, []); // Выполняется только один раз при монтировании
 
   // Синхронизируем локальное состояние с Redux при изменении store
   useEffect(() => {
@@ -47,7 +76,8 @@ export const SelectChannelsSection: React.FC<SelectChannelsSectionProps> = ({
 
   // Пересчитываем estimations когда budgetAllocation меняется
   useEffect(() => {
-    if (budgetAllocation && channelsData.selectedChannels.length > 0) {
+    // Не рассчитываем estimations если totalBudget = 0
+    if (budgetAllocation && channelsData.selectedChannels.length > 0 && totalBudget > 0) {
       channelsData.selectedChannels.forEach(ch => {
         const channelBudget = budgetAllocation[ch] || 0;
         // Используем базовые значения (пустые фильтры)
@@ -65,12 +95,17 @@ export const SelectChannelsSection: React.FC<SelectChannelsSectionProps> = ({
         }));
       });
     }
-  }, [budgetAllocation, channelsData.selectedChannels, dispatch]); // ✅ Убрал channelData из зависимостей!
+  }, [budgetAllocation, channelsData.selectedChannels, totalBudget, dispatch]); // ✅ Добавил totalBudget в зависимости
 
   // Функция для инициализации и пересчета estimations для каналов
   const updateChannelEstimationsForChannels = (channels: string[]) => {
     // Инициализируем данные для новых каналов
     dispatch(initializeChannelData(channels));
+    
+    // Не рассчитываем estimations если totalBudget = 0
+    if (totalBudget === 0) {
+      return;
+    }
     
     // Пересчитываем estimations для всех каналов сразу после инициализации
     // Используем setTimeout чтобы дать Redux обновить store

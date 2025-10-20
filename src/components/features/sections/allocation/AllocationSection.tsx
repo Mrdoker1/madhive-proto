@@ -65,8 +65,36 @@ export const AllocationSection: React.FC = () => {
     const initializeChannelData = async () => {
       if (!totalBudget || selectedChannels.length === 0) return;
       
-      // Используем Budget Weight для более реалистичного распределения
-      const budgetAllocation = calculateDefaultBudgetAllocation(selectedChannels, totalBudget);
+      // Проверяем, есть ли уже сохраненное распределение бюджета в Redux
+      // Если есть - используем его, если нет - рассчитываем дефолтное
+      let budgetAllocation: Record<string, number>;
+      let needsSave = false; // Флаг: нужно ли сохранить в Redux
+      
+      if (channelsData.budgetAllocation && Object.keys(channelsData.budgetAllocation).length > 0) {
+        // Используем существующее распределение из Redux
+        budgetAllocation = { ...channelsData.budgetAllocation };
+        
+        // МИГРАЦИЯ: если есть старый ключ 'display', переименовываем в 'preroll'
+        if (budgetAllocation['display'] !== undefined) {
+          budgetAllocation['preroll'] = budgetAllocation['display'];
+          delete budgetAllocation['display'];
+          needsSave = true;
+        }
+        
+        // Проверяем, что ВСЕ выбранные каналы имеют бюджет
+        const allChannelsHaveBudget = selectedChannels.every(ch => budgetAllocation[ch] && budgetAllocation[ch] > 0);
+        
+        if (!allChannelsHaveBudget) {
+          // Если есть каналы без бюджета, пересчитываем распределение для всех
+          budgetAllocation = calculateDefaultBudgetAllocation(selectedChannels, totalBudget);
+          needsSave = true;
+        }
+      } else {
+        // Рассчитываем дефолтное распределение только при первой инициализации
+        budgetAllocation = calculateDefaultBudgetAllocation(selectedChannels, totalBudget);
+        needsSave = true;
+      }
+      
       const newChannelData: Record<string, ChannelPoint & SliderChannelAllocation> = {};
       const loadingStates: Record<string, boolean> = {};
 
@@ -105,12 +133,15 @@ export const AllocationSection: React.FC = () => {
       setChannelData(newChannelData);
       setIsLoading(loadingStates);
       
-      // Сохраняем распределение бюджета в Redux
-      dispatch(updateChannelsData({ budgetAllocation }));
+      // Сохраняем распределение бюджета в Redux если оно было изменено/пересчитано
+      if (needsSave) {
+        dispatch(updateChannelsData({ budgetAllocation }));
+      }
     };
 
     initializeChannelData();
-  }, [selectedChannels, totalBudget, dispatch]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedChannels, totalBudget, dispatch]); // Убрали channelsData.budgetAllocation из зависимостей
 
   const points = Object.values(channelData);
   
@@ -172,8 +203,7 @@ export const AllocationSection: React.FC = () => {
       
       setChannelData(finalData);
       
-      // Сохраняем распределение бюджета в Redux
-      dispatch(updateChannelsData({ budgetAllocation: newBudgets }));
+      console.log('[handleBudgetChange] ✅ Метрики обновлены!');
       
     } catch (error) {
       console.error('Failed to fetch metrics:', error);
@@ -203,6 +233,9 @@ export const AllocationSection: React.FC = () => {
 
     // Умное перераспределение с учетом коэффициентов
     const newBudgets = redistributeBudgetSmart(currentBudgets, channelId, clampedBudget, totalBudget);
+    
+    // 🚨 КРИТИЧНО: Сохраняем в Redux СРАЗУ, до async операций!
+    dispatch(updateChannelsData({ budgetAllocation: newBudgets }));
 
     // Обновляем состояние загрузки для всех каналов
     const loadingUpdates: Record<string, boolean> = {};

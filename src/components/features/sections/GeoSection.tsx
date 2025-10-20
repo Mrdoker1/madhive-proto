@@ -52,7 +52,7 @@ const GeoSection = ({ channel, isFirstChannel = true }: GeoSectionProps) => {
         gender: [], age: [], income: [], education: [], householdSize: []
       };
       const interests = channelData[channel]?.interests || [];
-      const channelBudget = budgetAllocation?.[channel === 'preroll' ? 'display' : channel] || 0;
+      const channelBudget = budgetAllocation?.[channel] || 0;
       
       const audienceEstimation = calculateAudienceEstimation(audienceData, interests, channelBudget, channel);
       const newMarketEstimation = calculateMarketEstimation(values, channelBudget, channel);
@@ -79,7 +79,7 @@ const GeoSection = ({ channel, isFirstChannel = true }: GeoSectionProps) => {
               gender: [], age: [], income: [], education: [], householdSize: []
             };
             const chInterests = channelData[ch]?.interests || [];
-            const chChannelBudget = budgetAllocation?.[ch === 'preroll' ? 'display' : ch] || 0;
+            const chChannelBudget = budgetAllocation?.[ch] || 0;
             const chAudienceEstimation = calculateAudienceEstimation(chAudienceData, chInterests, chChannelBudget, ch);
             const chMarketEstimation = calculateMarketEstimation(values, chChannelBudget, ch);
             

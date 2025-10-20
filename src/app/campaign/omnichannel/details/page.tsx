@@ -23,16 +23,6 @@ import { calculateAudienceEstimation, calculateMarketEstimation } from '@/utils/
 
 type ChannelType = 'preroll' | 'ctv' | 'audio' | 'social' | 'search' | 'email';
 
-// Маппинг между ID каналов в SelectChannelsSection и ChannelType
-const CHANNEL_ID_MAP: Record<string, ChannelType> = {
-  'display': 'preroll', // Display = Pre Roll
-  'ctv': 'ctv',
-  'audio': 'audio',
-  'social': 'social',
-  'search': 'search',
-  'email': 'email'
-};
-
 export default function OmnichannelDetailsPage() {
   const router = useRouter();
   const dispatch = useAppDispatch();
@@ -42,9 +32,7 @@ export default function OmnichannelDetailsPage() {
   
   // Фильтруем выбранные каналы (исключаем linear_tv, он не показывается на этой странице)
   const availableChannels = useMemo(() => {
-    return selectedChannelsFromRedux
-      .filter(channelId => channelId !== 'linear_tv' && CHANNEL_ID_MAP[channelId])
-      .map(channelId => CHANNEL_ID_MAP[channelId]);
+    return selectedChannelsFromRedux.filter(channelId => channelId !== 'linear_tv') as ChannelType[];
   }, [selectedChannelsFromRedux]);
   
   // Устанавливаем активный канал - первый из доступных
@@ -60,7 +48,7 @@ export default function OmnichannelDetailsPage() {
       
       // Инициализируем базовые estimations для всех каналов
       availableChannels.forEach(ch => {
-        const channelBudget = budgetAllocation?.[ch === 'preroll' ? 'display' : ch] || 0;
+        const channelBudget = budgetAllocation?.[ch] || 0;
         const baseAudienceData = { gender: [], age: [], income: [], education: [], householdSize: [] };
         const audienceEstimation = calculateAudienceEstimation(baseAudienceData, [], channelBudget, ch);
         const marketEstimation = calculateMarketEstimation([], channelBudget, ch);
@@ -262,7 +250,7 @@ export default function OmnichannelDetailsPage() {
         breadcrumbs={breadcrumbSteps} 
         title={`Channel Details (${availableChannels.length})`}
         showRightSidebar={true}
-        rightSidebarContent={<OmnichannelRightSidebar selectedChannels={availableChannels} />}
+        rightSidebarContent={<OmnichannelRightSidebar selectedChannels={availableChannels} readOnly={true} />}
         headerActions={
           channelPills.length > 0 ? (
             <ChannelPills

@@ -28,13 +28,18 @@ const RightSidebar: React.FC<RightSidebarProps> = ({ className = '', isOmnichann
   // Вычисляем суммарные estimations для omnichannel (только для выбранных каналов)
   const omnichannelAudienceEstimation = useMemo(() => {
     if (!isOmnichannel) return 0;
-    // Audience НЕ может быть больше Market - это один и тот же пул людей
-    // Берем максимальное значение среди каналов (лучший охват)
+    // Для omnichannel - суммируем все каналы с учетом overlap
+    // Простая логика: ~30% людей видят рекламу в нескольких каналах
     const audienceValues = selectedChannels
       .filter(ch => ch !== 'linear_tv')
       .map(ch => channelData[ch]?.estimations?.audienceEstimation || 0);
     
-    return audienceValues.length > 0 ? Math.max(...audienceValues) : 0;
+    if (audienceValues.length === 0) return 0;
+    if (audienceValues.length === 1) return audienceValues[0];
+    
+    // Суммируем и применяем фиксированный коэффициент 0.7
+    const totalSum = audienceValues.reduce((sum, val) => sum + val, 0);
+    return Math.round(totalSum * 0.7);
   }, [isOmnichannel, channelData, selectedChannels]);
   
   const omnichannelMarketEstimation = useMemo(() => {

@@ -19,8 +19,8 @@ export interface ChannelConfig {
 
 // Базовые значения для расчета reach каналов согласно предоставленным данным
 export const CHANNEL_CONFIGS: Record<string, ChannelConfig> = {
-  'display': {
-    id: 'display',
+  'preroll': {
+    id: 'preroll',
     name: 'Pre Roll',
     color: '#6633CC',
     maxReach: 45,              // 45% от общего reach - самый низкий

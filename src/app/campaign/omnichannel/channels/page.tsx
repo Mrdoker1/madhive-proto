@@ -13,16 +13,6 @@ import AllocationSection from "@/components/features/sections/AllocationSection"
 import RightSidebar from "@/components/layout/RightSidebar";
 import { useAppSelector } from '@/hooks/useRedux';
 
-// Маппинг между ID каналов
-const CHANNEL_ID_MAP: Record<string, string> = {
-  'display': 'display',
-  'ctv': 'ctv',
-  'audio': 'audio',
-  'social': 'social',
-  'search': 'search',
-  'email': 'email'
-};
-
 export default function OmnichannelChannelsPage() {
   const router = useRouter();
   
@@ -30,9 +20,7 @@ export default function OmnichannelChannelsPage() {
   
   // Фильтруем выбранные каналы (исключаем linear_tv)
   const availableChannels = useMemo(() => {
-    return selectedChannelsFromRedux
-      .filter(channelId => channelId !== 'linear_tv' && CHANNEL_ID_MAP[channelId])
-      .map(channelId => CHANNEL_ID_MAP[channelId]);
+    return selectedChannelsFromRedux.filter(channelId => channelId !== 'linear_tv');
   }, [selectedChannelsFromRedux]);
 
   // Бредкрамбсы для страницы Channels

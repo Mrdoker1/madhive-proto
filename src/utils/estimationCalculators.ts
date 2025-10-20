@@ -4,7 +4,6 @@ import { CampaignAudienceData } from '@/store/slices/campaignSlice';
 // Используем неровные числа для реалистичности
 const CHANNEL_BASE_AUDIENCE: Record<string, number> = {
   'preroll': 187456321,    // ~187M
-  'display': 187456321,    // ~187M (preroll использует display)
   'ctv': 123847562,        // ~124M
   'audio': 145328917,      // ~145M
   'social': 226789453,     // ~227M
@@ -24,11 +23,11 @@ export const calculateAudienceEstimation = (
   // Используем максимальную возможную аудиторию канала как ceiling
   const maxChannelAudience = CHANNEL_BASE_AUDIENCE[channel] || CHANNEL_BASE_AUDIENCE['preroll'];
   
-  // Если бюджет = 0, используем среднее значение (примерно 60% от максимума)
+  // Если бюджет = 0, возвращаем 0 (нет бюджета = нет оценки)
   // Иначе рассчитываем от бюджета
   let baseAudience: number;
   if (channelBudget === 0) {
-    baseAudience = Math.round(maxChannelAudience * 0.6);
+    return 0;
   } else {
     const budgetMultiplier = 15; // ~15 человек на $1
     baseAudience = Math.min(channelBudget * budgetMultiplier, maxChannelAudience);
@@ -64,7 +63,6 @@ export const calculateAudienceEstimation = (
 // Базовые размеры рынка для каждого канала (в людях)
 const CHANNEL_MARKET_SIZES: Record<string, number> = {
   'preroll': 250000000,    // 250M - Pre-roll video ads
-  'display': 250000000,    // 250M - Display ads (preroll использует display бюджет)
   'ctv': 150000000,        // 150M - Connected TV
   'audio': 180000000,      // 180M - Audio/Streaming
   'social': 280000000,     // 280M - Social Media
@@ -76,9 +74,14 @@ const CHANNEL_MARKET_SIZES: Record<string, number> = {
 // Размер рынка зависит от канала, geo-фильтры его УМЕНЬШАЮТ
 export const calculateMarketEstimation = (
   selectedZipCodes: string[],
-  channelBudget: number = 0, // Не используем для расчета
+  channelBudget: number = 0,
   channel: string = 'preroll' // Канал определяет базовый размер рынка
 ): number => {
+  // Если бюджет = 0, возвращаем 0 (нет бюджета = нет оценки)
+  if (channelBudget === 0) {
+    return 0;
+  }
+  
   // Базовый размер рынка для канала
   let baseMarket = CHANNEL_MARKET_SIZES[channel] || CHANNEL_MARKET_SIZES['preroll'];
   

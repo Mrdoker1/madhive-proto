@@ -48,7 +48,7 @@ const InterestsSection = ({ channel, isFirstChannel = false }: InterestsSectionP
       gender: [], age: [], income: [], education: [], householdSize: []
     };
     const geoData = channelData[channel]?.geo || { selectedZipCodes: [] };
-    const channelBudget = budgetAllocation?.[channel === 'preroll' ? 'display' : channel] || 0;
+    const channelBudget = budgetAllocation?.[channel] || 0;
 
     const newAudienceEstimation = calculateAudienceEstimation(audienceData, newInterests, channelBudget, channel);
     const marketEstimation = calculateMarketEstimation(geoData.selectedZipCodes, channelBudget, channel);
@@ -74,8 +74,7 @@ const InterestsSection = ({ channel, isFirstChannel = false }: InterestsSectionP
             gender: [], age: [], income: [], education: [], householdSize: []
           };
           const otherChannelGeo = channelData[ch]?.geo || { selectedZipCodes: [] };
-          const budgetKey = ch === 'preroll' ? 'display' : ch;
-          const otherChannelBudget = budgetAllocation?.[budgetKey] || 0;
+          const otherChannelBudget = budgetAllocation?.[ch] || 0;
 
           const otherAudienceEstimation = calculateAudienceEstimation(otherChannelAudience, newInterests, otherChannelBudget, ch);
           const otherMarketEstimation = calculateMarketEstimation(otherChannelGeo.selectedZipCodes, otherChannelBudget, ch);

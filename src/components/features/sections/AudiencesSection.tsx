@@ -47,7 +47,7 @@ const AudiencesSection = ({ channel, isFirstChannel = true }: AudiencesSectionPr
       // Пересчитываем estimations для канала
       const interests = channelData[channel]?.interests || [];
       const geoData = channelData[channel]?.geo || { selectedZipCodes: [] };
-      const channelBudget = budgetAllocation?.[channel === 'preroll' ? 'display' : channel] || 0;
+      const channelBudget = budgetAllocation?.[channel] || 0;
       
       const newAudienceEstimation = calculateAudienceEstimation(updatedAudienceData, interests, channelBudget, channel);
       const marketEstimation = calculateMarketEstimation(geoData.selectedZipCodes, channelBudget, channel);
@@ -72,7 +72,7 @@ const AudiencesSection = ({ channel, isFirstChannel = true }: AudiencesSectionPr
             // Обновляем estimations для других каналов тоже
             const chInterests = channelData[ch]?.interests || [];
             const chGeoData = channelData[ch]?.geo || { selectedZipCodes: [] };
-            const chChannelBudget = budgetAllocation?.[ch === 'preroll' ? 'display' : ch] || 0;
+            const chChannelBudget = budgetAllocation?.[ch] || 0;
             const chAudienceEstimation = calculateAudienceEstimation(updatedAudienceData, chInterests, chChannelBudget, ch);
             const chMarketEstimation = calculateMarketEstimation(chGeoData.selectedZipCodes, chChannelBudget, ch);
             
