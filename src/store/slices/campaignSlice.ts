@@ -91,6 +91,7 @@ export interface ChannelSectionData {
   };
   dayparts: CampaignDaypartsData;
   interests: string[]; // Для Interests section
+  keywords?: string[]; // Для Keywords section (только для search)
   estimations: {
     audienceEstimation: number;
     marketEstimation: number;
@@ -260,7 +261,7 @@ const campaignSlice = createSlice({
       state, 
       action: PayloadAction<{ 
         channel: string; 
-        section: 'audience' | 'geo' | 'dayparts' | 'interests'; 
+        section: 'audience' | 'geo' | 'dayparts' | 'interests' | 'keywords'; 
         data: any;
       }>
     ) => {

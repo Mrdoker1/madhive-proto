@@ -216,7 +216,7 @@ export default function OmnichannelDetailsPage() {
         return (
           <>
             <SectionWrapper id="keywords" title="Key Words">
-              <KeyWordsSection />
+              <KeyWordsSection channel="search" />
             </SectionWrapper>
             <SectionWrapper id="audiences" title="Audiences">
               <AudiencesSection 

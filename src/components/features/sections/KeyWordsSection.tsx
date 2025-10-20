@@ -3,11 +3,18 @@
 import { useState, useEffect } from 'react';
 import { MultiSelect, Button, Group, Text, Select, TextInput } from '@mantine/core';
 import { keyWordsData, categoryOptions, keywordsByAdvertiser } from '@/data/keyWordsData';
-import { useAppSelector } from '@/hooks/useRedux';
+import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
+import { updateChannelSectionData } from '@/store/slices/campaignSlice';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const KeyWordsSection = () => {
+interface KeyWordsSectionProps {
+  channel?: string;
+}
+
+const KeyWordsSection = ({ channel = 'search' }: KeyWordsSectionProps) => {
+  const dispatch = useAppDispatch();
   const advertiserFromRedux = useAppSelector((state) => state.campaign.general.advertiser);
+  const channelData = useAppSelector((state) => state.campaign.omnichannel.channelData);
   
   const [advertiser, setAdvertiser] = useState<string>('');
   const [selectedKeyWords, setSelectedKeyWords] = useState<string[]>([]);
@@ -15,6 +22,13 @@ const KeyWordsSection = () => {
   const [generatedKeyWords, setGeneratedKeyWords] = useState<string[]>([]);
   const [showGenerator, setShowGenerator] = useState<boolean>(false);
   const [customKeyword, setCustomKeyword] = useState<string>('');
+
+  // Загружаем keywords из Redux при монтировании
+  useEffect(() => {
+    if (channel && channelData[channel]?.keywords) {
+      setSelectedKeyWords(channelData[channel].keywords || []);
+    }
+  }, [channel, channelData]);
 
   // Синхронизируем advertiser с Redux и обновляем данные
   useEffect(() => {
@@ -30,6 +44,17 @@ const KeyWordsSection = () => {
       }
     }
   }, [advertiserFromRedux]);
+
+  // Сохраняем keywords в Redux при изменении
+  useEffect(() => {
+    if (channel && selectedKeyWords.length >= 0) {
+      dispatch(updateChannelSectionData({
+        channel,
+        section: 'keywords',
+        data: selectedKeyWords
+      }));
+    }
+  }, [selectedKeyWords, channel, dispatch]);
 
   const handleReset = () => {
     setSelectedKeyWords([]);

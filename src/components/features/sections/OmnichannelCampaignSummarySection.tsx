@@ -164,8 +164,8 @@ const OmnichannelCampaignSummarySection: React.FC = () => {
   // Форматирование Keywords для канала (для search)
   const formatChannelKeywordsString = (channelId: string) => {
     const data = channelData[channelId];
-    if (!data || !data.keywords?.list) return '';
-    return formatArray(data.keywords.list.map(k => k.text));
+    if (!data || !data.keywords || data.keywords.length === 0) return '';
+    return formatArray(data.keywords);
   };
 
   // Форматирование Daypart Summary для канала
