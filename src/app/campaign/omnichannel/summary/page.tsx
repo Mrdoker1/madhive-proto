@@ -5,10 +5,22 @@ import PageLayout from "@/components/layout/PageLayout";
 import SectionWrapper from "@/components/ui/SectionWrapper";
 import { BreadcrumbStep } from "@/components/ui/Breadcrumbs";
 import NextButton from "@/components/ui/NextButton";
-import { Text } from '@mantine/core';
+import OmnichannelCampaignSummarySection from "@/components/features/sections/OmnichannelCampaignSummarySection";
+import OmnichannelRightSidebar from "@/components/layout/OmnichannelRightSidebar";
+import { useAppDispatch, useAppSelector } from '@/hooks/useRedux';
+import { saveCampaign, resetCampaign } from '@/store/slices/campaignSlice';
+import { useMemo } from 'react';
 
 export default function OmnichannelSummaryPage() {
   const router = useRouter();
+  const dispatch = useAppDispatch();
+  
+  const selectedChannelsFromRedux = useAppSelector((state) => state.campaign.channels.selectedChannels);
+  
+  // Фильтруем выбранные каналы (исключаем linear_tv)
+  const availableChannels = useMemo(() => {
+    return selectedChannelsFromRedux.filter(channelId => channelId !== 'linear_tv');
+  }, [selectedChannelsFromRedux]);
   
   // Бредкрамбсы для страницы Summary
   const breadcrumbSteps: BreadcrumbStep[] = [
@@ -40,6 +52,16 @@ export default function OmnichannelSummaryPage() {
     }
   ];
 
+  const handleNextClick = () => {
+    console.log('Создание omnichannel кампании завершено!');
+    // Сохраняем кампанию в Redux
+    dispatch(saveCampaign());
+    // Сбрасываем форму для новой кампании
+    dispatch(resetCampaign());
+    // Переходим на страницу со списком кампаний
+    router.push('/campaign');
+  };
+
   const handleBackClick = () => {
     console.log('Возврат к предыдущему шагу - Channel Details');
     router.push('/campaign/omnichannel/details');
@@ -51,10 +73,12 @@ export default function OmnichannelSummaryPage() {
         breadcrumbs={breadcrumbSteps} 
         title="Summary"
         showRightSidebar={true}
+        rightSidebarContent={<OmnichannelRightSidebar selectedChannels={availableChannels} readOnly={true} />}
         footerContent={
           <NextButton 
             active={true}
-            text="Create Omnichannel Campaign"
+            onClick={handleNextClick}
+            text="Create Campaign"
             showBack={true}
             onBackClick={handleBackClick}
             backText="Back"
@@ -63,48 +87,16 @@ export default function OmnichannelSummaryPage() {
       >
         <div style={{ backgroundColor: 'var(--page-background)', paddingTop: '32px', paddingBottom: '96px', paddingLeft: '32px', paddingRight: '32px', minHeight: '100%' }}>
           <div style={{ display: 'flex', justifyContent: 'center', margin: '0 auto' }}>
-            {/* Основной контент */}
-            <div style={{ width: '100%', maxWidth: '800px' }}>
+            {/* Основной контент без левой навигации */}
+            <div style={{ width: '100%', maxWidth: '960px' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '40px' }}>
               
-              {/* Campaign Overview Section */}
+              {/* Campaign Review Section */}
               <SectionWrapper 
-                id="campaign-overview" 
-                title="Campaign Overview"
+                id="campaign-review" 
+                title="Almost done. Please carefully review campaign information."
               >
-                <Text size="sm" c="dimmed">
-                  General campaign information and settings overview.
-                </Text>
-              </SectionWrapper>
-
-              {/* Channel Summary Section */}
-              <SectionWrapper 
-                id="channel-summary" 
-                title="Channel Summary"
-              >
-                <Text size="sm" c="dimmed">
-                  Summary of selected advertising channels and their configurations.
-                </Text>
-              </SectionWrapper>
-
-              {/* Budget Summary Section */}
-              <SectionWrapper 
-                id="budget-summary" 
-                title="Budget Summary"
-              >
-                <Text size="sm" c="dimmed">
-                  Budget allocation and spending summary across channels.
-                </Text>
-              </SectionWrapper>
-
-              {/* Audience Summary Section */}
-              <SectionWrapper 
-                id="audience-summary" 
-                title="Audience Summary"
-              >
-                <Text size="sm" c="dimmed">
-                  Target audience settings and reach estimations.
-                </Text>
+                <OmnichannelCampaignSummarySection />
               </SectionWrapper>
               
               </div>
