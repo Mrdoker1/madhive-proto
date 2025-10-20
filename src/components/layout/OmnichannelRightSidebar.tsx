@@ -184,6 +184,72 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({
     });
   };
 
+  // Вычисляем процент аудитории для канала
+  const getChannelAudiencePercent = (channelId: string): number => {
+    if (selectedChannels.length === 0) return 0;
+    
+    const channelAudience = channelData[channelId]?.estimations?.audienceEstimation || 0;
+    const totalAudience = selectedChannels.reduce((sum, ch) => {
+      return sum + (channelData[ch]?.estimations?.audienceEstimation || 0);
+    }, 0);
+    
+    return totalAudience > 0 ? (channelAudience / totalAudience) * 100 : 0;
+  };
+
+  // Вычисляем распределение аудитории для выбранных каналов
+  const getTotalAudienceProgressBars = () => {
+    if (selectedChannels.length === 0) {
+      return <div style={{ width: '100%', backgroundColor: '#E5E5E5' }} />;
+    }
+
+    return selectedChannels.map(channelId => {
+      const percentOfTotal = getChannelAudiencePercent(channelId);
+      
+      return (
+        <div 
+          key={channelId}
+          style={{ 
+            width: `${percentOfTotal}%`, 
+            backgroundColor: CHANNEL_COLORS[channelId] || '#E5E5E5' 
+          }} 
+        />
+      );
+    });
+  };
+
+  // Вычисляем процент market estimation для канала
+  const getChannelMarketPercent = (channelId: string): number => {
+    if (selectedChannels.length === 0) return 0;
+    
+    const channelMarket = channelData[channelId]?.estimations?.marketEstimation || 0;
+    const totalMarket = selectedChannels.reduce((sum, ch) => {
+      return sum + (channelData[ch]?.estimations?.marketEstimation || 0);
+    }, 0);
+    
+    return totalMarket > 0 ? (channelMarket / totalMarket) * 100 : 0;
+  };
+
+  // Вычисляем распределение market estimation для выбранных каналов
+  const getTotalMarketProgressBars = () => {
+    if (selectedChannels.length === 0) {
+      return <div style={{ width: '100%', backgroundColor: '#E5E5E5' }} />;
+    }
+
+    return selectedChannels.map(channelId => {
+      const percentOfTotal = getChannelMarketPercent(channelId);
+      
+      return (
+        <div 
+          key={channelId}
+          style={{ 
+            width: `${percentOfTotal}%`, 
+            backgroundColor: CHANNEL_COLORS[channelId] || '#E5E5E5' 
+          }} 
+        />
+      );
+    });
+  };
+
   // Функция для определения цвета легенды
   const getLegendColor = (channelId: string): string => {
     if (activeChannel === 'total') {
@@ -373,7 +439,13 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({
               </Text>
             )}
             
-            {/* Progress Bar - пустой для Audience (нет данных) */}
+            {activeChannel !== 'total' && channelData[activeChannel]?.estimations?.audienceEstimation && (
+              <Text size="xs" c="dimmed" ta="right" mb="md">
+                {getChannelAudiencePercent(activeChannel).toFixed(1)}% of total audience
+              </Text>
+            )}
+            
+            {/* Progress Bar */}
             <div style={{ 
               display: 'flex', 
               height: '8px', 
@@ -381,7 +453,20 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({
               overflow: 'hidden',
               marginBottom: '12px'
             }}>
-              <div style={{ width: '100%', backgroundColor: '#E5E5E5' }} />
+              {activeChannel === 'total' ? (
+                getTotalAudienceProgressBars()
+              ) : (
+                <>
+                  <div style={{ 
+                    width: `${getChannelAudiencePercent(activeChannel)}%`, 
+                    backgroundColor: CHANNEL_COLORS[activeChannel] 
+                  }} />
+                  <div style={{ 
+                    width: `${100 - getChannelAudiencePercent(activeChannel)}%`, 
+                    backgroundColor: '#E5E5E5' 
+                  }} />
+                </>
+              )}
             </div>
             
             {/* Legend */}
@@ -394,7 +479,7 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({
             }}>
               {visibleLegendChannels.map(channel => (
                 <div key={channel.id} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#CCCCCC' }} />
+                  <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: getLegendColor(channel.id) }} />
                   <span>{channel.label}</span>
                 </div>
               ))}
@@ -462,14 +547,26 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({
               backgroundColor: '#FFFFFF',
               borderRadius: '8px',
               padding: '8px 16px',
-              marginBottom: '16px'
+              marginBottom: '8px'
             }}>
               <Text size="xl" fw={600} ta="center">
                 {getMarketEstimation().toLocaleString('en-US')}
               </Text>
             </div>
             
-            {/* Progress Bar - empty/gray for no data */}
+            {activeChannel === 'total' && selectedChannels.length > 0 && (
+              <Text size="xs" c="dimmed" ta="right" mb="md">
+                across {selectedChannels.length} Channel{selectedChannels.length !== 1 ? 's' : ''}
+              </Text>
+            )}
+            
+            {activeChannel !== 'total' && channelData[activeChannel]?.estimations?.marketEstimation && (
+              <Text size="xs" c="dimmed" ta="right" mb="md">
+                {getChannelMarketPercent(activeChannel).toFixed(1)}% of total market
+              </Text>
+            )}
+            
+            {/* Progress Bar */}
             <div style={{ 
               display: 'flex',
               height: '8px', 
@@ -477,10 +574,23 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({
               overflow: 'hidden',
               marginBottom: '12px'
             }}>
-              <div style={{ width: '100%', height: '100%', backgroundColor: '#E5E5E5' }} />
+              {activeChannel === 'total' ? (
+                getTotalMarketProgressBars()
+              ) : (
+                <>
+                  <div style={{ 
+                    width: `${getChannelMarketPercent(activeChannel)}%`, 
+                    backgroundColor: CHANNEL_COLORS[activeChannel] 
+                  }} />
+                  <div style={{ 
+                    width: `${100 - getChannelMarketPercent(activeChannel)}%`, 
+                    backgroundColor: '#E5E5E5' 
+                  }} />
+                </>
+              )}
             </div>
             
-            {/* Legend - серая для Market (нет данных) */}
+            {/* Legend */}
             <div style={{ 
               display: 'grid',
               gridTemplateColumns: `repeat(${Math.min(visibleLegendChannels.length, 3)}, 1fr)`,
@@ -490,7 +600,7 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({
             }}>
               {visibleLegendChannels.map(channel => (
                 <div key={channel.id} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#CCCCCC' }} />
+                  <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: getLegendColor(channel.id) }} />
                   <span>{channel.label}</span>
                 </div>
               ))}
