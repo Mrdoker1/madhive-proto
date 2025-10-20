@@ -13,25 +13,27 @@ const CHANNEL_BASE_AUDIENCE: Record<string, number> = {
 
 // Логика расчета Audience Estimation
 // Базовая аудитория зависит от бюджета канала, фильтры её УМЕНЬШАЮТ
+// ВАЖНО: Audience НИКОГДА не может быть больше Market Estimation
 export const calculateAudienceEstimation = (
   audienceData: CampaignAudienceData,
   interests: string[] = [],
   channelBudget: number = 0,
-  channel: string = 'preroll'
+  channel: string = 'preroll',
+  selectedZipCodes: string[] = [] // Добавлен параметр для расчета market
 ): number => {
-  // Базовая аудитория зависит от бюджета и канала
-  // Используем максимальную возможную аудиторию канала как ceiling
-  const maxChannelAudience = CHANNEL_BASE_AUDIENCE[channel] || CHANNEL_BASE_AUDIENCE['preroll'];
-  
   // Если бюджет = 0, возвращаем 0 (нет бюджета = нет оценки)
-  // Иначе рассчитываем от бюджета
-  let baseAudience: number;
   if (channelBudget === 0) {
     return 0;
-  } else {
-    const budgetMultiplier = 15; // ~15 человек на $1
-    baseAudience = Math.min(channelBudget * budgetMultiplier, maxChannelAudience);
   }
+  
+  // Сначала вычисляем Market Estimation как ceiling
+  const marketEstimation = calculateMarketEstimation(selectedZipCodes, channelBudget, channel);
+  
+  // Базовая аудитория зависит от бюджета и канала
+  const maxChannelAudience = CHANNEL_BASE_AUDIENCE[channel] || CHANNEL_BASE_AUDIENCE['preroll'];
+  
+  const budgetMultiplier = 15; // ~15 человек на $1
+  let baseAudience = Math.min(channelBudget * budgetMultiplier, maxChannelAudience);
   
   // Коэффициент сужения для каждого фильтра
   let narrowingFactor = 1.0;
@@ -55,7 +57,10 @@ export const calculateAudienceEstimation = (
   }
   
   // Применяем коэффициент сужения
-  const finalAudience = Math.round(baseAudience * narrowingFactor);
+  let finalAudience = Math.round(baseAudience * narrowingFactor);
+  
+  // КРИТИЧНО: Audience не может превышать Market Estimation
+  finalAudience = Math.min(finalAudience, marketEstimation);
   
   return finalAudience;
 };

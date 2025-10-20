@@ -50,7 +50,7 @@ export default function OmnichannelDetailsPage() {
       availableChannels.forEach(ch => {
         const channelBudget = budgetAllocation?.[ch] || 0;
         const baseAudienceData = { gender: [], age: [], income: [], education: [], householdSize: [] };
-        const audienceEstimation = calculateAudienceEstimation(baseAudienceData, [], channelBudget, ch);
+        const audienceEstimation = calculateAudienceEstimation(baseAudienceData, [], channelBudget, ch, []);
         const marketEstimation = calculateMarketEstimation([], channelBudget, ch);
         
         dispatch(updateChannelEstimations({

@@ -54,7 +54,7 @@ const GeoSection = ({ channel, isFirstChannel = true }: GeoSectionProps) => {
       const interests = channelData[channel]?.interests || [];
       const channelBudget = budgetAllocation?.[channel] || 0;
       
-      const audienceEstimation = calculateAudienceEstimation(audienceData, interests, channelBudget, channel);
+      const audienceEstimation = calculateAudienceEstimation(audienceData, interests, channelBudget, channel, values);
       const newMarketEstimation = calculateMarketEstimation(values, channelBudget, channel);
       
       dispatch(updateChannelEstimations({
@@ -80,7 +80,7 @@ const GeoSection = ({ channel, isFirstChannel = true }: GeoSectionProps) => {
             };
             const chInterests = channelData[ch]?.interests || [];
             const chChannelBudget = budgetAllocation?.[ch] || 0;
-            const chAudienceEstimation = calculateAudienceEstimation(chAudienceData, chInterests, chChannelBudget, ch);
+            const chAudienceEstimation = calculateAudienceEstimation(chAudienceData, chInterests, chChannelBudget, ch, values);
             const chMarketEstimation = calculateMarketEstimation(values, chChannelBudget, ch);
             
             dispatch(updateChannelEstimations({

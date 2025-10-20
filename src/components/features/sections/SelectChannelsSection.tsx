@@ -85,7 +85,7 @@ export const SelectChannelsSection: React.FC<SelectChannelsSectionProps> = ({
         const interests: string[] = [];
         const geoData = { selectedZipCodes: [] };
         
-        const audienceEstimation = calculateAudienceEstimation(baseAudienceData, interests, channelBudget, ch);
+        const audienceEstimation = calculateAudienceEstimation(baseAudienceData, interests, channelBudget, ch, geoData.selectedZipCodes);
         const marketEstimation = calculateMarketEstimation(geoData.selectedZipCodes, channelBudget, ch);
         
         dispatch(updateChannelEstimations({
@@ -116,7 +116,7 @@ export const SelectChannelsSection: React.FC<SelectChannelsSectionProps> = ({
         const interests: string[] = [];
         const geoData = { selectedZipCodes: [] };
         
-        const audienceEstimation = calculateAudienceEstimation(baseAudienceData, interests, channelBudget, ch);
+        const audienceEstimation = calculateAudienceEstimation(baseAudienceData, interests, channelBudget, ch, geoData.selectedZipCodes);
         const marketEstimation = calculateMarketEstimation(geoData.selectedZipCodes, channelBudget, ch);
         
         dispatch(updateChannelEstimations({

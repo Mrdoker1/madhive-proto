@@ -142,18 +142,23 @@ const OmnichannelCampaignSummarySection: React.FC = () => {
     return parts.length > 0 ? parts.join(', ') : '';
   };
 
-  // Форматирование Markets данных для канала
-  const formatChannelMarketsString = (channelId: string) => {
+  // Форматирование Geo (ZIP codes) данных для канала
+  const formatChannelGeoString = (channelId: string) => {
     const data = channelData[channelId];
-    if (!data || !data.geo?.markets) return '';
-    return formatArray(data.geo.markets);
+    if (!data || !data.geo?.selectedZipCodes || data.geo.selectedZipCodes.length === 0) {
+      if (data?.geo?.targetNationally) {
+        return 'Target Nationally';
+      }
+      return '';
+    }
+    return formatArray(data.geo.selectedZipCodes);
   };
 
   // Форматирование Interests для канала
   const formatChannelInterestsString = (channelId: string) => {
     const data = channelData[channelId];
-    if (!data || !data.interests?.selectedInterests) return '';
-    return formatArray(data.interests.selectedInterests);
+    if (!data || !data.interests || data.interests.length === 0) return '';
+    return formatArray(data.interests);
   };
 
   // Форматирование Keywords для канала (для search)
@@ -350,7 +355,7 @@ const OmnichannelCampaignSummarySection: React.FC = () => {
         
         // Проверяем есть ли данные для канала
         const hasAudience = formatChannelAudienceString(channelId) !== '';
-        const hasMarkets = formatChannelMarketsString(channelId) !== '';
+        const hasGeo = formatChannelGeoString(channelId) !== '';
         const hasInterests = formatChannelInterestsString(channelId) !== '';
         const hasKeywords = formatChannelKeywordsString(channelId) !== '';
         const hasDayparts = formatChannelDaypartSummary(channelId) !== '';
@@ -387,11 +392,11 @@ const OmnichannelCampaignSummarySection: React.FC = () => {
                   />
                 )}
 
-                {/* Markets */}
-                {hasMarkets && (
+                {/* Geo (ZIP Codes) */}
+                {hasGeo && (
                   <SummaryRow
-                    label="Markets"
-                    value={formatChannelMarketsString(channelId)}
+                    label="Geo"
+                    value={formatChannelGeoString(channelId)}
                     editRoute={`/campaign/omnichannel/details#geo-${channelId}`}
                     isEmpty={false}
                   />
