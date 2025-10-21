@@ -34,6 +34,7 @@ const ProposalSection = () => {
   const marketsDetails = useAppSelector((state) => state.campaign.markets.marketsDetails || []);
   const totalBudget = useAppSelector((state) => state.campaign.budget.totalBudget);
   const selectedBroadcasters = useAppSelector((state) => state.campaign.linear.broadcasters);
+  const broadcastersWithStations = useAppSelector((state) => state.campaign.linear.broadcastersWithStations || []);
   const flightData = useAppSelector((state) => state.campaign.flight);
   const daypartsData = useAppSelector((state) => state.campaign.dayparts);
   
@@ -78,7 +79,7 @@ const ProposalSection = () => {
     });
   }, [broadcasterIds]);
   
-  // Объединяем: берем все доступные markets и накладываем данные из marketsDetails (budgets, selections)
+  // Объединяем: берем все доступные markets и накладываем данные из marketsDetails (budgets) и broadcastersWithStations (stations)
   const combinedMarkets = useMemo(() => {
     const marketMap = new Map();
     
@@ -87,28 +88,45 @@ const ProposalSection = () => {
       marketMap.set(market.id, market);
     });
     
-    // Затем перезаписываем данными из выбранных на предыдущем шаге (у них корректные budgets и selections)
+    // Затем перезаписываем данными из выбранных на предыдущем шаге (у них корректные budgets)
     marketsDetails.forEach(market => {
       const existing = marketMap.get(market.id);
       if (existing) {
+        // Получаем stations для этого market из broadcastersWithStations
+        const marketStations: StationBudget[] = [];
+        
+        broadcastersWithStations.forEach(broadcaster => {
+          const broadcasterStations = broadcaster.stations.filter(s => 
+            s.marketId === market.id && s.selected
+          );
+          broadcasterStations.forEach(station => {
+            marketStations.push({
+              id: station.id,
+              name: station.name,
+              selected: station.selected,
+              percentage: station.percentage,
+              budget: station.budget,
+              marketId: station.marketId,
+              broadcasterId: station.broadcasterId,
+              cpm: station.cpm,
+              marketShare: station.marketShare,
+              audienceSize: station.audienceSize
+            });
+          });
+        });
+        
         marketMap.set(market.id, {
           ...existing,
-          ...market,
-          rank: existing.rank,
-          marketSize: existing.marketSize,
-          stations: market.stations.map((station: StationBudget) => ({
-            ...station,
-            marketId: market.id,
-            cpm: '$20.00',
-            marketShare: 0,
-            audienceSize: 0
-          }))
+          selected: market.selected,
+          percentage: market.percentage,
+          budget: market.budget,
+          stations: marketStations
         });
       }
     });
     
     return Array.from(marketMap.values());
-  }, [allAvailableMarkets, marketsDetails]);
+  }, [allAvailableMarkets, marketsDetails, broadcastersWithStations]);
   
   // Создаем стабильный список ID markets из marketsDetails
   const marketIds = useMemo(() => {

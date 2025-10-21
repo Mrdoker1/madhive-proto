@@ -34,9 +34,24 @@ export interface CampaignFlightData {
   hiatusEndDate?: string;
 }
 
+export interface BroadcasterStationBudget extends StationBudget {
+  marketId: string;
+  broadcasterId: string;
+  cpm: string;
+  marketShare: number;
+  audienceSize: number;
+}
+
+export interface BroadcasterWithStations {
+  id: string;
+  name: string;
+  stations: BroadcasterStationBudget[];
+}
+
 export interface CampaignLinearData {
   broadcasters: string[];
   measurementProvider: string;
+  broadcastersWithStations?: BroadcasterWithStations[]; // Детальная информация о broadcasters и их stations
 }
 
 export interface CampaignAudienceData {

@@ -9,6 +9,7 @@ import NextButton from "@/components/ui/NextButton";
 import LinearDetailsSection from "@/components/features/sections/LinearDetailsSection";
 import AudiencesSection from "@/components/features/sections/AudiencesSection";
 import MarketsSection from "@/components/features/sections/markets";
+import BroadcastersAndProgramsSection from "@/components/features/sections/BroadcastersAndProgramsSection";
 import DaypartsSection from "@/components/features/sections/DaypartsSection";
 
 export default function ChannelDetailsPage() {
@@ -48,6 +49,7 @@ export default function ChannelDetailsPage() {
     { id: 'linear-details', label: 'Linear Details', anchor: '#linear-details' },
     { id: 'audiences', label: 'Audiences', anchor: '#audiences' },
     { id: 'markets', label: 'Markets', anchor: '#markets' },
+    { id: 'broadcasters', label: 'Broadcasters and Programs', anchor: '#broadcasters' },
     { id: 'dayparts', label: 'Dayparts', anchor: '#dayparts' }
   ];
 
@@ -117,6 +119,14 @@ export default function ChannelDetailsPage() {
                 title="Markets"
               >
                 <MarketsSection />
+              </SectionWrapper>
+
+              {/* Broadcasters and Programs Section */}
+              <SectionWrapper 
+                id="broadcasters" 
+                title="Broadcasters and Programs"
+              >
+                <BroadcastersAndProgramsSection />
               </SectionWrapper>
 
               {/* Dayparts Section */}

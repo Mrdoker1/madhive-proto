@@ -8147,3 +8147,13 @@ export const getAvailableMarkets = (broadcasterIds: string[]): string[] => {
   });
   return Array.from(marketIds);
 };
+
+export const getAvailableBroadcasters = (marketIds: string[]): string[] => {
+  const broadcasterIds = new Set<string>();
+  stationsData.forEach(station => {
+    if (marketIds.includes(station.marketId)) {
+      broadcasterIds.add(station.broadcasterId);
+    }
+  });
+  return Array.from(broadcasterIds);
+};
