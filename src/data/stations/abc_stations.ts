@@ -1496,12 +1496,6 @@ export const abcStations: StationInfo[] = [
     state: "MI",
   },
   {
-    station: "WYOW",
-    associatedDma: "Ambiguous City/State",
-    affiliation: ["ABC"],
-    city: "EAGLE",
-  },
-  {
     station: "WYTV",
     affiliation: ["ABC"],
   },

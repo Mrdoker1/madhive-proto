@@ -608,7 +608,7 @@ const ProposalSection = () => {
             <Accordion.Item key={station.id} value={station.id}>
               <Accordion.Control>
                 <Group justify="space-between" pr="md" style={{ width: '100%' }}>
-                  <Text fw={500}>{station.name} ({programs.length})</Text>
+                  <Text fw={500} size="sm">{station.name} ({programs.length})</Text>
                   <Group gap={20} align="center">
                     <div style={{ 
                       display: 'flex', 
@@ -718,53 +718,7 @@ const ProposalSection = () => {
               }
             }}
           />
-          <Menu shadow="md" width={300} closeOnItemClick={false}>
-            <Menu.Target>
-              <Button
-                leftSection={<IconPlus size={14} />}
-                variant="outline"
-                size="sm"
-                styles={{ 
-                  root: {
-                    height: '36px',
-                    fontSize: '12px'
-                  }
-                }}
-              >
-                Add market
-              </Button>
-            </Menu.Target>
-
-            <Menu.Dropdown style={{ maxHeight: '400px', overflowY: 'auto' }}>
-              <Menu.Label>Select Markets to Display</Menu.Label>
-              {allAvailableMarkets.length === 0 ? (
-                <Menu.Item disabled>No markets available</Menu.Item>
-              ) : (
-                allAvailableMarkets.map((market) => (
-                  <Menu.Item
-                    key={market.id}
-                    onClick={() => toggleMarketVisibility(market.id)}
-                    leftSection={
-                      <div onClick={(e) => e.stopPropagation()}>
-                        <Checkbox
-                          checked={visibleMarkets.has(market.id)}
-                          onChange={() => toggleMarketVisibility(market.id)}
-                          color="var(--primary-color)"
-                          style={{ cursor: 'pointer' }}
-                          styles={{
-                            input: { cursor: 'pointer' },
-                            label: { cursor: 'pointer' }
-                          }}
-                        />
-                      </div>
-                    }
-                  >
-                    <Text size="sm">{market.displayName}</Text>
-                  </Menu.Item>
-                ))
-              )}
-            </Menu.Dropdown>
-          </Menu>
+{/* Add market button is hidden */}
         </Group>
 
         <Group gap={20} align="center">
@@ -819,7 +773,7 @@ const ProposalSection = () => {
           fontSize: '14px',
           padding: '40px 20px'
         }}>
-          Select markets using &quot;Add market&quot; button to display programs
+          Select markets and stations to display programs
         </div>
       ) : selectedMarketsWithStations.length >= 6 ? (
         // For 6+ markets: use dropdown selector for better UX
@@ -836,7 +790,8 @@ const ProposalSection = () => {
             mb="md"
             styles={{
               input: {
-                fontWeight: 500
+                fontWeight: 500,
+                fontSize: '12px'
               }
             }}
           />
@@ -853,7 +808,15 @@ const ProposalSection = () => {
         <Tabs value={activeMarketTab} onChange={setActiveMarketTab} color="var(--primary-color)">
           <Tabs.List>
             {selectedMarketsWithStations.map((market) => (
-              <Tabs.Tab key={market.id} value={market.id}>
+              <Tabs.Tab 
+                key={market.id} 
+                value={market.id}
+                styles={{
+                  tab: {
+                    fontSize: '12px'
+                  }
+                }}
+              >
                 {market.name} ({market.stations.length})
               </Tabs.Tab>
             ))}

@@ -1,25 +1,17 @@
+import { allBroadcasterStations } from './stations';
+
 export interface BroadcasterData {
   id: string;
   name: string;
   displayName: string;
 }
 
-// Список всех доступных бродкастеров
-export const broadcastersData: BroadcasterData[] = [
-  { id: 'abc', name: 'ABC', displayName: 'ABC' },
-  { id: 'cbs', name: 'CBS', displayName: 'CBS' },
-  { id: 'nbc', name: 'NBC', displayName: 'NBC' },
-  { id: 'gray', name: 'Gray', displayName: 'Gray' },
-  { id: 'nexstar', name: 'Nexstar', displayName: 'Nexstar' },
-  { id: 'hearst', name: 'Hearst', displayName: 'Hearst' },
-  { id: 'tegna', name: 'TEGNA', displayName: 'TEGNA' },
-  { id: 'scripps', name: 'Scripps', displayName: 'Scripps' },
-  { id: 'news-press-gazette', name: 'News Press Gazette', displayName: 'News Press Gazette' },
-  { id: 'morgan-murphy', name: 'Morgan Murphy', displayName: 'Morgan Murphy' },
-  { id: 'hubbard-broadcasting', name: 'Hubbard Broadcasting', displayName: 'Hubbard Broadcasting' },
-  { id: 'univision', name: 'Univision', displayName: 'Univision' },
-  { id: 'entravision', name: 'Entravision', displayName: 'Entravision' }
-];
+// Генерируем broadcasters на основе новых данных из папки stations
+export const broadcastersData: BroadcasterData[] = allBroadcasterStations.map(broadcaster => ({
+  id: broadcaster.broadcasterId,
+  name: broadcaster.broadcasterName,
+  displayName: broadcaster.broadcasterName
+}));
 
 // Функция для получения бродкастера по ID
 export const getBroadcasterById = (id: string): BroadcasterData | undefined => {
