@@ -1,21 +1,9 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Line, LineChart, ResponsiveContainer } from 'recharts';
-
-// Mock данные для графиков
-const generateMockData = (baseValue: number, variance: number, points: number = 30): number[] => {
-  const data: number[] = [];
-  let current = baseValue;
-  
-  for (let i = 0; i < points; i++) {
-    const change = (Math.random() - 0.5) * variance;
-    current = Math.max(baseValue * 0.8, Math.min(baseValue * 1.2, current + change));
-    data.push(current);
-  }
-  
-  return data;
-};
+import { campaignTableData } from '@/data/DashboardData';
+import { useDashboardFilters } from '@/contexts/DashboardFilterContext';
 
 interface MetricCardProps {
   title: string;
@@ -80,38 +68,86 @@ const MetricCard: React.FC<MetricCardProps> = ({
 };
 
 const MetricsSection: React.FC = () => {
-  const metricsData = [
-    {
-      title: 'Impressions',
-      value: '2,529,748',
-      data: generateMockData(2500000, 100000),
-      color: '#8B5CF6'
-    },
-    {
-      title: 'Reach',
-      value: '2,087,987',
-      data: generateMockData(2000000, 80000),
-      color: '#8B5CF6'
-    },
-    {
-      title: 'Frequency',
-      value: '6.2',
-      data: generateMockData(6, 0.5),
-      color: '#8B5CF6'
-    },
-    {
-      title: 'Incremental Reach',
-      value: '1,099,112',
-      data: generateMockData(1100000, 50000),
-      color: '#8B5CF6'
-    },
-    {
-      title: 'Unique Reach',
-      value: '770,228',
-      data: generateMockData(770000, 30000),
-      color: '#8B5CF6'
+  const { advertiser, campaign } = useDashboardFilters();
+
+  // Вычисляем суммарные метрики из данных кампаний с учетом фильтров
+  const metricsData = useMemo(() => {
+    // Фильтруем данные на основе выбранных фильтров
+    let filteredData = campaignTableData;
+    
+    if (advertiser) {
+      filteredData = filteredData.filter(row => row.advertiser === advertiser);
     }
-  ];
+    
+    if (campaign) {
+      filteredData = filteredData.filter(row => row.id === campaign);
+    }
+
+    // Если нет данных после фильтрации, возвращаем пустые значения
+    if (filteredData.length === 0) {
+      return [
+        { title: 'Impressions', value: '0', data: [], color: '#8B5CF6' },
+        { title: 'Reach', value: '0', data: [], color: '#8B5CF6' },
+        { title: 'Frequency', value: '0.0', data: [], color: '#8B5CF6' },
+        { title: 'Incremental Reach', value: '0', data: [], color: '#8B5CF6' },
+        { title: 'Unique Reach', value: '0', data: [], color: '#8B5CF6' }
+      ];
+    }
+
+    const totalImpressions = filteredData.reduce((sum, row) => sum + row.impressions, 0);
+    const totalReach = filteredData.reduce((sum, row) => sum + row.reach, 0);
+    const totalIncrementalReach = filteredData.reduce((sum, row) => sum + row.incrementalReach, 0);
+    const totalUniqueReach = filteredData.reduce((sum, row) => sum + row.uniqueReach, 0);
+    const avgFrequency = filteredData.reduce((sum, row) => sum + row.frequency, 0) / filteredData.length;
+
+    // Суммируем тренды по отфильтрованным кампаниям
+    const sumTrends = (trendKey: 'impressionsTrend' | 'reachTrend' | 'frequencyTrend' | 'incrementalReachTrend' | 'uniqueReachTrend') => {
+      const maxLength = Math.max(...filteredData.map(row => row[trendKey].length));
+      const summedTrend: number[] = [];
+      
+      for (let i = 0; i < maxLength; i++) {
+        const sum = filteredData.reduce((acc, row) => {
+          return acc + (row[trendKey][i] || 0);
+        }, 0);
+        summedTrend.push(sum);
+      }
+      
+      return summedTrend;
+    };
+
+    return [
+      {
+        title: 'Impressions',
+        value: totalImpressions.toLocaleString('en-US'),
+        data: sumTrends('impressionsTrend'),
+        color: '#8B5CF6'
+      },
+      {
+        title: 'Reach',
+        value: totalReach.toLocaleString('en-US'),
+        data: sumTrends('reachTrend'),
+        color: '#8B5CF6'
+      },
+      {
+        title: 'Frequency',
+        value: avgFrequency.toFixed(1),
+        data: sumTrends('frequencyTrend').map(val => val / filteredData.length),
+        color: '#8B5CF6'
+      },
+      {
+        title: 'Incremental Reach',
+        value: totalIncrementalReach.toLocaleString('en-US'),
+        data: sumTrends('incrementalReachTrend'),
+        color: '#8B5CF6'
+      },
+      {
+        title: 'Unique Reach',
+        value: totalUniqueReach.toLocaleString('en-US'),
+        data: sumTrends('uniqueReachTrend'),
+        color: '#8B5CF6'
+      }
+    ];
+  }, [advertiser, campaign]);
 
   return (
     <div

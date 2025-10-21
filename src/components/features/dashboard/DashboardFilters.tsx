@@ -1,21 +1,42 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useMemo } from 'react';
 import { Select, Button } from '@mantine/core';
 import { IconRefresh } from '@tabler/icons-react';
+import { useDashboardFilters } from '@/contexts/DashboardFilterContext';
+import { campaignTableData } from '@/data/DashboardData';
 
 const DashboardFilters: React.FC = () => {
-  const [campaignType, setCampaignType] = useState<string | null>('linear');
-  const [dateRange, setDateRange] = useState<string | null>('last_30_days');
-  const [advertiser, setAdvertiser] = useState<string | null>(null);
-  const [campaign, setCampaign] = useState<string | null>(null);
+  const {
+    campaignType,
+    dateRange,
+    advertiser,
+    campaign,
+    setCampaignType,
+    setDateRange,
+    setAdvertiser,
+    setCampaign,
+    resetFilters
+  } = useDashboardFilters();
 
-  const handleReset = () => {
-    setCampaignType('linear');
-    setDateRange('last_30_days');
-    setAdvertiser(null);
-    setCampaign(null);
-  };
+  // Получаем уникальных advertisers из данных
+  const advertiserOptions = useMemo(() => {
+    const uniqueAdvertisers = Array.from(new Set(campaignTableData.map(row => row.advertiser)));
+    return uniqueAdvertisers.map(adv => ({
+      value: adv,
+      label: adv
+    }));
+  }, []);
+
+  // Получаем кампании для выбранного advertiser
+  const campaignOptions = useMemo(() => {
+    if (!advertiser) return [];
+    const filteredCampaigns = campaignTableData.filter(row => row.advertiser === advertiser);
+    return filteredCampaigns.map(row => ({
+      value: row.id,
+      label: row.campaign
+    }));
+  }, [advertiser]);
 
   return (
     <div 
@@ -99,18 +120,19 @@ const DashboardFilters: React.FC = () => {
       {/* Advertiser Filter */}
       <Select
         value={advertiser}
-        onChange={setAdvertiser}
-        data={[
-          { value: 'advertiser_1', label: 'Advertiser A' },
-          { value: 'advertiser_2', label: 'Advertiser B' },
-          { value: 'advertiser_3', label: 'Advertiser C' },
-          { value: 'advertiser_4', label: 'Advertiser D' }
-        ]}
+        onChange={(value) => {
+          setAdvertiser(value);
+          // Сбросить campaign при смене advertiser
+          if (value !== advertiser) {
+            setCampaign(null);
+          }
+        }}
+        data={advertiserOptions}
         placeholder="Advertiser"
         clearable
         styles={{
           input: {
-            width: '180px',
+            width: '220px',
             height: '40px',
             backgroundColor: '#FFFFFF',
             border: '1px solid var(--border-color)',
@@ -125,23 +147,20 @@ const DashboardFilters: React.FC = () => {
       <Select
         value={campaign}
         onChange={setCampaign}
-        data={[
-          { value: 'campaign_1', label: 'Campaign 1' },
-          { value: 'campaign_2', label: 'Campaign 2' },
-          { value: 'campaign_3', label: 'Campaign 3' },
-          { value: 'campaign_4', label: 'Campaign 4' }
-        ]}
+        data={campaignOptions}
         placeholder="Campaign"
         clearable
+        disabled={!advertiser}
         styles={{
           input: {
-            width: '180px',
+            width: '280px',
             height: '40px',
             backgroundColor: '#FFFFFF',
             border: '1px solid var(--border-color)',
             borderRadius: '8px',
             fontSize: '14px',
-            color: '#000000'
+            color: '#000000',
+            opacity: !advertiser ? 0.6 : 1
           }
         }}
       />
@@ -149,7 +168,7 @@ const DashboardFilters: React.FC = () => {
       {/* Reset Button */}
       <Button
         variant="subtle"
-        onClick={handleReset}
+        onClick={resetFilters}
         leftSection={<IconRefresh size={16} />}
         styles={{
           root: {

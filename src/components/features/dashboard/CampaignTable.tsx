@@ -2,21 +2,43 @@
 
 import React, { useState, useMemo } from 'react';
 import { Select } from '@mantine/core';
-import { campaignTableData, type CampaignTableRow } from '@/data/dashboardTableData';
+import { campaignTableData, type CampaignTableRow } from '@/data/DashboardData';
+import { useDashboardFilters } from '@/contexts/DashboardFilterContext';
 
 const CampaignTable: React.FC = () => {
+  const { advertiser, campaign } = useDashboardFilters();
   const [pageSize, setPageSize] = useState<number>(10);
   const [currentPage, setCurrentPage] = useState<number>(1);
 
+  // Фильтруем данные на основе выбранных фильтров
+  const filteredData = useMemo(() => {
+    let data = campaignTableData;
+    
+    if (advertiser) {
+      data = data.filter(row => row.advertiser === advertiser);
+    }
+    
+    if (campaign) {
+      data = data.filter(row => row.id === campaign);
+    }
+    
+    return data;
+  }, [advertiser, campaign]);
+
   // Вычисляем данные для текущей страницы
-  const totalItems = campaignTableData.length;
+  const totalItems = filteredData.length;
   const totalPages = Math.ceil(totalItems / pageSize);
   const startIdx = (currentPage - 1) * pageSize;
   const endIdx = Math.min(startIdx + pageSize, totalItems);
   const currentData = useMemo(() => 
-    campaignTableData.slice(startIdx, endIdx), 
-    [startIdx, endIdx]
+    filteredData.slice(startIdx, endIdx), 
+    [filteredData, startIdx, endIdx]
   );
+
+  // Сбрасываем на первую страницу при изменении фильтров
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [advertiser, campaign]);
 
   // Форматирование чисел с запятыми
   const formatNumber = (num: number): string => {
@@ -108,6 +130,16 @@ const CampaignTable: React.FC = () => {
                 color: '#6B7280',
                 borderBottom: '1px solid var(--border-color)'
               }}>
+                Advertiser
+              </th>
+              <th style={{
+                padding: '16px 24px',
+                textAlign: 'left',
+                fontSize: '12px',
+                fontWeight: 500,
+                color: '#6B7280',
+                borderBottom: '1px solid var(--border-color)'
+              }}>
                 Campaign
               </th>
               <th style={{
@@ -148,7 +180,17 @@ const CampaignTable: React.FC = () => {
                 color: '#6B7280',
                 borderBottom: '1px solid var(--border-color)'
               }}>
-                Conversions
+                Incremental Reach
+              </th>
+              <th style={{
+                padding: '16px 24px',
+                textAlign: 'right',
+                fontSize: '12px',
+                fontWeight: 500,
+                color: '#6B7280',
+                borderBottom: '1px solid var(--border-color)'
+              }}>
+                Unique Reach
               </th>
             </tr>
           </thead>
@@ -160,6 +202,13 @@ const CampaignTable: React.FC = () => {
                   borderBottom: index < currentData.length - 1 ? '1px solid var(--border-color)' : 'none'
                 }}
               >
+                <td style={{
+                  padding: '16px 24px',
+                  fontSize: '14px',
+                  color: '#000000'
+                }}>
+                  {row.advertiser}
+                </td>
                 <td style={{
                   padding: '16px 24px',
                   fontSize: '14px',
@@ -189,7 +238,7 @@ const CampaignTable: React.FC = () => {
                   fontSize: '14px',
                   color: '#000000'
                 }}>
-                  {row.avgFrequency.toFixed(1)}
+                  {row.frequency.toFixed(1)}
                 </td>
                 <td style={{
                   padding: '16px 24px',
@@ -197,7 +246,15 @@ const CampaignTable: React.FC = () => {
                   fontSize: '14px',
                   color: '#000000'
                 }}>
-                  {formatNumber(row.conversions)}
+                  {formatNumber(row.incrementalReach)}
+                </td>
+                <td style={{
+                  padding: '16px 24px',
+                  textAlign: 'right',
+                  fontSize: '14px',
+                  color: '#000000'
+                }}>
+                  {formatNumber(row.uniqueReach)}
                 </td>
               </tr>
             ))}
