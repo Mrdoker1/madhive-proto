@@ -92,22 +92,19 @@ export const checkStationOverallocation = (markets: MarketWithStationsData[]): b
 };
 
 /**
- * Вычисляет Market Estimation на основе выбранных станций
+ * Вычисляет Market Estimation на основе выбранных markets
  * @param markets - массив маркетов с их текущим состоянием
- * @returns общий размер аудитории выбранных станций
+ * @returns общий размер аудитории выбранных markets
  */
 export const calculateMarketEstimation = (markets: MarketWithStationsData[]): number => {
-  let totalAudienceSize = 0;
+  let totalMarketSize = 0;
   
   markets.forEach(market => {
-    if (market.selected) {
-      // Суммируем audienceSize всех выбранных станций
-      const selectedStations = market.stations.filter(station => station.selected);
-      selectedStations.forEach(station => {
-        totalAudienceSize += station.audienceSize;
-      });
+    if (market.selected && market.marketSize) {
+      // Суммируем marketSize всех выбранных markets
+      totalMarketSize += market.marketSize;
     }
   });
   
-  return totalAudienceSize;
+  return totalMarketSize;
 };

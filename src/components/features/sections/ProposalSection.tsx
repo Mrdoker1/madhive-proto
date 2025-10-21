@@ -1,14 +1,14 @@
 'use client';
 
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
-import { Tabs, Accordion, Table, Checkbox, Group, Text, Badge, TextInput, Select, Button, Tooltip, Menu } from '@mantine/core';
+import { Tabs, Accordion, Table, Checkbox, Group, Text, Badge, TextInput, Select, Button, Tooltip, Menu, Pagination } from '@mantine/core';
 import { IconSearch, IconPlus, IconAlertCircle } from '@tabler/icons-react';
 import { getProgramsByStation, Program } from '@/data/programsData';
 import { useAppSelector } from '@/hooks/useRedux';
 import { getAvailableMarkets, getStationsByMarket } from '@/data/stationsData';
 import { getMarketById } from '@/data/marketsData';
 import { getBroadcasterByName } from '@/data/broadcastersData';
-import { StationBudget } from '@/store/slices/campaignSlice';
+import { BroadcasterStationBudget } from '@/store/slices/campaignSlice';
 
 interface ProgramSelection {
   [stationId: string]: {
@@ -93,7 +93,7 @@ const ProposalSection = () => {
       const existing = marketMap.get(market.id);
       if (existing) {
         // Получаем stations для этого market из broadcastersWithStations
-        const marketStations: StationBudget[] = [];
+        const marketStations: BroadcasterStationBudget[] = [];
         
         broadcastersWithStations.forEach(broadcaster => {
           const broadcasterStations = broadcaster.stations.filter(s => 
@@ -173,6 +173,13 @@ const ProposalSection = () => {
   const [programSelections, setProgramSelections] = useState<ProgramSelection>({});
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDaypartFilter, setSelectedDaypartFilter] = useState<string | null>(null);
+  const [programPages, setProgramPages] = useState<Record<string, number>>({});
+  const PROGRAMS_PER_PAGE = 20;
+  
+  // Сброс пагинации при изменении фильтров
+  useEffect(() => {
+    setProgramPages({});
+  }, [searchQuery, selectedDaypartFilter]);
   
   // Извлекаем выбранные дни недели из dayparts
   const selectedDaysOfWeek = useMemo(() => {
@@ -327,7 +334,7 @@ const ProposalSection = () => {
   const stationPrograms = useMemo(() => {
     const programs: Record<string, Program[]> = {};
     selectedMarketsWithStations.forEach(market => {
-      market.stations.forEach((station: StationBudget) => {
+      market.stations.forEach((station: BroadcasterStationBudget) => {
         const originalPrograms = getProgramsByStation(station.id);
         // Применяем обновление дат к каждой программе
         programs[station.id] = originalPrograms.map(program => updateProgramDates(program));
@@ -435,6 +442,17 @@ const ProposalSection = () => {
       return matchesSearch && matchesDaypart;
     });
 
+    // Пагинация
+    const currentPage = programPages[stationId] || 1;
+    const totalPages = Math.ceil(filteredPrograms.length / PROGRAMS_PER_PAGE);
+    const startIndex = (currentPage - 1) * PROGRAMS_PER_PAGE;
+    const endIndex = startIndex + PROGRAMS_PER_PAGE;
+    const paginatedPrograms = filteredPrograms.slice(startIndex, endIndex);
+
+    const handlePageChange = (page: number) => {
+      setProgramPages(prev => ({ ...prev, [stationId]: page }));
+    };
+
     return (
       <div>
         <Table
@@ -493,7 +511,7 @@ const ProposalSection = () => {
                 </Table.Td>
               </Table.Tr>
             ) : (
-              filteredPrograms.map((program) => {
+              paginatedPrograms.map((program) => {
                 const daypartInfo = daypartDefinitions.find(dp => dp.name === program.daypart);
                 
                 return (
@@ -570,6 +588,22 @@ const ProposalSection = () => {
             )}
           </Table.Tbody>
         </Table>
+        
+        {/* Пагинация */}
+        {totalPages > 1 && (
+          <Group justify="space-between" align="center" mt="md">
+            <Text size="xs" c="dimmed">
+              Showing {startIndex + 1}-{Math.min(endIndex, filteredPrograms.length)} of {filteredPrograms.length} programs
+            </Text>
+            <Pagination 
+              total={totalPages} 
+              value={currentPage} 
+              onChange={handlePageChange} 
+              size="sm"
+            />
+          </Group>
+        )}
+        
         {budgetExceeded && (
           <Group gap={6} mt="xs">
             <IconAlertCircle size={16} color="red" />
@@ -592,14 +626,14 @@ const ProposalSection = () => {
     if (availableStations.length === 0) {
       return (
         <Text c="dimmed" size="sm" p="md">
-          No stations available for this market
+          No stations selected for this market
         </Text>
       );
     }
 
     return (
       <Accordion>
-        {availableStations.map((station: StationBudget) => {
+        {availableStations.map((station: BroadcasterStationBudget) => {
           const programs = stationPrograms[station.id] || [];
           const totals = calculateStationTotals(station.id);
           const budgetExceeded = checkBudgetExceeded(station.id, station.budget);

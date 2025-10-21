@@ -3,7 +3,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Text, Group, Pagination, Select, Checkbox, Table, TextInput, Tooltip } from '@mantine/core';
 import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
-import { updateMarketsData } from '@/store/slices/campaignSlice';
+import { updateMarketsData, updateEstimations } from '@/store/slices/campaignSlice';
 import { marketsData } from '@/data/marketsData';
 import MarketsFilter from './components/MarketsFilter';
 
@@ -114,6 +114,20 @@ const MarketsSection = () => {
     }));
     
     dispatch(updateMarketsData({ selectedMarkets: selectedMarketNames, marketsDetails }));
+    
+    // Обновляем Market Estimation
+    const selectedMarkets = markets.filter(m => m.selected);
+    
+    if (selectedMarkets.length > 0) {
+      // Считаем total market size
+      const totalMarketSize = selectedMarkets.reduce((sum, market) => {
+        return sum + market.marketSize;
+      }, 0);
+      
+      dispatch(updateEstimations({ marketEstimation: totalMarketSize }));
+    } else {
+      dispatch(updateEstimations({ marketEstimation: 0 }));
+    }
   }, [markets, dispatch]);
 
   // Handlers

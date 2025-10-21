@@ -4,6 +4,7 @@ import { updateMarketsData, updateEstimations } from '@/store/slices/campaignSli
 import { marketsData } from '@/data/marketsData';
 import { getAvailableMarkets, getStationsByMarket, getStationsByMarketAndBroadcaster } from '@/data/stationsData';
 import { getBroadcasterByName } from '@/data/broadcastersData';
+import { calculateMarketEstimation } from '../utils/marketCalculations';
 import type { MarketWithStationsData } from '../types';
 
 export const useMarketsState = () => {
@@ -139,13 +140,12 @@ export const useMarketsState = () => {
     
     dispatch(updateMarketsData({ selectedMarkets: selectedMarketNames, marketsDetails }));
 
-    // Обновляем estimations
-    if (markets.length > 0) {
-      // Используем динамический импорт для избежания циклических зависимостей
-      import('../utils/marketCalculations').then(({ calculateMarketEstimation }) => {
-        const marketEstimation = calculateMarketEstimation(markets);
-        dispatch(updateEstimations({ marketEstimation }));
-      });
+    // Обновляем estimations - считаем только если есть выбранные markets
+    const selectedMarkets = markets.filter(m => m.selected);
+    
+    if (selectedMarkets.length > 0) {
+      const marketEstimation = calculateMarketEstimation(markets);
+      dispatch(updateEstimations({ marketEstimation }));
     } else {
       dispatch(updateEstimations({ marketEstimation: 0 }));
     }
