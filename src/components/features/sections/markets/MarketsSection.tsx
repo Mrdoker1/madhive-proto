@@ -18,10 +18,65 @@ interface MarketRow {
   budget: number;
 }
 
+// Функция для расчета Impressions станции
+const calculateStationImpressions = (budget: number, cpm: string): number => {
+  const cpmValue = parseFloat(cpm.replace('$', ''));
+  if (budget === 0 || cpmValue === 0) return 0;
+  return (budget / cpmValue) * 1000;
+};
+
+// Функция для расчета Impressions маркета
+const calculateMarketImpressions = (marketId: string, broadcastersWithStations: any[]): string => {
+  if (!broadcastersWithStations || broadcastersWithStations.length === 0) return '#';
+  
+  let totalImpressions = 0;
+  
+  // Проходим по всем broadcasters и их станциям
+  broadcastersWithStations.forEach(broadcaster => {
+    broadcaster.stations.forEach((station: any) => {
+      // Если станция принадлежит этому маркету и выбрана
+      if (station.marketId === marketId && station.selected && station.budget > 0) {
+        totalImpressions += calculateStationImpressions(station.budget, station.cpm);
+      }
+    });
+  });
+  
+  if (totalImpressions === 0) return '#';
+  
+  // Форматируем результат
+  return totalImpressions.toLocaleString('en-US', { maximumFractionDigits: 0 });
+};
+
+// Функция для расчета среднего CPM маркета
+const calculateMarketCPM = (marketId: string, broadcastersWithStations: any[]): string => {
+  if (!broadcastersWithStations || broadcastersWithStations.length === 0) return '#';
+  
+  let totalCPM = 0;
+  let stationCount = 0;
+  
+  // Проходим по всем broadcasters и их станциям
+  broadcastersWithStations.forEach(broadcaster => {
+    broadcaster.stations.forEach((station: any) => {
+      // Если станция принадлежит этому маркету и выбрана
+      if (station.marketId === marketId && station.selected) {
+        const cpmValue = parseFloat(station.cpm.replace('$', ''));
+        totalCPM += cpmValue;
+        stationCount++;
+      }
+    });
+  });
+  
+  if (stationCount === 0) return '#';
+  
+  const averageCPM = totalCPM / stationCount;
+  return `$${averageCPM.toFixed(2)}`;
+};
+
 const MarketsSection = () => {
   const dispatch = useAppDispatch();
   const marketsReduxData = useAppSelector((state) => state.campaign.markets);
   const budgetData = useAppSelector((state) => state.campaign.budget);
+  const linearData = useAppSelector((state) => state.campaign.linear);
   
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState('10');
@@ -272,8 +327,8 @@ const MarketsSection = () => {
                 )}
               </Table.Td>
               <Table.Td><Text size="xs">{market.budget > 0 ? `$${market.budget.toLocaleString('en-US', { maximumFractionDigits: 0 })}` : '$0'}</Text></Table.Td>
-              <Table.Td><Text size="xs">#</Text></Table.Td>
-              <Table.Td><Text size="xs">#</Text></Table.Td>
+              <Table.Td><Text size="xs">{calculateMarketImpressions(market.id, linearData.broadcastersWithStations || [])}</Text></Table.Td>
+              <Table.Td><Text size="xs">{calculateMarketCPM(market.id, linearData.broadcastersWithStations || [])}</Text></Table.Td>
             </Table.Tr>
           ))}
         </Table.Tbody>
