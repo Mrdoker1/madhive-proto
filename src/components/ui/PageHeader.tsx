@@ -15,6 +15,8 @@ interface PageHeaderProps {
   onRightButtonClick?: () => void;
   /** Дополнительный контент рядом с заголовком */
   actions?: React.ReactNode;
+  /** Кастомная кнопка справа (заменяет стандартную кнопку) */
+  rightButtonComponent?: React.ReactNode;
 }
 
 const PageHeader: React.FC<PageHeaderProps> = ({ 
@@ -24,6 +26,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({
   rightButtonActive = true,
   onRightButtonClick,
   actions,
+  rightButtonComponent,
 }) => {
   return (
     <div 
@@ -51,7 +54,10 @@ const PageHeader: React.FC<PageHeaderProps> = ({
         {actions}
       </div>
 
-      {showRightButton && (
+      {/* Правая кнопка - либо кастомная, либо стандартная */}
+      {rightButtonComponent ? (
+        rightButtonComponent
+      ) : showRightButton ? (
         <Button
           onClick={rightButtonActive ? onRightButtonClick : undefined}
           disabled={!rightButtonActive}
@@ -59,7 +65,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({
         >
           {rightButtonText}
         </Button>
-      )}
+      ) : null}
     </div>
   );
 };

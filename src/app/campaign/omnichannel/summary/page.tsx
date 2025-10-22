@@ -8,7 +8,7 @@ import NextButton from "@/components/ui/NextButton";
 import OmnichannelCampaignSummarySection from "@/components/features/sections/OmnichannelCampaignSummarySection";
 import OmnichannelRightSidebar from "@/components/layout/OmnichannelRightSidebar";
 import { useAppDispatch, useAppSelector } from '@/hooks/useRedux';
-import { saveCampaign, resetCampaign } from '@/store/slices/campaignSlice';
+import { saveCampaign } from '@/store/slices/campaignSlice';
 import { useMemo } from 'react';
 
 export default function OmnichannelSummaryPage() {
@@ -56,8 +56,6 @@ export default function OmnichannelSummaryPage() {
     console.log('Создание omnichannel кампании завершено!');
     // Сохраняем кампанию в Redux
     dispatch(saveCampaign());
-    // Сбрасываем форму для новой кампании
-    dispatch(resetCampaign());
     // Переходим на страницу со списком кампаний
     router.push('/campaign');
   };

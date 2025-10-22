@@ -1,5 +1,6 @@
 'use client';
 
+import { useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
 import { updateBudgetData } from '@/store/slices/campaignSlice';
@@ -12,6 +13,12 @@ import TotalBudgetSection from "@/components/features/sections/TotalBudgetSectio
 import GoalSection from "@/components/features/sections/GoalSection";
 import FlightRangeSection from "@/components/features/sections/FlightRangeSection";
 import NextButton from "@/components/ui/NextButton";
+import { 
+  validateGeneralDetails, 
+  validateTotalBudget, 
+  validateGoal, 
+  validateFlightRange
+} from '@/utils/validation';
 
 export default function NewCampaignPage() {
   const router = useRouter();
@@ -19,6 +26,10 @@ export default function NewCampaignPage() {
   
   // Получаем данные из глобального стейта
   const totalBudget = useAppSelector((state) => state.campaign.budget.totalBudget);
+  const generalData = useAppSelector((state) => state.campaign.general);
+  const budgetData = useAppSelector((state) => state.campaign.budget);
+  const goalData = useAppSelector((state) => state.campaign.goal);
+  const flightData = useAppSelector((state) => state.campaign.flight);
   
   // Бредкрамбсы для страницы New Campaign - только индикация статуса
   const breadcrumbSteps: BreadcrumbStep[] = [
@@ -58,15 +69,32 @@ export default function NewCampaignPage() {
     { id: 'flight-range', label: 'Flight Range', anchor: '#flight-range' }
   ];
 
+  // Проверяем валидность формы
+  const isFormValid = useMemo(() => {
+    const errors = [
+      ...validateGeneralDetails(generalData),
+      ...validateTotalBudget(budgetData),
+      ...validateGoal(goalData),
+      ...validateFlightRange(flightData)
+    ];
+    return errors.length === 0;
+  }, [generalData, budgetData, goalData, flightData]);
+
+  // Сообщение об ошибке
+  const errorMessage = useMemo(() => {
+    if (isFormValid) return '';
+    return 'Please fill in all required fields to continue';
+  }, [isFormValid]);
+
   const handleNextClick = () => {
+    if (!isFormValid) return;
+    
     console.log('Переход к следующему шагу - Channel Details');
-    // Переходим на страницу channel-details
     router.push('/campaign/linear/details');
   };
 
   const handleTotalBudgetChange = (budget: number) => {
     dispatch(updateBudgetData({ totalBudget: budget }));
-    console.log('Total budget changed:', budget);
   };
 
   return (
@@ -76,9 +104,10 @@ export default function NewCampaignPage() {
         title="Campaign Information"
         footerContent={
           <NextButton 
-            active={true}
+            active={isFormValid}
             onClick={handleNextClick}
             text="Next"
+            errorMessage={errorMessage}
           />
         }
       >

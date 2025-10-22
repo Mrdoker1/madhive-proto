@@ -1,7 +1,8 @@
 'use client';
 
 import React from 'react';
-import { Button } from '@mantine/core';
+import { Button, Group, Text } from '@mantine/core';
+import { IconAlertCircle } from '@tabler/icons-react';
 
 interface NextButtonProps {
   /**
@@ -37,6 +38,10 @@ interface NextButtonProps {
    * Whether the Back button is enabled (defaults to true)
    */
   backEnabled?: boolean;
+  /**
+   * Error message to display (optional)
+   */
+  errorMessage?: string;
 }
 
 export const NextButton: React.FC<NextButtonProps> = ({
@@ -48,6 +53,7 @@ export const NextButton: React.FC<NextButtonProps> = ({
   onBackClick,
   backText = 'Back',
   backEnabled = true,
+  errorMessage,
 }) => {
   return (
     <div style={{ 
@@ -58,7 +64,7 @@ export const NextButton: React.FC<NextButtonProps> = ({
     }}>
       <div className={`
         w-full 
-        flex items-center justify-end
+        flex items-center justify-between
         border-t
         ${className}
       `}
@@ -67,6 +73,18 @@ export const NextButton: React.FC<NextButtonProps> = ({
         height: '64px'
       }}
       >
+        {/* Error message on the left */}
+        <div style={{ flex: 1 }}>
+          {errorMessage && (
+            <Group gap={6}>
+              <IconAlertCircle size={16} color="red" />
+              <Text c="red" size="xs">
+                {errorMessage}
+              </Text>
+            </Group>
+          )}
+        </div>
+
         {/* Container for buttons with gap */}
         <div className="flex items-center" style={{ gap: '16px' }}>
           {/* Back Button */}

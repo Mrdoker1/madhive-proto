@@ -1,14 +1,25 @@
 'use client';
 
 import React from 'react';
-import { TextInput, ActionIcon, Button } from '@mantine/core';
-import { IconSearch, IconSettings, IconInfoCircle } from '@tabler/icons-react';
+import { TextInput, ActionIcon, Menu, Button } from '@mantine/core';
+import { IconSearch, IconSettings, IconInfoCircle, IconChevronDown } from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
+import { useAppDispatch } from '@/hooks/useRedux';
+import { resetCampaign } from '@/store/slices/campaignSlice';
 
 const DashboardHeader: React.FC = () => {
   const router = useRouter();
+  const dispatch = useAppDispatch();
 
-  const handleNewCampaignClick = () => {
+  const handleNewLinearCampaign = () => {
+    // Сбрасываем данные формы перед созданием новой кампании
+    dispatch(resetCampaign());
+    router.push('/campaign/linear/new');
+  };
+
+  const handleNewOmnichannelCampaign = () => {
+    // Сбрасываем данные формы перед созданием новой кампании
+    dispatch(resetCampaign());
     router.push('/campaign/omnichannel/new');
   };
 
@@ -75,13 +86,26 @@ const DashboardHeader: React.FC = () => {
           <IconInfoCircle size={20} stroke={1.5} />
         </ActionIcon>
 
-        {/* New Campaign Button */}
-        <Button
-          onClick={handleNewCampaignClick}
-          variant="filled"
-        >
-          New Campaign
-        </Button>
+        {/* New Campaign Dropdown Button */}
+        <Menu shadow="md" width={200}>
+          <Menu.Target>
+            <Button
+              variant="filled"
+              rightSection={<IconChevronDown size={16} />}
+            >
+              New Campaign
+            </Button>
+          </Menu.Target>
+
+          <Menu.Dropdown>
+            <Menu.Item onClick={handleNewLinearCampaign}>
+              Linear Campaign
+            </Menu.Item>
+            <Menu.Item onClick={handleNewOmnichannelCampaign}>
+              Omnichannel Campaign
+            </Menu.Item>
+          </Menu.Dropdown>
+        </Menu>
       </div>
     </header>
   );

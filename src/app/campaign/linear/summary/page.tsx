@@ -8,7 +8,7 @@ import { BreadcrumbStep } from "@/components/ui/Breadcrumbs";
 import NextButton from "@/components/ui/NextButton";
 import CampaignSummarySection from "@/components/features/sections/CampaignSummarySection";
 import { useAppDispatch } from '@/hooks/useRedux';
-import { saveCampaign, resetCampaign } from '@/store/slices/campaignSlice';
+import { saveCampaign } from '@/store/slices/campaignSlice';
 
 export default function SummaryPage() {
   const router = useRouter();
@@ -48,8 +48,6 @@ export default function SummaryPage() {
     console.log('Создание кампании завершено!');
     // Сохраняем кампанию в Redux
     dispatch(saveCampaign());
-    // Сбрасываем форму для новой кампании
-    dispatch(resetCampaign());
     // Переходим на страницу со списком кампаний
     router.push('/campaign');
   };

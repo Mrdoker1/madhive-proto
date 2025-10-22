@@ -22,6 +22,8 @@ interface PageLayoutProps {
   onHeaderRightButtonClick?: () => void;
   // Дополнительные действия/контент в заголовке (справа от title)
   headerActions?: React.ReactNode;
+  // Кастомная кнопка справа в PageHeader
+  headerRightButtonComponent?: React.ReactNode;
 }
 
 const PageLayout: React.FC<PageLayoutProps> = ({ 
@@ -37,7 +39,8 @@ const PageLayout: React.FC<PageLayoutProps> = ({
   headerRightButtonText = 'Next',
   headerRightButtonActive = true,
   onHeaderRightButtonClick,
-  headerActions
+  headerActions,
+  headerRightButtonComponent
 }) => {
   return (
     <motion.div 
@@ -94,6 +97,7 @@ const PageLayout: React.FC<PageLayoutProps> = ({
                   rightButtonActive={headerRightButtonActive}
                   onRightButtonClick={onHeaderRightButtonClick}
                   actions={headerActions}
+                  rightButtonComponent={headerRightButtonComponent}
                 />
               </motion.div>
             )}

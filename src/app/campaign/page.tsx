@@ -5,9 +5,11 @@ import PageLayout from '@/components/layout/PageLayout';
 import { useRouter } from 'next/navigation';
 import CampaignList from '@/components/features/campaigns/CampaignList';
 import { campaignsMock, CampaignSummary } from '@/data/campaignsData';
-import { Select, Pagination } from '@mantine/core';
+import { Select, Pagination, Menu, Button } from '@mantine/core';
+import { IconChevronDown } from '@tabler/icons-react';
 import { useState, useMemo } from 'react';
-import { useAppSelector } from '@/hooks/useRedux';
+import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
+import { resetCampaign } from '@/store/slices/campaignSlice';
 import type { SavedCampaign } from '@/store/slices/campaignSlice';
 
 // Функция для конвертации SavedCampaign в CampaignSummary
@@ -44,12 +46,21 @@ function convertToCampaignSummary(saved: SavedCampaign): CampaignSummary {
 
 export default function CampaignListPage() {
   const router = useRouter();
+  const dispatch = useAppDispatch();
   const [pageSize, setPageSize] = useState<number>(20);
   const [page, setPage] = useState<number>(1);
   
   const savedCampaigns = useAppSelector((state) => state.campaign.savedCampaigns);
 
-  const handleNewCampaign = () => {
+  const handleNewLinearCampaign = () => {
+    // Сбрасываем данные формы перед созданием новой кампании
+    dispatch(resetCampaign());
+    router.push('/campaign/linear/new');
+  };
+
+  const handleNewOmnichannelCampaign = () => {
+    // Сбрасываем данные формы перед созданием новой кампании
+    dispatch(resetCampaign());
     router.push('/campaign/omnichannel/new');
   };
 
@@ -66,6 +77,29 @@ export default function CampaignListPage() {
   const endIdx = Math.min(startIdx + pageSize, totalItems);
 
   const currentItems = useMemo(() => allCampaigns.slice(startIdx, endIdx), [allCampaigns, startIdx, endIdx]);
+
+  // Компонент dropdown кнопки для создания кампании
+  const newCampaignButton = (
+    <Menu shadow="md" width={200}>
+      <Menu.Target>
+        <Button
+          variant="filled"
+          rightSection={<IconChevronDown size={16} />}
+        >
+          New Campaign
+        </Button>
+      </Menu.Target>
+
+      <Menu.Dropdown>
+        <Menu.Item onClick={handleNewLinearCampaign}>
+          Linear Campaign
+        </Menu.Item>
+        <Menu.Item onClick={handleNewOmnichannelCampaign}>
+          Omnichannel Campaign
+        </Menu.Item>
+      </Menu.Dropdown>
+    </Menu>
+  );
 
   const footer = (
     <div className="flex items-center justify-between" style={{ padding: '12px 24px', background: 'var(--header-background)', borderTop: '1px solid var(--border-color)' }}>
@@ -101,10 +135,7 @@ export default function CampaignListPage() {
   return (
     <PageLayout 
       title="Campaign"
-      headerShowRightButton
-      headerRightButtonText="New Campaign"
-      headerRightButtonActive
-      onHeaderRightButtonClick={handleNewCampaign}
+      headerRightButtonComponent={newCampaignButton}
       footerContent={footer}
     >
       <div style={{ padding: '24px' }}>
