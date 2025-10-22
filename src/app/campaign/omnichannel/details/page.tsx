@@ -14,7 +14,7 @@ import GeoSection from "@/components/features/sections/GeoSection";
 import DaypartsSection from "@/components/features/sections/DaypartsSection";
 import KeyWordsSection from "@/components/features/sections/KeyWordsSection";
 import OmnichannelRightSidebar from "@/components/layout/OmnichannelRightSidebar";
-import CarryOverNotification from "@/components/ui/CarryOverNotification";
+import InfoNotification from "@/components/ui/InfoNotification";
 import { Text } from '@mantine/core';
 import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
 import { setCarryOverMode, initializeChannelData, updateChannelEstimations } from '@/store/slices/campaignSlice';
@@ -287,7 +287,12 @@ export default function OmnichannelDetailsPage() {
             <div style={{ paddingLeft: '20px', width: '100%', maxWidth: '800px' }}>
               {/* Нотификация carry over */}
               <AnimatePresence>
-                {carryOverMode && <CarryOverNotification key="carry-over-notification" />}
+                {carryOverMode && (
+                  <InfoNotification 
+                    key="carry-over-notification"
+                    message="Carried over input for Audiences, Interests, Geo and Dayparts"
+                  />
+                )}
               </AnimatePresence>
               
               <div style={{ display: 'flex', flexDirection: 'column', gap: '40px' }}>

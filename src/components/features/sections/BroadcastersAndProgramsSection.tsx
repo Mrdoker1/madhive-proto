@@ -7,6 +7,8 @@ import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
 import { updateLinearData, type BroadcasterWithStations, type BroadcasterStationBudget } from '@/store/slices/campaignSlice';
 import { broadcastersData, getBroadcasterById } from '@/data/broadcastersData';
 import { getAvailableBroadcasters, getStationsByMarketAndBroadcaster, type StationData } from '@/data/stationsData';
+import InfoNotification from '@/components/ui/InfoNotification';
+import { AnimatePresence } from 'framer-motion';
 
 interface StationWithData extends StationData {
   selected: boolean;
@@ -445,11 +447,14 @@ const BroadcastersAndProgramsSection = () => {
   return (
     <div>
       {/* Уведомление о необходимости выбрать markets */}
-      {(!marketsData.selectedMarkets || marketsData.selectedMarkets.length === 0) && (
-        <Text size="sm" c="dimmed" mb="md">
-          Please select markets first
-        </Text>
-      )}
+      <AnimatePresence>
+        {(!marketsData.selectedMarkets || marketsData.selectedMarkets.length === 0) && (
+          <InfoNotification 
+            key="broadcaster-auto-selection-notification"
+            message="Broadcaster selection and associated Stations per DMA will automatically be defined once markets are selected"
+          />
+        )}
+      </AnimatePresence>
 
       {/* Multiselect для выбора broadcasters */}
       <MultiSelect

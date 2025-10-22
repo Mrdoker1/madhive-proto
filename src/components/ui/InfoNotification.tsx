@@ -2,11 +2,12 @@ import { Alert } from '@mantine/core';
 import { IconInfoCircle } from '@tabler/icons-react';
 import { motion } from 'framer-motion';
 
-interface CarryOverNotificationProps {
+interface InfoNotificationProps {
+  message: string;
   onDismiss?: () => void;
 }
 
-const CarryOverNotification = ({ onDismiss }: CarryOverNotificationProps) => {
+const InfoNotification = ({ message, onDismiss }: InfoNotificationProps) => {
   return (
     <motion.div
       initial={{ opacity: 0, y: -10, scale: 0.95 }}
@@ -26,9 +27,9 @@ const CarryOverNotification = ({ onDismiss }: CarryOverNotificationProps) => {
           backgroundColor: '#E4EDFF',
           border: '1px solid #98BBFF',
           minHeight: 'auto',
-          maxHeight: 44,
           display: 'flex',
           alignItems: 'center',
+          padding: '12px 16px',
         }}
         styles={{
           message: {
@@ -40,12 +41,12 @@ const CarryOverNotification = ({ onDismiss }: CarryOverNotificationProps) => {
           }
         }}
         withCloseButton={false}
-              >
-                Carried over input for Audiences, Interests, Geo and Dayparts
-              </Alert>
+      >
+        {message}
+      </Alert>
     </motion.div>
   );
 };
 
-export default CarryOverNotification;
+export default InfoNotification;
 
