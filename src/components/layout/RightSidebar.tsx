@@ -25,6 +25,11 @@ const RightSidebar: React.FC<RightSidebarProps> = ({ className = '', isOmnichann
   const channelData = useAppSelector((state) => state.campaign.omnichannel.channelData);
   const selectedChannels = useAppSelector((state) => state.campaign.channels.selectedChannels);
   
+  // Для Linear: получаем данные о markets, broadcasters и stations
+  const marketsDetails = useAppSelector((state) => state.campaign.markets.marketsDetails);
+  const broadcasters = useAppSelector((state) => state.campaign.linear.broadcasters);
+  const broadcastersWithStations = useAppSelector((state) => state.campaign.linear.broadcastersWithStations);
+  
   // Вычисляем суммарные estimations для omnichannel (только для выбранных каналов)
   const omnichannelAudienceEstimation = useMemo(() => {
     if (!isOmnichannel) return 0;
@@ -56,6 +61,50 @@ const RightSidebar: React.FC<RightSidebarProps> = ({ className = '', isOmnichann
   // Используем правильные значения в зависимости от типа кампании
   const audienceEstimation = isOmnichannel ? omnichannelAudienceEstimation : linearAudienceEstimation;
   const marketEstimation = isOmnichannel ? omnichannelMarketEstimation : linearMarketEstimation;
+  
+  // Вычисляем детали для Linear Market Estimation
+  const linearMarketDetails = useMemo(() => {
+    if (isOmnichannel) return null;
+    
+    const selectedMarketsCount = marketsDetails?.filter(m => m.selected).length || 0;
+    const selectedBroadcastersCount = broadcasters?.length || 0;
+    
+    // Подсчитываем количество выбранных станций
+    let totalStations = 0;
+    let totalImpressions = 0;
+    let totalCPM = 0;
+    let stationCount = 0;
+    
+    if (broadcastersWithStations && broadcastersWithStations.length > 0) {
+      broadcastersWithStations.forEach(broadcaster => {
+        broadcaster.stations.forEach(station => {
+          if (station.selected) {
+            totalStations++;
+            
+            // Расчет impressions: (budget / CPM) * 1000
+            if (station.budget > 0 && station.cpm) {
+              const cpmValue = parseFloat(station.cpm.replace('$', ''));
+              if (cpmValue > 0) {
+                totalImpressions += (station.budget / cpmValue) * 1000;
+                totalCPM += cpmValue;
+                stationCount++;
+              }
+            }
+          }
+        });
+      });
+    }
+    
+    const averageCPM = stationCount > 0 ? totalCPM / stationCount : 0;
+    
+    return {
+      marketsCount: selectedMarketsCount,
+      broadcastersCount: selectedBroadcastersCount,
+      programsCount: totalStations,
+      totalImpressions,
+      averageCPM
+    };
+  }, [isOmnichannel, marketsDetails, broadcasters, broadcastersWithStations]);
   
   // Локальное состояние для редактирования бюджета
   const [budgetInput, setBudgetInput] = useState('');
@@ -263,12 +312,72 @@ const RightSidebar: React.FC<RightSidebarProps> = ({ className = '', isOmnichann
           <div style={{ 
             backgroundColor: '#FFFFFF',
             borderRadius: '8px',
-            padding: '8px 16px',
+            padding: '24px 16px',
             marginBottom: '16px'
           }}>
-            <Text size="xl" fw={600} ta="center">
-              {marketEstimation > 0 ? marketEstimation.toLocaleString('en-US') : '--'}
-            </Text>
+            {!isOmnichannel && linearMarketDetails ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {/* Markets */}
+                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'baseline', gap: '8px' }}>
+                  <Text size="xl" fw={600} style={{ color: '#000' }}>
+                    {linearMarketDetails.marketsCount}
+                  </Text>
+                  <Text size="sm" style={{ color: '#666' }}>
+                    Markets
+                  </Text>
+                </div>
+                
+                {/* Broadcasters */}
+                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'baseline', gap: '8px' }}>
+                  <Text size="xl" fw={600} style={{ color: '#000' }}>
+                    {linearMarketDetails.broadcastersCount}
+                  </Text>
+                  <Text size="sm" style={{ color: '#666' }}>
+                    Broadcasters
+                  </Text>
+                </div>
+                
+                {/* Stations */}
+                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'baseline', gap: '8px' }}>
+                  <Text size="xl" fw={600} style={{ color: '#000' }}>
+                    {linearMarketDetails.programsCount}
+                  </Text>
+                  <Text size="sm" style={{ color: '#666' }}>
+                    Stations
+                  </Text>
+                </div>
+                
+                {/* Impressions */}
+                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'baseline', gap: '8px' }}>
+                  <Text size="xl" fw={600} style={{ color: '#000' }}>
+                    {linearMarketDetails.totalImpressions > 0 
+                      ? linearMarketDetails.totalImpressions.toLocaleString('en-US', { maximumFractionDigits: 0 })
+                      : '#'
+                    }
+                  </Text>
+                  <Text size="sm" style={{ color: '#666' }}>
+                    Impressions
+                  </Text>
+                </div>
+                
+                {/* Average CPM */}
+                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'baseline', gap: '8px' }}>
+                  <Text size="xl" fw={600} style={{ color: '#000' }}>
+                    {linearMarketDetails.averageCPM > 0 
+                      ? `$${linearMarketDetails.averageCPM.toFixed(2)}`
+                      : '#'
+                    }
+                  </Text>
+                  <Text size="sm" style={{ color: '#666' }}>
+                    Avg. CPM
+                  </Text>
+                </div>
+              </div>
+            ) : (
+              <Text size="xl" fw={600} ta="center">
+                {marketEstimation > 0 ? marketEstimation.toLocaleString('en-US') : '--'}
+              </Text>
+            )}
           </div>
         </div>
 
