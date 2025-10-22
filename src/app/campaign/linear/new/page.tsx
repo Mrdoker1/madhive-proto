@@ -109,7 +109,8 @@ export default function NewCampaignPage() {
             {/* Total Budget Section */}
             <SectionWrapper 
               id="total-budget" 
-              title="Total Budget *"
+              title="Total Budget"
+              required
             >
               <TotalBudgetSection onChange={handleTotalBudgetChange} />
             </SectionWrapper>
@@ -117,7 +118,8 @@ export default function NewCampaignPage() {
             {/* Goal Section */}
             <SectionWrapper 
               id="goal" 
-              title="Goal *"
+              title="Goal"
+              required
             >
               <GoalSection />
             </SectionWrapper>
@@ -125,7 +127,8 @@ export default function NewCampaignPage() {
             {/* Flight Range Section */}
             <SectionWrapper 
               id="flight-range" 
-              title="Flight Range *"
+              title="Flight Range"
+              required
             >
               <FlightRangeSection totalBudget={totalBudget} />
             </SectionWrapper>

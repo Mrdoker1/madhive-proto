@@ -116,7 +116,8 @@ export default function OmnichannelNewCampaignPage() {
             {/* Total Budget Section */}
             <SectionWrapper 
               id="total-budget" 
-              title="Total Budget *"
+              title="Total Budget"
+              required
             >
               <TotalBudgetSection onChange={handleTotalBudgetChange} />
             </SectionWrapper>
@@ -124,7 +125,8 @@ export default function OmnichannelNewCampaignPage() {
             {/* Goal Section */}
             <SectionWrapper 
               id="goal" 
-              title="Goal *"
+              title="Goal"
+              required
             >
               <GoalSection />
             </SectionWrapper>
@@ -132,7 +134,8 @@ export default function OmnichannelNewCampaignPage() {
             {/* Flight Range Section */}
             <SectionWrapper 
               id="flight-range" 
-              title="Flight Range *"
+              title="Flight Range"
+              required
             >
               <FlightRangeSection totalBudget={totalBudget} />
             </SectionWrapper>

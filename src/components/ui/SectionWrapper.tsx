@@ -7,13 +7,15 @@ interface SectionWrapperProps {
   children: React.ReactNode;
   id?: string;
   className?: string;
+  required?: boolean;
 }
 
 const SectionWrapper: React.FC<SectionWrapperProps> = ({
   title,
   children,
   id,
-  className = ''
+  className = '',
+  required = false
 }) => {
   return (
     <section id={id} className={`scroll-mt-8 ${className}`}>
@@ -27,6 +29,7 @@ const SectionWrapper: React.FC<SectionWrapperProps> = ({
         }}
       >
         {title}
+        {required && <span style={{ color: '#FA5252' }}> *</span>}
       </h2>
       
       {/* Контейнер с контентом */}
