@@ -48,8 +48,8 @@ export default function ChannelDetailsPage() {
   const anchorItems: AnchorItem[] = [
     { id: 'linear-details', label: 'Linear Details', anchor: '#linear-details' },
     { id: 'audiences', label: 'Audiences', anchor: '#audiences' },
-    { id: 'markets', label: 'Markets', anchor: '#markets' },
-    { id: 'broadcasters', label: 'Broadcasters and Programs', anchor: '#broadcasters' },
+    { id: 'markets', label: 'Market/Weight', anchor: '#markets' },
+    { id: 'broadcasters', label: 'Broadcasters/Programs', anchor: '#broadcasters' },
     { id: 'dayparts', label: 'Dayparts', anchor: '#dayparts' }
   ];
 
@@ -116,7 +116,7 @@ export default function ChannelDetailsPage() {
               {/* Markets Section */}
               <SectionWrapper 
                 id="markets" 
-                title="Markets"
+                title="Market/Weight"
               >
                 <MarketsSection />
               </SectionWrapper>
@@ -124,7 +124,7 @@ export default function ChannelDetailsPage() {
               {/* Broadcasters and Programs Section */}
               <SectionWrapper 
                 id="broadcasters" 
-                title="Broadcasters and Programs"
+                title="Broadcasters/Programs"
               >
                 <BroadcastersAndProgramsSection />
               </SectionWrapper>
