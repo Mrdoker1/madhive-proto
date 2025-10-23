@@ -19,7 +19,6 @@ export default function OmnichannelChannelsPage() {
   
   const selectedChannelsFromRedux = useAppSelector((state) => state.campaign.channels.selectedChannels);
   const budgetAllocation = useAppSelector((state) => state.campaign.channels.budgetAllocation);
-  const totalBudget = useAppSelector((state) => state.campaign.budget.totalBudget);
   
   // Фильтруем выбранные каналы (исключаем linear_tv)
   const availableChannels = useMemo(() => {
@@ -30,10 +29,10 @@ export default function OmnichannelChannelsPage() {
   const isFormValid = useMemo(() => {
     const errors = [
       ...validateSelectChannels(availableChannels),
-      ...validateAllocation(budgetAllocation, availableChannels, totalBudget)
+      ...validateAllocation(budgetAllocation, availableChannels)
     ];
     return errors.length === 0;
-  }, [availableChannels, budgetAllocation, totalBudget]);
+  }, [availableChannels, budgetAllocation]);
 
   // Сообщение об ошибке
   const errorMessage = useMemo(() => {
@@ -45,13 +44,13 @@ export default function OmnichannelChannelsPage() {
       return channelErrors[0].message;
     }
     
-    const allocationErrors = validateAllocation(budgetAllocation, availableChannels, totalBudget);
+    const allocationErrors = validateAllocation(budgetAllocation, availableChannels);
     if (allocationErrors.length > 0) {
       return allocationErrors[0].message;
     }
     
     return 'Please fill in all required fields to continue';
-  }, [isFormValid, availableChannels, budgetAllocation, totalBudget]);
+  }, [isFormValid, availableChannels, budgetAllocation]);
 
   // Бредкрамбсы для страницы Channels
   const breadcrumbSteps: BreadcrumbStep[] = [

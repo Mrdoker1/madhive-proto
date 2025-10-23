@@ -174,13 +174,20 @@ export const validateSelectChannels = (selectedChannels: string[]): ValidationEr
 
 /**
  * Валидация Allocation (для Omnichannel)
+ * Проверяем, что все выбранные каналы имеют распределенный бюджет
+ * Точное равенство суммы totalBudget не проверяем, так как AllocationSection
+ * автоматически управляет распределением и может округлять значения
  */
 export const validateAllocation = (
   budgetAllocation: Record<string, number> | undefined,
-  selectedChannels: string[],
-  totalBudget: number
+  selectedChannels: string[]
 ): ValidationError[] => {
   const errors: ValidationError[] = [];
+
+  // Если нет выбранных каналов, валидация не нужна
+  if (selectedChannels.length === 0) {
+    return errors;
+  }
 
   // Проверяем, что budgetAllocation существует
   if (!budgetAllocation) {
@@ -192,28 +199,15 @@ export const validateAllocation = (
     return errors;
   }
 
-  // Проверяем, что все выбранные каналы имеют распределенный бюджет
+  // Проверяем, что все выбранные каналы имеют распределенный бюджет (больше 0)
   const channelsWithoutBudget = selectedChannels.filter(
-    channel => !budgetAllocation[channel] || budgetAllocation[channel] === 0
+    channel => !budgetAllocation[channel] || budgetAllocation[channel] <= 0
   );
 
   if (channelsWithoutBudget.length > 0) {
     errors.push({
       field: 'budgetAllocation',
       message: 'All selected channels must have budget allocated',
-      sectionId: 'allocation'
-    });
-  }
-
-  // Проверяем, что сумма распределенного бюджета равна общему бюджету
-  const allocatedSum = Object.values(budgetAllocation).reduce((sum, val) => sum + val, 0);
-  const difference = Math.abs(allocatedSum - totalBudget);
-  
-  // Допускаем погрешность в 1 доллар из-за округления
-  if (difference > 1) {
-    errors.push({
-      field: 'budgetAllocation',
-      message: 'Budget allocation must equal total budget',
       sectionId: 'allocation'
     });
   }
