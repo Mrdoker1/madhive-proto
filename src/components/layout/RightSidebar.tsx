@@ -31,6 +31,32 @@ const RightSidebar: React.FC<RightSidebarProps> = ({ className = '', isOmnichann
   const broadcastersWithStations = useAppSelector((state) => state.campaign.linear.broadcastersWithStations);
   
   // Вычисляем суммарные estimations для omnichannel (только для выбранных каналов)
+  // Сначала вычисляем market estimation, чтобы использовать его для ограничения audience
+  const omnichannelMarketEstimation = useMemo(() => {
+    if (!isOmnichannel) return 0;
+    
+    const filteredChannels = selectedChannels.filter(ch => ch !== 'linear_tv');
+    const marketValues = filteredChannels.map(ch => channelData[ch]?.estimations?.marketEstimation || 0);
+    
+    if (marketValues.length === 0) return 0;
+    if (marketValues.length === 1) return marketValues[0];
+    
+    // Проверяем, используются ли конкретные zip codes для таргетинга
+    const hasGeoTargeting = filteredChannels.some(ch => {
+      const geoData = channelData[ch]?.geo;
+      return geoData?.selectedZipCodes && geoData.selectedZipCodes.length > 0;
+    });
+    
+    if (hasGeoTargeting) {
+      // При geo-таргетинге суммируем market estimation с коэффициентом overlap 0.85
+      const totalSum = marketValues.reduce((sum, val) => sum + val, 0);
+      return Math.round(totalSum * 0.85);
+    } else {
+      // При nationwide таргетинге берем максимум - это один и тот же рынок США
+      return Math.max(...marketValues);
+    }
+  }, [isOmnichannel, channelData, selectedChannels]);
+  
   const omnichannelAudienceEstimation = useMemo(() => {
     if (!isOmnichannel) return 0;
     // Для omnichannel - суммируем все каналы с учетом overlap
@@ -44,19 +70,11 @@ const RightSidebar: React.FC<RightSidebarProps> = ({ className = '', isOmnichann
     
     // Суммируем и применяем фиксированный коэффициент 0.7
     const totalSum = audienceValues.reduce((sum, val) => sum + val, 0);
-    return Math.round(totalSum * 0.7);
-  }, [isOmnichannel, channelData, selectedChannels]);
-  
-  const omnichannelMarketEstimation = useMemo(() => {
-    if (!isOmnichannel) return 0;
-    // Market НЕ суммируется - это размер доступного рынка (одни и те же люди)
-    // Берём максимальное значение из всех выбранных каналов
-    const marketValues = selectedChannels
-      .filter(ch => ch !== 'linear_tv')
-      .map(ch => channelData[ch]?.estimations?.marketEstimation || 0);
+    const totalAudience = Math.round(totalSum * 0.7);
     
-    return marketValues.length > 0 ? Math.max(...marketValues) : 0;
-  }, [isOmnichannel, channelData, selectedChannels]);
+    // ВАЖНО: Audience не может превышать Market Estimation
+    return Math.min(totalAudience, omnichannelMarketEstimation);
+  }, [isOmnichannel, channelData, selectedChannels, omnichannelMarketEstimation]);
   
   // Используем правильные значения в зависимости от типа кампании
   const audienceEstimation = isOmnichannel ? omnichannelAudienceEstimation : linearAudienceEstimation;

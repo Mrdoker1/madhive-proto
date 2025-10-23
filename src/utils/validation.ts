@@ -156,6 +156,72 @@ export const errorsToFieldErrors = (errors: ValidationError[]): Record<string, s
 };
 
 /**
+ * Валидация Select Channels (для Omnichannel)
+ */
+export const validateSelectChannels = (selectedChannels: string[]): ValidationError[] => {
+  const errors: ValidationError[] = [];
+
+  if (!selectedChannels || selectedChannels.length === 0) {
+    errors.push({
+      field: 'selectedChannels',
+      message: 'Please select at least one channel',
+      sectionId: 'select-channels'
+    });
+  }
+
+  return errors;
+};
+
+/**
+ * Валидация Allocation (для Omnichannel)
+ */
+export const validateAllocation = (
+  budgetAllocation: Record<string, number> | undefined,
+  selectedChannels: string[],
+  totalBudget: number
+): ValidationError[] => {
+  const errors: ValidationError[] = [];
+
+  // Проверяем, что budgetAllocation существует
+  if (!budgetAllocation) {
+    errors.push({
+      field: 'budgetAllocation',
+      message: 'Please allocate budget across channels',
+      sectionId: 'allocation'
+    });
+    return errors;
+  }
+
+  // Проверяем, что все выбранные каналы имеют распределенный бюджет
+  const channelsWithoutBudget = selectedChannels.filter(
+    channel => !budgetAllocation[channel] || budgetAllocation[channel] === 0
+  );
+
+  if (channelsWithoutBudget.length > 0) {
+    errors.push({
+      field: 'budgetAllocation',
+      message: 'All selected channels must have budget allocated',
+      sectionId: 'allocation'
+    });
+  }
+
+  // Проверяем, что сумма распределенного бюджета равна общему бюджету
+  const allocatedSum = Object.values(budgetAllocation).reduce((sum, val) => sum + val, 0);
+  const difference = Math.abs(allocatedSum - totalBudget);
+  
+  // Допускаем погрешность в 1 доллар из-за округления
+  if (difference > 1) {
+    errors.push({
+      field: 'budgetAllocation',
+      message: 'Budget allocation must equal total budget',
+      sectionId: 'allocation'
+    });
+  }
+
+  return errors;
+};
+
+/**
  * Скролл к первой ошибке
  */
 export const scrollToFirstError = (errors: ValidationError[]): void => {

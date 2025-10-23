@@ -12,16 +12,46 @@ import SelectChannelsSection from "@/components/features/sections/SelectChannels
 import AllocationSection from "@/components/features/sections/AllocationSection";
 import RightSidebar from "@/components/layout/RightSidebar";
 import { useAppSelector } from '@/hooks/useRedux';
+import { validateSelectChannels, validateAllocation } from '@/utils/validation';
 
 export default function OmnichannelChannelsPage() {
   const router = useRouter();
   
   const selectedChannelsFromRedux = useAppSelector((state) => state.campaign.channels.selectedChannels);
+  const budgetAllocation = useAppSelector((state) => state.campaign.channels.budgetAllocation);
+  const totalBudget = useAppSelector((state) => state.campaign.budget.totalBudget);
   
   // Фильтруем выбранные каналы (исключаем linear_tv)
   const availableChannels = useMemo(() => {
     return selectedChannelsFromRedux.filter(channelId => channelId !== 'linear_tv');
   }, [selectedChannelsFromRedux]);
+
+  // Проверяем валидность формы
+  const isFormValid = useMemo(() => {
+    const errors = [
+      ...validateSelectChannels(availableChannels),
+      ...validateAllocation(budgetAllocation, availableChannels, totalBudget)
+    ];
+    return errors.length === 0;
+  }, [availableChannels, budgetAllocation, totalBudget]);
+
+  // Сообщение об ошибке
+  const errorMessage = useMemo(() => {
+    if (isFormValid) return '';
+    
+    // Проверяем каждую валидацию отдельно для более точного сообщения
+    const channelErrors = validateSelectChannels(availableChannels);
+    if (channelErrors.length > 0) {
+      return channelErrors[0].message;
+    }
+    
+    const allocationErrors = validateAllocation(budgetAllocation, availableChannels, totalBudget);
+    if (allocationErrors.length > 0) {
+      return allocationErrors[0].message;
+    }
+    
+    return 'Please fill in all required fields to continue';
+  }, [isFormValid, availableChannels, budgetAllocation, totalBudget]);
 
   // Бредкрамбсы для страницы Channels
   const breadcrumbSteps: BreadcrumbStep[] = [
@@ -60,6 +90,8 @@ export default function OmnichannelChannelsPage() {
   ];
 
   const handleNextClick = () => {
+    if (!isFormValid) return;
+    
     console.log('Переход к следующему шагу - Channel Details');
     router.push('/campaign/omnichannel/details');
   };
@@ -78,12 +110,13 @@ export default function OmnichannelChannelsPage() {
         rightSidebarContent={<RightSidebar isOmnichannel={true} />}
         footerContent={
           <NextButton 
-            active={true}
+            active={isFormValid}
             onClick={handleNextClick}
             text="Next"
             showBack={true}
             onBackClick={handleBackClick}
             backText="Back"
+            errorMessage={errorMessage}
           />
         }
       >
@@ -106,6 +139,7 @@ export default function OmnichannelChannelsPage() {
               <SectionWrapper 
                 id="select-channels" 
                 title="Select Channels"
+                required
               >
                 <SelectChannelsSection 
                   onSelectionChange={(channels) => {
@@ -118,6 +152,7 @@ export default function OmnichannelChannelsPage() {
               <SectionWrapper 
                 id="allocation" 
                 title="Allocation"
+                required
               >
                 <AllocationSection />
               </SectionWrapper>

@@ -1,14 +1,14 @@
 import { CampaignAudienceData } from '@/store/slices/campaignSlice';
 
 // Базовые размеры аудитории для каналов (без фильтров)
-// Используем неровные числа для реалистичности
+// Audience всегда меньше Market - это активная достижимая аудитория
 const CHANNEL_BASE_AUDIENCE: Record<string, number> = {
-  'preroll': 187456321,    // ~187M
-  'ctv': 123847562,        // ~124M
-  'audio': 145328917,      // ~145M
-  'social': 226789453,     // ~227M
-  'search': 243591827,     // ~244M
-  'email': 165432198,      // ~165M
+  'preroll': 95234781,     // ~95M
+  'ctv': 73892456,         // ~74M
+  'audio': 84567123,       // ~85M
+  'social': 117283945,     // ~117M
+  'search': 107654892,     // ~108M
+  'email': 67123894,       // ~67M
 };
 
 // Логика расчета Audience Estimation
@@ -66,13 +66,14 @@ export const calculateAudienceEstimation = (
 };
 
 // Базовые размеры рынка для каждого канала (в людях)
+// Реалистичные значения для США с учетом охвата каждого канала
 const CHANNEL_MARKET_SIZES: Record<string, number> = {
-  'preroll': 250000000,    // 250M - Pre-roll video ads
-  'ctv': 150000000,        // 150M - Connected TV
-  'audio': 180000000,      // 180M - Audio/Streaming
-  'social': 280000000,     // 280M - Social Media
-  'search': 300000000,     // 300M - Search
-  'email': 200000000,      // 200M - Email
+  'preroll': 127456891,    // ~127M - Pre-roll video ads
+  'ctv': 98234567,         // ~98M - Connected TV
+  'audio': 112847623,      // ~113M - Audio/Streaming
+  'social': 156392847,     // ~156M - Social Media (самый широкий охват)
+  'search': 143728956,     // ~144M - Search
+  'email': 89567234,       // ~90M - Email (более узкая аудитория)
 };
 
 // Логика расчета Market Estimation
@@ -92,9 +93,10 @@ export const calculateMarketEstimation = (
   
   // Если выбраны конкретные zip codes, размер рынка уменьшается (более узкий географический таргетинг)
   if (selectedZipCodes.length > 0) {
-    // Каждый zip code покрывает примерно 30,000-50,000 человек
-    // Используем среднее значение 40,000
-    baseMarket = selectedZipCodes.length * 40000;
+    // Каждый zip code покрывает в среднем 100,000-150,000 человек (особенно в городских районах)
+    // Используем более реалистичное значение 120,000 на zip code
+    // Это обеспечивает, что Market Estimation будет больше Audience Estimation при нормальных бюджетах
+    baseMarket = selectedZipCodes.length * 120000;
   }
   
   return baseMarket;

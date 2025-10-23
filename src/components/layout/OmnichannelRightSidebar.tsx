@@ -127,6 +127,37 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({
     return (channelBudget / totalBudget) * 100;
   };
 
+  // Получаем Market Estimation для канала
+  const getMarketEstimation = (): number => {
+    if (activeChannel === 'total') {
+      const marketValues = selectedChannels.map(ch => 
+        channelData[ch]?.estimations?.marketEstimation || 0
+      );
+      
+      if (marketValues.length === 0) return 0;
+      if (marketValues.length === 1) return marketValues[0];
+      
+      // Проверяем, используются ли конкретные zip codes для таргетинга
+      // Если хотя бы один канал использует geo-targeting, суммируем с коэффициентом
+      const hasGeoTargeting = selectedChannels.some(ch => {
+        const geoData = channelData[ch]?.geo;
+        return geoData?.selectedZipCodes && geoData.selectedZipCodes.length > 0;
+      });
+      
+      if (hasGeoTargeting) {
+        // При geo-таргетинге суммируем market estimation с коэффициентом overlap 0.85
+        const totalSum = marketValues.reduce((sum, val) => sum + val, 0);
+        return Math.round(totalSum * 0.85);
+      } else {
+        // При nationwide таргетинге берем максимум - это один и тот же рынок США
+        return Math.max(...marketValues);
+      }
+    } else {
+      // Для конкретного канала
+      return channelData[activeChannel]?.estimations?.marketEstimation || 0;
+    }
+  };
+
   // Получаем Audience Estimation для канала
   const getAudienceEstimation = (): number => {
     if (activeChannel === 'total') {
@@ -141,24 +172,15 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({
       
       // Суммируем и применяем фиксированный коэффициент 0.7
       const totalSum = audienceValues.reduce((sum, val) => sum + val, 0);
-      return Math.round(totalSum * 0.7);
+      const totalAudience = Math.round(totalSum * 0.7);
+      
+      // ВАЖНО: Audience не может превышать Market Estimation
+      const totalMarket = getMarketEstimation();
+      
+      return Math.min(totalAudience, totalMarket);
     } else {
       // Для конкретного канала
       return channelData[activeChannel]?.estimations?.audienceEstimation || 0;
-    }
-  };
-
-  // Получаем Market Estimation для канала
-  const getMarketEstimation = (): number => {
-    if (activeChannel === 'total') {
-      // Для Total - берём максимальное значение (размер рынка не суммируется)
-      const marketValues = selectedChannels.map(ch => 
-        channelData[ch]?.estimations?.marketEstimation || 0
-      );
-      return marketValues.length > 0 ? Math.max(...marketValues) : 0;
-    } else {
-      // Для конкретного канала
-      return channelData[activeChannel]?.estimations?.marketEstimation || 0;
     }
   };
 

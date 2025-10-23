@@ -78,7 +78,7 @@ export const NextButton: React.FC<NextButtonProps> = ({
           {errorMessage && (
             <Group gap={6}>
               <IconAlertCircle size={16} color="red" />
-              <Text c="red" size="xs">
+              <Text size="xs">
                 {errorMessage}
               </Text>
             </Group>
