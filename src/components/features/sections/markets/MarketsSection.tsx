@@ -3,8 +3,10 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Text, Group, Pagination, Select, Checkbox, Table, TextInput, Tooltip } from '@mantine/core';
 import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
-import { updateMarketsData, updateEstimations } from '@/store/slices/campaignSlice';
+import { updateMarketsData, updateEstimations, updateLinearData } from '@/store/slices/campaignSlice';
 import { marketsData } from '@/data/marketsData';
+import { getAvailableBroadcasters } from '@/data/stationsData';
+import { getBroadcasterById } from '@/data/broadcastersData';
 import MarketsFilter from './components/MarketsFilter';
 
 interface MarketRow {
@@ -183,6 +185,29 @@ const MarketsSection = () => {
     } else {
       dispatch(updateEstimations({ marketEstimation: 0 }));
     }
+  }, [markets, dispatch]);
+
+  // Автоматический выбор broadcasters при выборе маркетов
+  useEffect(() => {
+    const selectedMarketIds = markets.filter(m => m.selected).map(m => m.id);
+    
+    if (selectedMarketIds.length === 0) {
+      // Если не выбран ни один маркет, очищаем broadcasters
+      dispatch(updateLinearData({ broadcasters: [] }));
+      return;
+    }
+    
+    // Получаем всех доступных broadcasters для выбранных маркетов
+    const broadcasterIds = getAvailableBroadcasters(selectedMarketIds);
+    
+    // Конвертируем ID в названия
+    const broadcasterNames = broadcasterIds
+      .map(id => getBroadcasterById(id))
+      .filter(Boolean)
+      .map(b => b!.name);
+    
+    // Автоматически выбираем всех доступных broadcasters
+    dispatch(updateLinearData({ broadcasters: broadcasterNames }));
   }, [markets, dispatch]);
 
   // Handlers

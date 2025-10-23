@@ -107,7 +107,8 @@ const BroadcastersAndProgramsSection = () => {
           
           stations.push({
             ...station,
-            selected: savedStation?.selected || false,
+            // Автоматически выбираем все станции по умолчанию
+            selected: savedStation?.selected !== undefined ? savedStation.selected : true,
             percentage: savedStation?.percentage || 0,
             budget: savedStation?.budget || 0
           });
@@ -115,15 +116,60 @@ const BroadcastersAndProgramsSection = () => {
       });
 
       if (stations.length > 0) {
-        broadcastersWithStations.push({
-          id: broadcaster.id,
-          name: broadcaster.name,
-          stations
-        });
+        // Автоматически распределяем бюджет между выбранными станциями
+        const selectedStations = stations.filter(s => s.selected);
+        
+        if (selectedStations.length > 0) {
+          // Считаем общий бюджет всех markets этого broadcaster
+          const uniqueMarketIds = new Set(selectedStations.map(s => s.marketId));
+          const totalBudgetAllMarkets = Array.from(uniqueMarketIds).reduce((sum, marketId) => {
+            const market = marketsData.marketsDetails?.find(m => m.id === marketId);
+            return sum + (market?.budget || 0);
+          }, 0);
+          
+          // Равномерно распределяем процент между всеми выбранными станциями
+          const percentagePerStation = Math.round((100 / selectedStations.length) * 100) / 100;
+          const budgetPerStation = (totalBudgetAllMarkets * percentagePerStation) / 100;
+          
+          // Обновляем все станции с бюджетом
+          const finalStations = stations.map(station => {
+            if (!station.selected) {
+              return { ...station, percentage: 0, budget: 0 };
+            }
+            
+            // Если есть сохраненные данные при начальной загрузке, используем их
+            if (isInitialLoad.current && station.percentage > 0) {
+              return station;
+            }
+            
+            return {
+              ...station,
+              percentage: percentagePerStation,
+              budget: budgetPerStation
+            };
+          });
+          
+          broadcastersWithStations.push({
+            id: broadcaster.id,
+            name: broadcaster.name,
+            stations: finalStations
+          });
+        } else {
+          broadcastersWithStations.push({
+            id: broadcaster.id,
+            name: broadcaster.name,
+            stations
+          });
+        }
       }
     });
 
     setBroadcasterStations(broadcastersWithStations);
+    
+    // Автоматически раскрываем все broadcasters, чтобы показать выбранные станции
+    const broadcasterIds = broadcastersWithStations.map(b => b.id);
+    setExpandedBroadcasters(new Set(broadcasterIds));
+    
     isInitialLoad.current = false;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [linearData.broadcasters, marketsData.selectedMarkets, marketsData.marketsDetails]);
