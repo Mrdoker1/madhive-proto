@@ -1,15 +1,23 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import { useState, useCallback, useMemo } from 'react';
 import PageLayout from "@/components/layout/PageLayout";
 import NavigationAnchors, { AnchorItem } from "@/components/ui/NavigationAnchors";
 import SectionWrapper from "@/components/ui/SectionWrapper";
 import { BreadcrumbStep } from "@/components/ui/Breadcrumbs";
 import NextButton from "@/components/ui/NextButton";
+import RightSidebar from "@/components/layout/RightSidebar";
 import ProposalSection from "@/components/features/sections/ProposalSection";
+import { validateProgramSelection, validateProgramBudget } from '@/utils/validation';
 
 export default function GenerateProposalPage() {
   const router = useRouter();
+  
+  // Состояние для данных валидации
+  const [programSelections, setProgramSelections] = useState<any>({});
+  const [stationPrograms, setStationPrograms] = useState<any>({});
+  const [stationBudgets, setStationBudgets] = useState<Record<string, number>>({});
   
   // Бредкрамбсы для страницы Generate Proposal
   const breadcrumbSteps: BreadcrumbStep[] = [
@@ -46,7 +54,46 @@ export default function GenerateProposalPage() {
     { id: 'proposal', label: 'Proposal', anchor: '#proposal' }
   ];
 
+  // Callback для получения данных валидации из ProposalSection
+  const handleValidationChange = useCallback((
+    isValid: boolean, 
+    selections: any, 
+    programs: any, 
+    budgets: Record<string, number>
+  ) => {
+    setProgramSelections(selections);
+    setStationPrograms(programs);
+    setStationBudgets(budgets);
+  }, []);
+
+  // Проверяем валидность формы
+  const isFormValid = useMemo(() => {
+    const selectionErrors = validateProgramSelection(programSelections);
+    const budgetErrors = validateProgramBudget(programSelections, stationPrograms, stationBudgets);
+    return selectionErrors.length === 0 && budgetErrors.length === 0;
+  }, [programSelections, stationPrograms, stationBudgets]);
+
+  // Сообщение об ошибке
+  const errorMessage = useMemo(() => {
+    if (isFormValid) return '';
+    
+    // Проверяем каждую валидацию отдельно для более точного сообщения
+    const selectionErrors = validateProgramSelection(programSelections);
+    if (selectionErrors.length > 0) {
+      return selectionErrors[0].message;
+    }
+    
+    const budgetErrors = validateProgramBudget(programSelections, stationPrograms, stationBudgets);
+    if (budgetErrors.length > 0) {
+      return budgetErrors[0].message;
+    }
+    
+    return 'Please fill in all required fields to continue';
+  }, [isFormValid, programSelections, stationPrograms, stationBudgets]);
+
   const handleNextClick = () => {
+    if (!isFormValid) return;
+    
     console.log('Переход к следующему шагу - Summary');
     router.push('/campaign/linear/summary');
   };
@@ -61,15 +108,17 @@ export default function GenerateProposalPage() {
       <PageLayout 
         breadcrumbs={breadcrumbSteps} 
         title="Generate Proposal"
-        showRightSidebar={false}
+        showRightSidebar={true}
+        rightSidebarContent={<RightSidebar />}
         footerContent={
           <NextButton 
-            active={true}
+            active={isFormValid}
             onClick={handleNextClick}
             text="Next"
             showBack={true}
             onBackClick={handleBackClick}
             backText="Back"
+            errorMessage={errorMessage}
           />
         }
       >
@@ -93,8 +142,9 @@ export default function GenerateProposalPage() {
               <SectionWrapper 
                 id="proposal" 
                 title="Proposal"
+                required
               >
-                <ProposalSection />
+                <ProposalSection onValidationChange={handleValidationChange} />
               </SectionWrapper>
               
               </div>

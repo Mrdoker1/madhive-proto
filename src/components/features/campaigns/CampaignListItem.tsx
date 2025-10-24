@@ -15,6 +15,24 @@ function formatCurrency(n: number): string {
   return `$${n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
+// Функция для форматирования названий каналов
+function formatChannelName(channel: string): string {
+  const channelNames: Record<string, string> = {
+    'preroll': 'Preroll',
+    'ctv': 'CTV',
+    'audio': 'Audio',
+    'social': 'Social',
+    'search': 'Search',
+    'email': 'Email',
+    'display': 'Display',
+    'linear_tv': 'Linear TV',
+    'Linear TV': 'Linear TV',
+    'CTV': 'CTV'
+  };
+  
+  return channelNames[channel] || channel.charAt(0).toUpperCase() + channel.slice(1);
+}
+
 export default function CampaignListItem({ c }: { c: CampaignSummary }) {
   const data = c.sparkline.map((v, i) => ({ i, v }));
   return (
@@ -72,7 +90,7 @@ export default function CampaignListItem({ c }: { c: CampaignSummary }) {
               fontWeight: 600,
             }}
           >
-            {ch}
+            {formatChannelName(ch)}
           </span>
         ))}
       </div>

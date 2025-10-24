@@ -1,6 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import { useMemo } from 'react';
 import PageLayout from "@/components/layout/PageLayout";
 import NavigationAnchors, { AnchorItem } from "@/components/ui/NavigationAnchors";
 import SectionWrapper from "@/components/ui/SectionWrapper";
@@ -11,9 +12,16 @@ import AudiencesSection from "@/components/features/sections/AudiencesSection";
 import MarketsSection from "@/components/features/sections/markets";
 import BroadcastersAndProgramsSection from "@/components/features/sections/BroadcastersAndProgramsSection";
 import DaypartsSection from "@/components/features/sections/DaypartsSection";
+import { useAppSelector } from '@/hooks/useRedux';
+import { validateMarkets, validateBroadcastersAndPrograms } from '@/utils/validation';
 
 export default function ChannelDetailsPage() {
   const router = useRouter();
+  
+  // Получаем данные из Redux для валидации
+  const selectedMarkets = useAppSelector((state) => state.campaign.markets.selectedMarkets);
+  const broadcasters = useAppSelector((state) => state.campaign.linear.broadcasters);
+  const broadcastersWithStations = useAppSelector((state) => state.campaign.linear.broadcastersWithStations);
   // Бредкрамбсы для страницы Channel Details - обновленные статусы
   const breadcrumbSteps: BreadcrumbStep[] = [
     { 
@@ -53,7 +61,36 @@ export default function ChannelDetailsPage() {
     { id: 'dayparts', label: 'Dayparts', anchor: '#dayparts' }
   ];
 
+  // Проверяем валидность формы
+  const isFormValid = useMemo(() => {
+    const errors = [
+      ...validateMarkets(selectedMarkets),
+      ...validateBroadcastersAndPrograms(broadcasters, broadcastersWithStations)
+    ];
+    return errors.length === 0;
+  }, [selectedMarkets, broadcasters, broadcastersWithStations]);
+
+  // Сообщение об ошибке
+  const errorMessage = useMemo(() => {
+    if (isFormValid) return '';
+    
+    // Проверяем каждую валидацию отдельно для более точного сообщения
+    const marketErrors = validateMarkets(selectedMarkets);
+    if (marketErrors.length > 0) {
+      return marketErrors[0].message;
+    }
+    
+    const broadcasterErrors = validateBroadcastersAndPrograms(broadcasters, broadcastersWithStations);
+    if (broadcasterErrors.length > 0) {
+      return broadcasterErrors[0].message;
+    }
+    
+    return 'Please fill in all required fields to continue';
+  }, [isFormValid, selectedMarkets, broadcasters, broadcastersWithStations]);
+
   const handleNextClick = () => {
+    if (!isFormValid) return;
+    
     console.log('Переход к следующему шагу - Generate Proposal');
     // Переходим на страницу proposal
     router.push('/campaign/linear/proposal');
@@ -72,12 +109,13 @@ export default function ChannelDetailsPage() {
         showRightSidebar={true}
         footerContent={
           <NextButton 
-            active={true}
+            active={isFormValid}
             onClick={handleNextClick}
             text="Next"
             showBack={true}
             onBackClick={handleBackClick}
             backText="Back"
+            errorMessage={errorMessage}
           />
         }
       >
@@ -117,6 +155,7 @@ export default function ChannelDetailsPage() {
               <SectionWrapper 
                 id="markets" 
                 title="Market/Weight"
+                required
               >
                 <MarketsSection />
               </SectionWrapper>
@@ -125,6 +164,7 @@ export default function ChannelDetailsPage() {
               <SectionWrapper 
                 id="broadcasters" 
                 title="Broadcasters/Programs"
+                required
               >
                 <BroadcastersAndProgramsSection />
               </SectionWrapper>

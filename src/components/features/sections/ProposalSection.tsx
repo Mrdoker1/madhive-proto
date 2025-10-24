@@ -29,7 +29,11 @@ const daypartDefinitions = [
   { name: 'Late News', color: '#5C6BC0', hours: [23] }             // Indigo - late night
 ];
 
-const ProposalSection = () => {
+interface ProposalSectionProps {
+  onValidationChange?: (isValid: boolean, programSelections: ProgramSelection, stationPrograms: any, stationBudgets: Record<string, number>) => void;
+}
+
+const ProposalSection: React.FC<ProposalSectionProps> = ({ onValidationChange }) => {
   // Получаем детальную информацию о markets и stations из Redux
   const marketsDetails = useAppSelector((state) => state.campaign.markets.marketsDetails || []);
   const totalBudget = useAppSelector((state) => state.campaign.budget.totalBudget);
@@ -382,6 +386,38 @@ const ProposalSection = () => {
     return { totalImpressions, totalRate, avgCPM };
   }, [programSelections, stationPrograms]);
 
+  // Передаем данные валидации в родительский компонент
+  useEffect(() => {
+    if (onValidationChange) {
+      // Собираем бюджеты станций
+      const stationBudgets: Record<string, number> = {};
+      selectedMarketsWithStations.forEach(market => {
+        market.stations.forEach((station: BroadcasterStationBudget) => {
+          stationBudgets[station.id] = station.budget;
+        });
+      });
+
+      // Проверяем валидность (выбрана хотя бы одна программа и бюджет не превышен)
+      let hasSelectedPrograms = false;
+      let budgetExceeded = false;
+
+      Object.keys(stationPrograms).forEach(stationId => {
+        const selections = programSelections[stationId] || {};
+        const hasSelected = Object.values(selections).some(selected => selected);
+        if (hasSelected) {
+          hasSelectedPrograms = true;
+        }
+        
+        if (checkBudgetExceeded(stationId, stationBudgets[stationId] || 0)) {
+          budgetExceeded = true;
+        }
+      });
+
+      const isValid = hasSelectedPrograms && !budgetExceeded;
+      onValidationChange(isValid, programSelections, stationPrograms, stationBudgets);
+    }
+  }, [programSelections, stationPrograms, selectedMarketsWithStations, onValidationChange]);
+
   // Toggle программы
   const toggleProgram = (stationId: string, programId: string) => {
     setProgramSelections(prev => ({
@@ -472,10 +508,10 @@ const ProposalSection = () => {
                   color="var(--primary-color)"
                 />
               </Table.Th>
-              <Table.Th>
+              <Table.Th style={{ width: '140px' }}>
                 <Text size="xs" fw={500}>Program Name</Text>
               </Table.Th>
-              <Table.Th>
+              <Table.Th style={{ width: '120px' }}>
                 <Text size="xs" fw={500}>Daypart</Text>
               </Table.Th>
               <Table.Th>

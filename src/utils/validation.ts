@@ -216,6 +216,148 @@ export const validateAllocation = (
 };
 
 /**
+ * Валидация Markets (для Linear)
+ * Проверяем, что выбран хотя бы один маркет
+ */
+export const validateMarkets = (selectedMarkets: string[]): ValidationError[] => {
+  const errors: ValidationError[] = [];
+
+  if (!selectedMarkets || selectedMarkets.length === 0) {
+    errors.push({
+      field: 'selectedMarkets',
+      message: 'Please select at least one market',
+      sectionId: 'markets'
+    });
+  }
+
+  return errors;
+};
+
+/**
+ * Валидация Broadcasters and Programs (для Linear)
+ * Проверяем, что:
+ * 1. Выбран хотя бы один broadcaster
+ * 2. Выбрана хотя бы одна станция в общем (не обязательно у каждого broadcaster)
+ */
+export const validateBroadcastersAndPrograms = (
+  broadcasters: string[],
+  broadcastersWithStations?: Array<{
+    id: string;
+    name: string;
+    stations: Array<{ id: string; selected: boolean }>;
+  }>
+): ValidationError[] => {
+  const errors: ValidationError[] = [];
+
+  // Проверяем, что выбран хотя бы один broadcaster
+  if (!broadcasters || broadcasters.length === 0) {
+    errors.push({
+      field: 'broadcasters',
+      message: 'Please select at least one broadcaster',
+      sectionId: 'broadcasters'
+    });
+    return errors;
+  }
+
+  // Проверяем, что выбрана хотя бы одна станция в общем (у любого broadcaster)
+  if (broadcastersWithStations && broadcastersWithStations.length > 0) {
+    const totalSelectedStations = broadcastersWithStations.reduce((count, broadcaster) => {
+      const selectedStations = broadcaster.stations.filter(s => s.selected);
+      return count + selectedStations.length;
+    }, 0);
+
+    if (totalSelectedStations === 0) {
+      errors.push({
+        field: 'stations',
+        message: 'Please select at least one station',
+        sectionId: 'broadcasters'
+      });
+    }
+  }
+
+  return errors;
+};
+
+/**
+ * Валидация Proposal - проверка выбора программ (для Linear)
+ * Проверяем, что выбрана хотя бы одна программа
+ */
+export const validateProgramSelection = (
+  programSelections: { [stationId: string]: { [programId: string]: boolean } }
+): ValidationError[] => {
+  const errors: ValidationError[] = [];
+
+  // Подсчитываем общее количество выбранных программ
+  let totalSelectedPrograms = 0;
+  
+  Object.values(programSelections).forEach(stationPrograms => {
+    Object.values(stationPrograms).forEach(isSelected => {
+      if (isSelected) {
+        totalSelectedPrograms++;
+      }
+    });
+  });
+
+  if (totalSelectedPrograms === 0) {
+    errors.push({
+      field: 'programs',
+      message: 'Please select at least one program',
+      sectionId: 'proposal'
+    });
+  }
+
+  return errors;
+};
+
+/**
+ * Валидация Proposal - проверка бюджета программ (для Linear)
+ * Проверяем, что выбранные программы не превышают выделенный бюджет станции
+ */
+export const validateProgramBudget = (
+  programSelections: { [stationId: string]: { [programId: string]: boolean } },
+  stationPrograms: { 
+    [stationId: string]: Array<{ 
+      id: string; 
+      rate: number; 
+    }> 
+  },
+  stationBudgets: { [stationId: string]: number }
+): ValidationError[] => {
+  const errors: ValidationError[] = [];
+
+  // Проверяем каждую станцию
+  Object.keys(programSelections).forEach(stationId => {
+    const selectedPrograms = programSelections[stationId];
+    const programs = stationPrograms[stationId] || [];
+    const allocatedBudget = stationBudgets[stationId] || 0;
+
+    // Считаем общую стоимость выбранных программ для этой станции
+    let totalRate = 0;
+    Object.keys(selectedPrograms).forEach(programId => {
+      if (selectedPrograms[programId]) {
+        const program = programs.find(p => p.id === programId);
+        if (program) {
+          totalRate += program.rate;
+        }
+      }
+    });
+
+    // Проверяем превышение бюджета
+    if (totalRate > allocatedBudget) {
+      errors.push({
+        field: 'programBudget',
+        message: 'Selected programs exceed the allocated budget',
+        sectionId: 'proposal'
+      });
+      // Возвращаем после первой найденной ошибки, чтобы не дублировать сообщение
+      return;
+    }
+  });
+
+  return errors;
+};
+
+/**
  * Скролл к первой ошибке
  */
 export const scrollToFirstError = (errors: ValidationError[]): void => {
