@@ -44,11 +44,16 @@ function convertToCampaignSummary(saved: SavedCampaign): CampaignSummary {
   };
 }
 
+type SortField = 'status' | 'name' | 'progressPercent' | 'pacingPercent' | 'deliveredImpressions' | 'deliveredSpend' | 'remainingImpression' | 'remainingBudget';
+type SortDirection = 'asc' | 'desc';
+
 export default function CampaignListPage() {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const [pageSize, setPageSize] = useState<number>(20);
   const [page, setPage] = useState<number>(1);
+  const [sortField, setSortField] = useState<SortField>('status');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
   
   const savedCampaigns = useAppSelector((state) => state.campaign.savedCampaigns);
 
@@ -64,19 +69,90 @@ export default function CampaignListPage() {
     router.push('/campaign/omnichannel/new');
   };
 
+  // Функция для определения приоритета статуса (для сортировки)
+  const getStatusPriority = (status: string): number => {
+    const priorities: Record<string, number> = {
+      'Not Started': 1,      // Не начатые - первыми
+      'On Target': 2,        // Идут по плану
+      'Over Pace': 3,        // Немного опережают
+      'Way Over Pace': 4,    // Сильно опережают
+      'Under Pace': 5,       // Немного отстают
+      'Way Under Pace': 6,   // Сильно отстают
+      'Completed': 7         // Завершенные - последними
+    };
+    return priorities[status] || 99;
+  };
+
+  // Функция сортировки
+  const sortCampaigns = (campaigns: CampaignSummary[]): CampaignSummary[] => {
+    return [...campaigns].sort((a, b) => {
+      let comparison = 0;
+
+      switch (sortField) {
+        case 'status':
+          comparison = getStatusPriority(a.status) - getStatusPriority(b.status);
+          break;
+        case 'name':
+          comparison = a.name.localeCompare(b.name);
+          break;
+        case 'progressPercent':
+          comparison = a.progressPercent - b.progressPercent;
+          break;
+        case 'pacingPercent':
+          const aPacing = a.pacingPercent ?? -1;
+          const bPacing = b.pacingPercent ?? -1;
+          comparison = aPacing - bPacing;
+          break;
+        case 'deliveredImpressions':
+          comparison = a.deliveredImpressions - b.deliveredImpressions;
+          break;
+        case 'deliveredSpend':
+          comparison = a.deliveredSpend - b.deliveredSpend;
+          break;
+        case 'remainingImpression':
+          comparison = a.remainingImpression - b.remainingImpression;
+          break;
+        case 'remainingBudget':
+          comparison = a.remainingBudget - b.remainingBudget;
+          break;
+      }
+
+      return sortDirection === 'asc' ? comparison : -comparison;
+    });
+  };
+
+  // Обработчик изменения сортировки
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      // Переключаем направление если поле то же самое
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      // Новое поле - начинаем с asc
+      setSortField(field);
+      setSortDirection('asc');
+    }
+    // Сбрасываем на первую страницу при изменении сортировки
+    setPage(1);
+  };
+
   // Объединяем сохранённые кампании с mock данными
   const allCampaigns = useMemo(() => {
     const converted = savedCampaigns.map(convertToCampaignSummary);
     return [...converted, ...campaignsMock];
   }, [savedCampaigns]);
 
-  const totalItems = allCampaigns.length;
+  // Применяем сортировку
+  const sortedCampaigns = useMemo(() => {
+    return sortCampaigns(allCampaigns);
+  }, [allCampaigns, sortField, sortDirection]);
+
+  const totalItems = sortedCampaigns.length;
   const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
   const pageSafe = Math.min(page, totalPages);
   const startIdx = (pageSafe - 1) * pageSize;
   const endIdx = Math.min(startIdx + pageSize, totalItems);
 
-  const currentItems = useMemo(() => allCampaigns.slice(startIdx, endIdx), [allCampaigns, startIdx, endIdx]);
+  const currentItems = useMemo(() => sortedCampaigns.slice(startIdx, endIdx), [sortedCampaigns, startIdx, endIdx]);
 
   // Компонент dropdown кнопки для создания кампании
   const newCampaignButton = (
@@ -139,7 +215,12 @@ export default function CampaignListPage() {
       footerContent={footer}
     >
       <div style={{ padding: '24px' }}>
-        <CampaignList items={currentItems} />
+        <CampaignList 
+          items={currentItems} 
+          sortField={sortField}
+          sortDirection={sortDirection}
+          onSort={handleSort}
+        />
       </div>
     </PageLayout>
   );

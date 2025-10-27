@@ -3,10 +3,49 @@
 import React from 'react';
 import CampaignListItem from './CampaignListItem';
 import type { CampaignSummary } from '@/data/campaignsData';
+import { IconChevronUp, IconChevronDown } from '@tabler/icons-react';
 
-export default function CampaignList({ items }: { items: CampaignSummary[] }) {
+type SortField = 'status' | 'name' | 'progressPercent' | 'pacingPercent' | 'deliveredImpressions' | 'deliveredSpend' | 'remainingImpression' | 'remainingBudget';
+type SortDirection = 'asc' | 'desc';
+
+interface CampaignListProps {
+  items: CampaignSummary[];
+  sortField?: SortField;
+  sortDirection?: SortDirection;
+  onSort?: (field: SortField) => void;
+}
+
+export default function CampaignList({ items, sortField, sortDirection, onSort }: CampaignListProps) {
   const nameColWidth = 220; // px
   const statusColWidth = 160; // px
+
+  // Компонент для индикатора сортировки
+  const SortIndicator = ({ field }: { field: SortField }) => {
+    if (sortField !== field) return null;
+    return sortDirection === 'asc' 
+      ? <IconChevronUp size={14} style={{ marginLeft: '4px', display: 'inline' }} />
+      : <IconChevronDown size={14} style={{ marginLeft: '4px', display: 'inline' }} />;
+  };
+
+  // Функция для создания кликабельного заголовка
+  const SortableHeader = ({ field, children, style }: { field: SortField; children: React.ReactNode; style?: React.CSSProperties }) => {
+    return (
+      <div 
+        style={{ 
+          ...style,
+          cursor: 'pointer', 
+          userSelect: 'none',
+          display: 'flex',
+          alignItems: 'center'
+        }}
+        onClick={() => onSort?.(field)}
+      >
+        {children}
+        <SortIndicator field={field} />
+      </div>
+    );
+  };
+
   return (
     <div style={{ borderBottom: '1px solid var(--border-color)', fontSize: '12px', position: 'relative', overflowX: 'auto', overflowY: 'hidden', background: 'transparent' }}>
 
@@ -25,16 +64,32 @@ export default function CampaignList({ items }: { items: CampaignSummary[] }) {
           width: 'fit-content'
         }}
       >
-        <div style={{ position: 'sticky', left: '0', zIndex: 1, background: 'var(--header-background)', paddingLeft: '16px', paddingRight: '16px', paddingTop: '8px', paddingBottom: '8px' }}>Name</div>
-        <div style={{ position: 'sticky', left: `${nameColWidth}px`, zIndex: 1, background: 'var(--header-background)', paddingLeft: '16px', paddingRight: '12px', paddingTop: '8px', paddingBottom: '8px', borderRight: '1px solid var(--border-color)' }}>Pacing Status</div>
+        <div style={{ position: 'sticky', left: '0', zIndex: 1, background: 'var(--header-background)', paddingLeft: '16px', paddingRight: '16px', paddingTop: '8px', paddingBottom: '8px' }}>
+          <SortableHeader field="name">Name</SortableHeader>
+        </div>
+        <div style={{ position: 'sticky', left: `${nameColWidth}px`, zIndex: 1, background: 'var(--header-background)', paddingLeft: '16px', paddingRight: '12px', paddingTop: '8px', paddingBottom: '8px', borderRight: '1px solid var(--border-color)' }}>
+          <SortableHeader field="status">Pacing Status</SortableHeader>
+        </div>
         <div style={{ paddingLeft: '20px' }}>Delivered in Last 7 days</div>
         <div style={{ paddingLeft: '20px' }}>Channels</div>
-        <div style={{ paddingLeft: '20px' }}>Progress (Delivered/Goal)</div>
-        <div>Pacing% (Delivered/Pacing Target)</div>
-        <div style={{ textAlign: 'right' }}>Delivered Impression</div>
-        <div style={{ textAlign: 'right' }}>Delivered Spend($)</div>
-        <div style={{ textAlign: 'right' }}>Remaining Impression</div>
-        <div style={{ textAlign: 'right', paddingRight: '16px' }}>Remaining Budget($)</div>
+        <div style={{ paddingLeft: '20px' }}>
+          <SortableHeader field="progressPercent">Progress (Delivered/Goal)</SortableHeader>
+        </div>
+        <div>
+          <SortableHeader field="pacingPercent">Pacing% (Delivered/Pacing Target)</SortableHeader>
+        </div>
+        <div style={{ textAlign: 'right' }}>
+          <SortableHeader field="deliveredImpressions" style={{ justifyContent: 'flex-end' }}>Delivered Impression</SortableHeader>
+        </div>
+        <div style={{ textAlign: 'right' }}>
+          <SortableHeader field="deliveredSpend" style={{ justifyContent: 'flex-end' }}>Delivered Spend($)</SortableHeader>
+        </div>
+        <div style={{ textAlign: 'right' }}>
+          <SortableHeader field="remainingImpression" style={{ justifyContent: 'flex-end' }}>Remaining Impression</SortableHeader>
+        </div>
+        <div style={{ textAlign: 'right', paddingRight: '16px' }}>
+          <SortableHeader field="remainingBudget" style={{ justifyContent: 'flex-end' }}>Remaining Budget($)</SortableHeader>
+        </div>
       </div>
 
       {/* Left cover больше не нужен — фон и высокий z-index на sticky колонках */}
