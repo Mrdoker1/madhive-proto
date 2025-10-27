@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import 'mapbox-gl/dist/mapbox-gl.css';
 import { MantineProvider, createTheme } from '@mantine/core';
 import { StoreProvider } from '@/app/StoreProvider';
 import AppLayout from '@/components/layout/AppLayout';
