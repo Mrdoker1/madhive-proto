@@ -121,26 +121,19 @@ export default function Home() {
           </div>
 
           {/* Разделитель */}
-          <div className="w-full max-w-6xl flex justify-center" style={{ marginTop: '32px', marginBottom: '8px' }}>
+          <div className="w-full max-w-6xl flex justify-center" style={{ marginTop: '32px', marginBottom: '32px' }}>
             <div style={{ height: '1px', backgroundColor: '#E5E7EB', width: '100%', maxWidth: '800px' }} />
           </div>
 
-          {/* Секция настроек карты */}
-          <div className="w-full max-w-6xl flex justify-center">
-            <div style={{ width: '100%', maxWidth: '800px' }}>
-              <MapSettingsSection />
-            </div>
-          </div>
-
-          {/* Разделитель */}
-          <div className="w-full max-w-6xl flex justify-center" style={{ marginTop: '8px', marginBottom: '8px' }}>
-            <div style={{ height: '1px', backgroundColor: '#E5E7EB', width: '100%', maxWidth: '800px' }} />
-          </div>
-
-          {/* Секция настроек AI */}
+          {/* Секции настроек в одну строку */}
           <div className="w-full max-w-6xl flex justify-center" style={{ paddingBottom: '40px' }}>
-            <div style={{ width: '100%', maxWidth: '800px' }}>
-              <AISettingsSection />
+            <div style={{ display: 'flex', gap: '32px', width: '100%', maxWidth: '800px' }}>
+              <div style={{ flex: 1 }}>
+                <MapSettingsSection />
+              </div>
+              <div style={{ flex: 1 }}>
+                <AISettingsSection />
+              </div>
             </div>
           </div>
         </div>

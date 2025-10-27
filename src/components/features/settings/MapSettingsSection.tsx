@@ -91,12 +91,13 @@ const MapSettingsSection: React.FC = () => {
               }}
             />
             <Button
+              variant="outline"
               onClick={handleSave}
               loading={loading}
               styles={{
                 root: {
-                  backgroundColor: '#291036',
-                  color: '#FFFFFF',
+                  borderColor: '#291036',
+                  color: '#291036',
                   fontSize: '14px',
                   fontWeight: 500,
                   padding: '0 20px',
@@ -104,7 +105,7 @@ const MapSettingsSection: React.FC = () => {
                   height: '34px',
                   flexShrink: 0,
                   '&:hover': {
-                    backgroundColor: '#1f0829'
+                    backgroundColor: 'rgba(41, 16, 54, 0.05)'
                   }
                 }
               }}
