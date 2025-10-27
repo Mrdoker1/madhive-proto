@@ -1,12 +1,16 @@
+'use client';
+
 import Link from "next/link";
 import { Text, Table, TableThead, TableTbody, TableTr, TableTh, TableTd } from '@mantine/core';
 import PageLayout from "@/components/layout/PageLayout";
+import MapSettingsSection from '@/components/features/settings/MapSettingsSection';
+import AISettingsSection from '@/components/features/settings/AISettingsSection';
 
 export default function Home() {
   return (
     <PageLayout>
       <div style={{ backgroundColor: 'var(--page-background)' }} className="h-full">
-        <div className="container mx-auto flex flex-col items-center justify-center min-h-full">
+        <div className="container mx-auto flex flex-col items-center justify-center min-h-full" style={{ paddingTop: '64px' }}>
           <h2 style={{ color: 'black' }} >Madhive Proto</h2>
           <p style={{ color: 'black', paddingBottom: '24px', fontSize: '12px' }}>Campaign management prototype with linear and omnichannel advertising workflows</p>
           
@@ -114,6 +118,20 @@ export default function Home() {
                 ))}
               </TableTbody>
             </Table>
+          </div>
+
+          {/* Секция настроек карты */}
+          <div className="w-full max-w-6xl flex justify-center" style={{ marginTop: '32px' }}>
+            <div style={{ width: '100%', maxWidth: '800px' }}>
+              <MapSettingsSection />
+            </div>
+          </div>
+
+          {/* Секция настроек AI */}
+          <div className="w-full max-w-6xl flex justify-center" style={{ marginTop: '24px', paddingBottom: '40px' }}>
+            <div style={{ width: '100%', maxWidth: '800px' }}>
+              <AISettingsSection />
+            </div>
           </div>
         </div>
       </div>

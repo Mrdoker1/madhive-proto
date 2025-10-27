@@ -5,8 +5,6 @@ import { getCampaignDMAData, type CampaignDMAZone } from '@/data/campaignDmaData
 import { useDashboardFilters } from '@/contexts/DashboardFilterContext';
 import mapboxgl from 'mapbox-gl';
 
-mapboxgl.accessToken = 'pk.eyJ1IjoibXJkb2tlcjEiLCJhIjoiY2szNGlvZHcxMDFweTNjcG4xeXRicng5ZSJ9.PAdeoloR2kVbvXM7LFO-zg';
-
 const GeoPerformanceMap: React.FC = () => {
   const { campaign } = useDashboardFilters();
   const mapContainer = useRef<HTMLDivElement>(null);
@@ -16,6 +14,25 @@ const GeoPerformanceMap: React.FC = () => {
   const [tooltipPosition, setTooltipPosition] = useState<{ x: number; y: number } | null>(null);
   const [campaignData, setCampaignData] = useState<ReturnType<typeof getCampaignDMAData> | null>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
+  const [apiKeyLoaded, setApiKeyLoaded] = useState(false);
+
+  // Загрузка API ключа из настроек
+  useEffect(() => {
+    const loadApiKey = async () => {
+      try {
+        const response = await fetch('/api/settings');
+        const data = await response.json();
+        mapboxgl.accessToken = data.mapboxApiKey || 'pk.eyJ1IjoibXJkb2tlcjEiLCJhIjoiY2szNGlvZHcxMDFweTNjcG4xeXRicng5ZSJ9.PAdeoloR2kVbvXM7LFO-zg';
+        setApiKeyLoaded(true);
+      } catch (error) {
+        console.error('Failed to load API key:', error);
+        // Используем дефолтный ключ
+        mapboxgl.accessToken = 'pk.eyJ1IjoibXJkb2tlcjEiLCJhIjoiY2szNGlvZHcxMDFweTNjcG4xeXRicng5ZSJ9.PAdeoloR2kVbvXM7LFO-zg';
+        setApiKeyLoaded(true);
+      }
+    };
+    loadApiKey();
+  }, []);
 
   // Загрузка данных кампании при изменении выбранной кампании
   useEffect(() => {
@@ -29,8 +46,8 @@ const GeoPerformanceMap: React.FC = () => {
 
   // Инициализация карты
   useEffect(() => {
-    if (!mapContainer.current || map.current) {
-      console.log('Map init skipped:', { hasContainer: !!mapContainer.current, hasMap: !!map.current });
+    if (!mapContainer.current || map.current || !apiKeyLoaded) {
+      console.log('Map init skipped:', { hasContainer: !!mapContainer.current, hasMap: !!map.current, apiKeyLoaded });
       return;
     }
 
@@ -126,7 +143,7 @@ const GeoPerformanceMap: React.FC = () => {
       }
       setMapLoaded(false);
     };
-  }, []);
+  }, [apiKeyLoaded]);
 
   // Отображение DMA зон на карте
   useEffect(() => {
