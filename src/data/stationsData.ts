@@ -13,8 +13,10 @@ export interface StationData {
 // Генерируем stations на основе новых данных из папки stations
 export const stationsData: StationData[] = [];
 
-// Заполняем stationsData из новой структуры
+// Заполняем stationsData из новой структуры с гарантией уникальности ID
 let globalStationIndex = 0;
+const usedIds = new Set<string>(); // Трекинг использованных ID
+
 allBroadcasterStations.forEach(broadcaster => {
   broadcaster.stations.forEach((station) => {
     // Создаем market ID из DMA
@@ -22,13 +24,22 @@ allBroadcasterStations.forEach(broadcaster => {
       ? station.associatedDma.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
       : `unknown-${globalStationIndex}`;
     
-    // Генерируем уникальный ID станции (broadcaster + station + market для уникальности)
+    // Генерируем базовый ID станции
     const stationName = station.station.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-    const marketPart = marketId.substring(0, 20); // Используем часть market ID для уникальности
-    const stationId = `${broadcaster.broadcasterId}-${stationName}-${marketPart}`;
+    const marketPart = marketId.substring(0, 20);
+    let stationId = `${broadcaster.broadcasterId}-${stationName}-${marketPart}`;
+    
+    // Проверяем уникальность и добавляем индекс если нужно
+    let uniqueId = stationId;
+    let counter = 1;
+    while (usedIds.has(uniqueId)) {
+      uniqueId = `${stationId}-${counter}`;
+      counter++;
+    }
+    usedIds.add(uniqueId);
     
     stationsData.push({
-      id: stationId,
+      id: uniqueId,
       name: station.station,
       marketId: marketId,
       broadcasterId: broadcaster.broadcasterId,

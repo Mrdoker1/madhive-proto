@@ -3,9 +3,9 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Text, Card, Group } from '@mantine/core';
 import { IconCurrencyDollar } from '@tabler/icons-react';
-import Image from 'next/image';
 import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
 import { updateBudgetData } from '@/store/slices/campaignSlice';
+import AISuggestionCard from '@/components/ui/AISuggestionCard';
 import ChannelPills, { ChannelPill } from '@/components/ui/ChannelPills';
 
 // Цвета каналов из allocation
@@ -26,12 +26,14 @@ interface OmnichannelRightSidebarProps {
   className?: string;
   selectedChannels?: string[]; // Массив выбранных каналов (preroll, ctv, audio, etc.)
   readOnly?: boolean; // Если true, то бюджет нельзя редактировать
+  pageKey?: string; // Ключ страницы для AI подсказок
 }
 
 const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({ 
   className = '',
   selectedChannels = [],
-  readOnly = false
+  readOnly = false,
+  pageKey = 'default'
 }) => {
   const dispatch = useAppDispatch();
   const [activeChannel, setActiveChannel] = useState<ChannelType>('total');
@@ -631,45 +633,9 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({
         )}
 
         {/* AI Suggestions */}
-        <Card
-          padding="lg"
-          radius="md"
-          styles={{
-            root: {
-              backgroundColor: '#FFFFFF',
-              borderRadius: '8px',
-              position: 'relative',
-              overflow: 'visible',
-              minHeight: 'auto',
-              height: 'auto',
-              marginBottom: '100px'
-            }
-          }}
-        >
-          {/* Spark Icon in top right corner */}
-          <div style={{
-            position: 'absolute',
-            top: '16px',
-            right: '16px'
-          }}>
-            <Image
-              src="/assets/icons/other/spark.svg"
-              alt="AI Spark"
-              width={20}
-              height={20}
-              className={className}
-            />
-          </div>
-          
-          <Text size="xs" style={{ color: '#666', lineHeight: 1.5, paddingRight: '30px' }}>
-            We suggest you : Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor 
-            incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud 
-            exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute 
-            irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla 
-            pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia 
-            deserunt mollit anim id est laborum.
-          </Text>
-        </Card>
+        <div style={{ marginBottom: '100px' }}>
+          <AISuggestionCard pageKey={pageKey} />
+        </div>
       </div>
     </div>
   );

@@ -250,7 +250,7 @@ export default function OmnichannelDetailsPage() {
         breadcrumbs={breadcrumbSteps} 
         title={`Channel Details (${availableChannels.length})`}
         showRightSidebar={true}
-        rightSidebarContent={<OmnichannelRightSidebar selectedChannels={availableChannels} readOnly={true} />}
+        rightSidebarContent={<OmnichannelRightSidebar selectedChannels={availableChannels} readOnly={true} pageKey="omnichannel-details" />}
         headerActions={
           channelPills.length > 0 ? (
             <ChannelPills

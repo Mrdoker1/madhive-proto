@@ -71,14 +71,12 @@ const AISettingsSection: React.FC = () => {
   return (
     <div
       style={{
-        backgroundColor: '#FFFFFF',
-        border: '1px solid var(--border-color)',
         borderRadius: '12px',
-        padding: '24px'
+        padding: '8px'
       }}
     >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-        <h2 style={{ fontSize: '18px', fontWeight: 600, color: '#111827', margin: 0 }}>
+        <h2 style={{ fontSize: '16px', fontWeight: 600, color: '#111827', margin: 0 }}>
           AI Provider
         </h2>
 
@@ -92,7 +90,7 @@ const AISettingsSection: React.FC = () => {
               label="DeepSeek"
               styles={{
                 label: {
-                  fontSize: '14px',
+                  fontSize: '12px',
                   color: '#374151',
                   cursor: 'pointer'
                 },
@@ -106,7 +104,7 @@ const AISettingsSection: React.FC = () => {
               label="OpenAI"
               styles={{
                 label: {
-                  fontSize: '14px',
+                  fontSize: '12px',
                   color: '#374151',
                   cursor: 'pointer'
                 },
@@ -130,7 +128,7 @@ const AISettingsSection: React.FC = () => {
             leftSection={<IconKey size={16} />}
             styles={{
               label: {
-                fontSize: '14px',
+                fontSize: '12px',
                 fontWeight: 500,
                 color: '#374151',
                 marginBottom: '8px'
@@ -152,7 +150,7 @@ const AISettingsSection: React.FC = () => {
             leftSection={<IconKey size={16} />}
             styles={{
               label: {
-                fontSize: '14px',
+                fontSize: '12px',
                 fontWeight: 500,
                 color: '#374151',
                 marginBottom: '8px'

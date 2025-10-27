@@ -5,14 +5,15 @@ import { Text, Card } from '@mantine/core';
 import { IconCurrencyDollar } from '@tabler/icons-react';
 import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
 import { updateBudgetData, updateEstimations } from '@/store/slices/campaignSlice';
-import Image from 'next/image';
+import AISuggestionCard from '@/components/ui/AISuggestionCard';
 
 interface RightSidebarProps {
   className?: string;
   isOmnichannel?: boolean; // Флаг для определения типа кампании
+  pageKey?: string; // Ключ страницы для AI подсказок
 }
 
-const RightSidebar: React.FC<RightSidebarProps> = ({ className = '', isOmnichannel = false }) => {
+const RightSidebar: React.FC<RightSidebarProps> = ({ className = '', isOmnichannel = false, pageKey = 'default' }) => {
   const dispatch = useAppDispatch();
   
   // Получаем данные кампании из глобального стейта
@@ -400,41 +401,7 @@ const RightSidebar: React.FC<RightSidebarProps> = ({ className = '', isOmnichann
         </div>
 
         {/* AI Suggestions */}
-        <Card
-          padding="lg"
-          radius="md"
-          styles={{
-            root: {
-              backgroundColor: '#FFFFFF',
-              borderRadius: '8px',
-              position: 'relative'
-            }
-          }}
-        >
-          {/* Spark Icon in top right corner */}
-          <div style={{
-            position: 'absolute',
-            top: '16px',
-            right: '16px'
-          }}>
-            <Image
-              src="/assets/icons/other/spark.svg"
-              alt="AI Spark"
-              width={20}
-              height={20}
-              className={className}
-            />
-          </div>
-          
-          <Text size="xs" style={{ color: '#666', lineHeight: 1.5, paddingRight: '30px' }}>
-            We suggest you : Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor 
-            incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud 
-            exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute 
-            irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla 
-            pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia 
-            deserunt mollit anim id est laborum.
-          </Text>
-        </Card>
+        <AISuggestionCard pageKey={pageKey} />
       </div>
     </div>
   );

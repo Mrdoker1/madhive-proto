@@ -310,11 +310,9 @@ const GeoPerformanceMap: React.FC = () => {
                 left: '50%',
                 transform: 'translate(-50%, -50%)',
                 textAlign: 'center',
-                backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                backgroundColor: 'white',
                 padding: '32px 48px',
                 borderRadius: '12px',
-                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-                border: '1px solid var(--border-color)',
                 zIndex: 10
               }}
             >

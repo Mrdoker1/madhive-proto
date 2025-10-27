@@ -71,7 +71,7 @@ export default function OmnichannelSummaryPage() {
         breadcrumbs={breadcrumbSteps} 
         title="Summary"
         showRightSidebar={true}
-        rightSidebarContent={<OmnichannelRightSidebar selectedChannels={availableChannels} readOnly={true} />}
+        rightSidebarContent={<OmnichannelRightSidebar selectedChannels={availableChannels} readOnly={true} pageKey="omnichannel-summary" />}
         footerContent={
           <NextButton 
             active={true}

@@ -107,6 +107,7 @@ export default function ChannelDetailsPage() {
         breadcrumbs={breadcrumbSteps} 
         title="Channel Details"
         showRightSidebar={true}
+        rightSidebarPageKey="linear-details"
         footerContent={
           <NextButton 
             active={isFormValid}

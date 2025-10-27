@@ -14,6 +14,7 @@ interface PageLayoutProps {
   onBreadcrumbClick?: (step: BreadcrumbStep) => void; // Обработчик клика на breadcrumb
   showRightSidebar?: boolean; // Показывать правый сайдбар
   rightSidebarContent?: React.ReactNode; // Кастомный контент для правого сайдбара
+  rightSidebarPageKey?: string; // Ключ страницы для AI подсказок в сайдбаре
   footerContent?: React.ReactNode; // Контент который будет зафиксирован внизу
   // Опции правой кнопки в PageHeader
   headerShowRightButton?: boolean;
@@ -34,6 +35,7 @@ const PageLayout: React.FC<PageLayoutProps> = ({
   onBreadcrumbClick,
   showRightSidebar = false,
   rightSidebarContent,
+  rightSidebarPageKey = 'default',
   footerContent,
   headerShowRightButton = false,
   headerRightButtonText = 'Next',
@@ -151,7 +153,7 @@ const PageLayout: React.FC<PageLayoutProps> = ({
                 scale: { duration: 0.3 }
               }}
             >
-              {rightSidebarContent || <RightSidebar />}
+              {rightSidebarContent || <RightSidebar pageKey={rightSidebarPageKey} />}
             </motion.div>
           )}
         </AnimatePresence>

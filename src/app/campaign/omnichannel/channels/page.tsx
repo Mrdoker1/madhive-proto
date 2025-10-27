@@ -106,7 +106,7 @@ export default function OmnichannelChannelsPage() {
         breadcrumbs={breadcrumbSteps} 
         title="Channels"
         showRightSidebar={true}
-        rightSidebarContent={<RightSidebar isOmnichannel={true} />}
+        rightSidebarContent={<RightSidebar isOmnichannel={true} pageKey="omnichannel-channels" />}
         footerContent={
           <NextButton 
             active={isFormValid}

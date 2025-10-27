@@ -109,7 +109,7 @@ export default function GenerateProposalPage() {
         breadcrumbs={breadcrumbSteps} 
         title="Generate Proposal"
         showRightSidebar={true}
-        rightSidebarContent={<RightSidebar />}
+        rightSidebarContent={<RightSidebar pageKey="linear-proposal" />}
         footerContent={
           <NextButton 
             active={isFormValid}

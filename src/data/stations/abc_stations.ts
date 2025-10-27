@@ -1132,13 +1132,6 @@ export const abcStations: StationInfo[] = [
     state: "MS",
   },
   {
-    station: "WLS-TV",
-    associatedDma: "Chicago, IL",
-    affiliation: ["ABC"],
-    city: "CHICAGO",
-    state: "IL",
-  },
-  {
     station: "WMAR-TV",
     associatedDma: "Baltimore, MD",
     affiliation: ["ABC"],

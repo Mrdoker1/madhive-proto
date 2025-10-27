@@ -11,8 +11,8 @@ export default function Home() {
     <PageLayout>
       <div style={{ backgroundColor: 'var(--page-background)' }} className="h-full">
         <div className="container mx-auto flex flex-col items-center justify-center min-h-full" style={{ paddingTop: '64px' }}>
-          <h2 style={{ color: 'black' }} >Madhive Proto</h2>
-          <p style={{ color: 'black', paddingBottom: '24px', fontSize: '12px' }}>Campaign management prototype with linear and omnichannel advertising workflows</p>
+          <h2 style={{ color: 'black', paddingBottom: '8px'}} >Madhive Proto</h2>
+          <p style={{ color: 'black', paddingBottom: '32px', fontSize: '12px' }}>Campaign management prototype with linear and omnichannel advertising workflows</p>
           
           <div className="mt-8 w-full max-w-6xl flex justify-center">
             <Table style={{ tableLayout: 'fixed', width: '100%', maxWidth: '800px' }}>
@@ -120,15 +120,25 @@ export default function Home() {
             </Table>
           </div>
 
+          {/* Разделитель */}
+          <div className="w-full max-w-6xl flex justify-center" style={{ marginTop: '32px', marginBottom: '8px' }}>
+            <div style={{ height: '1px', backgroundColor: '#E5E7EB', width: '100%', maxWidth: '800px' }} />
+          </div>
+
           {/* Секция настроек карты */}
-          <div className="w-full max-w-6xl flex justify-center" style={{ marginTop: '32px' }}>
+          <div className="w-full max-w-6xl flex justify-center">
             <div style={{ width: '100%', maxWidth: '800px' }}>
               <MapSettingsSection />
             </div>
           </div>
 
+          {/* Разделитель */}
+          <div className="w-full max-w-6xl flex justify-center" style={{ marginTop: '8px', marginBottom: '8px' }}>
+            <div style={{ height: '1px', backgroundColor: '#E5E7EB', width: '100%', maxWidth: '800px' }} />
+          </div>
+
           {/* Секция настроек AI */}
-          <div className="w-full max-w-6xl flex justify-center" style={{ marginTop: '24px', paddingBottom: '40px' }}>
+          <div className="w-full max-w-6xl flex justify-center" style={{ paddingBottom: '40px' }}>
             <div style={{ width: '100%', maxWidth: '800px' }}>
               <AISettingsSection />
             </div>

@@ -61,13 +61,11 @@ const MapSettingsSection: React.FC = () => {
   return (
     <div
       style={{
-        backgroundColor: '#FFFFFF',
-        border: '1px solid var(--border-color)',
         borderRadius: '12px',
-        padding: '24px'
+        padding: '8px'
       }}
     >
-      <h2 style={{ fontSize: '18px', fontWeight: 600, color: '#111827', marginBottom: '16px' }}>
+      <h2 style={{ fontSize: '16px', fontWeight: 600, color: '#111827', marginBottom: '16px' }}>
         Map Settings
       </h2>
 
@@ -80,7 +78,7 @@ const MapSettingsSection: React.FC = () => {
           leftSection={<IconKey size={16} />}
           styles={{
             label: {
-              fontSize: '14px',
+              fontSize: '12px',
               fontWeight: 500,
               color: '#374151',
               marginBottom: '8px'
