@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { TextInput, Button, Alert, Radio, Group } from '@mantine/core';
+import { PasswordInput, Button, Alert, Radio, Group } from '@mantine/core';
 import { IconKey, IconCheck, IconAlertCircle } from '@tabler/icons-react';
 
 const AISettingsSection: React.FC = () => {
@@ -117,53 +117,68 @@ const AISettingsSection: React.FC = () => {
         </Radio.Group>
       </div>
 
-      <div style={{ maxWidth: '600px' }}>
-
-        {aiProvider === 'deepseek' ? (
-          <TextInput
-            label="DeepSeek API Key"
-            placeholder="sk-..."
-            value={deepseekApiKey}
-            onChange={(e) => setDeepseekApiKey(e.target.value)}
-            leftSection={<IconKey size={16} />}
-            styles={{
-              label: {
-                fontSize: '12px',
-                fontWeight: 500,
-                color: '#374151',
-                marginBottom: '8px'
-              },
-              input: {
-                fontSize: '14px',
-                padding: '10px 12px 10px 36px',
-                border: '1px solid var(--border-color)',
-                borderRadius: '8px'
-              }
-            }}
-          />
-        ) : (
-          <TextInput
-            label="OpenAI API Key"
-            placeholder="sk-..."
-            value={openaiApiKey}
-            onChange={(e) => setOpenaiApiKey(e.target.value)}
-            leftSection={<IconKey size={16} />}
-            styles={{
-              label: {
-                fontSize: '12px',
-                fontWeight: 500,
-                color: '#374151',
-                marginBottom: '8px'
-              },
-              input: {
-                fontSize: '14px',
-                padding: '10px 12px 10px 36px',
-                border: '1px solid var(--border-color)',
-                borderRadius: '8px'
-              }
-            }}
-          />
-        )}
+      <div style={{ maxWidth: '800px' }}>
+        <div style={{ marginBottom: '8px' }}>
+          <label style={{ fontSize: '12px', fontWeight: 500, color: '#374151', display: 'block', marginBottom: '8px' }}>
+            {aiProvider === 'deepseek' ? 'DeepSeek API Key' : 'OpenAI API Key'}
+          </label>
+          <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+            {aiProvider === 'deepseek' ? (
+              <PasswordInput
+                placeholder="sk-..."
+                value={deepseekApiKey}
+                onChange={(e) => setDeepseekApiKey(e.target.value)}
+                leftSection={<IconKey size={16} />}
+                style={{ flex: 1 }}
+                styles={{
+                  input: {
+                    fontSize: '14px',
+                    padding: '10px 12px 10px 36px',
+                    border: '1px solid var(--border-color)',
+                    borderRadius: '8px'
+                  }
+                }}
+              />
+            ) : (
+              <PasswordInput
+                placeholder="sk-proj-..."
+                value={openaiApiKey}
+                onChange={(e) => setOpenaiApiKey(e.target.value)}
+                leftSection={<IconKey size={16} />}
+                style={{ flex: 1 }}
+                styles={{
+                  input: {
+                    fontSize: '14px',
+                    padding: '10px 12px 10px 36px',
+                    border: '1px solid var(--border-color)',
+                    borderRadius: '8px'
+                  }
+                }}
+              />
+            )}
+            <Button
+              onClick={handleSave}
+              loading={loading}
+              styles={{
+                root: {
+                  backgroundColor: '#291036',
+                  color: '#FFFFFF',
+                  fontSize: '14px',
+                  fontWeight: 500,
+                  padding: '0 20px',
+                  borderRadius: '8px',
+                  height: '34px',
+                  flexShrink: 0,
+                  '&:hover': {
+                    backgroundColor: '#1f0829'
+                  }
+                }
+              }}
+            >
+              Save
+            </Button>
+          </div>
+        </div>
 
         <p style={{ fontSize: '12px', color: '#6B7280', marginTop: '8px', marginBottom: '16px' }}>
           {aiProvider === 'deepseek' ? (
@@ -220,27 +235,6 @@ const AISettingsSection: React.FC = () => {
             {error}
           </Alert>
         )}
-
-        <Button
-          onClick={handleSave}
-          loading={loading}
-          styles={{
-            root: {
-              backgroundColor: '#291036',
-              color: '#FFFFFF',
-              fontSize: '14px',
-              fontWeight: 500,
-              padding: '10px 20px',
-              borderRadius: '8px',
-              height: 'auto',
-              '&:hover': {
-                backgroundColor: '#1f0829'
-              }
-            }
-          }}
-        >
-          Save
-        </Button>
       </div>
     </div>
   );

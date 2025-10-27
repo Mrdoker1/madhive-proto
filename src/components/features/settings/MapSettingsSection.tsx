@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { TextInput, Button, Alert } from '@mantine/core';
+import { PasswordInput, Button, Alert } from '@mantine/core';
 import { IconKey, IconCheck, IconAlertCircle } from '@tabler/icons-react';
 
 const MapSettingsSection: React.FC = () => {
@@ -69,28 +69,50 @@ const MapSettingsSection: React.FC = () => {
         Map Settings
       </h2>
 
-      <div style={{ maxWidth: '600px' }}>
-        <TextInput
-          label="Mapbox API Key"
-          placeholder="pk.eyJ1IjoiZXhhbXBsZSIsImEiOiJjbGV4YW1wbGUifQ..."
-          value={apiKey}
-          onChange={(e) => setApiKey(e.target.value)}
-          leftSection={<IconKey size={16} />}
-          styles={{
-            label: {
-              fontSize: '12px',
-              fontWeight: 500,
-              color: '#374151',
-              marginBottom: '8px'
-            },
-            input: {
-              fontSize: '14px',
-              padding: '10px 12px 10px 36px',
-              border: '1px solid var(--border-color)',
-              borderRadius: '8px'
-            }
-          }}
-        />
+      <div style={{ maxWidth: '800px' }}>
+        <div style={{ marginBottom: '8px' }}>
+          <label style={{ fontSize: '12px', fontWeight: 500, color: '#374151', display: 'block', marginBottom: '8px' }}>
+            Mapbox API Key
+          </label>
+          <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+            <PasswordInput
+              placeholder="pk.eyJ1IjoiZXhhbXBsZSIsImEiOiJjbGV4YW1wbGUifQ..."
+              value={apiKey}
+              onChange={(e) => setApiKey(e.target.value)}
+              leftSection={<IconKey size={16} />}
+              style={{ flex: 1 }}
+              styles={{
+                input: {
+                  fontSize: '14px',
+                  padding: '10px 12px 10px 36px',
+                  border: '1px solid var(--border-color)',
+                  borderRadius: '8px'
+                }
+              }}
+            />
+            <Button
+              onClick={handleSave}
+              loading={loading}
+              styles={{
+                root: {
+                  backgroundColor: '#291036',
+                  color: '#FFFFFF',
+                  fontSize: '14px',
+                  fontWeight: 500,
+                  padding: '0 20px',
+                  borderRadius: '8px',
+                  height: '34px',
+                  flexShrink: 0,
+                  '&:hover': {
+                    backgroundColor: '#1f0829'
+                  }
+                }
+              }}
+            >
+              Save
+            </Button>
+          </div>
+        </div>
 
         <p style={{ fontSize: '12px', color: '#6B7280', marginTop: '8px', marginBottom: '16px' }}>
           Get a free API key at{' '}
@@ -131,27 +153,6 @@ const MapSettingsSection: React.FC = () => {
             {error}
           </Alert>
         )}
-
-        <Button
-          onClick={handleSave}
-          loading={loading}
-          styles={{
-            root: {
-              backgroundColor: '#291036',
-              color: '#FFFFFF',
-              fontSize: '14px',
-              fontWeight: 500,
-              padding: '10px 20px',
-              borderRadius: '8px',
-              height: 'auto',
-              '&:hover': {
-                backgroundColor: '#1f0829'
-              }
-            }
-          }}
-        >
-          Save
-        </Button>
       </div>
     </div>
   );
