@@ -24,14 +24,14 @@ export default function NewCampaignPage() {
   const router = useRouter();
   const dispatch = useAppDispatch();
   
-  // Получаем данные из глобального стейта
+  // Get data from global state
   const totalBudget = useAppSelector((state) => state.campaign.budget.totalBudget);
   const generalData = useAppSelector((state) => state.campaign.general);
   const budgetData = useAppSelector((state) => state.campaign.budget);
   const goalData = useAppSelector((state) => state.campaign.goal);
   const flightData = useAppSelector((state) => state.campaign.flight);
   
-  // Бредкрамбсы для страницы New Campaign - только индикация статуса
+  // Breadcrumbs for New Campaign page - status indication only
   const breadcrumbSteps: BreadcrumbStep[] = [
     { 
       id: 'new-campaign', 
@@ -42,7 +42,7 @@ export default function NewCampaignPage() {
     { 
       id: 'general', 
       label: 'General', 
-      status: 'current' // Устанавливаем статус в зависимости от текущего прогресса
+      status: 'current' // Set status based on current progress
     },
     { 
       id: 'channel-details', 
@@ -61,7 +61,7 @@ export default function NewCampaignPage() {
     }
   ];
 
-  // Якоря для навигации по странице
+  // Anchors for page navigation
   const anchorItems: AnchorItem[] = [
     { id: 'general-details', label: 'General', anchor: '#general-details' },
     { id: 'total-budget', label: 'Total Budget', anchor: '#total-budget' },
@@ -69,7 +69,7 @@ export default function NewCampaignPage() {
     { id: 'flight-range', label: 'Flight Range', anchor: '#flight-range' }
   ];
 
-  // Проверяем валидность формы
+  // Check form validity
   const isFormValid = useMemo(() => {
     const errors = [
       ...validateGeneralDetails(generalData),
@@ -80,7 +80,7 @@ export default function NewCampaignPage() {
     return errors.length === 0;
   }, [generalData, budgetData, goalData, flightData]);
 
-  // Сообщение об ошибке
+  // Error message
   const errorMessage = useMemo(() => {
     if (isFormValid) return '';
     return 'Please fill in all required fields to continue';
@@ -89,7 +89,7 @@ export default function NewCampaignPage() {
   const handleNextClick = () => {
     if (!isFormValid) return;
     
-    console.log('Переход к следующему шагу - Channel Details');
+    console.log('Moving to next step - Channel Details');
     router.push('/campaign/linear/details');
   };
 
@@ -113,7 +113,7 @@ export default function NewCampaignPage() {
       >
         <div style={{ backgroundColor: 'var(--page-background)', paddingTop: '32px', paddingBottom: '96px', paddingLeft: '32px', paddingRight: '32px', minHeight: '100%' }}>
           <div style={{ display: 'flex', justifyContent: 'center', margin: '0 auto' }}>
-            {/* Левая колонка с навигацией */}
+            {/* Left column with navigation */}
             <div className="w-64" style={{ paddingRight: '20px', position: 'sticky', top: '32px', height: 'fit-content' }}>
               <NavigationAnchors 
                 items={anchorItems}
@@ -123,7 +123,7 @@ export default function NewCampaignPage() {
                 className="space-y-6"
               />
             </div>
-            {/* Основной контент */}
+            {/* Main content */}
             <div style={{ paddingLeft: '20px', width: '100%', maxWidth: '960px' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '40px' }}>
               

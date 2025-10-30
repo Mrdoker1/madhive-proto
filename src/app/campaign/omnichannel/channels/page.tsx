@@ -20,12 +20,12 @@ export default function OmnichannelChannelsPage() {
   const selectedChannelsFromRedux = useAppSelector((state) => state.campaign.channels.selectedChannels);
   const budgetAllocation = useAppSelector((state) => state.campaign.channels.budgetAllocation);
   
-  // Фильтруем выбранные каналы (исключаем linear_tv)
+  // Filter selected channels (exclude linear_tv)
   const availableChannels = useMemo(() => {
     return selectedChannelsFromRedux.filter(channelId => channelId !== 'linear_tv');
   }, [selectedChannelsFromRedux]);
 
-  // Проверяем валидность формы
+  // Check form validity
   const isFormValid = useMemo(() => {
     const errors = [
       ...validateSelectChannels(availableChannels),
@@ -34,11 +34,11 @@ export default function OmnichannelChannelsPage() {
     return errors.length === 0;
   }, [availableChannels, budgetAllocation]);
 
-  // Сообщение об ошибке
+  // Error message
   const errorMessage = useMemo(() => {
     if (isFormValid) return '';
     
-    // Проверяем каждую валидацию отдельно для более точного сообщения
+    // Check each validation separately for more precise message
     const channelErrors = validateSelectChannels(availableChannels);
     if (channelErrors.length > 0) {
       return channelErrors[0].message;
@@ -52,7 +52,7 @@ export default function OmnichannelChannelsPage() {
     return 'Please fill in all required fields to continue';
   }, [isFormValid, availableChannels, budgetAllocation]);
 
-  // Бредкрамбсы для страницы Channels
+  // Breadcrumbs for Channels page
   const breadcrumbSteps: BreadcrumbStep[] = [
     { 
       id: 'omnichannel-campaign', 
@@ -82,7 +82,7 @@ export default function OmnichannelChannelsPage() {
     }
   ];
 
-  // Якоря для навигации по странице
+  // Anchors for page navigation
   const anchorItems: AnchorItem[] = [
     { id: 'select-channels', label: 'Select Channels', anchor: '#select-channels' },
     { id: 'allocation', label: 'Allocation', anchor: '#allocation' }
@@ -91,12 +91,12 @@ export default function OmnichannelChannelsPage() {
   const handleNextClick = () => {
     if (!isFormValid) return;
     
-    console.log('Переход к следующему шагу - Channel Details');
+    console.log('Moving to next step - Channel Details');
     router.push('/campaign/omnichannel/details');
   };
 
   const handleBackClick = () => {
-    console.log('Возврат к предыдущему шагу - General');
+    console.log('Returning to previous step - General');
     router.push('/campaign/omnichannel/new');
   };
 
@@ -130,7 +130,7 @@ export default function OmnichannelChannelsPage() {
                 className="space-y-6"
               />
             </div>
-            {/* Основной контент */}
+            {/* Main content */}
             <div style={{ paddingLeft: '20px', width: '100%', maxWidth: '800px' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '40px' }}>
               

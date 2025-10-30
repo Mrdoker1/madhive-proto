@@ -17,12 +17,12 @@ export default function OmnichannelSummaryPage() {
   
   const selectedChannelsFromRedux = useAppSelector((state) => state.campaign.channels.selectedChannels);
   
-  // Фильтруем выбранные каналы (исключаем linear_tv)
+  // Filter selected channels (exclude linear_tv)
   const availableChannels = useMemo(() => {
     return selectedChannelsFromRedux.filter(channelId => channelId !== 'linear_tv');
   }, [selectedChannelsFromRedux]);
   
-  // Бредкрамбсы для страницы Summary
+  // Breadcrumbs for Summary page
   const breadcrumbSteps: BreadcrumbStep[] = [
     { 
       id: 'omnichannel-campaign', 
@@ -53,15 +53,15 @@ export default function OmnichannelSummaryPage() {
   ];
 
   const handleNextClick = () => {
-    console.log('Создание omnichannel кампании завершено!');
-    // Сохраняем кампанию в Redux
+    console.log('Omnichannel campaign creation completed!');
+    // Save campaign to Redux
     dispatch(saveCampaign());
-    // Переходим на страницу со списком кампаний
+    // Navigate to campaigns list page
     router.push('/campaign');
   };
 
   const handleBackClick = () => {
-    console.log('Возврат к предыдущему шагу - Channel Details');
+    console.log('Returning to previous step - Channel Details');
     router.push('/campaign/omnichannel/details');
   };
 
@@ -85,7 +85,7 @@ export default function OmnichannelSummaryPage() {
       >
         <div style={{ backgroundColor: 'var(--page-background)', paddingTop: '32px', paddingBottom: '96px', paddingLeft: '32px', paddingRight: '32px', minHeight: '100%' }}>
           <div style={{ display: 'flex', justifyContent: 'center', margin: '0 auto' }}>
-            {/* Основной контент без левой навигации */}
+            {/* Main content without left navigation */}
             <div style={{ width: '100%', maxWidth: '960px' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '40px' }}>
               

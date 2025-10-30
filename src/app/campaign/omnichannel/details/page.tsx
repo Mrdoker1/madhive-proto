@@ -30,23 +30,23 @@ export default function OmnichannelDetailsPage() {
   const carryOverMode = useAppSelector((state) => state.campaign.omnichannel.carryOverMode);
   const channelData = useAppSelector((state) => state.campaign.omnichannel.channelData);
   
-  // Фильтруем выбранные каналы (исключаем linear_tv, он не показывается на этой странице)
+  // Filter selected channels (exclude linear_tv, it's not shown on this page)
   const availableChannels = useMemo(() => {
     return selectedChannelsFromRedux.filter(channelId => channelId !== 'linear_tv') as ChannelType[];
   }, [selectedChannelsFromRedux]);
   
-  // Устанавливаем активный канал - первый из доступных
+  // Set active channel - first from available
   const [activeChannel, setActiveChannel] = useState<ChannelType | null>(null);
   const firstChannelRef = useRef<ChannelType | null>(null);
   
   const budgetAllocation = useAppSelector((state) => state.campaign.channels.budgetAllocation);
   
-  // Инициализация данных для каждого канала при первой загрузке
+  // Initialize data for each channel on first load
   useEffect(() => {
     if (availableChannels.length > 0) {
       dispatch(initializeChannelData(availableChannels));
       
-      // Инициализируем базовые estimations для всех каналов
+      // Initialize base estimations for all channels
       availableChannels.forEach(ch => {
         const channelBudget = budgetAllocation?.[ch] || 0;
         const baseAudienceData = { gender: [], age: [], income: [], education: [], householdSize: [] };
@@ -67,18 +67,18 @@ export default function OmnichannelDetailsPage() {
     }
   }, [availableChannels, activeChannel, budgetAllocation, dispatch]);
   
-  // Отслеживание смены вкладки для отключения carry over режима
+  // Track tab change to disable carry over mode
   const handleChannelChange = (channelId: ChannelType) => {
-    // Если пользователь переключился на другую вкладку (не первую),
-    // и carry over режим еще активен
+    // If user switched to another tab (not the first one),
+    // and carry over mode is still active
     if (carryOverMode && channelId !== firstChannelRef.current) {
-      // Режим остается активным до первого изменения данных на другой вкладке
-      // Отключение произойдет в секциях при изменении
+      // Mode remains active until first data change on another tab
+      // Disabling will happen in sections on change
     }
     setActiveChannel(channelId);
   };
 
-  // Бредкрамбсы для страницы Channel Details
+  // Breadcrumbs for Channel Details page
   const breadcrumbSteps: BreadcrumbStep[] = [
     { 
       id: 'omnichannel-campaign', 
@@ -108,7 +108,7 @@ export default function OmnichannelDetailsPage() {
     }
   ];
 
-  // Pills для переключения каналов (только выбранные пользователем)
+  // Pills for channel switching (only user-selected channels)
   const allChannelPills: ChannelPill[] = [
     { id: 'ctv', label: 'CTV' },
     { id: 'preroll', label: 'Pre Roll' },
@@ -118,12 +118,12 @@ export default function OmnichannelDetailsPage() {
     { id: 'email', label: 'Email' }
   ];
   
-  // Фильтруем pills только для выбранных каналов
+  // Filter pills for selected channels only
   const channelPills = useMemo(() => {
     return allChannelPills.filter(pill => availableChannels.includes(pill.id as ChannelType));
   }, [availableChannels, allChannelPills]);
 
-  // Якоря для навигации - разные для каждого канала
+  // Navigation anchors - different for each channel
   const getAnchorItems = (): AnchorItem[] => {
     if (activeChannel === 'search') {
       return [
@@ -143,19 +143,19 @@ export default function OmnichannelDetailsPage() {
   };
 
   const handleNextClick = () => {
-    console.log('Переход к следующему шагу - Summary');
+    console.log('Moving to next step - Summary');
     router.push('/campaign/omnichannel/summary');
   };
 
   const handleBackClick = () => {
-    console.log('Возврат к предыдущему шагу - Channels');
+    console.log('Returning to previous step - Channels');
     router.push('/campaign/omnichannel/channels');
   };
 
 
-  // Рендер контента в зависимости от канала
+  // Render content based on channel
   const renderChannelContent = () => {
-    // Если нет выбранных каналов, показываем сообщение
+    // If no channels selected, show message
     if (availableChannels.length === 0) {
       return (
         <div style={{ 
@@ -171,7 +171,7 @@ export default function OmnichannelDetailsPage() {
       );
     }
 
-    // Общий контент для Pre Roll, CTV, Audio, Email
+    // Common content for Pre Roll, CTV, Audio, Email
     const commonContent = (
       <>
         <SectionWrapper id="audiences" title="Audiences">
@@ -273,7 +273,7 @@ export default function OmnichannelDetailsPage() {
       >
         <div style={{ backgroundColor: 'var(--page-background)', paddingTop: '32px', paddingBottom: '96px', paddingLeft: '32px', paddingRight: '32px', minHeight: '100%' }}>
           <div style={{ display: 'flex', justifyContent: 'center', margin: '0 auto' }}>
-            {/* Левая колонка с навигацией */}
+            {/* Left column with navigation */}
             <div className="w-64" style={{ paddingRight: '20px', position: 'sticky', top: '32px', height: 'fit-content' }}>
               <NavigationAnchors 
                 items={getAnchorItems()}
@@ -283,9 +283,9 @@ export default function OmnichannelDetailsPage() {
                 className="space-y-6"
               />
             </div>
-            {/* Основной контент */}
+            {/* Main content */}
             <div style={{ paddingLeft: '20px', width: '100%', maxWidth: '800px' }}>
-              {/* Нотификация carry over */}
+              {/* Carry over notification */}
               <AnimatePresence>
                 {carryOverMode && (
                   <InfoNotification 

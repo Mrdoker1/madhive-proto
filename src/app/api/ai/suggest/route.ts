@@ -10,7 +10,7 @@ const DEFAULT_SETTINGS = {
   openaiApiKey: ''
 };
 
-// Получить настройки AI
+// Get AI settings
 function getAISettings() {
   try {
     if (fs.existsSync(SETTINGS_FILE)) {
@@ -33,7 +33,7 @@ function getAISettings() {
   };
 }
 
-// Запрос к DeepSeek API
+// Request to DeepSeek API
 async function getDeepSeekSuggestion(apiKey: string, systemPrompt: string, context: string): Promise<string> {
   try {
     const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
@@ -73,7 +73,7 @@ async function getDeepSeekSuggestion(apiKey: string, systemPrompt: string, conte
   }
 }
 
-// Запрос к OpenAI API
+// Request to OpenAI API
 async function getOpenAISuggestion(apiKey: string, systemPrompt: string, context: string): Promise<string> {
   try {
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -113,12 +113,12 @@ async function getOpenAISuggestion(apiKey: string, systemPrompt: string, context
   }
 }
 
-// Форматирование контекста в читабельный текст
+// Format context into readable text
 function formatContextForAI(context: any): string {
   // console.log('📝 Full context received:', JSON.stringify(context, null, 2));
   const lines: string[] = [];
   
-  // Обрабатываем различные части контекста
+  // Process various parts of the context
   if (context.general) {
     lines.push('Campaign Information:');
     if (context.general.campaignName) lines.push(`- Name: ${context.general.campaignName}`);
@@ -164,15 +164,15 @@ function formatContextForAI(context: any): string {
       lines.push('\nSelected Markets:');
       lines.push(`- Total Markets Selected: ${context.markets.selectedMarkets.length}`);
       
-      // Показываем названия маркетов (преобразуем ID в читабельные названия)
+      // Show market names (convert IDs to readable names)
       const marketNames = context.markets.selectedMarkets.map((id: string) => {
-        // Преобразуем ID типа "chicago-il" в "Chicago, IL"
+        // Convert IDs like "chicago-il" to "Chicago, IL"
         return id.split('-').map((word: string) => 
           word.length === 2 ? word.toUpperCase() : word.charAt(0).toUpperCase() + word.slice(1)
         ).join(', ');
       });
       
-      // Показываем первые 10 маркетов
+      // Show first 10 markets
       const displayMarkets = marketNames.slice(0, 10);
       lines.push(`- Markets: ${displayMarkets.join('; ')}`);
       if (marketNames.length > 10) {
@@ -180,7 +180,7 @@ function formatContextForAI(context: any): string {
       }
     }
     
-    // Добавляем информацию о деталях маркетов если есть
+    // Add market details information if available
     if (context.markets.marketsDetails) {
       const totalWeight = Object.values(context.markets.marketsDetails).reduce((sum: number, detail: any) => {
         return sum + (detail.weight || 0);
@@ -194,12 +194,12 @@ function formatContextForAI(context: any): string {
   if (context.linear) {
     // console.log('🔍 linear:', JSON.stringify(context.linear, null, 2));
     
-    // Показываем выбранных вещателей
+    // Show selected broadcasters
     if (context.linear.broadcasters && context.linear.broadcasters.length > 0) {
       lines.push('\nBroadcasters:');
       lines.push(`- Total Selected: ${context.linear.broadcasters.length}`);
       
-      // Преобразуем ID вещателей в читабельные названия
+      // Convert broadcaster IDs to readable names
       const broadcasterNames = context.linear.broadcasters.map((id: string) => {
         return id.split('-').map((word: string) => 
           word.charAt(0).toUpperCase() + word.slice(1)
@@ -210,7 +210,7 @@ function formatContextForAI(context: any): string {
       // console.log('❌ No broadcasters found in linear');
     }
     
-    // Показываем станции если есть
+    // Show stations if available
     if (context.linear.broadcastersWithStations && context.linear.broadcastersWithStations.length > 0) {
       const totalStations = context.linear.broadcastersWithStations.reduce((sum: number, b: any) => {
         return sum + (b.stations?.filter((s: any) => s.selected).length || 0);
@@ -220,7 +220,7 @@ function formatContextForAI(context: any): string {
         lines.push('\nStations:');
         lines.push(`- Total Stations Selected: ${totalStations}`);
         
-        // Показываем распределение станций по вещателям
+        // Show station distribution by broadcasters
         const stationsByBroadcaster = context.linear.broadcastersWithStations.map((b: any) => {
           const selected = b.stations?.filter((s: any) => s.selected).length || 0;
           return `${b.name}: ${selected}`;
@@ -266,19 +266,19 @@ function formatContextForAI(context: any): string {
   if (context.dayparts) {
     lines.push('\nDayparts (Time Slots):');
     
-    // Dayparts хранятся как selectedSlots: { day: { hour: boolean } }
+    // Dayparts are stored as selectedSlots: { day: { hour: boolean } }
     if (context.dayparts.selectedSlots && Object.keys(context.dayparts.selectedSlots).length > 0) {
       let totalSlots = 0;
       const daypartGroups = new Set<string>();
       
-      // Подсчитываем выбранные слоты и определяем временные группы
+      // Count selected slots and determine time groups
       Object.entries(context.dayparts.selectedSlots).forEach(([day, hours]: [string, any]) => {
         Object.entries(hours).forEach(([hour, selected]: [string, any]) => {
           if (selected) {
             totalSlots++;
             const hourNum = parseInt(hour);
             
-            // Определяем группу дейпарта
+            // Determine daypart group
             if (hourNum >= 2 && hourNum <= 5) daypartGroups.add('Overnight');
             else if (hourNum >= 6 && hourNum <= 9) daypartGroups.add('Early Morning');
             else if (hourNum >= 10 && hourNum <= 15) daypartGroups.add('Daytime');
@@ -329,7 +329,7 @@ function formatContextForAI(context: any): string {
     }
   }
 
-  // Для omnichannel кампаний - показываем данные по каждому каналу
+  // For omnichannel campaigns - show data for each channel
   if (context.omnichannel && context.omnichannel.channelData) {
     const channelData = context.omnichannel.channelData;
     const channels = Object.keys(channelData);
@@ -343,7 +343,7 @@ function formatContextForAI(context: any): string {
         
         lines.push(`\n${channelName} Channel:`);
         
-        // Audience для канала
+        // Audience for the channel
         if (channel.audience) {
           const audienceParts: string[] = [];
           if (channel.audience.gender && channel.audience.gender.length > 0) audienceParts.push(`Gender: ${channel.audience.gender.join(', ')}`);
@@ -359,7 +359,7 @@ function formatContextForAI(context: any): string {
           }
         }
         
-        // Dayparts для канала
+        // Dayparts for the channel
         if (channel.dayparts && channel.dayparts.selectedSlots) {
           let totalSlots = 0;
           const daypartGroups = new Set<string>();
@@ -386,17 +386,17 @@ function formatContextForAI(context: any): string {
           }
         }
         
-        // Interests для канала
+        // Interests for the channel
         if (channel.interests && channel.interests.length > 0) {
           lines.push(`  - Interests: ${channel.interests.length} selected`);
         }
         
-        // Keywords для канала (только для search)
+        // Keywords for the channel (search only)
         if (channel.keywords && channel.keywords.length > 0) {
           lines.push(`  - Keywords: ${channel.keywords.length} selected`);
         }
         
-        // Geo для канала
+        // Geo for the channel
         if (channel.geo && channel.geo.selectedZipCodes && channel.geo.selectedZipCodes.length > 0) {
           lines.push(`  - Geo: ${channel.geo.selectedZipCodes.length} zip codes`);
         } else if (channel.geo && channel.geo.targetNationally) {
@@ -416,7 +416,7 @@ function formatContextForAI(context: any): string {
     }
   }
 
-  // Если ничего не добавлено, возвращаем JSON
+  // If nothing is added, return JSON
   if (lines.length === 0) {
     return JSON.stringify(context, null, 2);
   }
@@ -438,7 +438,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Получаем настройки AI
+    // Get AI settings
     const { provider, apiKey } = getAISettings();
 
     if (!apiKey) {
@@ -448,12 +448,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Форматируем контекст в читабельный вид
+    // Format context into readable form
     const contextString = typeof context === 'string' 
       ? context 
       : formatContextForAI(context);
 
-    // Выбираем API в зависимости от провайдера
+    // Choose API based on provider
     let suggestion: string;
     
     if (provider === 'openai') {

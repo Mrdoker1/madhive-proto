@@ -120,12 +120,12 @@ export default function Home() {
             </Table>
           </div>
 
-          {/* Разделитель */}
+          {/* Divider */}
           <div className="w-full max-w-6xl flex justify-center" style={{ marginTop: '32px', marginBottom: '32px' }}>
             <div style={{ height: '1px', backgroundColor: '#E5E7EB', width: '100%', maxWidth: '800px' }} />
           </div>
 
-          {/* Секции настроек в одну строку */}
+          {/* Settings sections in one row */}
           <div className="w-full max-w-6xl flex justify-center" style={{ paddingBottom: '40px' }}>
             <div style={{ display: 'flex', gap: '32px', width: '100%', maxWidth: '800px' }}>
               <div style={{ flex: 1 }}>

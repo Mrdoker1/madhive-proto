@@ -4,7 +4,7 @@ import path from 'path';
 
 const SETTINGS_FILE = path.join(process.cwd(), 'settings.json');
 
-// Дефолтные настройки
+// Default settings
 const DEFAULT_SETTINGS = {
   mapboxApiKey: 'pk.eyJ1IjoibXJkb2tlcjEiLCJhIjoiY2szNGlvZHcxMDFweTNjcG4xeXRicng5ZSJ9.PAdeoloR2kVbvXM7LFO-zg',
   aiProvider: 'deepseek', // 'deepseek' or 'openai'
@@ -12,7 +12,7 @@ const DEFAULT_SETTINGS = {
   openaiApiKey: ''
 };
 
-// Получить настройки
+// Get settings
 export async function GET() {
   try {
     if (fs.existsSync(SETTINGS_FILE)) {
@@ -27,19 +27,19 @@ export async function GET() {
   }
 }
 
-// Сохранить настройки
+// Save settings
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     
-    // Загружаем текущие настройки или используем дефолтные
+    // Load current settings or use defaults
     let currentSettings = DEFAULT_SETTINGS;
     if (fs.existsSync(SETTINGS_FILE)) {
       const data = fs.readFileSync(SETTINGS_FILE, 'utf8');
       currentSettings = { ...DEFAULT_SETTINGS, ...JSON.parse(data) };
     }
 
-    // Обновляем только переданные поля
+    // Update only provided fields
     const settings = {
       ...currentSettings,
       ...body

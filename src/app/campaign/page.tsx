@@ -12,7 +12,7 @@ import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
 import { resetCampaign } from '@/store/slices/campaignSlice';
 import type { SavedCampaign } from '@/store/slices/campaignSlice';
 
-// Функция для конвертации SavedCampaign в CampaignSummary
+// Function to convert SavedCampaign to CampaignSummary
 function convertToCampaignSummary(saved: SavedCampaign): CampaignSummary {
   const channels = saved.channels.selectedChannels.map(ch => {
     if (ch === 'linear_tv') return 'Linear TV';
@@ -58,32 +58,32 @@ export default function CampaignListPage() {
   const savedCampaigns = useAppSelector((state) => state.campaign.savedCampaigns);
 
   const handleNewLinearCampaign = () => {
-    // Сбрасываем данные формы перед созданием новой кампании
+    // Reset form data before creating new campaign
     dispatch(resetCampaign());
     router.push('/campaign/linear/new');
   };
 
   const handleNewOmnichannelCampaign = () => {
-    // Сбрасываем данные формы перед созданием новой кампании
+    // Reset form data before creating new campaign
     dispatch(resetCampaign());
     router.push('/campaign/omnichannel/new');
   };
 
-  // Функция для определения приоритета статуса (для сортировки)
+  // Function to determine status priority (for sorting)
   const getStatusPriority = (status: string): number => {
     const priorities: Record<string, number> = {
-      'Not Started': 1,      // Не начатые - первыми
-      'On Target': 2,        // Идут по плану
-      'Over Pace': 3,        // Немного опережают
-      'Way Over Pace': 4,    // Сильно опережают
-      'Under Pace': 5,       // Немного отстают
-      'Way Under Pace': 6,   // Сильно отстают
-      'Completed': 7         // Завершенные - последними
+      'Not Started': 1,      // Not started - first
+      'On Target': 2,        // On track
+      'Over Pace': 3,        // Slightly ahead
+      'Way Over Pace': 4,    // Way ahead
+      'Under Pace': 5,       // Slightly behind
+      'Way Under Pace': 6,   // Way behind
+      'Completed': 7         // Completed - last
     };
     return priorities[status] || 99;
   };
 
-  // Функция сортировки
+  // Sorting function
   const sortCampaigns = (campaigns: CampaignSummary[]): CampaignSummary[] => {
     return [...campaigns].sort((a, b) => {
       let comparison = 0;
@@ -121,27 +121,27 @@ export default function CampaignListPage() {
     });
   };
 
-  // Обработчик изменения сортировки
+  // Sort change handler
   const handleSort = (field: SortField) => {
     if (sortField === field) {
-      // Переключаем направление если поле то же самое
+      // Toggle direction if field is the same
       setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
     } else {
-      // Новое поле - начинаем с asc
+      // New field - start with asc
       setSortField(field);
       setSortDirection('asc');
     }
-    // Сбрасываем на первую страницу при изменении сортировки
+    // Reset to first page on sort change
     setPage(1);
   };
 
-  // Объединяем сохранённые кампании с mock данными
+  // Combine saved campaigns with mock data
   const allCampaigns = useMemo(() => {
     const converted = savedCampaigns.map(convertToCampaignSummary);
     return [...converted, ...campaignsMock];
   }, [savedCampaigns]);
 
-  // Применяем сортировку
+  // Apply sorting
   const sortedCampaigns = useMemo(() => {
     return sortCampaigns(allCampaigns);
   }, [allCampaigns, sortField, sortDirection]);
@@ -154,7 +154,7 @@ export default function CampaignListPage() {
 
   const currentItems = useMemo(() => sortedCampaigns.slice(startIdx, endIdx), [sortedCampaigns, startIdx, endIdx]);
 
-  // Компонент dropdown кнопки для создания кампании
+  // Dropdown button component for campaign creation
   const newCampaignButton = (
     <Menu shadow="md" width={200}>
       <Menu.Target>

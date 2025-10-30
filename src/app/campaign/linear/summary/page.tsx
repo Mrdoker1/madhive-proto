@@ -14,7 +14,7 @@ export default function SummaryPage() {
   const router = useRouter();
   const dispatch = useAppDispatch();
 
-  // Бредкрамбсы для страницы Summary - все предыдущие шаги выполнены
+  // Breadcrumbs for Summary page - all previous steps completed
   const breadcrumbSteps: BreadcrumbStep[] = [
     { 
       id: 'new-campaign', 
@@ -25,35 +25,35 @@ export default function SummaryPage() {
     { 
       id: 'general', 
       label: 'General', 
-      status: 'completed' // выполнен
+      status: 'completed' // completed
     },
     { 
       id: 'channel-details', 
       label: 'Channel Details', 
-      status: 'completed' // выполнен
+      status: 'completed' // completed
     },
     { 
       id: 'generate-proposal', 
       label: 'Generate Proposal', 
-      status: 'completed' // выполнен
+      status: 'completed' // completed
     },
     { 
       id: 'summary', 
       label: 'Summary', 
-      status: 'current' // текущий шаг
+      status: 'current' // current step
     }
   ];
 
   const handleNextClick = () => {
-    console.log('Создание кампании завершено!');
-    // Сохраняем кампанию в Redux
+    console.log('Campaign creation completed!');
+    // Save campaign to Redux
     dispatch(saveCampaign());
-    // Переходим на страницу со списком кампаний
+    // Navigate to campaigns list page
     router.push('/campaign');
   };
 
   const handleBackClick = () => {
-    console.log('Возврат к предыдущему шагу - Generate Proposal');
+    console.log('Returning to previous step - Generate Proposal');
     router.push('/campaign/linear/proposal');
   };
 
@@ -75,7 +75,7 @@ export default function SummaryPage() {
       >
         <div style={{ backgroundColor: 'var(--page-background)', paddingTop: '32px', paddingBottom: '96px', paddingLeft: '32px', paddingRight: '32px', minHeight: '100%' }}>
           <div style={{ display: 'flex', justifyContent: 'center', margin: '0 auto' }}>
-            {/* Основной контент без левой навигации */}
+            {/* Main content without left navigation */}
             <div style={{ width: '100%', maxWidth: '960px' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '40px' }}>
               

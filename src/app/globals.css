@@ -119,7 +119,7 @@ body {
   }
 }
 
-/* Выходные дни - максимально специфичный селектор */
+/* Weekend days - most specific selector */
 button.rdrDay.rdrDayWeekend[style*="color"] {
   /* color: var(--secondary-color) !important; */
 }

@@ -18,11 +18,11 @@ import { validateMarkets, validateBroadcastersAndPrograms } from '@/utils/valida
 export default function ChannelDetailsPage() {
   const router = useRouter();
   
-  // Получаем данные из Redux для валидации
+  // Get data from Redux for validation
   const selectedMarkets = useAppSelector((state) => state.campaign.markets.selectedMarkets);
   const broadcasters = useAppSelector((state) => state.campaign.linear.broadcasters);
   const broadcastersWithStations = useAppSelector((state) => state.campaign.linear.broadcastersWithStations);
-  // Бредкрамбсы для страницы Channel Details - обновленные статусы
+  // Breadcrumbs for Channel Details page - updated statuses
   const breadcrumbSteps: BreadcrumbStep[] = [
     { 
       id: 'new-campaign', 
@@ -33,26 +33,26 @@ export default function ChannelDetailsPage() {
     { 
       id: 'general', 
       label: 'General', 
-      status: 'completed' // выполнен
+      status: 'completed' // completed
     },
     { 
       id: 'channel-details', 
       label: 'Channel Details', 
-      status: 'current' // текущий шаг
+      status: 'current' // current step
     },
     { 
       id: 'generate-proposal', 
       label: 'Generate Proposal', 
-      status: 'pending' // ожидает
+      status: 'pending' // pending
     },
     { 
       id: 'summary', 
       label: 'Summary', 
-      status: 'pending' // ожидает
+      status: 'pending' // pending
     }
   ];
 
-  // Якоря для навигации по странице
+  // Anchors for page navigation
   const anchorItems: AnchorItem[] = [
     { id: 'linear-details', label: 'Linear Details', anchor: '#linear-details' },
     { id: 'audiences', label: 'Audiences', anchor: '#audiences' },
@@ -61,7 +61,7 @@ export default function ChannelDetailsPage() {
     { id: 'dayparts', label: 'Dayparts', anchor: '#dayparts' }
   ];
 
-  // Проверяем валидность формы
+  // Check form validity
   const isFormValid = useMemo(() => {
     const errors = [
       ...validateMarkets(selectedMarkets),
@@ -70,11 +70,11 @@ export default function ChannelDetailsPage() {
     return errors.length === 0;
   }, [selectedMarkets, broadcasters, broadcastersWithStations]);
 
-  // Сообщение об ошибке
+  // Error message
   const errorMessage = useMemo(() => {
     if (isFormValid) return '';
     
-    // Проверяем каждую валидацию отдельно для более точного сообщения
+    // Check each validation separately for more precise message
     const marketErrors = validateMarkets(selectedMarkets);
     if (marketErrors.length > 0) {
       return marketErrors[0].message;
@@ -91,13 +91,13 @@ export default function ChannelDetailsPage() {
   const handleNextClick = () => {
     if (!isFormValid) return;
     
-    console.log('Переход к следующему шагу - Generate Proposal');
-    // Переходим на страницу proposal
+    console.log('Moving to next step - Generate Proposal');
+    // Navigate to proposal page
     router.push('/campaign/linear/proposal');
   };
 
   const handleBackClick = () => {
-    console.log('Возврат к предыдущему шагу - General');
+    console.log('Returning to previous step - General');
     router.push('/campaign/linear/new');
   };
 
@@ -122,7 +122,7 @@ export default function ChannelDetailsPage() {
       >
         <div style={{ backgroundColor: 'var(--page-background)', paddingTop: '32px', paddingBottom: '96px', paddingLeft: '32px', paddingRight: '32px', minHeight: '100%' }}>
           <div style={{ display: 'flex', justifyContent: 'center', margin: '0 auto' }}>
-            {/* Левая колонка с навигацией */}
+            {/* Left column with navigation */}
             <div className="w-64" style={{ paddingRight: '20px', position: 'sticky', top: '32px', height: 'fit-content' }}>
               <NavigationAnchors 
                 items={anchorItems}
@@ -132,7 +132,7 @@ export default function ChannelDetailsPage() {
                 className="space-y-6"
               />
             </div>
-            {/* Основной контент */}
+            {/* Main content */}
             <div style={{ paddingLeft: '20px', width: '100%', maxWidth: '800px' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '40px' }}>
               
