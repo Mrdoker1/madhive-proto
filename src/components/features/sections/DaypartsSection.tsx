@@ -53,7 +53,7 @@ const DaypartsSection = ({ channel, isFirstChannel = true }: DaypartsSectionProp
   const channelData = useAppSelector((state) => state.campaign.omnichannel.channelData);
   const linearDaypartsData = useAppSelector((state) => state.campaign.dayparts);
   
-  // Получаем данные для текущего канала или используем общие данные для linear
+  // Get data for current channel or use common data for linear
   const daypartsData = channel 
     ? (channelData[channel]?.dayparts || { selectedSlots: {} })
     : linearDaypartsData;
@@ -66,27 +66,27 @@ const DaypartsSection = ({ channel, isFirstChannel = true }: DaypartsSectionProp
   const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
   const hoursData = createHoursData();
 
-  // Вспомогательная функция для глубокого копирования selectedSlots
+  // Helper function for deep copying selectedSlots
   const deepCopySelectedSlots = (slots: Record<string, Record<number, boolean>>): DaypartsState => {
     return structuredClone(slots);
   };
 
-  // Функция для обновления данных с учетом carry over
+  // Function to update data with carry over support
   const updateSlots = (newSlots: DaypartsState) => {
-    // Если это omnichannel и мы НЕ на первой вкладке, отключаем carry over режим
+    // If this is omnichannel and we're NOT on first tab, disable carry over mode
     if (channel && !isFirstChannel && carryOverMode) {
       dispatch(setCarryOverMode(false));
     }
     
     if (channel) {
-      // Omnichannel: обновляем данные для конкретного канала
+      // Omnichannel: update data for specific channel
       dispatch(updateChannelSectionData({
         channel,
         section: 'dayparts',
         data: { selectedSlots: newSlots }
       }));
       
-      // Если carry over режим активен, копируем данные на все каналы
+      // If carry over mode is active, copy data to all channels
       if (carryOverMode && isFirstChannel) {
         const allChannels = Object.keys(channelData);
         allChannels.forEach(ch => {
@@ -100,7 +100,7 @@ const DaypartsSection = ({ channel, isFirstChannel = true }: DaypartsSectionProp
         });
       }
     } else {
-      // Linear: используем старую логику
+      // Linear: use old logic
       dispatch(updateDaypartsData({ selectedSlots: newSlots }));
     }
   };
@@ -242,7 +242,7 @@ const DaypartsSection = ({ channel, isFirstChannel = true }: DaypartsSectionProp
 
   return (
     <div>
-      {/* Описание и кнопки управления */}
+      {/* Description and control buttons */}
       <Group justify="space-between" align="flex-start" mb="lg" wrap="nowrap">
         <Text size="sm" c="dimmed" style={{ flex: 1 }}>
           Choose ad delivery by <strong>hour</strong> across the week. Drag to select a range. Click daypart names to select entire dayparts.
@@ -257,7 +257,7 @@ const DaypartsSection = ({ channel, isFirstChannel = true }: DaypartsSectionProp
         </Group>
       </Group>
 
-      {/* Таблица времени */}
+      {/* Time table */}
       <div 
         style={{ 
           userSelect: 'none', 
@@ -265,7 +265,7 @@ const DaypartsSection = ({ channel, isFirstChannel = true }: DaypartsSectionProp
           overflowX: 'auto'
         }}
       >
-        {/* Заголовок с днями */}
+        {/* Header with days */}
         <div style={{ 
           display: 'flex', 
           marginBottom: '8px', 
@@ -293,11 +293,11 @@ const DaypartsSection = ({ channel, isFirstChannel = true }: DaypartsSectionProp
           ))}
         </div>
 
-        {/* Строки часов */}
+        {/* Hour rows */}
         {hoursData.map((hourData, index) => {
           const showDaypartLabel = index === 0 || hoursData[index - 1].daypart !== hourData.daypart;
           
-          // Проверяем, все ли часы этого дейпарта выбраны
+          // Check if all hours of this daypart are selected
           const daypart = getDaypartForHour(hourData.hour);
           const allDaypartSelected = daypart ? days.every(day => 
             daypart.hours.every(hour => isCellSelected(day, hour))
@@ -309,7 +309,7 @@ const DaypartsSection = ({ channel, isFirstChannel = true }: DaypartsSectionProp
               marginBottom: '4px',
               gap: '4px'
             }}>
-              {/* Daypart и время */}
+              {/* Daypart and time */}
               <div
                 style={{
                   width: '220px',
@@ -322,7 +322,7 @@ const DaypartsSection = ({ channel, isFirstChannel = true }: DaypartsSectionProp
                   gap: '8px'
                 }}
               >
-                {/* Фиксированная область для кнопки дейпарта */}
+                {/* Fixed area for daypart button */}
                 <div style={{ 
                   width: '130px',
                   display: 'flex',
@@ -366,7 +366,7 @@ const DaypartsSection = ({ channel, isFirstChannel = true }: DaypartsSectionProp
                   )}
                 </div>
                 
-                {/* Область для цветной полоски и времени */}
+                {/* Area for color bar and time */}
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -391,7 +391,7 @@ const DaypartsSection = ({ channel, isFirstChannel = true }: DaypartsSectionProp
                 </div>
               </div>
 
-              {/* Ячейки для каждого дня */}
+              {/* Cells for each day */}
               {days.map(day => {
                 const selected = isCellSelected(day, hourData.hour);
                 const isInPreview = isCellInPreview(day, hourData.hour);

@@ -11,7 +11,7 @@ export default function ServerStatus() {
   const { data, loading, error, lastUpdated } = useAppSelector((state) => state.serverStatus);
 
   useEffect(() => {
-    // Загружаем статус при монтировании компонента
+    // Load status on component mount
     dispatch(fetchServerStatus());
   }, [dispatch]);
 

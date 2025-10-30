@@ -7,7 +7,7 @@ interface WeekData {
   startDate: Date;
   endDate: Date;
   totalDays: number;
-  activeDays: number; // Дни не в hiatus
+  activeDays: number; // Days not in hiatus
   weekNumber: number;
 }
 
@@ -15,7 +15,7 @@ interface HiatusBlock {
   id: string;
   startDate: Date;
   endDate: Date;
-  insertAfterWeek: number; // После какой недели вставить текст
+  insertAfterWeek: number; // After which week to insert text
 }
 
 interface HiatusRange {
@@ -31,7 +31,7 @@ interface FlightByDayProps {
   hiatusEndDate?: string;
   hiatusRanges?: HiatusRange[];
   className?: string;
-  // Новые пропсы для получения готовых данных от FlightByWeek
+  // New props to receive ready data from FlightByWeek
   weeks?: WeekData[];
   hiatusBlocks?: HiatusBlock[];
 }
@@ -50,35 +50,35 @@ const FlightByDay: React.FC<FlightByDayProps> = ({
   const [hiatusBlocks, setHiatusBlocks] = useState<HiatusBlock[]>([]);
   const [isMounted, setIsMounted] = useState(false);
 
-  // Проверяем, что компонент смонтирован на клиенте
+  // Check that component is mounted on client
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
-  // Мемоизируем hiatusRanges для стабильности зависимостей
+  // Memoize hiatusRanges for dependency stability
   const stableHiatusRanges = useMemo(() => hiatusRanges || [], [hiatusRanges]);
 
-  // Используем переданные данные если они есть, иначе генерируем свои
+  // Use passed data if available, otherwise generate our own
   const finalWeeks = propsWeeks || weeks;
   const finalHiatusBlocks = propsHiatusBlocks || hiatusBlocks;
 
-  // Мемоизируем максимальное количество дней для масштабирования
+  // Memoize maximum number of days for scaling
   const maxDays = useMemo(() => {
     return Math.max(...finalWeeks.map(week => week.activeDays), 1);
   }, [finalWeeks]);
 
-  // Мемоизируем общее количество дней
+  // Memoize total number of days
   const totalDays = useMemo(() => {
     return finalWeeks.reduce((total, week) => total + week.totalDays, 0);
   }, [finalWeeks]);
 
-  // Функция для генерации недель из диапазона дат
+  // Function to generate weeks from date range
   const generateWeeks = useCallback((start: string, end: string): WeekData[] => {
     if (!start || !end) return [];
 
-    // Локальная функция для проверки дня в хиатусе
+    // Local function to check if day is in hiatus
     const isDayInHiatus = (date: Date): boolean => {
-      // Проверяем новые множественные диапазоны
+      // Check new multiple ranges
       if (stableHiatusRanges && stableHiatusRanges.length > 0) {
         const isInMultipleRanges = stableHiatusRanges.some(range => {
           const rangeStart = new Date(range.start);
@@ -88,7 +88,7 @@ const FlightByDay: React.FC<FlightByDayProps> = ({
         if (isInMultipleRanges) return true;
       }
       
-      // Обратная совместимость со старым API
+      // Backward compatibility with old API
       if (hiatusStartDate && hiatusEndDate) {
         const hiatusStart = new Date(hiatusStartDate);
         const hiatusEnd = new Date(hiatusEndDate);
@@ -102,7 +102,7 @@ const FlightByDay: React.FC<FlightByDayProps> = ({
     const endDateObj = new Date(end);
     const weeksArray: WeekData[] = [];
 
-    // Начинаем с понедельника недели начальной даты
+    // Start with Monday of the start date's week
     const weekStart = new Date(startDateObj);
     const dayOfWeek = weekStart.getDay();
     const diff = weekStart.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
@@ -115,11 +115,11 @@ const FlightByDay: React.FC<FlightByDayProps> = ({
       const currentWeekEnd = new Date(currentWeekStart);
       currentWeekEnd.setDate(currentWeekStart.getDate() + 6);
 
-      // Не выходим за пределы выбранного диапазона
+      // Don't go beyond selected range
       const actualStart = currentWeekStart < startDateObj ? startDateObj : currentWeekStart;
       const actualEnd = currentWeekEnd > endDateObj ? endDateObj : currentWeekEnd;
 
-      // Подсчитываем дни в неделе
+      // Count days in week
       let totalDays = 0;
       let activeDays = 0;
       let tempDate = new Date(actualStart);
@@ -148,23 +148,23 @@ const FlightByDay: React.FC<FlightByDayProps> = ({
     return weeksArray;
   }, [hiatusStartDate, hiatusEndDate, stableHiatusRanges]);
 
-  // Функция для генерации hiatus блоков
+  // Function to generate hiatus blocks
   const generateHiatusBlocks = useCallback((weeks: WeekData[]): HiatusBlock[] => {
     if (weeks.length === 0) return [];
 
     const hiatusBlocks: HiatusBlock[] = [];
 
-    // Обработка новых множественных диапазонов
+    // Process new multiple ranges
     if (stableHiatusRanges && stableHiatusRanges.length > 0) {
       stableHiatusRanges.forEach((range, rangeIndex) => {
         const hiatusStart = new Date(range.start);
         const hiatusEnd = new Date(range.end);
 
-        // Найти после какой недели нужно показать hiatus текст
+        // Find after which week to show hiatus text
         let insertAfterWeek = -1;
 
         weeks.forEach((week, index) => {
-          // Если hiatus начинается в этой неделе или после неё
+          // If hiatus starts in this week or after
           if (week.endDate >= hiatusStart && insertAfterWeek === -1) {
             insertAfterWeek = index;
           }
@@ -181,16 +181,16 @@ const FlightByDay: React.FC<FlightByDayProps> = ({
       });
     }
 
-    // Обратная совместимость со старым API
+    // Backward compatibility with old API
     if (hiatusStartDate && hiatusEndDate && hiatusBlocks.length === 0) {
       const hiatusStart = new Date(hiatusStartDate);
       const hiatusEnd = new Date(hiatusEndDate);
 
-      // Найти после какой недели нужно показать hiatus текст
+      // Find after which week to show hiatus text
       let insertAfterWeek = -1;
 
       weeks.forEach((week, index) => {
-        // Если hiatus начинается в этой неделе или после неё
+        // If hiatus starts in this week or after
         if (week.endDate >= hiatusStart && insertAfterWeek === -1) {
           insertAfterWeek = index;
         }
@@ -209,67 +209,67 @@ const FlightByDay: React.FC<FlightByDayProps> = ({
     return hiatusBlocks;
   }, [hiatusStartDate, hiatusEndDate, stableHiatusRanges]);
 
-  // Мемоизируем создание единого массива элементов для отображения
+  // Memoize creation of single array of display items
   const createDisplayItems = useCallback((weeks: WeekData[], hiatusBlocks: HiatusBlock[]) => {
     const items: Array<{ type: 'week' | 'hiatus', data: WeekData | HiatusBlock, order: number }> = [];
     
-    // Обрабатываем недели с учетом хиатус периодов
+    // Process weeks accounting for hiatus periods
     weeks.forEach((week, index) => {
       if (week.activeDays > 0) {
-        // Проверяем, есть ли хиатус блоки которые пересекаются с этой неделей
+        // Check if there are hiatus blocks that overlap with this week
         const overlappingHiatus = hiatusBlocks.find(hiatus => {
           return week.startDate <= hiatus.endDate && week.endDate >= hiatus.startDate;
         });
         
         if (overlappingHiatus) {
-          // Если есть пересечение с хиатусом, нужно определить порядок
+          // If there's overlap with hiatus, need to determine order
           const hiatusStart = overlappingHiatus.startDate;
           const hiatusEnd = overlappingHiatus.endDate;
           
-          // Проверяем, активные дни недели до или после хиатуса
+          // Check if active days of week are before or after hiatus
           if (week.endDate <= hiatusStart) {
-            // Активные дни до хиатуса
+            // Active days before hiatus
             items.push({ type: 'week', data: week, order: index });
           } else if (week.startDate >= hiatusEnd) {
-            // Активные дни после хиатуса
+            // Active days after hiatus
             items.push({ type: 'week', data: week, order: index + 1 });
           } else {
-            // Неделя пересекается с хиатусом - нужно определить где больше активных дней
+            // Week overlaps with hiatus - need to determine where most active days are
             const weekMiddle = new Date((week.startDate.getTime() + week.endDate.getTime()) / 2);
             if (weekMiddle < hiatusStart || weekMiddle > hiatusEnd) {
-              // Центр недели вне хиатуса
+              // Week center outside hiatus
               if (weekMiddle < hiatusStart) {
                 items.push({ type: 'week', data: week, order: index });
               } else {
                 items.push({ type: 'week', data: week, order: index + 1 });
               }
             } else {
-              // Активные дни после хиатуса (по умолчанию)
+              // Active days after hiatus (default)
               items.push({ type: 'week', data: week, order: index + 1 });
             }
           }
         } else {
-          // Нет пересечения с хиатусом
+          // No overlap with hiatus
           items.push({ type: 'week', data: week, order: index });
         }
       }
     });
     
-    // Добавляем hiatus блоки в правильной позиции
+    // Add hiatus blocks in correct position
     hiatusBlocks.forEach((hiatus) => {
       items.push({ type: 'hiatus', data: hiatus, order: hiatus.insertAfterWeek + 0.5 });
     });
     
-    // Сортируем по порядку
+    // Sort by order
     return items.sort((a, b) => a.order - b.order);
   }, []);
 
-  // Мемоизируем массив элементов для отображения
+  // Memoize array of display items
   const displayItems = useMemo(() => {
     return createDisplayItems(finalWeeks, finalHiatusBlocks);
   }, [finalWeeks, finalHiatusBlocks, createDisplayItems]);
 
-  // Генерируем недели при изменении дат только если не переданы готовые данные
+  // Generate weeks on date change only if ready data not passed
   useEffect(() => {
     if (!propsWeeks && !propsHiatusBlocks) {
       if (startDate && endDate) {
@@ -285,7 +285,7 @@ const FlightByDay: React.FC<FlightByDayProps> = ({
     }
   }, [startDate, endDate, hiatusStartDate, hiatusEndDate, stableHiatusRanges, generateWeeks, generateHiatusBlocks, propsWeeks, propsHiatusBlocks]);
 
-  // Форматирование даты для отображения
+  // Format date for display
   const formatDate = (date: Date) => {
     return date.toLocaleDateString('en-US', { 
       month: '2-digit', 
@@ -294,13 +294,13 @@ const FlightByDay: React.FC<FlightByDayProps> = ({
     });
   };
 
-  // Не рендерим на сервере для избежания гидратации
+  // Don't render on server to avoid hydration
   if (!isMounted) {
     return null;
   }
 
   if (finalWeeks.length === 0) {
-    return null; // Не показываем компонент, если нет данных
+    return null; // Don't show component if no data
   }
 
   return (
@@ -341,14 +341,14 @@ const FlightByDay: React.FC<FlightByDayProps> = ({
             if (item.type === 'week') {
               const week = item.data as WeekData;
               
-              // Если в неделе нет активных дней, не показываем столбик
+              // If week has no active days, don't show bar
               if (week.activeDays === 0) {
                 return null;
               }
               
-              // Высота столбика зависит от количества активных дней, максимум 160px
+              // Bar height depends on number of active days, maximum 160px
               const heightPercentage = maxDays > 0 ? (week.activeDays / maxDays) * 100 : 0;
-              const calculatedHeight = (heightPercentage / 100) * 160; // Максимум 160px
+              const calculatedHeight = (heightPercentage / 100) * 160; // Maximum 160px
               const height = Math.max(calculatedHeight, 15);
               
               return (

@@ -8,14 +8,14 @@ export interface SpotLengthOption {
   label: string;
 }
 
-// Опции рекламодателей
+// Advertiser options
 export const advertiserOptions: SelectOption[] = [
   { value: 'Ford Motor Company', label: 'Ford Motor Company' },
   { value: 'Stellantis', label: 'Stellantis' },   
   { value: 'Toyota Motor Corp', label: 'Toyota Motor Corp' },
 ];
 
-// Бренды по рекламодателям
+// Brands by advertiser
 export const brandOptions: Record<string, SelectOption[]> = {
   'Ford Motor Company': [
     { value: 'ford-f150', label: 'Ford F-150' },
@@ -39,10 +39,10 @@ export const brandOptions: Record<string, SelectOption[]> = {
   ],
 };
 
-// Опция "No Agency" доступная для всех рекламодателей
+// "No Agency" option available for all advertisers
 export const noAgencyOption: SelectOption = { value: 'No Agency', label: 'No Agency' };
 
-// Агентства по рекламодателям
+// Agencies by advertiser
 export const agencyOptions: Record<string, SelectOption[]> = {
   'Ford Motor Company': [
     noAgencyOption,
@@ -64,7 +64,7 @@ export const agencyOptions: Record<string, SelectOption[]> = {
   ],
 };
 
-// Опции длительности роликов по рекламодателю, бренду и агентству
+// Spot length options by advertiser, brand and agency
 export const spotLengthOptions: Record<string, Record<string, Record<string, SpotLengthOption[]>>> = {
   'Ford Motor Company': {
     'ford-f150': {

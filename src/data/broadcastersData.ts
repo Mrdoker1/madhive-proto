@@ -6,19 +6,19 @@ export interface BroadcasterData {
   displayName: string;
 }
 
-// Генерируем broadcasters на основе новых данных из папки stations
+// Generate broadcasters based on new data from stations folder
 export const broadcastersData: BroadcasterData[] = allBroadcasterStations.map(broadcaster => ({
   id: broadcaster.broadcasterId,
   name: broadcaster.broadcasterName,
   displayName: broadcaster.broadcasterName
 }));
 
-// Функция для получения бродкастера по ID
+// Function to get broadcaster by ID
 export const getBroadcasterById = (id: string): BroadcasterData | undefined => {
   return broadcastersData.find(broadcaster => broadcaster.id === id);
 };
 
-// Функция для получения бродкастера по названию
+// Function to get broadcaster by name
 export const getBroadcasterByName = (name: string): BroadcasterData | undefined => {
   return broadcastersData.find(broadcaster => broadcaster.name === name);
 };

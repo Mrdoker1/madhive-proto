@@ -13,7 +13,7 @@ interface UseMarketsHandlersProps {
   dispatch: AppDispatch;
 }
 
-// calculateMarketEstimation импортирован из utils
+// calculateMarketEstimation is imported from utils
 
 export const useMarketsHandlers = ({
   markets,
@@ -26,7 +26,7 @@ export const useMarketsHandlers = ({
 
   const handleSelectAll = useCallback((checked: boolean) => {
     if (checked) {
-      // Если выбираем все маркеты, равномерно распределяем проценты
+      // If selecting all markets, distribute percentages evenly
       const percentagePerMarket = Math.round((100 / markets.length) * 100) / 100;
       
       const updatedMarkets = markets.map(market => {
@@ -76,7 +76,7 @@ export const useMarketsHandlers = ({
       const marketEstimation = calculateMarketEstimation(updatedMarkets);
       dispatch(updateEstimations({ marketEstimation }));
     } else {
-      // Если снимаем выбор со всех маркетов
+      // If deselecting all markets
       const updatedMarkets = markets.map(market => ({
         ...market,
         selected: false,
@@ -101,7 +101,7 @@ export const useMarketsHandlers = ({
   }, [markets, budgetData.totalBudget, setMarkets, dispatch]);
 
   const handleSelect = useCallback((marketId: string, checked: boolean) => {
-    // Сначала обновляем статус выбранного маркета
+    // First update selected market status
     const preliminaryMarkets = markets.map(market => {
       if (market.id === marketId) {
         return {
@@ -111,18 +111,18 @@ export const useMarketsHandlers = ({
             ...station,
             selected: checked,
             percentage: checked ? Math.round((100 / market.stations.length) * 100) / 100 : 0,
-            budget: 0 // Пока 0, пересчитаем после распределения процентов
+            budget: 0 // Temporarily 0, will recalculate after percentage distribution
           }))
         };
       }
       return market;
     });
 
-    // Подсчитываем количество выбранных маркетов
+    // Count selected markets
     const selectedMarkets = preliminaryMarkets.filter(market => market.selected);
     const selectedCount = selectedMarkets.length;
     
-    // Равномерно распределяем проценты между выбранными маркетами
+    // Distribute percentages evenly among selected markets
     const percentagePerMarket = selectedCount > 0 ? Math.round((100 / selectedCount) * 100) / 100 : 0;
     
     const updatedMarkets = preliminaryMarkets.map(market => {
@@ -137,7 +137,7 @@ export const useMarketsHandlers = ({
           budget: marketBudget,
           stations: market.stations.map(station => ({
             ...station,
-            // Сохраняем selected и percentage из preliminaryMarkets
+            // Keep selected and percentage from preliminaryMarkets
             budget: station.selected ? budgetPerStation : 0
           }))
         };
@@ -163,7 +163,7 @@ export const useMarketsHandlers = ({
       .filter(market => market.selected)
       .map(market => market.name);
     
-    // Сохраняем детальную информацию о markets и stations
+    // Save detailed information about markets and stations
     const marketsDetails = updatedMarkets
       .filter(market => market.selected)
       .map(market => ({
@@ -249,7 +249,7 @@ export const useMarketsHandlers = ({
           return station;
         });
 
-        // Пересчитываем бюджет и проценты для выбранных станций
+        // Recalculate budget and percentages for selected stations
         const selectedStations = updatedStations.filter(s => s.selected);
         const selectedCount = selectedStations.length;
         
@@ -268,7 +268,7 @@ export const useMarketsHandlers = ({
             stations: recalculatedStations
           };
         } else {
-          // Если нет выбранных станций, обнуляем их бюджеты
+          // If no stations selected, reset their budgets to zero
           const clearedStations = updatedStations.map(station => ({
             ...station,
             percentage: 0,

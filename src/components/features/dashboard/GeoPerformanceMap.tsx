@@ -16,7 +16,7 @@ const GeoPerformanceMap: React.FC = () => {
   const [mapLoaded, setMapLoaded] = useState(false);
   const [apiKeyLoaded, setApiKeyLoaded] = useState(false);
 
-  // Загрузка API ключа из настроек
+  // Load API key from settings
   useEffect(() => {
     const loadApiKey = async () => {
       try {
@@ -26,7 +26,7 @@ const GeoPerformanceMap: React.FC = () => {
         setApiKeyLoaded(true);
       } catch (error) {
         console.error('Failed to load API key:', error);
-        // Используем дефолтный ключ
+        // Use default key
         mapboxgl.accessToken = 'pk.eyJ1IjoibXJkb2tlcjEiLCJhIjoiY2szNGlvZHcxMDFweTNjcG4xeXRicng5ZSJ9.PAdeoloR2kVbvXM7LFO-zg';
         setApiKeyLoaded(true);
       }
@@ -34,7 +34,7 @@ const GeoPerformanceMap: React.FC = () => {
     loadApiKey();
   }, []);
 
-  // Загрузка данных кампании при изменении выбранной кампании
+  // Load campaign data when selected campaign changes
   useEffect(() => {
     if (campaign) {
       const data = getCampaignDMAData(campaign);
@@ -44,7 +44,7 @@ const GeoPerformanceMap: React.FC = () => {
     }
   }, [campaign]);
 
-  // Инициализация карты
+  // Initialize map
   useEffect(() => {
     if (!mapContainer.current || map.current || !apiKeyLoaded) {
       console.log('Map init skipped:', { hasContainer: !!mapContainer.current, hasMap: !!map.current, apiKeyLoaded });
@@ -55,7 +55,7 @@ const GeoPerformanceMap: React.FC = () => {
     console.log('Mapbox token:', mapboxgl.accessToken ? 'SET' : 'NOT SET');
 
     try {
-      // Инициализация карты - берем Streets но будем скрывать лишние слои
+      // Initialize map - using Streets but will hide unnecessary layers
       map.current = new mapboxgl.Map({
         container: mapContainer.current,
         style: 'mapbox://styles/mapbox/streets-v12',
@@ -71,12 +71,12 @@ const GeoPerformanceMap: React.FC = () => {
         if (!map.current) return;
         console.log('✅ Map loaded successfully!');
         
-        // Убираем дороги и лишние детали
+        // Remove roads and unnecessary details
         const style = map.current.getStyle();
         if (style && style.layers) {
           style.layers.forEach((layer: any) => {
             try {
-              // Скрываем ВСЕ дороги, мосты, туннели и их номера
+              // Hide ALL roads, bridges, tunnels and their labels
               if (
                 layer.id.includes('road') ||
                 layer.id.includes('bridge') ||
@@ -95,7 +95,7 @@ const GeoPerformanceMap: React.FC = () => {
                 map.current!.setLayoutProperty(layer.id, 'visibility', 'none');
               }
             } catch (e) {
-              // Игнорируем ошибки для слоев без нужных свойств
+              // Ignore errors for layers without needed properties
             }
           });
         }
@@ -114,7 +114,7 @@ const GeoPerformanceMap: React.FC = () => {
       console.error('❌ Error creating map:', error);
     }
 
-    // Обработчик для зума по Ctrl+Scroll
+    // Handler for zoom with Ctrl+Scroll
     const handleWheel = (e: WheelEvent) => {
       if (!map.current) return;
       
@@ -145,7 +145,7 @@ const GeoPerformanceMap: React.FC = () => {
     };
   }, [apiKeyLoaded]);
 
-  // Отображение DMA зон на карте
+  // Display DMA zones on map
   useEffect(() => {
     if (!map.current || !campaignData || !mapLoaded) {
       console.log('DMA zones effect - waiting...', { 
@@ -158,11 +158,11 @@ const GeoPerformanceMap: React.FC = () => {
 
     console.log('Adding DMA zones to map...', campaignData.campaignName);
 
-    // Удаляем старые маркеры
+    // Remove old markers
     markers.current.forEach(marker => marker.remove());
     markers.current = [];
 
-    // Удаляем старые слои и источники
+    // Remove old layers and sources
     if (map.current.getLayer('dma-fills')) {
       map.current.removeLayer('dma-fills');
     }
@@ -175,10 +175,10 @@ const GeoPerformanceMap: React.FC = () => {
     
     console.log('Processing zones:', zones.length);
 
-    // Получаем максимальное значение impressions для цветовой шкалы
+    // Get maximum impressions value for color scale
     const maxImpressions = Math.max(...zones.map(z => z.impressions));
 
-    // Функция для получения цвета зоны
+    // Function to get zone color
     const getZoneColor = (impressions: number): string => {
       const percentage = (impressions / maxImpressions) * 100;
       if (percentage >= 75) return '#059669';
@@ -187,7 +187,7 @@ const GeoPerformanceMap: React.FC = () => {
       return '#d1fae5';
     };
 
-    // Создаем GeoJSON для DMA зон (точки)
+    // Create GeoJSON for DMA zones (points)
     const geojsonFeatures = zones.map((zone) => {
       return {
         type: 'Feature',
@@ -205,7 +205,7 @@ const GeoPerformanceMap: React.FC = () => {
       };
     });
 
-    // Добавляем источник данных
+    // Add data source
     map.current.addSource('dma-zones', {
       type: 'geojson',
       data: {
@@ -214,10 +214,10 @@ const GeoPerformanceMap: React.FC = () => {
       }
     });
 
-    // Вычисляем радиус круга на основе impressions
+    // Calculate circle radius based on impressions
     const minImpressions = Math.min(...zones.map(z => z.impressions));
     
-    // Добавляем слой с кругами для DMA зон
+    // Add layer with circles for DMA zones
     map.current.addLayer({
       id: 'dma-fills',
       type: 'circle',
@@ -238,7 +238,7 @@ const GeoPerformanceMap: React.FC = () => {
       }
     });
 
-    // Обработчики hover для кругов
+    // Hover handlers for circles
     map.current.on('mouseenter', 'dma-fills', (e) => {
       if (map.current && e.features && e.features[0]) {
         map.current.getCanvas().style.cursor = 'pointer';
@@ -267,7 +267,7 @@ const GeoPerformanceMap: React.FC = () => {
       }
     });
 
-    // Подстраиваем карту под все зоны
+    // Fit map to all zones
     const bounds = new mapboxgl.LngLatBounds();
     zones.forEach(zone => {
       bounds.extend(zone.coordinates);
@@ -391,7 +391,7 @@ const GeoPerformanceMap: React.FC = () => {
                 else if (percentage >= 50) color = '#10b981';
                 else if (percentage >= 25) color = '#6ee7b7';
 
-                // Функция приближения к зоне
+                // Function to zoom to zone
                 const handleZoomToZone = () => {
                   if (map.current) {
                     map.current.flyTo({

@@ -12,7 +12,7 @@ const AISettingsSection: React.FC = () => {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
 
-  // Загрузка текущих настроек
+  // Load current settings
   useEffect(() => {
     fetchSettings();
   }, []);

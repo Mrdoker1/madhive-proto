@@ -2,11 +2,11 @@ export { SimpleSlider } from './SimpleSlider';
 export { ChannelSlider } from './ChannelSlider';
 export { SuggestedChannelSlider } from './SuggestedChannelSlider';
 
-// Экспорт типов
+// Export types
 export type { ChannelAllocation, SimpleSliderProps, ChannelSliderProps } from './types';
 
-// Экспорт констант
+// Export constants
 export { channelNames, channelColors, SLIDER_CONFIG } from './constants';
 
-// Экспорт утилит
+// Export utilities
 export { fetchForecastMetrics, isChannelInefficient, formatCurrency, parseNumericValue } from './utils';

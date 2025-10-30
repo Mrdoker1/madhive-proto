@@ -1,51 +1,51 @@
 import { CHANNEL_REACH_COEFFICIENTS, CHART_CONFIG } from './constants';
 
 /**
- * Вычисляет reach на основе бюджета с сильным влиянием и ограничением максимума
- * Бюджет сильно влияет на reach, но reach никогда не превышает MAX_REACH
+ * Calculates reach based on budget with strong influence and maximum limit
+ * Budget strongly affects reach, but reach never exceeds MAX_REACH
  */
 export const calculateReachFromBudget = (channelId: string, budget: number, totalBudget: number = CHART_CONFIG.DEFAULT_BUDGET): number => {
   if (budget <= 0) return CHART_CONFIG.MIN_REACH;
   
   const channelCoefficient = CHANNEL_REACH_COEFFICIENTS[channelId] || 0.015;
   
-  // Нормализуем коэффициент канала (0.008-0.025 -> 0.7-1.0)
+  // Normalize channel coefficient (0.008-0.025 -> 0.7-1.0)
   const normalizedCoeff = (channelCoefficient - 0.008) / (0.025 - 0.008) * 0.3 + 0.7;
   
-  // Целевой максимальный reach для этого канала (70-100% от MAX_REACH)
+  // Target maximum reach for this channel (70-100% of MAX_REACH)
   const channelMaxReach = CHART_CONFIG.MAX_REACH * normalizedCoeff;
   
-  // Вычисляем "сырой" reach с сильным влиянием бюджета
+  // Calculate "raw" reach with strong budget influence
   const budgetProgress = budget / totalBudget;
   
-  // Агрессивный рост с использованием степенной функции
-  // Малые бюджеты дают мало reach, большие бюджеты дают много reach
+  // Aggressive growth using power function
+  // Small budgets give little reach, large budgets give much reach
   let rawReach;
   
   if (budgetProgress <= CHART_CONFIG.THRESHOLD_PERCENTAGE) {
-    // До 20%: умеренный рост
+    // Up to 20%: moderate growth
     const progress = budgetProgress / CHART_CONFIG.THRESHOLD_PERCENTAGE;
     rawReach = CHART_CONFIG.MIN_REACH + (channelMaxReach * 0.3) * Math.pow(progress, 1.5);
   } else {
-    // После 20%: более агрессивный рост
+    // After 20%: more aggressive growth
     const baseReach = CHART_CONFIG.MIN_REACH + (channelMaxReach * 0.3);
     const excessProgress = (budgetProgress - CHART_CONFIG.THRESHOLD_PERCENTAGE) / (1 - CHART_CONFIG.THRESHOLD_PERCENTAGE);
     
-    // Степенная функция для сильного роста, но с ограничением
+    // Power function for strong growth, but with limitation
     const additionalReach = (channelMaxReach - baseReach) * Math.pow(excessProgress, 0.8);
     rawReach = baseReach + additionalReach;
   }
   
-  // Применяем "мягкое ограничение" для предотвращения превышения максимума
-  // Используем гиперболический тангенс для плавного приближения к максимуму
+  // Apply "soft limit" to prevent exceeding maximum
+  // Use hyperbolic tangent for smooth approach to maximum
   const saturatedReach = channelMaxReach * Math.tanh(rawReach / channelMaxReach);
   
   return Math.min(saturatedReach, channelMaxReach);
 };
 
 /**
- * Умное перераспределение бюджета с учетом коэффициентов эффективности
- * Более эффективные каналы теряют меньше бюджета, менее эффективные - больше
+ * Smart budget redistribution considering efficiency coefficients
+ * More efficient channels lose less budget, less efficient ones lose more
  */
 export const redistributeBudgetSmart = (
   currentBudgets: Record<string, number>,
@@ -59,48 +59,48 @@ export const redistributeBudgetSmart = (
     return { [targetChannelId]: newBudgetForTarget };
   }
 
-  // Вычисляем сколько бюджета нужно перераспределить
+  // Calculate how much budget needs to be redistributed
   const currentTargetBudget = currentBudgets[targetChannelId] || 0;
   const budgetDifference = newBudgetForTarget - currentTargetBudget;
   const availableBudgetForOthers = totalBudget - newBudgetForTarget;
 
-  // Получаем коэффициенты эффективности для других каналов
+  // Get efficiency coefficients for other channels
   const otherChannelsEfficiency = otherChannelIds.map(id => ({
     id,
     coefficient: CHANNEL_REACH_COEFFICIENTS[id] || 0.015,
     currentBudget: currentBudgets[id] || 0
   }));
 
-  // Сортируем по эффективности (более эффективные каналы должны сохранить больше бюджета)
+  // Sort by efficiency (more efficient channels should keep more budget)
   otherChannelsEfficiency.sort((a, b) => b.coefficient - a.coefficient);
 
-  // Вычисляем веса для распределения (обратно пропорционально эффективности)
-  // Менее эффективные каналы получают больший вес = теряют больше бюджета
+  // Calculate weights for distribution (inversely proportional to efficiency)
+  // Less efficient channels get higher weight = lose more budget
   const totalWeight = otherChannelsEfficiency.reduce((sum, channel) => {
-    // Инвертируем коэффициент: меньший коэффициент = больший вес
+    // Invert coefficient: lower coefficient = higher weight
     const invertedWeight = 1 / channel.coefficient;
     return sum + invertedWeight;
   }, 0);
 
-  // Распределяем бюджет пропорционально весам
+  // Distribute budget proportionally to weights
   const newBudgets: Record<string, number> = { [targetChannelId]: newBudgetForTarget };
   
   otherChannelsEfficiency.forEach(channel => {
     const weight = (1 / channel.coefficient) / totalWeight;
     const newBudget = availableBudgetForOthers * weight;
-    newBudgets[channel.id] = Math.max(0, Math.round(newBudget / 100) * 100); // Округляем до кратных 100
+    newBudgets[channel.id] = Math.max(0, Math.round(newBudget / 100) * 100); // Round to multiples of 100
   });
 
   return newBudgets;
 };
 
 /**
- * Функция для тестирования умного перераспределения
+ * Function for testing smart redistribution
  */
 export const debugSmartRedistribution = (totalBudget: number = CHART_CONFIG.DEFAULT_BUDGET) => {
   console.log('\n=== Smart Budget Redistribution Test ===');
   
-  // Пример: CTV, Email, Social
+  // Example: CTV, Email, Social
   const testChannels = ['ctv', 'email', 'social'];
   const initialBudgets: Record<string, number> = {
     'ctv': totalBudget / 3,
@@ -114,7 +114,7 @@ export const debugSmartRedistribution = (totalBudget: number = CHART_CONFIG.DEFA
     console.log(`  ${id}: $${Math.round(initialBudgets[id]/1000)}K (coeff: ${coeff})`);
   });
   
-  // Увеличиваем бюджет CTV до 60% от общего
+  // Increase CTV budget to 60% of total
   const newCtvBudget = totalBudget * 0.6;
   const redistributed = redistributeBudgetSmart(initialBudgets, 'ctv', newCtvBudget, totalBudget);
   
@@ -128,7 +128,7 @@ export const debugSmartRedistribution = (totalBudget: number = CHART_CONFIG.DEFA
 };
 
 /**
- * Вспомогательная функция для отладки - показывает как растет reach для канала
+ * Helper function for debugging - shows how reach grows for a channel
  */
 export const debugReachGrowth = (channelId: string, totalBudget: number = CHART_CONFIG.DEFAULT_BUDGET) => {
   const steps = [0, 0.1, 0.2, 0.3, 0.5, 0.7, 1.0];
@@ -145,7 +145,7 @@ export const debugReachGrowth = (channelId: string, totalBudget: number = CHART_
 };
 
 /**
- * Создание параболического пути: от (0,0) до точки, затем горизонтально
+ * Create parabolic path: from (0,0) to point, then horizontally
  */
 export const createParabolicPath = (
   pointX: number, 
@@ -153,24 +153,24 @@ export const createParabolicPath = (
   chartWidth: number, 
   chartHeight: number
 ): string => {
-  // Начинаем от (0, chartHeight) - это соответствует reach = 0
+  // Start from (0, chartHeight) - this corresponds to reach = 0
   let path = `M 0 ${chartHeight}`;
   
-  // Создаем параболическую кривую до точки с помощью квадратичной кривой Безье
-  const controlX = pointX * 0.5; // Контрольная точка по X (в середине пути)
-  const controlY = pointY; // Контрольная точка по Y (на уровне целевой точки)
+  // Create parabolic curve to point using quadratic Bezier curve
+  const controlX = pointX * 0.5; // Control point X (in the middle of path)
+  const controlY = pointY; // Control point Y (at target point level)
   
-  // Квадратичная кривая Безье для параболы
+  // Quadratic Bezier curve for parabola
   path += ` Q ${controlX} ${controlY} ${pointX} ${pointY}`;
   
-  // Горизонтальная линия до конца графика
+  // Horizontal line to end of chart
   path += ` L ${chartWidth} ${pointY}`;
   
   return path;
 };
 
 /**
- * Вычисляет позицию точки на графике
+ * Calculates point position on chart
  */
 export const calculateChartPosition = (
   budget: number,
@@ -187,7 +187,7 @@ export const calculateChartPosition = (
 };
 
 /**
- * Преобразует координаты мыши в значения бюджета и reach
+ * Converts mouse coordinates to budget and reach values
  */
 export const mouseToValues = (
   mouseX: number,
@@ -207,7 +207,7 @@ export const mouseToValues = (
 };
 
 /**
- * Ограничивает значения в пределах графика
+ * Limits values within chart bounds
  */
 export const clampToChart = (
   x: number,

@@ -34,7 +34,7 @@ interface ProposalSectionProps {
 }
 
 const ProposalSection: React.FC<ProposalSectionProps> = ({ onValidationChange }) => {
-  // Получаем детальную информацию о markets и stations из Redux
+  // Get detailed information about markets and stations from Redux
   const marketsDetails = useAppSelector((state) => state.campaign.markets.marketsDetails || []);
   const totalBudget = useAppSelector((state) => state.campaign.budget.totalBudget);
   const selectedBroadcasters = useAppSelector((state) => state.campaign.linear.broadcasters);
@@ -42,14 +42,14 @@ const ProposalSection: React.FC<ProposalSectionProps> = ({ onValidationChange })
   const flightData = useAppSelector((state) => state.campaign.flight);
   const daypartsData = useAppSelector((state) => state.campaign.dayparts);
   
-  // Конвертируем имена broadcasters в ID
+  // Convert broadcaster names to IDs
   const broadcasterIds = useMemo(() => {
     return selectedBroadcasters
       .map(name => getBroadcasterByName(name)?.id)
       .filter(Boolean) as string[];
   }, [selectedBroadcasters]);
   
-  // Получаем ВСЕ доступные markets от выбранных broadcasters
+  // Get ALL available markets from selected broadcasters
   const allAvailableMarkets = useMemo(() => {
     const marketIds = getAvailableMarkets(broadcasterIds);
     return marketIds.map(marketId => {
@@ -83,20 +83,20 @@ const ProposalSection: React.FC<ProposalSectionProps> = ({ onValidationChange })
     });
   }, [broadcasterIds]);
   
-  // Объединяем: берем все доступные markets и накладываем данные из marketsDetails (budgets) и broadcastersWithStations (stations)
+  // Combine: take all available markets and overlay data from marketsDetails (budgets) and broadcastersWithStations (stations)
   const combinedMarkets = useMemo(() => {
     const marketMap = new Map();
     
-    // Сначала добавляем все доступные markets от broadcasters
+    // First add all available markets from broadcasters
     allAvailableMarkets.forEach(market => {
       marketMap.set(market.id, market);
     });
     
-    // Затем перезаписываем данными из выбранных на предыдущем шаге (у них корректные budgets)
+    // Then overwrite with data from previous step selections (they have correct budgets)
     marketsDetails.forEach(market => {
       const existing = marketMap.get(market.id);
       if (existing) {
-        // Получаем stations для этого market из broadcastersWithStations
+        // Get stations for this market from broadcastersWithStations
         const marketStations: BroadcasterStationBudget[] = [];
         
         broadcastersWithStations.forEach(broadcaster => {
@@ -132,25 +132,25 @@ const ProposalSection: React.FC<ProposalSectionProps> = ({ onValidationChange })
     return Array.from(marketMap.values());
   }, [allAvailableMarkets, marketsDetails, broadcastersWithStations]);
   
-  // Создаем стабильный список ID markets из marketsDetails
+  // Create stable list of market IDs from marketsDetails
   const marketIds = useMemo(() => {
     return marketsDetails.map(m => m.id).join(',');
   }, [marketsDetails]);
   
-  // Локальное состояние для видимости markets
-  // Показываем только те markets которые были выбраны на предыдущем шаге
+  // Local state for market visibility
+  // Show only markets that were selected in previous step
   const [visibleMarkets, setVisibleMarkets] = useState<Set<string>>(() => {
     return new Set(marketsDetails.map(m => m.id));
   });
   
-  // Обновляем visibleMarkets когда меняется список ID markets
+  // Update visibleMarkets when market ID list changes
   useEffect(() => {
     if (marketIds) {
       setVisibleMarkets(new Set(marketIds.split(',').filter(Boolean)));
     }
   }, [marketIds]);
   
-  // Фильтруем только видимые markets
+  // Filter only visible markets
   const selectedMarketsWithStations = useMemo(() => {
     return combinedMarkets.filter(m => visibleMarkets.has(m.id));
   }, [combinedMarkets, visibleMarkets]);
@@ -162,12 +162,12 @@ const ProposalSection: React.FC<ProposalSectionProps> = ({ onValidationChange })
     return null;
   });
   
-  // Получаем первый market ID для инициализации активного таба
+  // Get first market ID for initializing active tab
   const firstMarketId = useMemo(() => {
     return marketsDetails.length > 0 ? marketsDetails[0].id : null;
-  }, [marketIds]); // Используем стабильную зависимость marketIds
+  }, [marketIds]); // Use stable dependency marketIds
   
-  // Обновляем активный таб при изменении списка markets
+  // Update active tab when market list changes
   useEffect(() => {
     if (firstMarketId && !activeMarketTab) {
       setActiveMarketTab(firstMarketId);
@@ -180,19 +180,19 @@ const ProposalSection: React.FC<ProposalSectionProps> = ({ onValidationChange })
   const [programPages, setProgramPages] = useState<Record<string, number>>({});
   const PROGRAMS_PER_PAGE = 20;
   
-  // Сброс пагинации при изменении фильтров
+  // Reset pagination when filters change
   useEffect(() => {
     setProgramPages({});
   }, [searchQuery, selectedDaypartFilter]);
   
-  // Извлекаем выбранные дни недели из dayparts
+  // Extract selected days of week from dayparts
   const selectedDaysOfWeek = useMemo(() => {
     const selectedSlots = daypartsData.selectedSlots;
     if (!selectedSlots || Object.keys(selectedSlots).length === 0) {
-      return null; // Нет выбранных слотов - используем дефолтные дни
+      return null; // No selected slots - use default days
     }
     
-    // Получаем уникальные дни, у которых есть хотя бы один выбранный слот
+    // Get unique days that have at least one selected slot
     const days = Object.keys(selectedSlots).filter(day => {
       const daySlots = selectedSlots[day];
       return Object.values(daySlots).some(selected => selected);
@@ -201,14 +201,14 @@ const ProposalSection: React.FC<ProposalSectionProps> = ({ onValidationChange })
     return days.length > 0 ? days : null;
   }, [daypartsData.selectedSlots]);
   
-  // Извлекаем выбранные часы и определяем активные dayparts
+  // Extract selected hours and determine active dayparts
   const activeDaypartsInfo = useMemo(() => {
     const selectedSlots = daypartsData.selectedSlots;
     if (!selectedSlots || Object.keys(selectedSlots).length === 0) {
-      return null; // Нет выбранных слотов - используем дефолтные dayparts
+      return null; // No selected slots - use default dayparts
     }
     
-    // Собираем все выбранные часы (уникальные)
+    // Collect all selected hours (unique)
     const selectedHours = new Set<number>();
     Object.values(selectedSlots).forEach(daySlots => {
       Object.entries(daySlots).forEach(([hour, selected]) => {
@@ -222,10 +222,10 @@ const ProposalSection: React.FC<ProposalSectionProps> = ({ onValidationChange })
       return null;
     }
     
-    // Определяем какие dayparts активны и собираем их часы
+    // Determine which dayparts are active and collect their hours
     const activeDayparts = daypartDefinitions
       .map(daypart => {
-        // Фильтруем только те часы из daypart, которые выбраны
+        // Filter only those hours from daypart that are selected
         const activeHours = daypart.hours.filter(hour => selectedHours.has(hour));
         if (activeHours.length > 0) {
           return {
@@ -240,7 +240,7 @@ const ProposalSection: React.FC<ProposalSectionProps> = ({ onValidationChange })
     return activeDayparts.length > 0 ? activeDayparts : null;
   }, [daypartsData.selectedSlots]);
   
-  // Функция для генерации случайной даты в диапазоне
+  // Function to generate random date in range
   const getRandomDateInRange = useCallback((startDate: string, endDate: string): string => {
     const start = new Date(startDate).getTime();
     const end = new Date(endDate).getTime();
@@ -249,7 +249,7 @@ const ProposalSection: React.FC<ProposalSectionProps> = ({ onValidationChange })
     return randomDate.toISOString().split('T')[0];
   }, []);
   
-  // Функция для форматирования часа в AM/PM формат
+  // Function to format hour to AM/PM format
   const formatHourToTime = useCallback((hour: number): string => {
     if (hour === 0) return '12:00 AM';
     if (hour < 12) return `${hour}:00 AM`;
@@ -257,21 +257,21 @@ const ProposalSection: React.FC<ProposalSectionProps> = ({ onValidationChange })
     return `${hour - 12}:00 PM`;
   }, []);
   
-  // Функция для получения случайного элемента из массива
+  // Function to get random item from array
   const getRandomItem = useCallback(<T,>(array: T[]): T => {
     return array[Math.floor(Math.random() * array.length)];
   }, []);
   
-  // Функция для обновления дат и дней программы на основе Flight Range и Dayparts
+  // Function to update program dates and days based on Flight Range and Dayparts
   const updateProgramDates = useCallback((program: Program): Program => {
     let updatedProgram = { ...program };
     
-    // Обновляем даты, если Flight Range выбран
+    // Update dates if Flight Range is selected
     if (flightData.startDate && flightData.endDate) {
       const startDate = flightData.startDate;
       const endDate = flightData.endDate;
       
-      // Генерируем случайные даты в пределах диапазона
+      // Generate random dates within range
       const programStartDate = getRandomDateInRange(startDate, endDate);
       const programEndDate = getRandomDateInRange(programStartDate, endDate);
       
@@ -282,7 +282,7 @@ const ProposalSection: React.FC<ProposalSectionProps> = ({ onValidationChange })
       };
     }
     
-    // Обновляем дни недели, если Dayparts выбраны
+    // Update days of week if Dayparts are selected
     if (selectedDaysOfWeek) {
       updatedProgram = {
         ...updatedProgram,
@@ -290,12 +290,12 @@ const ProposalSection: React.FC<ProposalSectionProps> = ({ onValidationChange })
       };
     }
     
-    // Обновляем daypart и airTime, если Dayparts выбраны
+    // Update daypart and airTime if Dayparts are selected
     if (activeDaypartsInfo) {
-      // Выбираем случайный активный daypart
+      // Select random active daypart
       const randomDaypart = getRandomItem(activeDaypartsInfo);
       
-      // Выбираем случайный час из этого daypart
+      // Select random hour from this daypart
       const randomHour = getRandomItem(randomDaypart.hours);
       
       updatedProgram = {
@@ -316,13 +316,13 @@ const ProposalSection: React.FC<ProposalSectionProps> = ({ onValidationChange })
     formatHourToTime
   ]);
   
-  // Функция для toggle видимости market
+  // Function to toggle market visibility
   const toggleMarketVisibility = (marketId: string) => {
     setVisibleMarkets(prev => {
       const newSet = new Set(prev);
       if (newSet.has(marketId)) {
         newSet.delete(marketId);
-        // Если удаляем активный таб, переключаемся на первый доступный
+        // If removing active tab, switch to first available
         if (activeMarketTab === marketId) {
           const remainingMarkets = combinedMarkets.filter(m => newSet.has(m.id));
           setActiveMarketTab(remainingMarkets.length > 0 ? remainingMarkets[0].id : null);
@@ -334,27 +334,27 @@ const ProposalSection: React.FC<ProposalSectionProps> = ({ onValidationChange })
     });
   };
 
-  // Получаем все программы для всех станций с обновленными датами
+  // Get all programs for all stations with updated dates
   const stationPrograms = useMemo(() => {
     const programs: Record<string, Program[]> = {};
     selectedMarketsWithStations.forEach(market => {
       market.stations.forEach((station: BroadcasterStationBudget) => {
         const originalPrograms = getProgramsByStation(station.id);
-        // Применяем обновление дат к каждой программе
+        // Apply date update to each program
         programs[station.id] = originalPrograms.map(program => updateProgramDates(program));
       });
     });
     return programs;
   }, [selectedMarketsWithStations, updateProgramDates]);
 
-  // Функция для получения выбранных программ станции
+  // Function to get selected programs for station
   const getSelectedPrograms = (stationId: string): Program[] => {
     const programs = stationPrograms[stationId] || [];
     const selections = programSelections[stationId] || {};
     return programs.filter(p => selections[p.id]);
   };
 
-  // Подсчет totals для станции
+  // Calculate totals for station
   const calculateStationTotals = (stationId: string) => {
     const selectedPrograms = getSelectedPrograms(stationId);
     const totalImpressions = selectedPrograms.reduce((sum, p) => sum + p.impressions, 0);
@@ -364,13 +364,13 @@ const ProposalSection: React.FC<ProposalSectionProps> = ({ onValidationChange })
     return { totalImpressions, totalRate, avgCPM };
   };
 
-  // Проверка превышения бюджета для станции
+  // Check if budget is exceeded for station
   const checkBudgetExceeded = (stationId: string, allocatedBudget: number) => {
     const { totalRate } = calculateStationTotals(stationId);
     return totalRate > allocatedBudget;
   };
 
-  // Общий подсчет по всем станциям
+  // Grand totals across all stations
   const calculateGrandTotals = useMemo(() => {
     let totalImpressions = 0;
     let totalRate = 0;
@@ -386,10 +386,10 @@ const ProposalSection: React.FC<ProposalSectionProps> = ({ onValidationChange })
     return { totalImpressions, totalRate, avgCPM };
   }, [programSelections, stationPrograms]);
 
-  // Передаем данные валидации в родительский компонент
+  // Pass validation data to parent component
   useEffect(() => {
     if (onValidationChange) {
-      // Собираем бюджеты станций
+      // Collect station budgets
       const stationBudgets: Record<string, number> = {};
       selectedMarketsWithStations.forEach(market => {
         market.stations.forEach((station: BroadcasterStationBudget) => {
@@ -397,7 +397,7 @@ const ProposalSection: React.FC<ProposalSectionProps> = ({ onValidationChange })
         });
       });
 
-      // Проверяем валидность (выбрана хотя бы одна программа и бюджет не превышен)
+      // Check validity (at least one program selected and budget not exceeded)
       let hasSelectedPrograms = false;
       let budgetExceeded = false;
 
@@ -418,7 +418,7 @@ const ProposalSection: React.FC<ProposalSectionProps> = ({ onValidationChange })
     }
   }, [programSelections, stationPrograms, selectedMarketsWithStations, onValidationChange]);
 
-  // Toggle программы
+  // Toggle program
   const toggleProgram = (stationId: string, programId: string) => {
     setProgramSelections(prev => ({
       ...prev,
@@ -429,7 +429,7 @@ const ProposalSection: React.FC<ProposalSectionProps> = ({ onValidationChange })
     }));
   };
 
-  // Toggle всех программ станции
+  // Toggle all station programs
   const toggleAllStationPrograms = (stationId: string, checked: boolean) => {
     const programs = stationPrograms[stationId] || [];
     const newSelections: Record<string, boolean> = {};
@@ -443,12 +443,12 @@ const ProposalSection: React.FC<ProposalSectionProps> = ({ onValidationChange })
     }));
   };
 
-  // Форматирование чисел
+  // Number formatting
   const formatNumber = (num: number) => num.toLocaleString('en-US');
   const formatCurrency = (num: number) => `$${num.toLocaleString('en-US')}`;
   const formatCPM = (num: number) => `$${num.toFixed(2)}`;
 
-  // Функция для получения первой буквы дня недели
+  // Function to get first letter of day of week
   const getDayLetter = (day: string): string => {
     const dayMap: Record<string, string> = {
       'Mon': 'M',
@@ -462,7 +462,7 @@ const ProposalSection: React.FC<ProposalSectionProps> = ({ onValidationChange })
     return dayMap[day] || day.charAt(0);
   };
 
-  // Рендер таблицы программ для станции
+  // Render programs table for station
   const renderProgramsTable = (stationId: string, allocatedBudget: number) => {
     const programs = stationPrograms[stationId] || [];
     const selections = programSelections[stationId] || {};
@@ -471,14 +471,14 @@ const ProposalSection: React.FC<ProposalSectionProps> = ({ onValidationChange })
     const totals = calculateStationTotals(stationId);
     const budgetExceeded = checkBudgetExceeded(stationId, allocatedBudget);
 
-    // Фильтрация по поиску и daypart
+    // Filter by search and daypart
     const filteredPrograms = programs.filter(program => {
       const matchesSearch = program.name.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesDaypart = !selectedDaypartFilter || program.daypart === selectedDaypartFilter;
       return matchesSearch && matchesDaypart;
     });
 
-    // Пагинация
+    // Pagination
     const currentPage = programPages[stationId] || 1;
     const totalPages = Math.ceil(filteredPrograms.length / PROGRAMS_PER_PAGE);
     const startIndex = (currentPage - 1) * PROGRAMS_PER_PAGE;
@@ -625,7 +625,7 @@ const ProposalSection: React.FC<ProposalSectionProps> = ({ onValidationChange })
           </Table.Tbody>
         </Table>
         
-        {/* Пагинация */}
+        {/* Pagination */}
         {totalPages > 1 && (
           <Group justify="space-between" align="center" mt="md">
             <Text size="xs" c="dimmed">
@@ -652,7 +652,7 @@ const ProposalSection: React.FC<ProposalSectionProps> = ({ onValidationChange })
     );
   };
 
-  // Рендер аккордеонов для станций
+  // Render accordions for stations
   const renderStationsAccordions = (marketId: string) => {
     const market = selectedMarketsWithStations.find(m => m.id === marketId);
     if (!market) return null;
@@ -742,7 +742,7 @@ const ProposalSection: React.FC<ProposalSectionProps> = ({ onValidationChange })
     );
   };
 
-  // Проверяем наличие broadcasters
+  // Check if broadcasters are selected
   const hasBroadcasters = selectedBroadcasters.length > 0;
   
   if (!hasBroadcasters) {
@@ -755,7 +755,7 @@ const ProposalSection: React.FC<ProposalSectionProps> = ({ onValidationChange })
 
   return (
     <div>
-      {/* Фильтры и контролы */}
+      {/* Filters and controls */}
       <Group justify="space-between" mb="lg">
         <Group gap="md">
           <TextInput
@@ -834,7 +834,7 @@ const ProposalSection: React.FC<ProposalSectionProps> = ({ onValidationChange })
         </Group>
       </Group>
 
-      {/* Табы для Markets */}
+      {/* Tabs for Markets */}
       {selectedMarketsWithStations.length === 0 ? (
         <div style={{ 
           marginTop: '24px',

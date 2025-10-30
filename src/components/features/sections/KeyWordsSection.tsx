@@ -23,29 +23,29 @@ const KeyWordsSection = ({ channel = 'search' }: KeyWordsSectionProps) => {
   const [showGenerator, setShowGenerator] = useState<boolean>(false);
   const [customKeyword, setCustomKeyword] = useState<string>('');
 
-  // Загружаем keywords из Redux при монтировании
+  // Load keywords from Redux on mount
   useEffect(() => {
     if (channel && channelData[channel]?.keywords) {
       setSelectedKeyWords(channelData[channel].keywords || []);
     }
   }, [channel, channelData]);
 
-  // Синхронизируем advertiser с Redux и обновляем данные
+  // Synchronize advertiser with Redux and update data
   useEffect(() => {
     if (advertiserFromRedux) {
       setAdvertiser(advertiserFromRedux);
       
-      // Получаем данные для конкретного advertiser
+      // Get data for specific advertiser
       const advertiserData = keywordsByAdvertiser[advertiserFromRedux];
       if (advertiserData) {
-        // Current Keywords пустые по умолчанию
+        // Current Keywords empty by default
         setGeneratedKeyWords(advertiserData.generatedKeywords);
         setCategory(advertiserData.defaultCategory);
       }
     }
   }, [advertiserFromRedux]);
 
-  // Сохраняем keywords в Redux при изменении
+  // Save keywords to Redux on change
   useEffect(() => {
     if (channel && selectedKeyWords.length >= 0) {
       dispatch(updateChannelSectionData({
@@ -76,7 +76,7 @@ const KeyWordsSection = ({ channel = 'search' }: KeyWordsSectionProps) => {
   };
 
   const handleAddToKeyWords = () => {
-    // Добавляем сгенерированные ключевые слова к основным
+    // Add generated keywords to main keywords
     const uniqueKeyWords = [...new Set([...selectedKeyWords, ...generatedKeyWords])];
     setSelectedKeyWords(uniqueKeyWords);
   };

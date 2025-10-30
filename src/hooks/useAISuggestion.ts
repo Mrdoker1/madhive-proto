@@ -10,9 +10,9 @@ interface UseAISuggestionResult {
 }
 
 /**
- * Hook для получения AI подсказок на основе контекста текущей страницы
- * Автоматически обновляет подсказки при изменении данных кампании
- * @param pageKey - Ключ страницы для определения промпта
+ * Hook for getting AI suggestions based on current page context
+ * Automatically updates suggestions when campaign data changes
+ * @param pageKey - Page key to determine the prompt
  */
 export const useAISuggestion = (pageKey: string): UseAISuggestionResult => {
   const [suggestion, setSuggestion] = useState<string>('');
@@ -21,25 +21,25 @@ export const useAISuggestion = (pageKey: string): UseAISuggestionResult => {
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const lastContextRef = useRef<string>('');
 
-  // Получаем весь state кампании из Redux
+  // Get entire campaign state from Redux
   const campaignState = useAppSelector((state) => state.campaign);
 
-  // Функция для извлечения значения по пути (например, "linearData.selectedMarkets")
+  // Function to extract value by path (e.g., "linearData.selectedMarkets")
   const getValueByPath = (obj: any, path: string): any => {
     return path.split('.').reduce((acc, part) => acc?.[part], obj);
   };
 
-  // Функция для формирования контекста из Redux state
+  // Function to build context from Redux state
   const buildContext = useCallback(() => {
     const promptConfig = getPromptForPage(pageKey);
     const context: any = {};
 
-    // Если нет указанных ключей, используем весь state
+    // If no keys specified, use entire state
     if (promptConfig.contextKeys.length === 0) {
       return campaignState;
     }
 
-    // Извлекаем только нужные данные из state
+    // Extract only needed data from state
     promptConfig.contextKeys.forEach(key => {
       const value = getValueByPath(campaignState, key);
       if (value !== undefined) {
@@ -54,20 +54,20 @@ export const useAISuggestion = (pageKey: string): UseAISuggestionResult => {
     return context;
   }, [pageKey, campaignState]);
 
-  // Функция для получения подсказки от AI
+  // Function to get suggestion from AI
   const fetchSuggestion = useCallback(async (forceRefresh = false) => {
     const promptConfig = getPromptForPage(pageKey);
     const context = buildContext();
 
-    // Сериализуем контекст для сравнения
+    // Serialize context for comparison
     const contextString = JSON.stringify(context);
 
-    // Если контекст не изменился и это не принудительное обновление, пропускаем запрос
+    // If context hasn't changed and not forced refresh, skip request
     if (!forceRefresh && contextString === lastContextRef.current) {
       return;
     }
 
-    // Если контекст пустой, показываем заглушку
+    // If context is empty, show placeholder
     if (Object.keys(context).length === 0) {
       setSuggestion('Configure your campaign settings to get AI-powered suggestions.');
       lastContextRef.current = contextString;
@@ -96,7 +96,7 @@ export const useAISuggestion = (pageKey: string): UseAISuggestionResult => {
 
       const data = await response.json();
       setSuggestion(data.suggestion);
-      lastContextRef.current = contextString; // Сохраняем последний контекст
+      lastContextRef.current = contextString; // Save last context
     } catch (err) {
       console.error('Failed to fetch AI suggestion:', err);
       setError(err instanceof Error ? err.message : 'Failed to get suggestion');
@@ -106,24 +106,24 @@ export const useAISuggestion = (pageKey: string): UseAISuggestionResult => {
     }
   }, [pageKey, buildContext]);
 
-  // Функция для debounced обновления подсказок
+  // Function for debounced suggestion updates
   const debouncedFetchSuggestion = useCallback(() => {
-    // Очищаем предыдущий таймер
+    // Clear previous timer
     if (debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current);
     }
 
-    // Устанавливаем новый таймер
+    // Set new timer
     debounceTimerRef.current = setTimeout(() => {
       fetchSuggestion(false);
-    }, 1500); // Ждем 1.5 секунды после последнего изменения
+    }, 1500); // Wait 1.5 seconds after last change
   }, [fetchSuggestion]);
 
-  // Отслеживаем изменения в state кампании и обновляем подсказки
+  // Track changes in campaign state and update suggestions
   useEffect(() => {
     debouncedFetchSuggestion();
 
-    // Очистка таймера при размонтировании
+    // Cleanup timer on unmount
     return () => {
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current);
@@ -131,9 +131,9 @@ export const useAISuggestion = (pageKey: string): UseAISuggestionResult => {
     };
   }, [campaignState, debouncedFetchSuggestion]);
 
-  // Функция для ручного обновления (без debounce)
+  // Function for manual refresh (without debounce)
   const refresh = useCallback(() => {
-    // Очищаем debounce таймер если есть
+    // Clear debounce timer if exists
     if (debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current);
     }

@@ -20,23 +20,23 @@ interface MarketRow {
   budget: number;
 }
 
-// Функция для расчета Impressions станции
+// Function to calculate station Impressions
 const calculateStationImpressions = (budget: number, cpm: string): number => {
   const cpmValue = parseFloat(cpm.replace('$', ''));
   if (budget === 0 || cpmValue === 0) return 0;
   return (budget / cpmValue) * 1000;
 };
 
-// Функция для расчета Impressions маркета
+// Function to calculate market Impressions
 const calculateMarketImpressions = (marketId: string, broadcastersWithStations: any[]): string => {
   if (!broadcastersWithStations || broadcastersWithStations.length === 0) return '#';
   
   let totalImpressions = 0;
   
-  // Проходим по всем broadcasters и их станциям
+  // Iterate through all broadcasters and their stations
   broadcastersWithStations.forEach(broadcaster => {
     broadcaster.stations.forEach((station: any) => {
-      // Если станция принадлежит этому маркету и выбрана
+      // If station belongs to this market and is selected
       if (station.marketId === marketId && station.selected && station.budget > 0) {
         totalImpressions += calculateStationImpressions(station.budget, station.cpm);
       }
@@ -45,21 +45,21 @@ const calculateMarketImpressions = (marketId: string, broadcastersWithStations: 
   
   if (totalImpressions === 0) return '#';
   
-  // Форматируем результат
+  // Format result
   return totalImpressions.toLocaleString('en-US', { maximumFractionDigits: 0 });
 };
 
-// Функция для расчета среднего CPM маркета
+// Function to calculate average market CPM
 const calculateMarketCPM = (marketId: string, broadcastersWithStations: any[]): string => {
   if (!broadcastersWithStations || broadcastersWithStations.length === 0) return '#';
   
   let totalCPM = 0;
   let stationCount = 0;
   
-  // Проходим по всем broadcasters и их станциям
+  // Iterate through all broadcasters and their stations
   broadcastersWithStations.forEach(broadcaster => {
     broadcaster.stations.forEach((station: any) => {
-      // Если станция принадлежит этому маркету и выбрана
+      // If station belongs to this market and is selected
       if (station.marketId === marketId && station.selected) {
         const cpmValue = parseFloat(station.cpm.replace('$', ''));
         totalCPM += cpmValue;
@@ -86,7 +86,7 @@ const MarketsSection = () => {
   const [previousValues, setPreviousValues] = useState<Record<string, number>>({});
   const [errorTooltips, setErrorTooltips] = useState<Record<string, boolean>>({});
 
-  // Инициализация markets
+  // Initialize markets
   useEffect(() => {
     const initialMarkets: MarketRow[] = marketsData.map(market => {
       const savedMarket = marketsReduxData.marketsDetails?.find(m => m.id === market.id);
@@ -106,7 +106,7 @@ const MarketsSection = () => {
     setMarkets(initialMarkets);
   }, []);
 
-  // Обновление бюджетов при изменении total budget
+  // Update budgets when total budget changes
   useEffect(() => {
     if (markets.length === 0) return;
 
@@ -127,7 +127,7 @@ const MarketsSection = () => {
     );
   }, [budgetData.totalBudget]);
   
-  // Функция для автоматического распределения бюджета
+  // Function for automatic budget redistribution
   const redistributeBudget = (updatedMarkets: MarketRow[]) => {
     const selectedMarkets = updatedMarkets.filter(m => m.selected);
     if (selectedMarkets.length === 0) {
@@ -157,7 +157,7 @@ const MarketsSection = () => {
     });
   };
 
-  // Сохранение в Redux
+  // Save to Redux
   useEffect(() => {
     const selectedMarketNames = markets.filter(m => m.selected).map(m => m.name);
     const marketsDetails = markets.filter(m => m.selected).map(market => ({
@@ -167,16 +167,16 @@ const MarketsSection = () => {
       selected: market.selected,
       percentage: market.percentage,
       budget: market.budget,
-      stations: [] // stations теперь управляются в BroadcastersAndProgramsSection
+      stations: [] // stations are now managed in BroadcastersAndProgramsSection
     }));
     
     dispatch(updateMarketsData({ selectedMarkets: selectedMarketNames, marketsDetails }));
     
-    // Обновляем Market Estimation
+    // Update Market Estimation
     const selectedMarkets = markets.filter(m => m.selected);
     
     if (selectedMarkets.length > 0) {
-      // Считаем total market size
+      // Calculate total market size
       const totalMarketSize = selectedMarkets.reduce((sum, market) => {
         return sum + market.marketSize;
       }, 0);
@@ -187,26 +187,26 @@ const MarketsSection = () => {
     }
   }, [markets, dispatch]);
 
-  // Автоматический выбор broadcasters при выборе маркетов
+  // Automatic selection of broadcasters when markets are selected
   useEffect(() => {
     const selectedMarketIds = markets.filter(m => m.selected).map(m => m.id);
     
     if (selectedMarketIds.length === 0) {
-      // Если не выбран ни один маркет, очищаем broadcasters
+      // If no markets selected, clear broadcasters
       dispatch(updateLinearData({ broadcasters: [] }));
       return;
     }
     
-    // Получаем всех доступных broadcasters для выбранных маркетов
+    // Get all available broadcasters for selected markets
     const broadcasterIds = getAvailableBroadcasters(selectedMarketIds);
     
-    // Конвертируем ID в названия
+    // Convert IDs to names
     const broadcasterNames = broadcasterIds
       .map(id => getBroadcasterById(id))
       .filter(Boolean)
       .map(b => b!.name);
     
-    // Автоматически выбираем всех доступных broadcasters
+    // Automatically select all available broadcasters
     dispatch(updateLinearData({ broadcasters: broadcasterNames }));
   }, [markets, dispatch]);
 
@@ -278,7 +278,7 @@ const MarketsSection = () => {
     return Number(value.toFixed(2)).toString();
   };
 
-  // Пагинация
+  // Pagination
   const perPage = parseInt(itemsPerPage);
   const totalPages = Math.ceil(markets.length / perPage);
   const displayedMarkets = useMemo(() => {

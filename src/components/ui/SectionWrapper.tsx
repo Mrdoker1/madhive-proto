@@ -19,7 +19,7 @@ const SectionWrapper: React.FC<SectionWrapperProps> = ({
 }) => {
   return (
     <section id={id} className={`scroll-mt-8 ${className}`}>
-      {/* Заголовок секции */}
+      {/* Section title */}
       <h2 
         style={{ 
           fontSize: '16px',
@@ -32,7 +32,7 @@ const SectionWrapper: React.FC<SectionWrapperProps> = ({
         {required && <span style={{ color: '#FA5252' }}> *</span>}
       </h2>
       
-      {/* Контейнер с контентом */}
+      {/* Content container */}
       <div 
         className="rounded-lg"
         style={{ 

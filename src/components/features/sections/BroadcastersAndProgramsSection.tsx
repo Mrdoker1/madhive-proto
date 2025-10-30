@@ -22,7 +22,7 @@ interface LocalBroadcasterWithStations {
   stations: StationWithData[];
 }
 
-// Функция для форматирования процентов (максимум 2 знака после запятой)
+// Function to format percentages (maximum 2 decimal places)
 const formatPercentage = (value: number): string => {
   return Number(value.toFixed(2)).toString();
 };
@@ -48,7 +48,7 @@ const BroadcastersAndProgramsSection = () => {
   const previousMarketBudgetsRef = useRef<string>('');
   const isInitialLoad = useRef<boolean>(true);
 
-  // Получаем доступных broadcasters на основе выбранных markets
+  // Get available broadcasters based on selected markets
   const availableBroadcasters = useMemo(() => {
     if (!marketsData.selectedMarkets || marketsData.selectedMarkets.length === 0) {
       return [];
@@ -68,7 +68,7 @@ const BroadcastersAndProgramsSection = () => {
       .map(b => b!.name);
   }, [marketsData.selectedMarkets, marketsData.marketsDetails]);
 
-  // Получаем stations на основе выбранных broadcasters и markets
+  // Get stations based on selected broadcasters and markets
   React.useEffect(() => {
     if (linearData.broadcasters.length === 0 || !marketsData.selectedMarkets || marketsData.selectedMarkets.length === 0) {
       setBroadcasterStations([]);
@@ -82,7 +82,7 @@ const BroadcastersAndProgramsSection = () => {
 
     const broadcastersWithStations: LocalBroadcasterWithStations[] = [];
     
-    // Получаем сохраненные данные из Redux только при начальной загрузке
+    // Get saved data from Redux only on initial load
     const savedBroadcastersWithStations = isInitialLoad.current 
       ? (linearData.broadcastersWithStations || [])
       : [];
@@ -93,21 +93,21 @@ const BroadcastersAndProgramsSection = () => {
 
       const stations: StationWithData[] = [];
       
-      // Находим сохраненные данные для этого broadcaster
+      // Find saved data for this broadcaster
       const savedBroadcaster = savedBroadcastersWithStations.find(b => b.id === broadcaster.id);
 
       selectedMarketIds.forEach(marketId => {
         const marketStations = getStationsByMarketAndBroadcaster(marketId, broadcaster.id);
         
         marketStations.forEach(station => {
-          // Ищем сохраненные данные для этой станции (только при начальной загрузке)
+          // Search for saved data for this station (only on initial load)
           const savedStation = isInitialLoad.current 
             ? savedBroadcaster?.stations.find(s => s.id === station.id)
             : undefined;
           
           stations.push({
             ...station,
-            // Автоматически выбираем все станции по умолчанию
+            // Automatically select all stations by default
             selected: savedStation?.selected !== undefined ? savedStation.selected : true,
             percentage: savedStation?.percentage || 0,
             budget: savedStation?.budget || 0
@@ -116,28 +116,28 @@ const BroadcastersAndProgramsSection = () => {
       });
 
       if (stations.length > 0) {
-        // Автоматически распределяем бюджет между выбранными станциями
+        // Automatically distribute budget among selected stations
         const selectedStations = stations.filter(s => s.selected);
         
         if (selectedStations.length > 0) {
-          // Считаем общий бюджет всех markets этого broadcaster
+          // Calculate total budget of all markets for this broadcaster
           const uniqueMarketIds = new Set(selectedStations.map(s => s.marketId));
           const totalBudgetAllMarkets = Array.from(uniqueMarketIds).reduce((sum, marketId) => {
             const market = marketsData.marketsDetails?.find(m => m.id === marketId);
             return sum + (market?.budget || 0);
           }, 0);
           
-          // Равномерно распределяем процент между всеми выбранными станциями
+          // Evenly distribute percentage among all selected stations
           const percentagePerStation = Math.round((100 / selectedStations.length) * 100) / 100;
           const budgetPerStation = (totalBudgetAllMarkets * percentagePerStation) / 100;
           
-          // Обновляем все станции с бюджетом
+          // Update all stations with budget
           const finalStations = stations.map(station => {
             if (!station.selected) {
               return { ...station, percentage: 0, budget: 0 };
             }
             
-            // Если есть сохраненные данные при начальной загрузке, используем их
+            // If there's saved data on initial load, use it
             if (isInitialLoad.current && station.percentage > 0) {
               return station;
             }
@@ -166,7 +166,7 @@ const BroadcastersAndProgramsSection = () => {
 
     setBroadcasterStations(broadcastersWithStations);
     
-    // Автоматически раскрываем все broadcasters, чтобы показать выбранные станции
+    // Automatically expand all broadcasters to show selected stations
     const broadcasterIds = broadcastersWithStations.map(b => b.id);
     setExpandedBroadcasters(new Set(broadcasterIds));
     
@@ -174,7 +174,7 @@ const BroadcastersAndProgramsSection = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [linearData.broadcasters, marketsData.selectedMarkets, marketsData.marketsDetails]);
 
-  // Сохранение broadcasterStations в Redux
+  // Save broadcasterStations to Redux
   useEffect(() => {
     if (broadcasterStations.length === 0) {
       return;
@@ -200,22 +200,22 @@ const BroadcastersAndProgramsSection = () => {
     dispatch(updateLinearData({ broadcastersWithStations: broadcastersWithStationsData }));
   }, [broadcasterStations, dispatch]);
 
-  // Автоматический пересчет бюджетов станций при изменении бюджетов markets
+  // Automatic recalculation of station budgets when market budgets change
   useEffect(() => {
-    // Создаем строку из всех бюджетов markets для сравнения
+    // Create string from all market budgets for comparison
     const currentMarketBudgets = (marketsData.marketsDetails || [])
       .map(m => `${m.id}:${m.budget}`)
       .sort()
       .join('|');
     
-    // Если бюджеты не изменились, не пересчитываем
+    // If budgets haven't changed, don't recalculate
     if (previousMarketBudgetsRef.current === currentMarketBudgets) {
       return;
     }
     
     previousMarketBudgetsRef.current = currentMarketBudgets;
     
-    // Используем функциональное обновление чтобы получить актуальные значения
+    // Use functional update to get actual values
     setBroadcasterStations(prev => {
       if (prev.length === 0) return prev;
       
@@ -228,7 +228,7 @@ const BroadcastersAndProgramsSection = () => {
           return broadcaster;
         }
         
-        // Считаем общий бюджет всех markets этого broadcaster
+        // Calculate total budget of all markets for this broadcaster
         const uniqueMarketIds = new Set(selectedStations.map(s => s.marketId));
         const totalBudgetAllMarkets = Array.from(uniqueMarketIds).reduce((sum, marketId) => {
           const market = marketsData.marketsDetails?.find(m => m.id === marketId);
@@ -240,10 +240,10 @@ const BroadcastersAndProgramsSection = () => {
             return station;
           }
           
-          // Пересчитываем бюджет станции на основе её процента и общего бюджета
+          // Recalculate station budget based on its percentage and total budget
           const stationBudget = (totalBudgetAllMarkets * station.percentage) / 100;
           
-          // Проверяем, изменился ли бюджет
+          // Check if budget has changed
           if (Math.abs(station.budget - stationBudget) > 0.01) {
             hasChanges = true;
           }
@@ -260,7 +260,7 @@ const BroadcastersAndProgramsSection = () => {
         };
       });
       
-      // Возвращаем обновленные данные только если есть изменения
+      // Return updated data only if there are changes
       return hasChanges ? updatedBroadcasters : prev;
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -291,27 +291,27 @@ const BroadcastersAndProgramsSection = () => {
   const handleStationSelect = (broadcasterId: string, stationId: string, checked: boolean) => {
     setBroadcasterStations(prev => prev.map(broadcaster => {
       if (broadcaster.id === broadcasterId) {
-        // Обновляем выбор станции
+        // Update station selection
         const updatedStations = broadcaster.stations.map(station => 
           station.id === stationId ? { ...station, selected: checked } : station
         );
         
-        // Автоматически распределяем бюджет между выбранными станциями
+        // Automatically distribute budget among selected stations
         const selectedStations = updatedStations.filter(s => s.selected);
         
         if (selectedStations.length > 0) {
-          // Считаем общий бюджет всех markets этого broadcaster
+          // Calculate total budget of all markets for this broadcaster
           const uniqueMarketIds = new Set(selectedStations.map(s => s.marketId));
           const totalBudgetAllMarkets = Array.from(uniqueMarketIds).reduce((sum, marketId) => {
             const market = marketsData.marketsDetails?.find(m => m.id === marketId);
             return sum + (market?.budget || 0);
           }, 0);
           
-          // Равномерно распределяем процент между всеми выбранными станциями
+          // Evenly distribute percentage among all selected stations
           const percentagePerStation = Math.round((100 / selectedStations.length) * 100) / 100;
           const budgetPerStation = (totalBudgetAllMarkets * percentagePerStation) / 100;
           
-          // Обновляем все станции
+          // Update all stations
           const finalStations = updatedStations.map(station => {
             if (!station.selected) {
               return { ...station, percentage: 0, budget: 0 };
@@ -329,7 +329,7 @@ const BroadcastersAndProgramsSection = () => {
             stations: finalStations
           };
         } else {
-          // Если ничего не выбрано, сбрасываем все к 0
+          // If nothing is selected, reset everything to 0
           return {
             ...broadcaster,
             stations: updatedStations.map(s => ({ ...s, percentage: 0, budget: 0 }))
@@ -343,43 +343,43 @@ const BroadcastersAndProgramsSection = () => {
   const handleSelectAllStations = (broadcasterId: string, checked: boolean) => {
     setBroadcasterStations(prev => prev.map(broadcaster => {
       if (broadcaster.id === broadcasterId) {
-        // Получаем ID выбранных markets
+        // Get selected market IDs
         const selectedMarketIds = marketsData.marketsDetails
           ?.filter(m => m.selected)
           .map(m => m.id) || [];
         
-        // Обновляем выбор ТОЛЬКО для станций из выбранных markets
+        // Update selection ONLY for stations from selected markets
         const updatedStations = broadcaster.stations.map(station => {
-          // Если станция из выбранного market, обновляем её selected
+          // If station is from selected market, update its selected status
           if (selectedMarketIds.includes(station.marketId)) {
             return { ...station, selected: checked };
           }
-          // Иначе оставляем как есть
+          // Otherwise leave as is
           return station;
         });
         
         if (checked) {
-          // Фильтруем только выбранные станции из выбранных markets
+          // Filter only selected stations from selected markets
           const selectedVisibleStations = updatedStations.filter(
             s => s.selected && selectedMarketIds.includes(s.marketId)
           );
           
-          // Считаем общий бюджет всех markets этого broadcaster
+          // Calculate total budget of all markets for this broadcaster
           const uniqueMarketIds = new Set(selectedVisibleStations.map(s => s.marketId));
           const totalBudgetAllMarkets = Array.from(uniqueMarketIds).reduce((sum, marketId) => {
             const market = marketsData.marketsDetails?.find(m => m.id === marketId);
             return sum + (market?.budget || 0);
           }, 0);
           
-          // Равномерно распределяем процент между выбранными видимыми станциями
+          // Evenly distribute percentage among selected visible stations
           const percentagePerStation = selectedVisibleStations.length > 0
             ? Math.round((100 / selectedVisibleStations.length) * 100) / 100
             : 0;
           const budgetPerStation = (totalBudgetAllMarkets * percentagePerStation) / 100;
           
-          // Обновляем все станции
+          // Update all stations
           const finalStations = updatedStations.map(station => {
-            // Если станция выбрана и из выбранного market
+            // If station is selected and from selected market
             if (station.selected && selectedMarketIds.includes(station.marketId)) {
               return {
                 ...station,
@@ -395,7 +395,7 @@ const BroadcastersAndProgramsSection = () => {
             stations: finalStations
           };
         } else {
-          // Если снимаем выбор, сбрасываем бюджеты ТОЛЬКО для станций из выбранных markets
+          // If unchecking, reset budgets ONLY for stations from selected markets
           const finalStations = updatedStations.map(s => {
             if (selectedMarketIds.includes(s.marketId) && !s.selected) {
               return { ...s, percentage: 0, budget: 0 };
@@ -420,7 +420,7 @@ const BroadcastersAndProgramsSection = () => {
       if (broadcaster.id === broadcasterId) {
         const selectedStations = broadcaster.stations.filter(s => s.selected);
         
-        // Считаем общий бюджет всех markets этого broadcaster
+        // Calculate total budget of all markets for this broadcaster
         const uniqueMarketIds = new Set(selectedStations.map(s => s.marketId));
         const totalBudgetAllMarkets = Array.from(uniqueMarketIds).reduce((sum, marketId) => {
           const market = marketsData.marketsDetails?.find(m => m.id === marketId);
@@ -431,7 +431,7 @@ const BroadcastersAndProgramsSection = () => {
           ...broadcaster,
           stations: broadcaster.stations.map(station => {
             if (station.id === stationId) {
-              // Бюджет станции = процент от общего бюджета всех markets
+              // Station budget = percentage of total budget of all markets
               const stationBudget = (totalBudgetAllMarkets * numericValue) / 100;
               return { ...station, percentage: numericValue, budget: stationBudget };
             }
@@ -457,7 +457,7 @@ const BroadcastersAndProgramsSection = () => {
     
     if (!currentStation || !broadcaster) return;
 
-    // Рассчитываем общий процент ВСЕХ выбранных станций broadcaster
+    // Calculate total percentage of ALL selected stations of broadcaster
     const selectedStations = broadcaster.stations.filter(s => s.selected);
     
     const otherStationsTotal = selectedStations.reduce((total, station) => {
@@ -492,7 +492,7 @@ const BroadcastersAndProgramsSection = () => {
 
   return (
     <div>
-      {/* Уведомление о необходимости выбрать markets */}
+      {/* Notification about need to select markets */}
       <AnimatePresence>
         {(!marketsData.selectedMarkets || marketsData.selectedMarkets.length === 0) && (
           <InfoNotification 
@@ -502,7 +502,7 @@ const BroadcastersAndProgramsSection = () => {
         )}
       </AnimatePresence>
 
-      {/* Multiselect для выбора broadcasters */}
+      {/* Multiselect for broadcaster selection */}
       <MultiSelect
         label="Broadcasters"
         placeholder="Select Broadcasters"
@@ -515,7 +515,7 @@ const BroadcastersAndProgramsSection = () => {
         disabled={availableBroadcasters.length === 0}
       />
 
-      {/* Кнопки управления */}
+      {/* Control buttons */}
       <Group justify="flex-end" gap="4px" mb="lg">
         <Button 
           variant="outline" 
@@ -529,9 +529,9 @@ const BroadcastersAndProgramsSection = () => {
         </Button>
       </Group>
 
-      {/* Детальные таблицы для каждого broadcaster */}
+      {/* Detail tables for each broadcaster */}
       {broadcasterStations.map((broadcaster) => {
-        // Фильтруем только станции из выбранных markets
+        // Filter only stations from selected markets
         const selectedMarketIds = marketsData.marketsDetails
           ?.filter(m => m.selected)
           .map(m => m.id) || [];
@@ -546,14 +546,14 @@ const BroadcastersAndProgramsSection = () => {
         const someStationsSelected = visibleStations.some(station => station.selected);
         const isExpanded = expandedBroadcasters.has(broadcaster.id);
 
-        // Не показываем broadcaster если нет видимых станций
+        // Don't show broadcaster if there are no visible stations
         if (visibleStations.length === 0) {
           return null;
         }
 
         return (
           <div key={broadcaster.id} style={{ marginTop: '24px' }}>
-            {/* Header с информацией о broadcaster и кнопкой коллапса */}
+            {/* Header with broadcaster info and collapse button */}
             <div 
               style={{ 
                 display: 'flex', 
@@ -586,11 +586,11 @@ const BroadcastersAndProgramsSection = () => {
               </div>
             </div>
 
-            {/* Детальная таблица */}
+            {/* Detail table */}
             <Collapse in={isExpanded}>
               <Table>
                 <Table.Tbody>
-                  {/* Header row для детальной таблицы */}
+                  {/* Header row for detail table */}
                   <Table.Tr style={{ height: '48px' }}>
                     <Table.Th style={{ width: '40px', textAlign: 'center' }}>
                       <Checkbox
@@ -684,7 +684,7 @@ const BroadcastersAndProgramsSection = () => {
         );
       })}
 
-      {/* Сообщение когда broadcasters выбраны но нет stations */}
+      {/* Message when broadcasters are selected but there are no stations */}
       {linearData.broadcasters.length > 0 && broadcasterStations.length === 0 && (
         <Text size="sm" c="dimmed" mt="md">
           No stations available for selected broadcasters and markets

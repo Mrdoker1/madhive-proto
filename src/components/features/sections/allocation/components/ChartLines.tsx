@@ -28,7 +28,7 @@ export const ChartLines: React.FC<ChartLinesProps> = ({
   return (
     <>
       {points.map((point, index) => {
-        // Создаем статическую кривую по формуле для каждого канала
+        // Create static curve by formula for each channel
         const pathData = createStaticCurvePath(
           point.id,
           maxBudget,

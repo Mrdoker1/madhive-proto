@@ -5,17 +5,17 @@ export interface MarketInfo {
   name: string;
   displayName: string;
   rank: number;
-  marketSize: number; // размер аудитории
+  marketSize: number; // audience size
 }
 
-// Генерируем markets на основе уникальных DMA из новых station files
+// Generate markets based on unique DMAs from new station files
 const uniqueDMAs = getAllUniqueDMAs();
 
 export const marketsData: MarketInfo[] = uniqueDMAs.map((dma, index) => {
-  // Создаем ID из DMA
+  // Create ID from DMA
   const id = dma.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
   
-  // Используем полное название DMA для name и displayName, чтобы избежать дубликатов
+  // Use full DMA name for name and displayName to avoid duplicates
   const name = dma;
   const displayName = dma;
   
@@ -24,11 +24,11 @@ export const marketsData: MarketInfo[] = uniqueDMAs.map((dma, index) => {
     name,
     displayName: `${displayName} (${index + 1})`,
     rank: index + 1,
-    marketSize: Math.floor(Math.random() * 5000000) + 1000000 // От 1M до 6M
+    marketSize: Math.floor(Math.random() * 5000000) + 1000000 // From 1M to 6M
   };
 });
 
-// Функции для получения данных
+// Functions to get data
 export const getMarketById = (id: string): MarketInfo | undefined => {
   return marketsData.find(market => market.id === id);
 };
@@ -38,6 +38,6 @@ export const getMarketByName = (name: string): MarketInfo | undefined => {
 };
 
 export const getMarketsByRegion = (region: string): MarketInfo[] => {
-  // Простая фильтрация по region (можно расширить позже)
+  // Simple filtering by region (can be expanded later)
   return marketsData.filter(market => market.displayName.includes(region));
 };

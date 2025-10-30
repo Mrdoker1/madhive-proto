@@ -21,11 +21,11 @@ const MarketsFilter: React.FC<MarketsFilterProps> = ({
   selectedMarkets,
   onMarketsChange
 }) => {
-  // Формируем данные для MultiSelect (memoized)
+  // Form data for MultiSelect (memoized)
   const marketOptions = useMemo(() => 
     availableMarkets.map(market => ({
       value: market.name,
-      label: market.name // Используем name вместо displayName для удаления цифр
+      label: market.name // Use name instead of displayName to remove numbers
     })), [availableMarkets]
   );
 

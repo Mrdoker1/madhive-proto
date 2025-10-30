@@ -2,13 +2,13 @@ import { SLIDER_CONFIG } from './constants';
 import { calculateReachByFormula, CHANNEL_CONFIGS } from '../../channelConfig';
 
 /**
- * Мок функция для получения метрик прогнозирования (синхронизировано с новой формулой)
+ * Mock function to get forecast metrics (synchronized with new formula)
  */
 export async function fetchForecastMetrics(channelId: string, budget: number, totalBudget: number = 390000) {
-  // Имитируем API вызов
+  // Simulate API call
   await new Promise(resolve => setTimeout(resolve, SLIDER_CONFIG.API_DELAY));
   
-  // Используем новую формулу из channelConfig.ts
+  // Use new formula from channelConfig.ts
   const calculatedReach = calculateReachByFormula(channelId, budget, totalBudget);
   const config = CHANNEL_CONFIGS[channelId];
   
@@ -19,21 +19,21 @@ export async function fetchForecastMetrics(channelId: string, budget: number, to
     };
   }
   
-  // Max Reach = максимально достижимый reach если потратить весь totalBudget на этот канал
+  // Max Reach = maximum achievable reach if spending all totalBudget on this channel
   const maxPossibleReach = calculateReachByFormula(channelId, totalBudget, totalBudget);
   
-  // Reach% = процент бюджета канала от общего бюджета (позиция слайдера)
+  // Reach% = percentage of channel budget from total budget (slider position)
   const reachPercent = totalBudget > 0 ? Math.round((budget / totalBudget) * 100) : 0;
   
   
   return {
-    maxReach: Math.round(maxPossibleReach), // Максимально достижимый reach при полном бюджете
+    maxReach: Math.round(maxPossibleReach), // Maximum achievable reach with full budget
     reachPercent: Math.min(99, Math.max(1, reachPercent))
   };
 }
 
 /**
- * Проверяет, является ли канал неэффективным
+ * Checks if the channel is inefficient
  */
 export function isChannelInefficient(
   budget: number, 
@@ -44,14 +44,14 @@ export function isChannelInefficient(
 }
 
 /**
- * Форматирует число как валюту
+ * Formats number as currency
  */
 export function formatCurrency(value: number): string {
   return value.toLocaleString('en-US');
 }
 
 /**
- * Парсит значение из строки в число
+ * Parses value from string to number
  */
 export function parseNumericValue(value: string): number {
   return Number(value.replace(/[^0-9]/g, '')) || 0;

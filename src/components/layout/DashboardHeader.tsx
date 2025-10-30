@@ -12,13 +12,13 @@ const DashboardHeader: React.FC = () => {
   const dispatch = useAppDispatch();
 
   const handleNewLinearCampaign = () => {
-    // Сбрасываем данные формы перед созданием новой кампании
+    // Reset form data before creating new campaign
     dispatch(resetCampaign());
     router.push('/campaign/linear/new');
   };
 
   const handleNewOmnichannelCampaign = () => {
-    // Сбрасываем данные формы перед созданием новой кампании
+    // Reset form data before creating new campaign
     dispatch(resetCampaign());
     router.push('/campaign/omnichannel/new');
   };

@@ -16,8 +16,8 @@ const AudiencesSection = ({ channel, isFirstChannel = true }: AudiencesSectionPr
   const linearAudienceData = useAppSelector((state) => state.campaign.audience);
   const budgetAllocation = useAppSelector((state) => state.campaign.channels.budgetAllocation);
   
-  // Если это omnichannel кампания и есть канал, используем данные для конкретного канала
-  // В режиме carry over используем данные первого канала для всех
+  // If this is an omnichannel campaign and there's a channel, use data for specific channel
+  // In carry over mode, use first channel's data for all
   const audienceData = channel 
     ? (channelData[channel]?.audience || { gender: [], age: [], income: [], education: [], householdSize: [] })
     : linearAudienceData;
@@ -28,14 +28,14 @@ const AudiencesSection = ({ channel, isFirstChannel = true }: AudiencesSectionPr
       ? [...currentValues, value]
       : currentValues.filter(item => item !== value);
     
-    // Если это omnichannel и мы НЕ на первой вкладке, отключаем carry over режим
+    // If this is omnichannel and we're NOT on first tab, disable carry over mode
     if (channel && !isFirstChannel && carryOverMode) {
       dispatch(setCarryOverMode(false));
     }
     
-    // Обновляем данные
+    // Update data
     if (channel) {
-      // Omnichannel: обновляем данные для конкретного канала
+      // Omnichannel: update data for specific channel
       const updatedAudienceData = { ...audienceData, [category]: newValues };
       
       dispatch(updateChannelSectionData({
@@ -44,7 +44,7 @@ const AudiencesSection = ({ channel, isFirstChannel = true }: AudiencesSectionPr
         data: { [category]: newValues }
       }));
       
-      // Пересчитываем estimations для канала
+      // Recalculate estimations for channel
       const interests = channelData[channel]?.interests || [];
       const geoData = channelData[channel]?.geo || { selectedZipCodes: [] };
       const channelBudget = budgetAllocation?.[channel] || 0;
@@ -58,7 +58,7 @@ const AudiencesSection = ({ channel, isFirstChannel = true }: AudiencesSectionPr
         marketEstimation
       }));
       
-      // Если carry over режим активен, копируем данные на все каналы
+      // If carry over mode is active, copy data to all channels
       if (carryOverMode && isFirstChannel) {
         const allChannels = Object.keys(channelData);
         allChannels.forEach(ch => {
@@ -69,7 +69,7 @@ const AudiencesSection = ({ channel, isFirstChannel = true }: AudiencesSectionPr
               data: { [category]: newValues }
             }));
             
-            // Обновляем estimations для других каналов тоже
+            // Update estimations for other channels too
             const chInterests = channelData[ch]?.interests || [];
             const chGeoData = channelData[ch]?.geo || { selectedZipCodes: [] };
             const chChannelBudget = budgetAllocation?.[ch] || 0;
@@ -85,7 +85,7 @@ const AudiencesSection = ({ channel, isFirstChannel = true }: AudiencesSectionPr
         });
       }
     } else {
-      // Linear: используем старую логику
+      // Linear: use old logic
       dispatch(updateAudienceData({ [category]: newValues }));
     }
   };

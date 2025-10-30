@@ -18,10 +18,10 @@ const GoalSection: React.FC<GoalSectionProps> = ({
   const [goal, setGoal] = useState('');
   const [selectedObjective, setSelectedObjective] = useState<string | null>(null);
 
-  // Синхронизируем локальное состояние с глобальным при загрузке
+  // Synchronize local state with global on load
   useEffect(() => {
     setSelectedObjective(globalGoalData.goalType || null);
-    setGoal(globalGoalData.goalMetric || ''); // используем goalMetric для текстового описания
+    setGoal(globalGoalData.goalMetric || ''); // use goalMetric for text description
   }, [globalGoalData]);
 
   const campaignObjectives = [

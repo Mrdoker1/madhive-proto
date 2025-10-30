@@ -19,7 +19,7 @@ export default function CampaignList({ items, sortField, sortDirection, onSort }
   const nameColWidth = 220; // px
   const statusColWidth = 160; // px
 
-  // Компонент для индикатора сортировки
+  // Component for sort indicator
   const SortIndicator = ({ field }: { field: SortField }) => {
     if (sortField !== field) return null;
     return sortDirection === 'asc' 
@@ -27,7 +27,7 @@ export default function CampaignList({ items, sortField, sortDirection, onSort }
       : <IconChevronDown size={14} style={{ marginLeft: '4px', display: 'inline' }} />;
   };
 
-  // Функция для создания кликабельного заголовка
+  // Function to create clickable header
   const SortableHeader = ({ field, children, style }: { field: SortField; children: React.ReactNode; style?: React.CSSProperties }) => {
     return (
       <div 
@@ -92,7 +92,7 @@ export default function CampaignList({ items, sortField, sortDirection, onSort }
         </div>
       </div>
 
-      {/* Left cover больше не нужен — фон и высокий z-index на sticky колонках */}
+      {/* Left cover no longer needed — background and high z-index on sticky columns */}
 
       {/* Items */}
       {items.map((c) => (

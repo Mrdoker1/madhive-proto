@@ -10,7 +10,7 @@ const CampaignTable: React.FC = () => {
   const [pageSize, setPageSize] = useState<number>(10);
   const [currentPage, setCurrentPage] = useState<number>(1);
 
-  // Фильтруем данные на основе выбранных фильтров
+  // Filter data based on selected filters
   const filteredData = useMemo(() => {
     let data = campaignTableData;
     
@@ -25,7 +25,7 @@ const CampaignTable: React.FC = () => {
     return data;
   }, [advertiser, campaign]);
 
-  // Вычисляем данные для текущей страницы
+  // Calculate data for current page
   const totalItems = filteredData.length;
   const totalPages = Math.ceil(totalItems / pageSize);
   const startIdx = (currentPage - 1) * pageSize;
@@ -35,12 +35,12 @@ const CampaignTable: React.FC = () => {
     [filteredData, startIdx, endIdx]
   );
 
-  // Сбрасываем на первую страницу при изменении фильтров
+  // Reset to first page when filters change
   React.useEffect(() => {
     setCurrentPage(1);
   }, [advertiser, campaign]);
 
-  // Форматирование чисел с запятыми
+  // Format numbers with commas
   const formatNumber = (num: number): string => {
     return num.toLocaleString('en-US');
   };

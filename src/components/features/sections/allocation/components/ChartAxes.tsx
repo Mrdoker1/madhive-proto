@@ -42,10 +42,10 @@ export const ChartAxes: React.FC<ChartAxesProps> = ({
       
       {/* Y Axis labels */}
       {(() => {
-        // Используем тот же масштаб reach что и в channelConfig.ts
+        // Use the same reach scale as in channelConfig.ts
         const maxReach = BASE_REACH_SCALE;
         const maxReachK = Math.ceil(maxReach / 1000);
-        const stepSize = Math.max(2, Math.ceil(maxReachK / 8)); // 8-9 шагов максимум
+        const stepSize = Math.max(2, Math.ceil(maxReachK / 8)); // 8-9 steps maximum
         const steps = [];
         for (let i = 0; i <= maxReachK; i += stepSize) {
           steps.push(i);

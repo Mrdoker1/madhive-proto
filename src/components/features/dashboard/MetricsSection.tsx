@@ -70,9 +70,9 @@ const MetricCard: React.FC<MetricCardProps> = ({
 const MetricsSection: React.FC = () => {
   const { advertiser, campaign } = useDashboardFilters();
 
-  // Вычисляем суммарные метрики из данных кампаний с учетом фильтров
+  // Calculate total metrics from campaign data considering filters
   const metricsData = useMemo(() => {
-    // Фильтруем данные на основе выбранных фильтров
+    // Filter data based on selected filters
     let filteredData = campaignTableData;
     
     if (advertiser) {
@@ -83,7 +83,7 @@ const MetricsSection: React.FC = () => {
       filteredData = filteredData.filter(row => row.id === campaign);
     }
 
-    // Если нет данных после фильтрации, возвращаем пустые значения
+    // If no data after filtering, return empty values
     if (filteredData.length === 0) {
       return [
         { title: 'Impressions', value: '0', data: [], color: '#8B5CF6' },
@@ -100,7 +100,7 @@ const MetricsSection: React.FC = () => {
     const totalUniqueReach = filteredData.reduce((sum, row) => sum + row.uniqueReach, 0);
     const avgFrequency = filteredData.reduce((sum, row) => sum + row.frequency, 0) / filteredData.length;
 
-    // Суммируем тренды по отфильтрованным кампаниям
+    // Sum trends across filtered campaigns
     const sumTrends = (trendKey: 'impressionsTrend' | 'reachTrend' | 'frequencyTrend' | 'incrementalReachTrend' | 'uniqueReachTrend') => {
       const maxLength = Math.max(...filteredData.map(row => row[trendKey].length));
       const summedTrend: number[] = [];

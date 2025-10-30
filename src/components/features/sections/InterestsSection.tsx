@@ -16,13 +16,13 @@ const InterestsSection = ({ channel, isFirstChannel = false }: InterestsSectionP
   const dispatch = useAppDispatch();
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
 
-  // Получаем данные из Redux для конкретного канала
+  // Get data from Redux for specific channel
   const channelData = useAppSelector((state) => state.campaign.omnichannel.channelData);
   const carryOverMode = useAppSelector((state) => state.campaign.omnichannel.carryOverMode);
-  const budgetAllocation = useAppSelector((state) => state.campaign.channels.budgetAllocation); // ✅ channels, не budget!
+  const budgetAllocation = useAppSelector((state) => state.campaign.channels.budgetAllocation); // ✅ channels, not budget!
   const selectedChannels = useAppSelector((state) => state.campaign.channels.selectedChannels);
   
-  // Убедимся что selectedInterests всегда массив
+  // Ensure selectedInterests is always an array
   const rawInterests = channelData[channel]?.interests;
   const selectedInterests = Array.isArray(rawInterests) ? rawInterests : [];
 
@@ -31,19 +31,19 @@ const InterestsSection = ({ channel, isFirstChannel = false }: InterestsSectionP
       ? [...selectedInterests, interest]
       : selectedInterests.filter(i => i !== interest);
 
-    // Если это не первый канал и carry over активен, отключаем его
+    // If this is not the first channel and carry over is active, disable it
     if (!isFirstChannel && carryOverMode) {
       dispatch(setCarryOverMode(false));
     }
 
-    // Обновляем данные для текущего канала
+    // Update data for current channel
     dispatch(updateChannelSectionData({
       channel,
       section: 'interests',
       data: newInterests
     }));
 
-    // Пересчитываем estimations для канала
+    // Recalculate estimations for channel
     const audienceData = channelData[channel]?.audience || {
       gender: [], age: [], income: [], education: [], householdSize: []
     };
@@ -59,7 +59,7 @@ const InterestsSection = ({ channel, isFirstChannel = false }: InterestsSectionP
       marketEstimation
     }));
 
-    // Если carry over активен и это первый канал, распространяем изменения на все каналы
+    // If carry over is active and this is the first channel, propagate changes to all channels
     if (carryOverMode && isFirstChannel) {
       selectedChannels.forEach((ch) => {
         if (ch !== channel) {
@@ -69,7 +69,7 @@ const InterestsSection = ({ channel, isFirstChannel = false }: InterestsSectionP
             data: newInterests
           }));
 
-          // Пересчитываем estimations для других каналов
+          // Recalculate estimations for other channels
           const otherChannelAudience = channelData[ch]?.audience || {
             gender: [], age: [], income: [], education: [], householdSize: []
           };
@@ -117,7 +117,7 @@ const InterestsSection = ({ channel, isFirstChannel = false }: InterestsSectionP
 
   return (
     <div style={{ display: 'flex', gap: '32px' }}>
-      {/* Левая часть - категории с чекбоксами */}
+      {/* Left side - categories with checkboxes */}
       <div style={{ flex: 1 }}>
         <Grid gutter="xl">
           {interestCategories.map((category) => (
@@ -163,7 +163,7 @@ const InterestsSection = ({ channel, isFirstChannel = false }: InterestsSectionP
         </Grid>
       </div>
 
-      {/* Правая часть - выбранные интересы */}
+      {/* Right side - selected interests */}
       <div 
         style={{ 
           width: '320px',

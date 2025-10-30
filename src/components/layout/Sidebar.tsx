@@ -24,7 +24,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   const pathname = usePathname();
 
-  // Базовые элементы сайдбара
+  // Default sidebar items
   const defaultItems: SidebarItem[] = [
     {
       id: 'dashboard',
@@ -40,14 +40,14 @@ const Sidebar: React.FC<SidebarProps> = ({
     }
   ];
 
-  // Объединяем базовые элементы с переданными
+  // Combine default items with provided items
   const allItems = [...defaultItems, ...items];
 
   const handleItemClick = (itemId: string) => {
     onItemClick?.(itemId);
   };
 
-  // Определяем активный элемент на основе текущего пути
+  // Determine active item based on current path
   const isItemActive = (item: SidebarItem) => {
     if (!item.href) return false;
     return pathname === item.href || pathname?.startsWith(item.href + '/');
@@ -62,14 +62,14 @@ const Sidebar: React.FC<SidebarProps> = ({
         borderRightColor: 'var(--border-color)'
       }}
     >
-      {/* Элементы меню */}
+      {/* Menu items */}
       <div className="flex flex-col">
         {allItems.map((item) => {
           const isActive = isItemActive(item);
           
           const itemContent = (
             <>
-              {/* Левая линия для активного элемента */}
+              {/* Left line for active item */}
               {isActive && (
                 <div
                   className="absolute top-1/2 transform -translate-y-1/2"

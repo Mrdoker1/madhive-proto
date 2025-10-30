@@ -19,7 +19,7 @@ const DashboardFilters: React.FC = () => {
     resetFilters
   } = useDashboardFilters();
 
-  // Получаем уникальных advertisers из данных
+  // Get unique advertisers from data
   const advertiserOptions = useMemo(() => {
     const uniqueAdvertisers = Array.from(new Set(campaignTableData.map(row => row.advertiser)));
     return uniqueAdvertisers.map(adv => ({
@@ -28,7 +28,7 @@ const DashboardFilters: React.FC = () => {
     }));
   }, []);
 
-  // Получаем кампании для выбранного advertiser
+  // Get campaigns for selected advertiser
   const campaignOptions = useMemo(() => {
     if (!advertiser) return [];
     const filteredCampaigns = campaignTableData.filter(row => row.advertiser === advertiser);
@@ -122,7 +122,7 @@ const DashboardFilters: React.FC = () => {
         value={advertiser}
         onChange={(value) => {
           setAdvertiser(value);
-          // Сбросить campaign при смене advertiser
+          // Reset campaign when advertiser changes
           if (value !== advertiser) {
             setCampaign(null);
           }

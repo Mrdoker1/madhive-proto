@@ -10,7 +10,7 @@ const MapSettingsSection: React.FC = () => {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
 
-  // Загрузка текущего API ключа
+  // Load current API key
   useEffect(() => {
     fetchSettings();
   }, []);

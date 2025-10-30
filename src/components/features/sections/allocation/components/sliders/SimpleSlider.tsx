@@ -8,7 +8,7 @@ export const SimpleSlider: React.FC<SimpleSliderProps> = ({ value, max, step = 1
   const [isDragging, setIsDragging] = useState(false);
   const sliderRef = useRef<HTMLDivElement>(null);
   
-  // Синхронизируем с внешним value когда не перетаскиваем
+  // Synchronize with external value when not dragging
   useEffect(() => {
     if (!isDragging) {
       setLocalValue(value);
@@ -33,7 +33,7 @@ export const SimpleSlider: React.FC<SimpleSliderProps> = ({ value, max, step = 1
     e.stopPropagation();
     setIsDragging(true);
     
-    let currentDragValue = localValue; // Отслеживаем актуальное значение
+    let currentDragValue = localValue; // Track current value
     
     const handleMouseMove = (e: MouseEvent) => {
       if (!sliderRef.current) return;
@@ -43,13 +43,13 @@ export const SimpleSlider: React.FC<SimpleSliderProps> = ({ value, max, step = 1
       const newPercent = Math.max(0, Math.min(100, (x / rect.width) * 100));
       const newValue = Math.round((newPercent / 100) * max / step) * step;
       
-      currentDragValue = newValue; // Обновляем локальную переменную
+      currentDragValue = newValue; // Update local variable
       setLocalValue(newValue);
     };
     
     const handleMouseUp = () => {
       setIsDragging(false);
-      onChange(currentDragValue); // Используем актуальное значение
+      onChange(currentDragValue); // Use current value
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     };
@@ -70,7 +70,7 @@ export const SimpleSlider: React.FC<SimpleSliderProps> = ({ value, max, step = 1
         cursor: 'pointer',
       }}
     >
-      {/* Фон */}
+      {/* Background */}
       <div style={{
         position: 'absolute',
         top: '5px',
@@ -81,7 +81,7 @@ export const SimpleSlider: React.FC<SimpleSliderProps> = ({ value, max, step = 1
         borderRadius: '4px'
       }} />
       
-      {/* Заливка */}
+      {/* Fill */}
       <div style={{
         position: 'absolute',
         top: '5px',
@@ -92,7 +92,7 @@ export const SimpleSlider: React.FC<SimpleSliderProps> = ({ value, max, step = 1
         borderRadius: percent > 0 ? '4px 0 0 4px' : '4px'
       }} />
       
-      {/* Вертикальная линия от слайдера до ярлычка */}
+      {/* Vertical line from slider to label */}
       <div style={{
         position: 'absolute',
         left: `${percent}%`,
@@ -103,7 +103,7 @@ export const SimpleSlider: React.FC<SimpleSliderProps> = ({ value, max, step = 1
         backgroundColor: color
       }} />
       
-      {/* Маркер */}
+      {/* Marker */}
       <div
         onMouseDown={handleMarkerMouseDown}
         style={{

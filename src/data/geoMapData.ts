@@ -7,9 +7,9 @@ export interface DMAData {
   reach: number;
 }
 
-// Mock данные для DMA регионов - все 50 штатов США
+// Mock data for DMA regions - all 50 US states
 export const dmaMapData: DMAData[] = [
-  // Топ рынки
+  // Top markets
   { dmaCode: 'NY', dmaName: 'New York', state: 'NY', impressions: 1969227, grps: 850, reach: 1250000 },
   { dmaCode: 'LA', dmaName: 'Los Angeles', state: 'CA', impressions: 1750000, grps: 750, reach: 1100000 },
   { dmaCode: 'CHI', dmaName: 'Chicago', state: 'IL', impressions: 1450000, grps: 620, reach: 950000 },
@@ -29,7 +29,7 @@ export const dmaMapData: DMAData[] = [
   { dmaCode: 'ORL', dmaName: 'Orlando', state: 'FL', impressions: 850000, grps: 360, reach: 580000 },
   { dmaCode: 'SAC', dmaName: 'Sacramento', state: 'CA', impressions: 780000, grps: 330, reach: 530000 },
   
-  // Остальные штаты
+  // Other states
   { dmaCode: 'AL', dmaName: 'Birmingham', state: 'AL', impressions: 650000, grps: 280, reach: 450000 },
   { dmaCode: 'AK', dmaName: 'Anchorage', state: 'AK', impressions: 320000, grps: 140, reach: 220000 },
   { dmaCode: 'AR', dmaName: 'Little Rock', state: 'AR', impressions: 480000, grps: 200, reach: 330000 },
@@ -69,7 +69,7 @@ export const dmaMapData: DMAData[] = [
   { dmaCode: 'WY', dmaName: 'Cheyenne', state: 'WY', impressions: 270000, grps: 115, reach: 185000 }
 ];
 
-// Функция для получения цвета зоны в зависимости от значения метрики
+// Function to get zone color based on metric value
 export const getColorForValue = (value: number, metric: 'impressions' | 'grps' | 'reach'): string => {
   const maxValues = {
     impressions: 2000000,
@@ -86,7 +86,7 @@ export const getColorForValue = (value: number, metric: 'impressions' | 'grps' |
   return '#d1fae5'; // Very light green
 };
 
-// Форматирование чисел для отображения
+// Format numbers for display
 export const formatMetricValue = (value: number, metric: 'impressions' | 'grps' | 'reach'): string => {
   if (metric === 'grps') {
     return value.toLocaleString('en-US');

@@ -5,7 +5,7 @@ import React, { useState, useEffect } from 'react';
 export interface AnchorItem {
   id: string;
   label: string;
-  anchor: string; // селектор элемента или ID
+  anchor: string; // element selector or ID
 }
 
 interface NavigationAnchorsProps {
@@ -25,54 +25,54 @@ const NavigationAnchors: React.FC<NavigationAnchorsProps> = ({
 }) => {
   const [activeAnchor, setActiveAnchor] = useState<string>(items[0]?.id || '');
 
-  // Функция для плавного скролла к якорю
+  // Function for smooth scroll to anchor
   const scrollToAnchor = (anchor: string, itemId: string) => {
     const element = document.querySelector(anchor);
     const scrollContainer = document.querySelector('main.overflow-auto');
     
     if (element) {
       if (scrollContainer) {
-        // Скролл внутри main контейнера
+        // Scroll inside main container
         const containerRect = scrollContainer.getBoundingClientRect();
         const elementRect = element.getBoundingClientRect();
         const scrollTop = elementRect.top - containerRect.top + scrollContainer.scrollTop - 20; // 20px offset
         
-        // Проверяем поддержку smooth scroll
+        // Check smooth scroll support
         if ('scrollBehavior' in document.documentElement.style) {
           scrollContainer.scrollTo({
             top: scrollTop,
             behavior: 'smooth'
           });
         } else {
-          // Fallback для старых браузеров
+          // Fallback for older browsers
           scrollContainer.scrollTop = scrollTop;
         }
       } else {
-        // Обычный скролл для window
+        // Regular scroll for window
         if ('scrollBehavior' in document.documentElement.style) {
           element.scrollIntoView({ 
             behavior: 'smooth',
             block: 'start'
           });
         } else {
-          // Fallback для старых браузеров
+          // Fallback for older browsers
           element.scrollIntoView(true);
         }
       }
     }
   };
 
-  // Отслеживание активного якоря при скролле
+  // Track active anchor on scroll
   useEffect(() => {
     const handleScroll = (event?: Event) => {
-      // Определяем контейнер скролла - либо main с overflow-auto, либо window
+      // Determine scroll container - either main with overflow-auto or window
       const scrollContainer = document.querySelector('main.overflow-auto') || document.documentElement;
       const scrollPosition = (scrollContainer === document.documentElement ? window.scrollY : scrollContainer.scrollTop) + 100;
 
       for (const item of items) {
         const element = document.querySelector(item.anchor) as HTMLElement;
         if (element) {
-          // Используем getBoundingClientRect для более точного позиционирования
+          // Use getBoundingClientRect for more accurate positioning
           const rect = element.getBoundingClientRect();
           const containerRect = scrollContainer === document.documentElement 
             ? { top: 0 } 
@@ -89,7 +89,7 @@ const NavigationAnchors: React.FC<NavigationAnchorsProps> = ({
       }
     };
 
-    // Добавляем слушателей как для window, так и для main контейнера
+    // Add listeners for both window and main container
     const scrollContainer = document.querySelector('main.overflow-auto');
     
     if (scrollContainer) {
@@ -98,7 +98,7 @@ const NavigationAnchors: React.FC<NavigationAnchorsProps> = ({
       window.addEventListener('scroll', handleScroll);
     }
     
-    handleScroll(); // Вызываем сразу для установки начального состояния
+    handleScroll(); // Call immediately to set initial state
 
     return () => {
       if (scrollContainer) {
@@ -132,7 +132,7 @@ const NavigationAnchors: React.FC<NavigationAnchorsProps> = ({
         >
           <span className="relative inline-block">
             {item.label}
-            {/* Подчеркивание для активного элемента */}
+            {/* Underline for active element */}
             {activeAnchor === item.id && (
               <div
                 className="absolute transition-all duration-200 rounded-full"

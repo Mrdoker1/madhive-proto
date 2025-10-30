@@ -19,26 +19,26 @@ const MainMarketsTable: React.FC<MainMarketsTableProps> = ({
   someSelected,
   handlers
 }) => {
-  // Состояние для хранения предыдущих значений процентов
+  // State to store previous percentage values
   const [previousValues, setPreviousValues] = useState<Record<string, number>>({});
-  // Состояние для отображения tooltip ошибок
+  // State to display error tooltips
   const [errorTooltips, setErrorTooltips] = useState<Record<string, boolean>>({});
-  // Refs для работы с tooltip
+  // Refs for working with tooltips
   const inputRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
-  // Функция для форматирования процентов (максимум 2 знака после запятой)
+  // Function to format percentages (maximum 2 decimal places)
   const formatPercentage = (value: number): string => {
     return Number(value.toFixed(2)).toString();
   };
 
-  // Функция для расчета общего процента всех выбранных маркетов
+  // Function to calculate total percentage of all selected markets
   const getTotalPercentage = () => {
     return markets.reduce((total, market) => {
       return market.selected ? total + market.percentage : total;
     }, 0);
   };
 
-  // Обработчик фокуса - сохраняем текущее значение как предыдущее
+  // Focus handler - save current value as previous
   const handlePercentageFocus = (marketId: string, currentValue: number) => {
     setPreviousValues(prev => ({
       ...prev,
@@ -46,14 +46,14 @@ const MainMarketsTable: React.FC<MainMarketsTableProps> = ({
     }));
   };
 
-  // Обработчик потери фокуса - валидация
+  // Blur handler - validation
   const handlePercentageBlur = (marketId: string, newValue: string) => {
     const numericValue = parseFloat(newValue) || 0;
     const currentMarket = markets.find(m => m.id === marketId);
     
     if (!currentMarket) return;
 
-    // Рассчитываем общий процент если бы мы применили новое значение
+    // Calculate total percentage if we were to apply new value
     const otherMarketsTotal = markets.reduce((total, market) => {
       if (market.id === marketId || !market.selected) return total;
       return total + market.percentage;
@@ -61,18 +61,18 @@ const MainMarketsTable: React.FC<MainMarketsTableProps> = ({
     
     const wouldBeTotal = otherMarketsTotal + numericValue;
     
-    // Если превышает 100%, показываем ошибку и возвращаем предыдущее значение
+    // If exceeds 100%, show error and revert to previous value
     if (wouldBeTotal > 100) {
       setErrorTooltips(prev => ({
         ...prev,
         [marketId]: true
       }));
       
-      // Возвращаем предыдущее значение
+      // Revert to previous value
       const previousValue = previousValues[marketId] || currentMarket.percentage;
       handlers.handlePercentageChange(marketId, previousValue.toString());
       
-      // Скрываем tooltip через 3 секунды
+      // Hide tooltip after 3 seconds
       setTimeout(() => {
         setErrorTooltips(prev => ({
           ...prev,
@@ -80,7 +80,7 @@ const MainMarketsTable: React.FC<MainMarketsTableProps> = ({
         }));
       }, 3000);
     } else {
-      // Убираем ошибку если она была
+      // Remove error if it was present
       setErrorTooltips(prev => ({
         ...prev,
         [marketId]: false

@@ -20,10 +20,10 @@ export const DraggablePoint: React.FC<DraggablePointProps> = ({
   const maxBudget = totalBudget || CHART_CONFIG.DEFAULT_BUDGET;
   const { OFFSET_X, OFFSET_Y } = CHART_CONFIG;
   
-  // Используем тот же масштаб reach что и в channelConfig.ts
+  // Use the same reach scale as in channelConfig.ts
   const maxReach = BASE_REACH_SCALE;
   
-  // Позиция точки на графике
+  // Point position on the chart
   const chartPosition = calculateChartPosition(
     point.budget,
     point.reach,
@@ -33,7 +33,7 @@ export const DraggablePoint: React.FC<DraggablePointProps> = ({
     chartHeight
   );
   
-  // Позиция точки в SVG координатах (с учетом отступов)
+  // Point position in SVG coordinates (with offsets)
   const svgX = chartPosition.x + OFFSET_X;
   const svgY = chartPosition.y + OFFSET_Y;
   
@@ -51,19 +51,19 @@ export const DraggablePoint: React.FC<DraggablePointProps> = ({
     
     const rect = svg.getBoundingClientRect();
     
-    // Позиция мыши в SVG координатах
+    // Mouse position in SVG coordinates
     const mouseXInSvg = e.clientX - rect.left;
     
-    // Преобразуем в координаты графика (убираем отступ по X)
+    // Convert to chart coordinates (remove X offset)
     const mouseXInChart = mouseXInSvg - OFFSET_X;
     
-    // Ограничиваем только по оси X
+    // Limit only along X axis
     const clampedX = Math.max(0, Math.min(mouseXInChart, chartWidth));
     
-    // Вычисляем новый бюджет на основе позиции X
+    // Calculate new budget based on X position
     const newBudget = (clampedX / chartWidth) * maxBudget;
     
-    // Передаем только новый бюджет (округленный до кратного 100), reach будет вычислен автоматически
+    // Pass only new budget (rounded to multiple of 100), reach will be calculated automatically
     onPointChange(point.id, Math.round(newBudget / 100) * 100);
   }, [isDragging, chartWidth, maxBudget, point.id, onPointChange, OFFSET_X]);
   

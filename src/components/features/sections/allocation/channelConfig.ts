@@ -1,5 +1,5 @@
 /**
- * Конфигурация каналов для расчета reach по формуле
+ * Channel configuration for reach calculation by formula
  * reach = maxReach × (1 - e^(-efficiency × budget / saturation))
  */
 
@@ -7,115 +7,115 @@ export interface ChannelConfig {
   id: string;
   name: string;
   color: string;
-  maxReach: number;        // Максимальный reach для канала (в процентах от общего reach)
-  efficiency: number;      // Эффективность канала (влияет на скорость роста кривой)
-  budgetWeight: number;    // Вес бюджета для распределения по умолчанию
-  reachWeight: number;     // Вес reach для расчетов
-  // Saturation points для разных размеров кампаний (в процентах от total budget)
+  maxReach: number;        // Maximum reach for channel (as percentage of total reach)
+  efficiency: number;      // Channel efficiency (affects curve growth rate)
+  budgetWeight: number;    // Budget weight for default allocation
+  reachWeight: number;     // Reach weight for calculations
+  // Saturation points for different campaign sizes (as percentage of total budget)
   saturationSmall: number;   // ~50K campaign
   saturationMedium: number;  // ~100K campaign  
   saturationLarge: number;   // ~200K campaign
 }
 
-// Базовые значения для расчета reach каналов согласно предоставленным данным
+// Base values for channel reach calculation according to provided data
 export const CHANNEL_CONFIGS: Record<string, ChannelConfig> = {
   'preroll': {
     id: 'preroll',
     name: 'Pre Roll',
     color: '#6633CC',
-    maxReach: 45,              // 45% от общего reach - самый низкий
-    efficiency: 1.5,           // Снижен для более медленного роста
+    maxReach: 45,              // 45% of total reach - lowest
+    efficiency: 1.5,           // Reduced for slower growth
     budgetWeight: 12,          // 12% budget weight
     reachWeight: 18,           // 18% reach weight
-    saturationSmall: 200,      // Увеличено для лучшего масштабирования
-    saturationMedium: 150,     // Увеличено для лучшего масштабирования
-    saturationLarge: 100       // Увеличено для лучшего масштабирования
+    saturationSmall: 200,      // Increased for better scaling
+    saturationMedium: 150,     // Increased for better scaling
+    saturationLarge: 100       // Increased for better scaling
   },
   'ctv': {
     id: 'ctv',
     name: 'CTV',
     color: '#FF9BD3',
-    maxReach: 65,              // 65% от общего reach - самый высокий
-    efficiency: 2.5,           // Снижен для лучшего масштабирования
+    maxReach: 65,              // 65% of total reach - highest
+    efficiency: 2.5,           // Reduced for better scaling
     budgetWeight: 55,          // 55% budget weight
     reachWeight: 45,           // 45% reach weight
-    saturationSmall: 200,      // Увеличено для лучшего масштабирования
-    saturationMedium: 150,     // Увеличено для лучшего масштабирования
-    saturationLarge: 100       // Увеличено для лучшего масштабирования
+    saturationSmall: 200,      // Increased for better scaling
+    saturationMedium: 150,     // Increased for better scaling
+    saturationLarge: 100       // Increased for better scaling
   },
   'audio': {
     id: 'audio',
     name: 'Audio',
     color: '#33CCCC',
-    maxReach: 55,              // 55% от общего reach - средний
-    efficiency: 3.0,           // Снижен для лучшего масштабирования
+    maxReach: 55,              // 55% of total reach - medium
+    efficiency: 3.0,           // Reduced for better scaling
     budgetWeight: 8,           // 8% budget weight
     reachWeight: 15,           // 15% reach weight
-    saturationSmall: 200,      // Увеличено для лучшего масштабирования
-    saturationMedium: 150,     // Увеличено для лучшего масштабирования
-    saturationLarge: 100       // Увеличено для лучшего масштабирования
+    saturationSmall: 200,      // Increased for better scaling
+    saturationMedium: 150,     // Increased for better scaling
+    saturationLarge: 100       // Increased for better scaling
   },
   'social': {
     id: 'social',
     name: 'Social',
     color: '#FF0099',
-    maxReach: 60,              // 60% от общего reach - высокий потенциал
-    efficiency: 2.0,           // Снижен для лучшего масштабирования
+    maxReach: 60,              // 60% of total reach - high potential
+    efficiency: 2.0,           // Reduced for better scaling
     budgetWeight: 15,          // 15% budget weight
     reachWeight: 12,           // 12% reach weight
-    saturationSmall: 200,      // Увеличено для лучшего масштабирования
-    saturationMedium: 150,     // Увеличено для лучшего масштабирования
-    saturationLarge: 100       // Увеличено для лучшего масштабирования
+    saturationSmall: 200,      // Increased for better scaling
+    saturationMedium: 150,     // Increased for better scaling
+    saturationLarge: 100       // Increased for better scaling
   },
   'search': {
     id: 'search',
     name: 'Search',
     color: '#00A3FF',
-    maxReach: 40,              // 40% от общего reach - средний потенциал
-    efficiency: 3.5,           // Снижен для лучшего масштабирования
+    maxReach: 40,              // 40% of total reach - medium potential
+    efficiency: 3.5,           // Reduced for better scaling
     budgetWeight: 8,           // 8% budget weight
     reachWeight: 7,            // 7% reach weight
-    saturationSmall: 200,      // Увеличено для лучшего масштабирования
-    saturationMedium: 150,     // Увеличено для лучшего масштабирования
-    saturationLarge: 100       // Увеличено для лучшего масштабирования
+    saturationSmall: 200,      // Increased for better scaling
+    saturationMedium: 150,     // Increased for better scaling
+    saturationLarge: 100       // Increased for better scaling
   },
   'email': {
     id: 'email',
     name: 'Email',
     color: '#FFA100',
-    maxReach: 25,              // 25% от общего reach - самый низкий потенциал
-    efficiency: 4.0,           // Снижен для лучшего масштабирования
+    maxReach: 25,              // 25% of total reach - lowest potential
+    efficiency: 4.0,           // Reduced for better scaling
     budgetWeight: 2,           // 2% budget weight
     reachWeight: 3,            // 3% reach weight
-    saturationSmall: 200,      // Увеличено для лучшего масштабирования
-    saturationMedium: 150,     // Увеличено для лучшего масштабирования
-    saturationLarge: 100       // Увеличено для лучшего масштабирования
+    saturationSmall: 200,      // Increased for better scaling
+    saturationMedium: 150,     // Increased for better scaling
+    saturationLarge: 100       // Increased for better scaling
   }
 };
 
 /**
- * Базовый масштаб reach для всех каналов (увеличен для лучшей видимости)
+ * Base reach scale for all channels (increased for better visibility)
  */
 export const BASE_REACH_SCALE = 20000;
 
 /**
- * Определяет saturation point в зависимости от размера total budget
+ * Determines saturation point based on total budget size
  */
 const getSaturationPoint = (config: ChannelConfig, totalBudget: number): number => {
   if (totalBudget <= 75000) {
-    // Малая кампания (~50K)
+    // Small campaign (~50K)
     return totalBudget * (config.saturationSmall / 100);
   } else if (totalBudget <= 150000) {
-    // Средняя кампания (~100K)
+    // Medium campaign (~100K)
     return totalBudget * (config.saturationMedium / 100);
   } else {
-    // Большая кампания (~200K+)
+    // Large campaign (~200K+)
     return totalBudget * (config.saturationLarge / 100);
   }
 };
 
 /**
- * Вычисляет reach по формуле: reach = maxReach × (1 - e^(-efficiency × budget / saturation))
+ * Calculates reach by formula: reach = maxReach × (1 - e^(-efficiency × budget / saturation))
  */
 export const calculateReachByFormula = (channelId: string, budget: number, totalBudget: number = 390000): number => {
   const config = CHANNEL_CONFIGS[channelId];
@@ -123,20 +123,20 @@ export const calculateReachByFormula = (channelId: string, budget: number, total
   
   const { maxReach, efficiency } = config;
   
-  // Определяем saturation point в зависимости от размера кампании
+  // Determine saturation point based on campaign size
   const saturation = getSaturationPoint(config, totalBudget);
   
-  // Рассчитываем абсолютный maxReach для данного канала
+  // Calculate absolute maxReach for this channel
   const absoluteMaxReach = (maxReach / 100) * BASE_REACH_SCALE;
   
-  // Формула reach = maxReach × (1 - e^(-efficiency × budget / saturation))
+  // Formula reach = maxReach × (1 - e^(-efficiency × budget / saturation))
   const reach = absoluteMaxReach * (1 - Math.exp(-efficiency * budget / saturation));
   
   return Math.round(reach);
 };
 
 /**
- * Генерирует точки для статической кривой канала
+ * Generates points for static channel curve
  */
 export const generateStaticCurvePoints = (
   channelId: string, 
@@ -155,7 +155,7 @@ export const generateStaticCurvePoints = (
 };
 
 /**
- * Создает SVG path для статической кривой
+ * Creates SVG path for static curve
  */
 export const createStaticCurvePath = (
   channelId: string,
@@ -185,19 +185,19 @@ export const createStaticCurvePath = (
 };
 
 /**
- * Вычисляет budget allocation по умолчанию используя Budget Weight
+ * Calculates default budget allocation using Budget Weight
  */
 export const calculateDefaultBudgetAllocation = (
   selectedChannels: string[], 
   totalBudget: number
 ): Record<string, number> => {
-  // Получаем общий вес выбранных каналов
+  // Get total weight of selected channels
   const totalWeight = selectedChannels.reduce((sum, channelId) => {
     const config = CHANNEL_CONFIGS[channelId];
     return sum + (config?.budgetWeight || 0);
   }, 0);
   
-  // Распределяем бюджет пропорционально весам
+  // Distribute budget proportionally to weights
   const allocation: Record<string, number> = {};
   selectedChannels.forEach(channelId => {
     const config = CHANNEL_CONFIGS[channelId];
@@ -210,21 +210,21 @@ export const calculateDefaultBudgetAllocation = (
 };
 
 /**
- * Получить цвет канала
+ * Get channel color
  */
 export const getChannelColor = (channelId: string): string => {
   return CHANNEL_CONFIGS[channelId]?.color || '#6B7280';
 };
 
 /**
- * Получить название канала
+ * Get channel name
  */
 export const getChannelName = (channelId: string): string => {
   return CHANNEL_CONFIGS[channelId]?.name || channelId;
 };
 
 /**
- * Получить все цвета каналов
+ * Get all channel colors
  */
 export const getAllChannelColors = (): Record<string, string> => {
   return Object.fromEntries(
@@ -233,7 +233,7 @@ export const getAllChannelColors = (): Record<string, string> => {
 };
 
 /**
- * Получить все названия каналов
+ * Get all channel names
  */
 export const getAllChannelNames = (): Record<string, string> => {
   return Object.fromEntries(

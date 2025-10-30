@@ -26,7 +26,7 @@ const initialState: ServerStatusState = {
   lastUpdated: null,
 };
 
-// Async thunk для получения статуса сервера
+// Async thunk for fetching server status
 export const fetchServerStatus = createAsyncThunk(
   'serverStatus/fetchStatus',
   async (_, { rejectWithValue }) => {

@@ -10,20 +10,20 @@ interface PageLayoutProps {
   children: React.ReactNode;
   breadcrumbs?: BreadcrumbStep[];
   title?: string;
-  showProgress?: boolean; // Показывать прогресс в breadcrumbs
-  onBreadcrumbClick?: (step: BreadcrumbStep) => void; // Обработчик клика на breadcrumb
-  showRightSidebar?: boolean; // Показывать правый сайдбар
-  rightSidebarContent?: React.ReactNode; // Кастомный контент для правого сайдбара
-  rightSidebarPageKey?: string; // Ключ страницы для AI подсказок в сайдбаре
-  footerContent?: React.ReactNode; // Контент который будет зафиксирован внизу
-  // Опции правой кнопки в PageHeader
+  showProgress?: boolean; // Show progress in breadcrumbs
+  onBreadcrumbClick?: (step: BreadcrumbStep) => void; // Breadcrumb click handler
+  showRightSidebar?: boolean; // Show right sidebar
+  rightSidebarContent?: React.ReactNode; // Custom content for right sidebar
+  rightSidebarPageKey?: string; // Page key for AI suggestions in sidebar
+  footerContent?: React.ReactNode; // Content that will be fixed at bottom
+  // Right button options in PageHeader
   headerShowRightButton?: boolean;
   headerRightButtonText?: string;
   headerRightButtonActive?: boolean;
   onHeaderRightButtonClick?: () => void;
-  // Дополнительные действия/контент в заголовке (справа от title)
+  // Additional actions/content in header (right of title)
   headerActions?: React.ReactNode;
-  // Кастомная кнопка справа в PageHeader
+  // Custom button on right in PageHeader
   headerRightButtonComponent?: React.ReactNode;
 }
 
@@ -51,7 +51,7 @@ const PageLayout: React.FC<PageLayoutProps> = ({
       animate={{ opacity: 1 }}
       transition={{ duration: 0.3 }}
     >
-      {/* Breadcrumbs - только если переданы */}
+      {/* Breadcrumbs - only if provided */}
       <AnimatePresence>
         {breadcrumbs.length > 0 && (
           <motion.div
@@ -69,7 +69,7 @@ const PageLayout: React.FC<PageLayoutProps> = ({
         )}
       </AnimatePresence>
       
-      {/* Main Layout Container - от PageHeader до конца */}
+      {/* Main Layout Container - from PageHeader to end */}
       <motion.div 
         className="flex flex-1 overflow-hidden"
         initial={{ opacity: 0, y: 20 }}
@@ -83,7 +83,7 @@ const PageLayout: React.FC<PageLayoutProps> = ({
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.2, ease: "easeOut" }}
         >
-          {/* Page Header - только если передан title */}
+          {/* Page Header - only if title is provided */}
           <AnimatePresence>
             {title && (
               <motion.div
@@ -111,12 +111,12 @@ const PageLayout: React.FC<PageLayoutProps> = ({
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3, ease: "easeOut" }}
-            style={{ paddingBottom: footerContent ? '80px' : '0' }} // Добавляем отступ снизу если есть footer
+            style={{ paddingBottom: footerContent ? '80px' : '0' }} // Add bottom padding if footer exists
           >
             {children}
           </motion.main>
           
-          {/* Fixed Footer Content - зафиксирован внизу левой части */}
+          {/* Fixed Footer Content - fixed at bottom of left side */}
           <AnimatePresence>
             {footerContent && (
               <motion.div
@@ -139,7 +139,7 @@ const PageLayout: React.FC<PageLayoutProps> = ({
           </AnimatePresence>
         </motion.div>
         
-        {/* Right Sidebar - от уровня PageHeader до конца страницы */}
+        {/* Right Sidebar - from PageHeader level to end of page */}
         <AnimatePresence>
           {showRightSidebar && (
             <motion.div

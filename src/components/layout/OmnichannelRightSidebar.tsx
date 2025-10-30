@@ -8,7 +8,7 @@ import { updateBudgetData } from '@/store/slices/campaignSlice';
 import AISuggestionCard from '@/components/ui/AISuggestionCard';
 import ChannelPills, { ChannelPill } from '@/components/ui/ChannelPills';
 
-// Цвета каналов из allocation
+// Channel colors from allocation
 const CHANNEL_COLORS: Record<string, string> = {
   total: '#000000',
   ctv: '#FF9BD3', 
@@ -24,9 +24,9 @@ type ChannelType = 'total' | 'ctv' | 'preroll' | 'audio' | 'social' | 'search' |
 
 interface OmnichannelRightSidebarProps {
   className?: string;
-  selectedChannels?: string[]; // Массив выбранных каналов (preroll, ctv, audio, etc.)
-  readOnly?: boolean; // Если true, то бюджет нельзя редактировать
-  pageKey?: string; // Ключ страницы для AI подсказок
+  selectedChannels?: string[]; // Array of selected channels (preroll, ctv, audio, etc.)
+  readOnly?: boolean; // If true, budget cannot be edited
+  pageKey?: string; // Page key for AI suggestions
 }
 
 const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({ 
@@ -39,15 +39,15 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({
   const [activeChannel, setActiveChannel] = useState<ChannelType>('total');
   const [audienceSize, setAudienceSize] = useState<'Small' | 'Good' | 'Strong'>('Strong');
   
-  // Получаем распределение бюджета и total budget из Redux
+  // Get budget allocation and total budget from Redux
   const budgetAllocation = useAppSelector((state) => state.campaign.channels.budgetAllocation);
   const totalBudget = useAppSelector((state) => state.campaign.budget.totalBudget) || 0;
   const channelData = useAppSelector((state) => state.campaign.omnichannel.channelData);
   
-  // Локальное состояние для редактирования бюджета
+  // Local state for budget editing
   const [budgetInput, setBudgetInput] = useState('');
   
-  // Функция для форматирования числа с разделителями
+  // Function to format number with separators
   const formatNumber = (value: string): string => {
     const cleanValue = value.replace(/[^\d.]/g, '');
     const parts = cleanValue.split('.');
@@ -55,24 +55,24 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({
     return parts.join('.');
   };
   
-  // Синхронизируем локальное состояние с глобальным при загрузке
+  // Synchronize local state with global state on load
   useEffect(() => {
     if (totalBudget > 0) {
       setBudgetInput(formatNumber(totalBudget.toString()));
     }
   }, [totalBudget]);
   
-  // Обработчик изменения бюджета
+  // Budget change handler
   const handleBudgetChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
-    // Убираем запятые для валидации
+    // Remove commas for validation
     const cleanValue = value.replace(/,/g, '');
     
-    // Разрешаем только цифры и точку для десятичных чисел
+    // Allow only digits and dot for decimal numbers
     if (/^\d*\.?\d*$/.test(cleanValue)) {
       setBudgetInput(formatNumber(cleanValue));
       
-      // Обновляем глобальный стейт
+      // Update global state
       const numericValue = parseFloat(cleanValue) || 0;
       dispatch(updateBudgetData({ totalBudget: numericValue }));
     }
@@ -88,10 +88,10 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({
     { id: 'email', label: 'Email' }
   ];
   
-  // Фильтруем pills: Total всегда показываем + выбранные каналы
+  // Filter pills: always show Total + selected channels
   const channelPills = useMemo(() => {
     if (selectedChannels.length === 0) {
-      return allChannelPills; // Если ничего не выбрано, показываем все
+      return allChannelPills; // If nothing selected, show all
     }
     
     return allChannelPills.filter(pill => 
@@ -99,7 +99,7 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({
     );
   }, [selectedChannels]);
   
-  // Если активный канал не в списке доступных, переключаемся на Total
+  // If active channel is not in available list, switch to Total
   useEffect(() => {
     const isActiveChannelAvailable = channelPills.some(pill => pill.id === activeChannel);
     if (!isActiveChannelAvailable) {
@@ -107,7 +107,7 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({
     }
   }, [channelPills, activeChannel]);
 
-  // Список всех возможных каналов для легенды
+  // List of all possible channels for legend
   const allLegendChannels = [
     { id: 'ctv', label: 'CTV' },
     { id: 'preroll', label: 'Preroll' },
@@ -117,19 +117,19 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({
     { id: 'email', label: 'Email' }
   ];
 
-  // Фильтруем легенду только для выбранных каналов
+  // Filter legend only for selected channels
   const visibleLegendChannels = selectedChannels.length > 0
     ? allLegendChannels.filter(channel => selectedChannels.includes(channel.id))
     : allLegendChannels;
 
-  // Вычисляем процент бюджета для канала
+  // Calculate budget percentage for channel
   const getChannelBudgetPercent = (channelId: string): number => {
     if (!budgetAllocation || totalBudget === 0) return 0;
     const channelBudget = budgetAllocation[channelId] || 0;
     return (channelBudget / totalBudget) * 100;
   };
 
-  // Получаем Market Estimation для канала
+  // Get Market Estimation for channel
   const getMarketEstimation = (): number => {
     if (activeChannel === 'total') {
       const marketValues = selectedChannels.map(ch => 
@@ -139,32 +139,32 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({
       if (marketValues.length === 0) return 0;
       if (marketValues.length === 1) return marketValues[0];
       
-      // Проверяем, используются ли конкретные zip codes для таргетинга
-      // Если хотя бы один канал использует geo-targeting, суммируем с коэффициентом
+      // Check if specific zip codes are used for targeting
+      // If at least one channel uses geo-targeting, sum with coefficient
       const hasGeoTargeting = selectedChannels.some(ch => {
         const geoData = channelData[ch]?.geo;
         return geoData?.selectedZipCodes && geoData.selectedZipCodes.length > 0;
       });
       
       if (hasGeoTargeting) {
-        // При geo-таргетинге суммируем market estimation с коэффициентом overlap 0.85
+        // With geo-targeting, sum market estimation with overlap coefficient 0.85
         const totalSum = marketValues.reduce((sum, val) => sum + val, 0);
         return Math.round(totalSum * 0.85);
       } else {
-        // При nationwide таргетинге берем максимум - это один и тот же рынок США
+        // With nationwide targeting, take maximum - it's the same US market
         return Math.max(...marketValues);
       }
     } else {
-      // Для конкретного канала
+      // For specific channel
       return channelData[activeChannel]?.estimations?.marketEstimation || 0;
     }
   };
 
-  // Получаем Audience Estimation для канала
+  // Get Audience Estimation for channel
   const getAudienceEstimation = (): number => {
     if (activeChannel === 'total') {
-      // Для Total - суммируем все каналы с учетом overlap
-      // Простая логика: ~30% людей видят рекламу в нескольких каналах
+      // For Total - sum all channels with overlap consideration
+      // Simple logic: ~30% of people see ads in multiple channels
       const audienceValues = selectedChannels.map(ch => 
         channelData[ch]?.estimations?.audienceEstimation || 0
       );
@@ -172,27 +172,27 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({
       if (audienceValues.length === 0) return 0;
       if (audienceValues.length === 1) return audienceValues[0];
       
-      // Суммируем и применяем фиксированный коэффициент 0.7
+      // Sum and apply fixed coefficient 0.7
       const totalSum = audienceValues.reduce((sum, val) => sum + val, 0);
       const totalAudience = Math.round(totalSum * 0.7);
       
-      // ВАЖНО: Audience не может превышать Market Estimation
+      // IMPORTANT: Audience cannot exceed Market Estimation
       const totalMarket = getMarketEstimation();
       
       return Math.min(totalAudience, totalMarket);
     } else {
-      // Для конкретного канала
+      // For specific channel
       return channelData[activeChannel]?.estimations?.audienceEstimation || 0;
     }
   };
 
-  // Вычисляем распределение для выбранных каналов в режиме Total
+  // Calculate distribution for selected channels in Total mode
   const getTotalProgressBars = () => {
     if (selectedChannels.length === 0 || !budgetAllocation) {
       return <div style={{ width: '100%', backgroundColor: '#E5E5E5' }} />;
     }
 
-    // Используем реальное распределение бюджета из Redux
+    // Use actual budget allocation from Redux
     return selectedChannels.map(channelId => {
       const percentOfTotal = getChannelBudgetPercent(channelId);
       
@@ -208,7 +208,7 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({
     });
   };
 
-  // Вычисляем процент аудитории для канала
+  // Calculate audience percentage for channel
   const getChannelAudiencePercent = (channelId: string): number => {
     if (selectedChannels.length === 0) return 0;
     
@@ -220,7 +220,7 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({
     return totalAudience > 0 ? (channelAudience / totalAudience) * 100 : 0;
   };
 
-  // Вычисляем распределение аудитории для выбранных каналов
+  // Calculate audience distribution for selected channels
   const getTotalAudienceProgressBars = () => {
     if (selectedChannels.length === 0) {
       return <div style={{ width: '100%', backgroundColor: '#E5E5E5' }} />;
@@ -241,7 +241,7 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({
     });
   };
 
-  // Вычисляем процент market estimation для канала
+  // Calculate market estimation percentage for channel
   const getChannelMarketPercent = (channelId: string): number => {
     if (selectedChannels.length === 0) return 0;
     
@@ -253,7 +253,7 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({
     return totalMarket > 0 ? (channelMarket / totalMarket) * 100 : 0;
   };
 
-  // Вычисляем распределение market estimation для выбранных каналов
+  // Calculate market estimation distribution for selected channels
   const getTotalMarketProgressBars = () => {
     if (selectedChannels.length === 0) {
       return <div style={{ width: '100%', backgroundColor: '#E5E5E5' }} />;
@@ -274,12 +274,12 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({
     });
   };
 
-  // Функция для определения цвета легенды
+  // Function to determine legend color
   const getLegendColor = (channelId: string): string => {
     if (activeChannel === 'total') {
       return CHANNEL_COLORS[channelId] || '#CCCCCC';
     }
-    // Если выбран конкретный канал, только он цветной, остальные серые
+    // If specific channel is selected, only it is colored, rest are gray
     return activeChannel === channelId ? CHANNEL_COLORS[channelId] : '#CCCCCC';
   };
 
@@ -349,12 +349,12 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({
           }}>
             {activeChannel === 'total' ? (
               readOnly ? (
-                // Режим только для чтения - показываем текст
+                // Read-only mode - show text
                 <Text size="xl" fw={600} ta="center">
                   $ {totalBudget.toLocaleString('en-US')}
                 </Text>
               ) : (
-                // Режим редактирования - показываем input
+                // Edit mode - show input
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
                   <IconCurrencyDollar size={20} color="#666" />
                   <input
@@ -439,7 +439,7 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({
           </div>
         </div>
 
-        {/* Audience Estimation - показываем только если выбран хотя бы один канал И введен бюджет */}
+        {/* Audience Estimation - show only if at least one channel is selected AND budget is entered */}
         {selectedChannels.length > 0 && totalBudget > 0 && (
           <div>
             <Text size="sm" fw={500} style={{ color: 'var(--form-label-color)', marginBottom: '8px' }}>
@@ -560,7 +560,7 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({
           </div>
         )}
 
-        {/* Market Estimation - показываем только если выбран хотя бы один канал И введен бюджет */}
+        {/* Market Estimation - show only if at least one channel is selected AND budget is entered */}
         {selectedChannels.length > 0 && totalBudget > 0 && (
           <div>
             <Text size="sm" fw={500} style={{ color: 'var(--form-label-color)', marginBottom: '8px' }}>

@@ -18,11 +18,11 @@ export const ChannelSlider: React.FC<ChannelSliderProps> = ({
 }) => {
   const totalBudget = useAppSelector((state) => state.campaign.budget.totalBudget) || 390250;
   
-  // Локальное состояние для инпута
+  // Local state for input
   const [inputValue, setInputValue] = useState(formatCurrency(allocation.budget));
   const [isInputFocused, setIsInputFocused] = useState(false);
 
-  // Синхронизируем локальное состояние с внешним значением
+  // Synchronize local state with external value
   useEffect(() => {
     if (!isInputFocused) {
       setInputValue(formatCurrency(allocation.budget));
@@ -42,7 +42,7 @@ export const ChannelSlider: React.FC<ChannelSliderProps> = ({
 
   const handleInputFocus = () => {
     setIsInputFocused(true);
-    // При фокусе показываем сырое числовое значение
+    // On focus, show raw numeric value
     setInputValue(allocation.budget.toString());
   };
 
@@ -54,7 +54,7 @@ export const ChannelSlider: React.FC<ChannelSliderProps> = ({
     onRemove(allocation.id);
   };
 
-  // Вычисляем процент бюджета
+  // Calculate budget percentage
   const budgetPercent = totalBudget > 0 ? (allocation.budget / totalBudget) * 100 : 0;
   const isLowBudget = budgetPercent < 10 && budgetPercent > 0;
 
@@ -80,28 +80,28 @@ export const ChannelSlider: React.FC<ChannelSliderProps> = ({
           ease: "easeOut"
         }}
       >
-        {/* Все элементы в одну строку */}
+        {/* All elements in one row */}
         <div style={{ 
           display: 'flex', 
           alignItems: 'center', 
           flexWrap: 'nowrap',
-          minHeight: '40px' // Минимальная высота для выравнивания
+          minHeight: '40px' // Minimum height for alignment
         }}>
-        {/* Иконка канала - 32px черная */}
+        {/* Channel icon - 32px black */}
         <Image
           src={`/assets/icons/channels/${allocation.id}.svg`}
           alt={allocation.name}
           width={32}
           height={32}
-          style={{ filter: 'brightness(0)', flexShrink: 0, marginRight: '8px' }} // Делает иконку черной + отступ 8px
+          style={{ filter: 'brightness(0)', flexShrink: 0, marginRight: '8px' }} // Makes icon black + 8px margin
         />
         
-        {/* Название канала - 12px */}
+        {/* Channel name - 12px */}
         <Text size="12px" fw={500} c="#1F2937" style={{ minWidth: '80px', flexShrink: 0, marginRight: '16px' }}>
           {allocation.name}
         </Text>
         
-        {/* Поле ввода бюджета */}
+        {/* Budget input field */}
         <TextInput
           value={inputValue}
           onChange={(e) => handleInputChange(e.target.value)}
@@ -113,7 +113,7 @@ export const ChannelSlider: React.FC<ChannelSliderProps> = ({
             input: {
               fontSize: '14px',
               padding: '12px 16px',
-              paddingLeft: '40px', // Добавляем отступ для иконки
+              paddingLeft: '40px', // Add padding for icon
               border: '1px solid var(--form-input-border)',
               borderRadius: '6px',
               backgroundColor: '#FFFFFF'
@@ -122,13 +122,13 @@ export const ChannelSlider: React.FC<ChannelSliderProps> = ({
           style={{ flexShrink: 0, marginRight: '16px' }}
         />
         
-        {/* Слайдер занимает все свободное место */}
+        {/* Slider takes all available space */}
         <div style={{ 
           flex: 1, 
           minWidth: '200px', 
           marginRight: '16px'
         }}>
-          {/* Метрики над слайдером */}
+          {/* Metrics above slider */}
           <div style={{
             display: 'flex',
             justifyContent: 'flex-end',
@@ -148,13 +148,13 @@ export const ChannelSlider: React.FC<ChannelSliderProps> = ({
           <SimpleSlider
             value={allocation.budget}
             max={totalBudget}
-            step={100} // Шаг в 100 долларов для точного контроля
-            color={allocation.color} // Оставляем оригинальный цвет канала
+            step={100} // Step of 100 dollars for precise control
+            color={allocation.color} // Keep original channel color
             onChange={handleSliderChange}
           />
         </div>
         
-        {/* Кнопка удаления */}
+        {/* Delete button */}
         <ActionIcon
           variant="subtle"
           color="gray"

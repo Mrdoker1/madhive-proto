@@ -28,28 +28,28 @@ export const useMarketsState = () => {
       return;
     }
 
-    // Получаем ID бродкастеров
+    // Get broadcaster IDs
     const broadcasterIds = linearData.broadcasters
       .map(name => getBroadcasterByName(name)?.id)
       .filter(Boolean) as string[];
 
-    // Получаем доступные маркеты для выбранных бродкастеров
+    // Get available markets for selected broadcasters
     const availableMarketIds = getAvailableMarkets(broadcasterIds);
     
-    // Создаем структуру маркетов со станциями
+    // Create markets structure with stations
     const marketsWithStations: MarketWithStationsData[] = availableMarketIds
       .map(marketId => {
         const marketInfo = marketsData.find(m => m.id === marketId);
         if (!marketInfo) return null;
 
-        // Проверяем есть ли этот market в сохраненных данных Redux
+        // Check if this market exists in saved Redux data
         const savedMarket = marketsReduxData.marketsDetails?.find(m => m.id === marketId);
 
-        // Получаем станции для этого маркета и выбранных бродкастеров
+        // Get stations for this market and selected broadcasters
         const stations = broadcasterIds.flatMap(broadcasterId => 
           getStationsByMarketAndBroadcaster(marketId, broadcasterId)
         ).map(station => {
-          // Проверяем была ли станция выбрана ранее
+          // Check if station was previously selected
           const savedStation = savedMarket?.stations.find(s => s.id === station.id);
           return {
             ...station,
@@ -67,16 +67,16 @@ export const useMarketsState = () => {
           marketSize: marketInfo.marketSize,
           percentage: savedMarket?.percentage || 0,
           budget: savedMarket?.budget || 0,
-          selected: savedMarket?.selected || false, // Восстанавливаем из Redux
+          selected: savedMarket?.selected || false, // Restore from Redux
           stations
         };
       })
       .filter(Boolean) as MarketWithStationsData[];
 
-    // Сортируем по рангу
+    // Sort by rank
     marketsWithStations.sort((a, b) => a.rank - b.rank);
 
-    // Показываем все доступные маркеты, восстанавливая выбор из Redux
+    // Show all available markets, restoring selection from Redux
     setMarkets(marketsWithStations);
   }, [linearData.broadcasters]);
 
@@ -113,7 +113,7 @@ export const useMarketsState = () => {
 
   // Update Redux when markets change
   useEffect(() => {
-    // Обновляем список выбранных маркетов в Redux
+    // Update list of selected markets in Redux
     const selectedMarketNames = markets
       .filter(m => m.selected)
       .map(m => m.name);
@@ -140,7 +140,7 @@ export const useMarketsState = () => {
     
     dispatch(updateMarketsData({ selectedMarkets: selectedMarketNames, marketsDetails }));
 
-    // Обновляем estimations - считаем только если есть выбранные markets
+    // Update estimations - calculate only if there are selected markets
     const selectedMarkets = markets.filter(m => m.selected);
     
     if (selectedMarkets.length > 0) {
@@ -154,16 +154,16 @@ export const useMarketsState = () => {
   // Auto-expand detailed tables when markets are selected
   useEffect(() => {
     if (selectedMarketsWithStations.length > 0) {
-      // Автоматически раскрываем все выбранные маркеты
+      // Automatically expand all selected markets
       const newExpanded = new Set(selectedMarketsWithStations.map(m => m.id));
       setExpandedDetails(newExpanded);
     } else {
-      // Закрываем все, если ничего не выбрано
+      // Collapse all if nothing is selected
       setExpandedDetails(new Set());
     }
   }, [selectedMarketsWithStations.length]);
 
-  // Get available markets for filter (memoized) - все доступные markets
+  // Get available markets for filter (memoized) - all available markets
   const availableMarketsForFilter = useMemo(() => 
     markets.map(market => ({
       id: market.id,

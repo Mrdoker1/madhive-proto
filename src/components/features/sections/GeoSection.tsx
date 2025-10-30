@@ -18,7 +18,7 @@ const GeoSection = ({ channel, isFirstChannel = true }: GeoSectionProps) => {
   const channelData = useAppSelector((state) => state.campaign.omnichannel.channelData);
   const budgetAllocation = useAppSelector((state) => state.campaign.channels.budgetAllocation);
   
-  // Получаем данные для текущего канала
+  // Get data for current channel
   const geoData = channel 
     ? (channelData[channel]?.geo || { selectedZipCodes: [], country: 'United States', targetNationally: true })
     : { selectedZipCodes: [], country: 'United States', targetNationally: true };
@@ -26,20 +26,20 @@ const GeoSection = ({ channel, isFirstChannel = true }: GeoSectionProps) => {
   const [selectedZipCodes, setSelectedZipCodes] = useState<string[]>(geoData.selectedZipCodes);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Синхронизируем локальный стейт с Redux когда меняется канал
+  // Synchronize local state with Redux when channel changes
   useEffect(() => {
     setSelectedZipCodes(geoData.selectedZipCodes);
   }, [channel, geoData.selectedZipCodes]);
 
   const handleZipCodesChange = (values: string[]) => {
-    // Если это omnichannel и мы НЕ на первой вкладке, отключаем carry over режим
+    // If this is omnichannel and we're NOT on first tab, disable carry over mode
     if (channel && !isFirstChannel && carryOverMode) {
       dispatch(setCarryOverMode(false));
     }
     
     setSelectedZipCodes(values);
     
-    // Обновляем данные в Redux
+    // Update data in Redux
     if (channel) {
       dispatch(updateChannelSectionData({
         channel,
@@ -47,7 +47,7 @@ const GeoSection = ({ channel, isFirstChannel = true }: GeoSectionProps) => {
         data: { selectedZipCodes: values }
       }));
       
-      // Пересчитываем estimations для канала
+      // Recalculate estimations for channel
       const audienceData = channelData[channel]?.audience || {
         gender: [], age: [], income: [], education: [], householdSize: []
       };
@@ -63,7 +63,7 @@ const GeoSection = ({ channel, isFirstChannel = true }: GeoSectionProps) => {
         marketEstimation: newMarketEstimation
       }));
       
-      // Если carry over режим активен, копируем данные на все каналы
+      // If carry over mode is active, copy data to all channels
       if (carryOverMode && isFirstChannel) {
         const allChannels = Object.keys(channelData);
         allChannels.forEach(ch => {
@@ -74,7 +74,7 @@ const GeoSection = ({ channel, isFirstChannel = true }: GeoSectionProps) => {
               data: { selectedZipCodes: values }
             }));
             
-            // Обновляем estimations для других каналов тоже
+            // Update estimations for other channels too
             const chAudienceData = channelData[ch]?.audience || {
               gender: [], age: [], income: [], education: [], householdSize: []
             };
@@ -105,7 +105,7 @@ const GeoSection = ({ channel, isFirstChannel = true }: GeoSectionProps) => {
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      // Файл загружен, но ничего не делаем с ним
+      // File uploaded, but we don't do anything with it
       console.log('File selected:', file.name);
     }
   };

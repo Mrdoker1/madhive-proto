@@ -30,27 +30,27 @@ export const AllocationSection: React.FC = () => {
   const selectedChannels = channelsData.selectedChannels;
   const channelCount = selectedChannels.length;
   
-  // Все доступные каналы
+  // All available channels
   const allAvailableChannels = Object.keys(CHANNEL_CONFIGS);
-  // Каналы, которые не выбраны
+  // Channels that are not selected
   const unselectedChannels = allAvailableChannels.filter(ch => !selectedChannels.includes(ch));
-  // Предлагаемый канал (первый из неиспользованных)
+  // Suggested channel (first unused one)
   const suggestedChannel = unselectedChannels.length > 0 ? unselectedChannels[0] : null;
   
-  // Единое состояние для каналов (содержит данные для графика и слайдеров)
+  // Unified state for channels (contains data for chart and sliders)
   const [channelData, setChannelData] = useState<Record<string, ChannelPoint & SliderChannelAllocation>>({});
   const [isLoading, setIsLoading] = useState<Record<string, boolean>>({});
 
 
-  // Отслеживаем размеры контейнера
+  // Track container dimensions
   useEffect(() => {
     const updateDimensions = () => {
       if (chartContainerRef.current) {
         const rect = chartContainerRef.current.getBoundingClientRect();
         
         setChartDimensions({
-          width: rect.width - CHART_CONFIG.OFFSET_X, // Минус отступ для Y-axis
-          height: 300 // Фиксированная высота
+          width: rect.width - CHART_CONFIG.OFFSET_X, // Minus offset for Y-axis
+          height: 300 // Fixed height
         });
       }
     };
@@ -60,37 +60,37 @@ export const AllocationSection: React.FC = () => {
     return () => window.removeEventListener('resize', updateDimensions);
   }, []);
 
-  // Инициализация данных каналов (для графика и слайдеров)
+  // Initialize channel data (for chart and sliders)
   useEffect(() => {
     const initializeChannelData = async () => {
       if (!totalBudget || selectedChannels.length === 0) return;
       
-      // Проверяем, есть ли уже сохраненное распределение бюджета в Redux
-      // Если есть - используем его, если нет - рассчитываем дефолтное
+      // Check if there is already a saved budget allocation in Redux
+      // If yes - use it, if no - calculate default
       let budgetAllocation: Record<string, number>;
-      let needsSave = false; // Флаг: нужно ли сохранить в Redux
+      let needsSave = false; // Flag: whether to save to Redux
       
       if (channelsData.budgetAllocation && Object.keys(channelsData.budgetAllocation).length > 0) {
-        // Используем существующее распределение из Redux
+        // Use existing allocation from Redux
         budgetAllocation = { ...channelsData.budgetAllocation };
         
-        // МИГРАЦИЯ: если есть старый ключ 'display', переименовываем в 'preroll'
+        // MIGRATION: if there's an old 'display' key, rename to 'preroll'
         if (budgetAllocation['display'] !== undefined) {
           budgetAllocation['preroll'] = budgetAllocation['display'];
           delete budgetAllocation['display'];
           needsSave = true;
         }
         
-        // Проверяем, что ВСЕ выбранные каналы имеют бюджет
+        // Check that ALL selected channels have budget
         const allChannelsHaveBudget = selectedChannels.every(ch => budgetAllocation[ch] && budgetAllocation[ch] > 0);
         
         if (!allChannelsHaveBudget) {
-          // Если есть каналы без бюджета, пересчитываем распределение для всех
+          // If there are channels without budget, recalculate allocation for all
           budgetAllocation = calculateDefaultBudgetAllocation(selectedChannels, totalBudget);
           needsSave = true;
         }
       } else {
-        // Рассчитываем дефолтное распределение только при первой инициализации
+        // Calculate default allocation only on first initialization
         budgetAllocation = calculateDefaultBudgetAllocation(selectedChannels, totalBudget);
         needsSave = true;
       }
@@ -105,24 +105,24 @@ export const AllocationSection: React.FC = () => {
         loadingStates[channelId] = true;
         setIsLoading(prev => ({ ...prev, [channelId]: true }));
         
-        // Получаем метрики для слайдеров
+        // Get metrics for sliders
         const metrics = await fetchForecastMetrics(channelId, budgetPerChannel, totalBudget);
         
-        // Вычисляем reach по новой формуле с учетом totalBudget
+        // Calculate reach by new formula considering totalBudget
         const calculatedReach = calculateReachByFormula(channelId, budgetPerChannel, totalBudget);
         
-        // Получаем конфигурацию канала
+        // Get channel configuration
         const channelConfig = CHANNEL_CONFIGS[channelId];
         
         newChannelData[channelId] = {
-          // Данные для графика
+          // Data for chart
           id: channelId,
           name: channelConfig?.name || channelNames[channelId] || channelId,
           color: channelConfig?.color || channelColors[channelId] || '#6B7280',
           budget: budgetPerChannel,
           reach: calculatedReach,
-          // Данные для слайдеров
-          maxReach: metrics.maxReach, // Используем абсолютное значение из новой формулы
+          // Data for sliders
+          maxReach: metrics.maxReach, // Use absolute value from new formula
           reachPercent: metrics.reachPercent,
           isInefficient: false
         };
@@ -133,7 +133,7 @@ export const AllocationSection: React.FC = () => {
       setChannelData(newChannelData);
       setIsLoading(loadingStates);
       
-      // Сохраняем распределение бюджета в Redux если оно было изменено/пересчитано
+      // Save budget allocation to Redux if it was changed/recalculated
       if (needsSave) {
         dispatch(updateChannelsData({ budgetAllocation }));
       }
@@ -141,40 +141,40 @@ export const AllocationSection: React.FC = () => {
 
     initializeChannelData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedChannels, totalBudget, dispatch]); // Убрали channelsData.budgetAllocation из зависимостей
+  }, [selectedChannels, totalBudget, dispatch]); // Removed channelsData.budgetAllocation from dependencies
 
   const points = Object.values(channelData);
   
-  // Минимальный бюджет для отображения графика
+  // Minimum budget to display chart
   const MIN_BUDGET_FOR_CHART = 1000;
   const shouldShowChart = totalBudget >= MIN_BUDGET_FOR_CHART;
   
-  // Обработчик изменения точки на графике с обновлением метрик
+  // Handler for point change on chart with metrics update
   const handlePointChange = useCallback(async (channelId: string, newBudget: number) => {
-    // Ограничиваем бюджет максимальным значением и округляем до кратного 100
+    // Limit budget to maximum value and round to multiple of 100
     const clampedBudget = Math.round(Math.min(Math.max(0, newBudget), totalBudget) / 100) * 100;
 
-    // Получаем текущие бюджеты всех каналов
+    // Get current budgets of all channels
     const currentBudgets: Record<string, number> = {};
     Object.keys(channelData).forEach(id => {
       currentBudgets[id] = channelData[id].budget;
     });
 
-    // Умное перераспределение с учетом коэффициентов
+    // Smart redistribution considering coefficients
     const newBudgets = redistributeBudgetSmart(currentBudgets, channelId, clampedBudget, totalBudget);
 
-    // Обновляем состояние загрузки для всех каналов
+    // Update loading state for all channels
     const loadingUpdates: Record<string, boolean> = {};
     Object.keys(newBudgets).forEach(id => {
       loadingUpdates[id] = true;
     });
     setIsLoading(prev => ({ ...prev, ...loadingUpdates }));
 
-    // Обновляем все каналы с новыми бюджетами, reach и метриками
+    // Update all channels with new budgets, reach and metrics
     try {
       const updatedChannelData = { ...channelData };
       
-      // Обновляем метрики для всех затронутых каналов параллельно
+      // Update metrics for all affected channels in parallel
       const metricPromises = Object.keys(newBudgets).map(async (id) => {
         const newChannelBudget = newBudgets[id];
         const calculatedReach = calculateReachByFormula(id, newChannelBudget, totalBudget);
@@ -195,7 +195,7 @@ export const AllocationSection: React.FC = () => {
 
       const results = await Promise.all(metricPromises);
       
-      // Применяем все обновления одновременно
+      // Apply all updates simultaneously
       const finalData = { ...updatedChannelData };
       results.forEach(result => {
         finalData[result.id] = result.data;
@@ -208,7 +208,7 @@ export const AllocationSection: React.FC = () => {
     } catch (error) {
       console.error('Failed to fetch metrics:', error);
     } finally {
-      // Убираем состояние загрузки для всех каналов
+      // Remove loading state for all channels
       const loadingClearUpdates: Record<string, boolean> = {};
       Object.keys(newBudgets).forEach(id => {
         loadingClearUpdates[id] = false;
@@ -217,38 +217,38 @@ export const AllocationSection: React.FC = () => {
     }
   }, [totalBudget, channelData, dispatch]);
 
-  // Обработчик изменения бюджета с умным перераспределением
+  // Handler for budget change with smart redistribution
   const handleBudgetChange = async (channelId: string, newBudget: number) => {
     const currentData = channelData[channelId];
     if (!currentData) return;
 
-    // Ограничиваем бюджет максимальным значением и округляем до кратного 100
+    // Limit budget to maximum value and round to multiple of 100
     const clampedBudget = Math.round(Math.min(Math.max(0, newBudget), totalBudget) / 100) * 100;
 
-    // Получаем текущие бюджеты всех каналов
+    // Get current budgets of all channels
     const currentBudgets: Record<string, number> = {};
     Object.keys(channelData).forEach(id => {
       currentBudgets[id] = channelData[id].budget;
     });
 
-    // Умное перераспределение с учетом коэффициентов
+    // Smart redistribution considering coefficients
     const newBudgets = redistributeBudgetSmart(currentBudgets, channelId, clampedBudget, totalBudget);
     
-    // 🚨 КРИТИЧНО: Сохраняем в Redux СРАЗУ, до async операций!
+    // 🚨 CRITICAL: Save to Redux IMMEDIATELY, before async operations!
     dispatch(updateChannelsData({ budgetAllocation: newBudgets }));
 
-    // Обновляем состояние загрузки для всех каналов
+    // Update loading state for all channels
     const loadingUpdates: Record<string, boolean> = {};
     Object.keys(newBudgets).forEach(id => {
       loadingUpdates[id] = true;
     });
     setIsLoading(prev => ({ ...prev, ...loadingUpdates }));
 
-    // Обновляем все каналы с новыми бюджетами, reach и метриками
+    // Update all channels with new budgets, reach and metrics
     try {
       const updatedChannelData = { ...channelData };
       
-      // Обновляем метрики для всех затронутых каналов параллельно
+      // Update metrics for all affected channels in parallel
       const metricPromises = Object.keys(newBudgets).map(async (id) => {
         const newChannelBudget = newBudgets[id];
         const calculatedReach = calculateReachByFormula(id, newChannelBudget, totalBudget);
@@ -269,7 +269,7 @@ export const AllocationSection: React.FC = () => {
 
       const results = await Promise.all(metricPromises);
       
-      // Применяем все обновления одновременно
+      // Apply all updates simultaneously
       const finalData = { ...updatedChannelData };
       results.forEach(result => {
         finalData[result.id] = result.data;
@@ -280,7 +280,7 @@ export const AllocationSection: React.FC = () => {
     } catch (error) {
       console.error('Failed to fetch metrics:', error);
     } finally {
-      // Убираем состояние загрузки для всех каналов
+      // Remove loading state for all channels
       const loadingClearUpdates: Record<string, boolean> = {};
       Object.keys(newBudgets).forEach(id => {
         loadingClearUpdates[id] = false;
@@ -289,17 +289,17 @@ export const AllocationSection: React.FC = () => {
     }
   };
 
-  // Удаление канала с перераспределением бюджета
+  // Remove channel with budget redistribution
   const handleRemoveChannel = (channelId: string) => {
-    // Удаляем канал из Redux selectedChannels
+    // Remove channel from Redux selectedChannels
     const updatedSelectedChannels = selectedChannels.filter(id => id !== channelId);
     
-    // Вычисляем новое распределение бюджета
+    // Calculate new budget allocation
     const newData = { ...channelData };
     const removedChannelBudget = newData[channelId]?.budget || 0;
     delete newData[channelId];
     
-    // Перераспределяем бюджет удаленного канала между оставшимися
+    // Redistribute removed channel's budget among remaining channels
     const remainingChannels = Object.keys(newData);
     if (remainingChannels.length > 0) {
       const budgetPerChannel = removedChannelBudget / remainingChannels.length;
@@ -311,7 +311,7 @@ export const AllocationSection: React.FC = () => {
       });
     }
     
-    // Обновляем Redux с новым списком каналов и бюджетами
+    // Update Redux with new channel list and budgets
     const updatedBudgetAllocation: Record<string, number> = {};
     Object.keys(newData).forEach(id => {
       updatedBudgetAllocation[id] = newData[id].budget;
@@ -322,33 +322,33 @@ export const AllocationSection: React.FC = () => {
       budgetAllocation: updatedBudgetAllocation
     }));
     
-    // Обновляем локальное состояние
+    // Update local state
     setChannelData(newData);
   };
 
-  // Добавление предложенного канала
+  // Add suggested channel
   const handleAddSuggestedChannel = useCallback((channelId: string) => {
-    // Добавляем канал в Redux
+    // Add channel to Redux
     dispatch(updateChannelsData({
       selectedChannels: [...selectedChannels, channelId]
     }));
   }, [dispatch, selectedChannels]);
   
-  // Вычисляем allocations для budget bar
+  // Calculate allocations for budget bar
   const totalAllocatedBudget = points.reduce((sum, point) => sum + point.budget, 0);
   const chartAllocations: ChannelAllocation[] = points.map(point => ({
     ...point,
     percentage: totalAllocatedBudget > 0 ? (point.budget / totalAllocatedBudget) * 100 : 0
   }));
 
-  // Все каналы для слайдеров
+  // All channels for sliders
   const allChannels = Object.values(channelData);
 
-  // Используем динамические размеры
+  // Use dynamic dimensions
   const chartWidth = chartDimensions.width;
   const chartHeight = chartDimensions.height;
 
-  // Показываем заглушку если нет каналов или бюджета
+  // Show placeholder if no channels or budget
   if (channelCount === 0) {
     return (
       <div style={{ padding: '24px', textAlign: 'center' }}>
@@ -369,7 +369,7 @@ export const AllocationSection: React.FC = () => {
     );
   }
 
-  // Если бюджет меньше минимального для графика, показываем сообщение
+  // If budget is less than minimum for chart, show message
   if (totalBudget < MIN_BUDGET_FOR_CHART) {
     return (
       <div style={{ padding: '24px', textAlign: 'center' }}>
@@ -500,14 +500,14 @@ export const AllocationSection: React.FC = () => {
                 ))}
               </AnimatePresence>
               
-              {/* Предложение добавить канал */}
+              {/* Suggestion to add channel */}
               <AnimatePresence>
                 {suggestedChannel && (
                   <SuggestedChannelSlider
                     channelId={suggestedChannel}
                     channelName={CHANNEL_CONFIGS[suggestedChannel].name}
                     channelColor={CHANNEL_CONFIGS[suggestedChannel].color}
-                    roiIncrease={Math.floor(Math.random() * 15) + 5} // Случайное значение 5-20%
+                    roiIncrease={Math.floor(Math.random() * 15) + 5} // Random value 5-20%
                     onAdd={handleAddSuggestedChannel}
                   />
                 )}

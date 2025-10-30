@@ -7,7 +7,7 @@ export interface ValidationError {
 }
 
 /**
- * Валидация General Details
+ * Validation for General Details
  */
 export const validateGeneralDetails = (data: CampaignGeneralData): ValidationError[] => {
   const errors: ValidationError[] = [];
@@ -64,7 +64,7 @@ export const validateGeneralDetails = (data: CampaignGeneralData): ValidationErr
 };
 
 /**
- * Валидация Total Budget
+ * Validation for Total Budget
  */
 export const validateTotalBudget = (data: CampaignBudgetData): ValidationError[] => {
   const errors: ValidationError[] = [];
@@ -81,7 +81,7 @@ export const validateTotalBudget = (data: CampaignBudgetData): ValidationError[]
 };
 
 /**
- * Валидация Goal
+ * Validation for Goal
  */
 export const validateGoal = (data: CampaignGoalData): ValidationError[] => {
   const errors: ValidationError[] = [];
@@ -98,7 +98,7 @@ export const validateGoal = (data: CampaignGoalData): ValidationError[] => {
 };
 
 /**
- * Валидация Flight Range
+ * Validation for Flight Range
  */
 export const validateFlightRange = (data: CampaignFlightData): ValidationError[] => {
   const errors: ValidationError[] = [];
@@ -123,12 +123,12 @@ export const validateFlightRange = (data: CampaignFlightData): ValidationError[]
 };
 
 /**
- * Форматирование ошибок в единую строку для отображения
+ * Format errors into a single string for display
  */
 export const formatValidationErrors = (errors: ValidationError[]): string => {
   if (errors.length === 0) return '';
   
-  // Группируем ошибки по секциям
+  // Group errors by sections
   const errorsBySection = errors.reduce((acc, error) => {
     const section = error.sectionId || 'general';
     if (!acc[section]) {
@@ -138,13 +138,13 @@ export const formatValidationErrors = (errors: ValidationError[]): string => {
     return acc;
   }, {} as Record<string, string[]>);
 
-  // Берем первую ошибку для отображения
+  // Take first error for display
   const firstError = errors[0];
   return firstError.message;
 };
 
 /**
- * Конвертация массива ошибок в объект для подсветки полей
+ * Convert error array to object for field highlighting
  */
 export const errorsToFieldErrors = (errors: ValidationError[]): Record<string, string> => {
   return errors.reduce((acc, error) => {
@@ -156,7 +156,7 @@ export const errorsToFieldErrors = (errors: ValidationError[]): Record<string, s
 };
 
 /**
- * Валидация Select Channels (для Omnichannel)
+ * Validation for Select Channels (for Omnichannel)
  */
 export const validateSelectChannels = (selectedChannels: string[]): ValidationError[] => {
   const errors: ValidationError[] = [];
@@ -173,10 +173,10 @@ export const validateSelectChannels = (selectedChannels: string[]): ValidationEr
 };
 
 /**
- * Валидация Allocation (для Omnichannel)
- * Проверяем, что все выбранные каналы имеют распределенный бюджет
- * Точное равенство суммы totalBudget не проверяем, так как AllocationSection
- * автоматически управляет распределением и может округлять значения
+ * Validation for Allocation (for Omnichannel)
+ * Check that all selected channels have allocated budget
+ * We don't check exact equality to totalBudget, as AllocationSection
+ * automatically manages distribution and may round values
  */
 export const validateAllocation = (
   budgetAllocation: Record<string, number> | undefined,
@@ -184,12 +184,12 @@ export const validateAllocation = (
 ): ValidationError[] => {
   const errors: ValidationError[] = [];
 
-  // Если нет выбранных каналов, валидация не нужна
+  // If no channels selected, validation not needed
   if (selectedChannels.length === 0) {
     return errors;
   }
 
-  // Проверяем, что budgetAllocation существует
+  // Check that budgetAllocation exists
   if (!budgetAllocation) {
     errors.push({
       field: 'budgetAllocation',
@@ -199,7 +199,7 @@ export const validateAllocation = (
     return errors;
   }
 
-  // Проверяем, что все выбранные каналы имеют распределенный бюджет (больше 0)
+  // Check that all selected channels have allocated budget (greater than 0)
   const channelsWithoutBudget = selectedChannels.filter(
     channel => !budgetAllocation[channel] || budgetAllocation[channel] <= 0
   );
@@ -216,8 +216,8 @@ export const validateAllocation = (
 };
 
 /**
- * Валидация Markets (для Linear)
- * Проверяем, что выбран хотя бы один маркет
+ * Validation for Markets (for Linear)
+ * Check that at least one market is selected
  */
 export const validateMarkets = (selectedMarkets: string[]): ValidationError[] => {
   const errors: ValidationError[] = [];
@@ -234,10 +234,10 @@ export const validateMarkets = (selectedMarkets: string[]): ValidationError[] =>
 };
 
 /**
- * Валидация Broadcasters and Programs (для Linear)
- * Проверяем, что:
- * 1. Выбран хотя бы один broadcaster
- * 2. Выбрана хотя бы одна станция в общем (не обязательно у каждого broadcaster)
+ * Validation for Broadcasters and Programs (for Linear)
+ * Check that:
+ * 1. At least one broadcaster is selected
+ * 2. At least one station is selected overall (not necessarily for each broadcaster)
  */
 export const validateBroadcastersAndPrograms = (
   broadcasters: string[],
@@ -249,7 +249,7 @@ export const validateBroadcastersAndPrograms = (
 ): ValidationError[] => {
   const errors: ValidationError[] = [];
 
-  // Проверяем, что выбран хотя бы один broadcaster
+  // Check that at least one broadcaster is selected
   if (!broadcasters || broadcasters.length === 0) {
     errors.push({
       field: 'broadcasters',
@@ -259,7 +259,7 @@ export const validateBroadcastersAndPrograms = (
     return errors;
   }
 
-  // Проверяем, что выбрана хотя бы одна станция в общем (у любого broadcaster)
+  // Check that at least one station is selected overall (from any broadcaster)
   if (broadcastersWithStations && broadcastersWithStations.length > 0) {
     const totalSelectedStations = broadcastersWithStations.reduce((count, broadcaster) => {
       const selectedStations = broadcaster.stations.filter(s => s.selected);
@@ -279,15 +279,15 @@ export const validateBroadcastersAndPrograms = (
 };
 
 /**
- * Валидация Proposal - проверка выбора программ (для Linear)
- * Проверяем, что выбрана хотя бы одна программа
+ * Validation for Proposal - program selection check (for Linear)
+ * Check that at least one program is selected
  */
 export const validateProgramSelection = (
   programSelections: { [stationId: string]: { [programId: string]: boolean } }
 ): ValidationError[] => {
   const errors: ValidationError[] = [];
 
-  // Подсчитываем общее количество выбранных программ
+  // Count total number of selected programs
   let totalSelectedPrograms = 0;
   
   Object.values(programSelections).forEach(stationPrograms => {
@@ -310,8 +310,8 @@ export const validateProgramSelection = (
 };
 
 /**
- * Валидация Proposal - проверка бюджета программ (для Linear)
- * Проверяем, что выбранные программы не превышают выделенный бюджет станции
+ * Validation for Proposal - program budget check (for Linear)
+ * Check that selected programs don't exceed allocated station budget
  */
 export const validateProgramBudget = (
   programSelections: { [stationId: string]: { [programId: string]: boolean } },
@@ -325,13 +325,13 @@ export const validateProgramBudget = (
 ): ValidationError[] => {
   const errors: ValidationError[] = [];
 
-  // Проверяем каждую станцию
+  // Check each station
   Object.keys(programSelections).forEach(stationId => {
     const selectedPrograms = programSelections[stationId];
     const programs = stationPrograms[stationId] || [];
     const allocatedBudget = stationBudgets[stationId] || 0;
 
-    // Считаем общую стоимость выбранных программ для этой станции
+    // Calculate total cost of selected programs for this station
     let totalRate = 0;
     Object.keys(selectedPrograms).forEach(programId => {
       if (selectedPrograms[programId]) {
@@ -342,14 +342,14 @@ export const validateProgramBudget = (
       }
     });
 
-    // Проверяем превышение бюджета
+    // Check budget excess
     if (totalRate > allocatedBudget) {
       errors.push({
         field: 'programBudget',
         message: 'Selected programs exceed the allocated budget',
         sectionId: 'proposal'
       });
-      // Возвращаем после первой найденной ошибки, чтобы не дублировать сообщение
+      // Return after first found error to avoid duplicate messages
       return;
     }
   });
@@ -358,7 +358,7 @@ export const validateProgramBudget = (
 };
 
 /**
- * Скролл к первой ошибке
+ * Scroll to first error
  */
 export const scrollToFirstError = (errors: ValidationError[]): void => {
   if (errors.length === 0) return;

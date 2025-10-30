@@ -27,7 +27,7 @@ const GeneralDetailsSection: React.FC<GeneralDetailsSectionProps> = ({
     spotLength: ['60']
   });
 
-  // Синхронизируем локальное состояние с глобальным при загрузке
+  // Synchronize local state with global on load
   useEffect(() => {
     setFormData({
       campaignName: globalGeneralData.campaignName || '',
@@ -44,20 +44,20 @@ const GeneralDetailsSection: React.FC<GeneralDetailsSectionProps> = ({
   const handleInputChange = (field: string, value: string | null) => {
     const newValue = value || '';
     
-    // При изменении рекламодателя сбрасываем бренд
+    // Reset brand when advertiser changes
     if (field === 'advertiser') {
       setFormData(prev => ({ 
         ...prev, 
         [field]: newValue,
-        brand: '', // Сбрасываем бренд при смене рекламодателя
-        agency: '', // Сбрасываем агентство при смене рекламодателя
-        spotLength: ['60'] // Сбрасываем к дефолту :60 при смене рекламодателя
+        brand: '', // Reset brand when advertiser changes
+        agency: '', // Reset agency when advertiser changes
+        spotLength: ['60'] // Reset to default :60 when advertiser changes
       }));
       dispatch(updateGeneralData({ 
         advertiser: newValue,
-        brand: '', // Сбрасываем бренд в глобальном состоянии
-        agency: '', // Сбрасываем агентство в глобальном состоянии
-        spotLength: ['60'] // Сбрасываем к дефолту :60 в глобальном состоянии
+        brand: '', // Reset brand in global state
+        agency: '', // Reset agency in global state
+        spotLength: ['60'] // Reset to default :60 in global state
       }));
     } else {
       setFormData(prev => ({
@@ -65,7 +65,7 @@ const GeneralDetailsSection: React.FC<GeneralDetailsSectionProps> = ({
         [field]: newValue
       }));
 
-      // Обновляем глобальный стейт для всех полей
+      // Update global state for all fields
       if (field === 'campaignName') {
         dispatch(updateGeneralData({ campaignName: newValue }));
       } else if (field === 'brand') {
@@ -80,7 +80,7 @@ const GeneralDetailsSection: React.FC<GeneralDetailsSectionProps> = ({
         dispatch(updateGeneralData({ campaignApprover: newValue }));
       }
       
-      // Сбрасываем spot length при изменении advertiser, brand или agency
+      // Reset spot length when advertiser, brand or agency changes
       if (field === 'brand' || field === 'agency') {
         setFormData(prev => ({ ...prev, spotLength: ['60'] }));
         dispatch(updateGeneralData({ spotLength: ['60'] }));
@@ -88,7 +88,7 @@ const GeneralDetailsSection: React.FC<GeneralDetailsSectionProps> = ({
     }
   };
 
-  // Обработчик для чекбоксов Spot Length
+  // Handler for Spot Length checkboxes
   const handleSpotLengthChange = (value: string) => {
     const currentSpotLengths = formData.spotLength;
     const newSpotLengths = currentSpotLengths.includes(value)
@@ -100,19 +100,19 @@ const GeneralDetailsSection: React.FC<GeneralDetailsSectionProps> = ({
       spotLength: newSpotLengths
     }));
     
-    // Обновляем глобальное состояние
+    // Update global state
     dispatch(updateGeneralData({ spotLength: newSpotLengths }));
   };
 
-  // Получаем бренды для выбранного рекламодателя
+  // Get brands for selected advertiser
   const availableBrandOptions = formData.advertiser ? brandOptions[formData.advertiser] || [] : [];
   
-  // Получаем агентства для выбранного рекламодателя
+  // Get agencies for selected advertiser
   const availableAgencyOptions = formData.advertiser ? agencyOptions[formData.advertiser] || [] : [];
 
   return (
     <div className={className}>
-      {/* Campaign Name - полная ширина */}
+      {/* Campaign Name - full width */}
       <TextInput
         label="Campaign Name"
         placeholder="Enter campaign name"
@@ -122,7 +122,7 @@ const GeneralDetailsSection: React.FC<GeneralDetailsSectionProps> = ({
         mb="lg"
       />
 
-      {/* Строка с Advertiser и Brand */}
+      {/* Row with Advertiser and Brand */}
       <Grid mb="lg">
         <Grid.Col span={6}>
           <Select
@@ -146,7 +146,7 @@ const GeneralDetailsSection: React.FC<GeneralDetailsSectionProps> = ({
         </Grid.Col>
       </Grid>
 
-      {/* Строка с Agency и CPE Code */}
+      {/* Row with Agency and CPE Code */}
       <Grid mb="lg">
         <Grid.Col span={6}>
           <Select
@@ -169,7 +169,7 @@ const GeneralDetailsSection: React.FC<GeneralDetailsSectionProps> = ({
         </Grid.Col>
       </Grid>
 
-      {/* Строка с Campaign Owner и Campaign Approver */}
+      {/* Row with Campaign Owner and Campaign Approver */}
       <Grid mb="lg">
         <Grid.Col span={6}>
           <TextInput

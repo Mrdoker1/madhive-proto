@@ -4,7 +4,7 @@ export interface CampaignDMAZone {
   state: string;
   impressions: number;
   coordinates: [number, number]; // [longitude, latitude]
-  bounds?: [[number, number], [number, number]]; // Границы зоны [[minLng, minLat], [maxLng, maxLat]]
+  bounds?: [[number, number], [number, number]]; // Zone bounds [[minLng, minLat], [maxLng, maxLat]]
 }
 
 export interface CampaignDMAData {
@@ -13,7 +13,7 @@ export interface CampaignDMAData {
   zones: CampaignDMAZone[];
 }
 
-// DMA данные для кампании Ford Motor Company
+// DMA data for Ford Motor Company campaign
 const fordDMAData: CampaignDMAData = {
   campaignId: 'ford-mach-e-ev',
   campaignName: 'Ford Mach-E EV Intro',
@@ -61,7 +61,7 @@ const fordDMAData: CampaignDMAData = {
   ]
 };
 
-// DMA данные для кампании Toyota
+// DMA data for Toyota campaign
 const toyotaDMAData: CampaignDMAData = {
   campaignId: 'toyota-q3-brand',
   campaignName: 'Toyota Q3 Brand Push',
@@ -109,7 +109,7 @@ const toyotaDMAData: CampaignDMAData = {
   ]
 };
 
-// DMA данные для кампании Chevy
+// DMA data for Chevy campaign
 const chevyDMAData: CampaignDMAData = {
   campaignId: 'chevy-silverado',
   campaignName: 'Chevy Silverado Summer Sale',
@@ -157,7 +157,7 @@ const chevyDMAData: CampaignDMAData = {
   ]
 };
 
-// DMA данные для кампании Ram
+// DMA data for Ram campaign
 const ramDMAData: CampaignDMAData = {
   campaignId: 'august-ram-truck',
   campaignName: 'August Ram Truck Month',
@@ -205,7 +205,7 @@ const ramDMAData: CampaignDMAData = {
   ]
 };
 
-// DMA данные для кампании Hyundai
+// DMA data for Hyundai campaign
 const hyundaiDMAData: CampaignDMAData = {
   campaignId: 'hyundai-sonata-sept',
   campaignName: 'Hyundai Sonata Sept Event',
@@ -253,7 +253,7 @@ const hyundaiDMAData: CampaignDMAData = {
   ]
 };
 
-// DMA данные для кампании Lincoln
+// DMA data for Lincoln campaign
 const lincolnDMAData: CampaignDMAData = {
   campaignId: 'lincoln-aviator-luxury',
   campaignName: 'Lincoln Aviator Luxury',
@@ -301,7 +301,7 @@ const lincolnDMAData: CampaignDMAData = {
   ]
 };
 
-// DMA данные для кампании Q3 Ford F150
+// DMA data for Q3 Ford F150 campaign
 const fordF150DMAData: CampaignDMAData = {
   campaignId: 'q3-ford-f150',
   campaignName: 'Q3 25 Ford F150 TRISTATE',
@@ -349,7 +349,7 @@ const fordF150DMAData: CampaignDMAData = {
   ]
 };
 
-// DMA данные для кампании JGC Holiday Pre-Launch
+// DMA data for JGC Holiday Pre-Launch campaign
 const jgcHolidayDMAData: CampaignDMAData = {
   campaignId: 'jgc-holiday-pre',
   campaignName: 'JGC Holiday Pre-Launch',
@@ -397,7 +397,7 @@ const jgcHolidayDMAData: CampaignDMAData = {
   ]
 };
 
-// Маппинг кампаний к их DMA данным
+// Mapping of campaigns to their DMA data
 export const campaignDMAMapping: Record<string, CampaignDMAData> = {
   'ford-mach-e-ev': fordDMAData,
   'toyota-q3-brand': toyotaDMAData,
@@ -409,12 +409,12 @@ export const campaignDMAMapping: Record<string, CampaignDMAData> = {
   'jgc-holiday-pre': jgcHolidayDMAData
 };
 
-// Функция для получения DMA данных по ID кампании
+// Function to get DMA data by campaign ID
 export const getCampaignDMAData = (campaignId: string): CampaignDMAData | null => {
   return campaignDMAMapping[campaignId] || null;
 };
 
-// Функция для получения всех доступных кампаний с DMA данными
+// Function to get all available campaigns with DMA data
 export const getAvailableCampaigns = (): Array<{ id: string; name: string }> => {
   return Object.values(campaignDMAMapping).map(campaign => ({
     id: campaign.campaignId,

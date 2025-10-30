@@ -9,7 +9,7 @@ interface WeekData {
   startDate: Date;
   endDate: Date;
   budget: number;
-  isLocked?: boolean; // Добавляем поле для блокировки
+  isLocked?: boolean; // Add field for locking
 }
 
 interface HiatusRange {
@@ -29,7 +29,7 @@ interface FlightByWeekProps {
     totalAllocated: number;
     showWarning: boolean;
   }) => void;
-  // Новые пропсы для поддержки hiatus режима
+  // New props to support hiatus mode
   hiatusStartDate?: string;
   hiatusEndDate?: string;
   hiatusRanges?: HiatusRange[];
@@ -52,10 +52,10 @@ const FlightByWeek: React.FC<FlightByWeekProps> = ({
   const [isDragging, setIsDragging] = useState(false);
   const [showBudgetTooltip, setShowBudgetTooltip] = useState(false);
 
-  // Мемоизируем hiatusRanges для стабильности зависимостей
+  // Memoize hiatusRanges for dependency stability
   const stableHiatusRanges = useMemo(() => hiatusRanges || [], [hiatusRanges]);
 
-  // Функция для переключения блокировки недели
+  // Function to toggle week lock
   const toggleWeekLock = (weekId: string) => {
     setWeeks(prevWeeks => 
       prevWeeks.map(week => 
@@ -66,34 +66,34 @@ const FlightByWeek: React.FC<FlightByWeekProps> = ({
     );
   };
 
-  // Функция для генерации недель из диапазона дат
+  // Function to generate weeks from date range
   const generateWeeks = useCallback((start: string, end: string): WeekData[] => {
     if (!start || !end) return [];
 
-    // Локальная функция для проверки недели в хиатусе
+    // Local function to check if week is in hiatus
     const isWeekInHiatus = (weekStart: Date, weekEnd: Date): boolean => {
-      // Определяем реальные границы недели внутри выбранного диапазона кампании
+      // Determine actual week boundaries within selected campaign range
       const actualWeekStart = weekStart > startDateObj ? weekStart : startDateObj;
       const actualWeekEnd = weekEnd < endDateObj ? weekEnd : endDateObj;
       
-      // Проверяем новые множественные диапазоны
+      // Check new multiple ranges
       if (stableHiatusRanges && stableHiatusRanges.length > 0) {
         return stableHiatusRanges.some(range => {
           const hiatusStart = new Date(range.start);
           const hiatusEnd = new Date(range.end);
           
-          // Неделя блокируется только если её АКТИВНАЯ ЧАСТЬ ПОЛНОСТЬЮ находится в hiatus диапазоне
+          // Week is locked only if its ACTIVE PART is FULLY within hiatus range
           return actualWeekStart >= hiatusStart && actualWeekEnd <= hiatusEnd;
         });
       }
       
-      // Обратная совместимость со старым API
+      // Backward compatibility with old API
       if (!hiatusStartDate || !hiatusEndDate) return false;
       
       const hiatusStart = new Date(hiatusStartDate);
       const hiatusEnd = new Date(hiatusEndDate);
       
-      // Неделя блокируется только если её АКТИВНАЯ ЧАСТЬ ПОЛНОСТЬЮ находится внутри hiatus диапазона
+      // Week is locked only if its ACTIVE PART is FULLY within hiatus range
       return actualWeekStart >= hiatusStart && actualWeekEnd <= hiatusEnd;
     };
 
@@ -101,7 +101,7 @@ const FlightByWeek: React.FC<FlightByWeekProps> = ({
     const endDateObj = new Date(end);
     const weeksArray: WeekData[] = [];
 
-    // Начинаем с понедельника недели начальной даты
+    // Start with Monday of the start date's week
     const weekStart = new Date(startDateObj);
     const dayOfWeek = weekStart.getDay();
     const diff = weekStart.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
@@ -114,18 +114,18 @@ const FlightByWeek: React.FC<FlightByWeekProps> = ({
       const currentWeekEnd = new Date(currentWeekStart);
       currentWeekEnd.setDate(currentWeekStart.getDate() + 6);
 
-      // Не выходим за пределы выбранного диапазона
+      // Don't go beyond selected range
       const actualEnd = currentWeekEnd > endDateObj ? endDateObj : currentWeekEnd;
       
-      // Проверяем, попадает ли неделя в hiatus диапазон
+      // Check if week falls in hiatus range
       const isHiatusWeek = isWeekInHiatus(new Date(currentWeekStart), actualEnd);
 
       weeksArray.push({
         id: `week-${weekCounter}`,
         startDate: new Date(currentWeekStart),
         endDate: actualEnd,
-        budget: isHiatusWeek ? 0 : 0, // Если неделя в hiatus, бюджет 0
-        isLocked: isHiatusWeek // Блокируем недели в hiatus
+        budget: isHiatusWeek ? 0 : 0, // If week is in hiatus, budget is 0
+        isLocked: isHiatusWeek // Lock weeks in hiatus
       });
 
       currentWeekStart.setDate(currentWeekStart.getDate() + 7);
@@ -135,13 +135,13 @@ const FlightByWeek: React.FC<FlightByWeekProps> = ({
     return weeksArray;
   }, [hiatusStartDate, hiatusEndDate, stableHiatusRanges]);
 
-  // Мемоизируем сгенерированные недели для предотвращения лишних пересчетов
+  // Memoize generated weeks to prevent unnecessary recalculations
   const generatedWeeks = useMemo(() => {
     if (!startDate || !endDate) return [];
     return generateWeeks(startDate, endDate);
   }, [startDate, endDate, generateWeeks]);
 
-  // Мемоизируем недели с бюджетом
+  // Memoize weeks with budget
   const weeksWithBudget = useMemo(() => {
     if (generatedWeeks.length === 0) return [];
     
@@ -154,29 +154,29 @@ const FlightByWeek: React.FC<FlightByWeekProps> = ({
     }));
   }, [generatedWeeks, totalBudget]);
 
-  // Обновляем состояние недель когда изменяются мемоизированные данные
+  // Update weeks state when memoized data changes
   useEffect(() => {
     setWeeks(weeksWithBudget);
   }, [weeksWithBudget]);
 
-  // Мемоизируем общую сумму бюджетов
+  // Memoize total budget sum
   const calculatedTotalAllocated = useMemo(() => {
     return weeks.reduce((sum, week) => sum + week.budget, 0);
   }, [weeks]);
 
-  // Обновляем состояние totalAllocated
+  // Update totalAllocated state
   useEffect(() => {
     setTotalAllocated(calculatedTotalAllocated);
   }, [calculatedTotalAllocated]);
 
-  // Уведомляем родительский компонент о изменениях
+  // Notify parent component of changes
   useEffect(() => {
     if (onChange && weeks.length > 0) {
       onChange(weeks);
     }
   }, [weeks, onChange]);
 
-  // Мемоизируем объект валидации
+  // Memoize validation object
   const validationData = useMemo(() => {
     const isOverBudget = totalAllocated > totalBudget;
     return {
@@ -186,14 +186,14 @@ const FlightByWeek: React.FC<FlightByWeekProps> = ({
     };
   }, [totalAllocated, totalBudget, isDragging]);
 
-  // Отправляем валидацию в родительский компонент
+  // Send validation to parent component
   useEffect(() => {
     if (onValidationChange && weeks.length > 0) {
       onValidationChange(validationData);
     }
   }, [validationData, onValidationChange, weeks.length]);
 
-  // Обновление бюджета конкретной недели
+  // Update budget for specific week
   const updateWeekBudget = (weekId: string, budget: number) => {
     setWeeks(prevWeeks => 
       prevWeeks.map(week => 
@@ -204,7 +204,7 @@ const FlightByWeek: React.FC<FlightByWeekProps> = ({
     );
   };
 
-  // Форматирование даты
+  // Format date
   const formatDate = (date: Date) => {
     return date.toLocaleDateString('en-US', { 
       month: '2-digit', 
@@ -213,18 +213,18 @@ const FlightByWeek: React.FC<FlightByWeekProps> = ({
     });
   };
 
-  // Мемоизируем максимальный бюджет для масштабирования баров
+  // Memoize maximum budget for bar scaling
   const maxBudget = useMemo(() => {
     return Math.max(...weeks.map(week => week.budget), 1);
   }, [weeks]);
 
-  // Мемоизируем проверку превышения бюджета  
+  // Memoize budget overflow check
   const isOverBudget = useMemo(() => {
     return totalAllocated > totalBudget;
   }, [totalAllocated, totalBudget]);
 
   if (weeks.length === 0) {
-    return null; // Не показываем компонент, если нет данных
+    return null; // Don't show component if no data
   }
 
   return (
@@ -273,14 +273,14 @@ const FlightByWeek: React.FC<FlightByWeekProps> = ({
         }}
       >
         {weeks.map((week, index) => {
-          // Используем dragState если активен, иначе обычный budget  
+          // Use dragState if active, otherwise regular budget
           const currentBudget = dragState[week.id] !== undefined ? dragState[week.id] : week.budget;
           
-          // Рассчитываем процент от общего бюджета
+          // Calculate percentage of total budget
           const percentage = totalBudget > 0 ? (currentBudget / totalBudget) * 100 : 0;
           const containerHeight = Math.min(Math.max(percentage * 2, 15), 120);
           
-          // Проверяем, является ли неделя hiatus
+          // Check if week is hiatus
           const isHiatusWeek = week.isLocked && currentBudget === 0;
           
           return (
@@ -305,7 +305,7 @@ const FlightByWeek: React.FC<FlightByWeekProps> = ({
                 height: '15px',
                 textAlign: 'center'
               }}>
-                {/* Lock/Unlock Button - только для недель не в hiatus */}
+                {/* Lock/Unlock Button - only for weeks not in hiatus */}
                 {!isHiatusWeek && (
                   <button
                     onClick={(e) => {
@@ -357,14 +357,14 @@ const FlightByWeek: React.FC<FlightByWeekProps> = ({
                 }}
                 tabIndex={-1}
                 onMouseDown={(e) => {
-                  // Запрещаем drag для заблокированных недель
+                  // Prohibit drag for locked weeks
                   if (week.isLocked) {
                     return;
                   }
 
-                  // Проверяем, есть ли бюджет
+                  // Check if there's budget
                   if (totalBudget === 0) {
-                    // Показываем тултип на 2 секунды
+                    // Show tooltip for 2 seconds
                     setShowBudgetTooltip(true);
                     setTimeout(() => {
                       setShowBudgetTooltip(false);
@@ -377,10 +377,10 @@ const FlightByWeek: React.FC<FlightByWeekProps> = ({
                   const startRect = startContainer.getBoundingClientRect();
                   const maxContainerHeight = 120;
                   
-                  // Начинаем drag операцию
+                  // Start drag operation
                   setIsDragging(true);
                   
-                  // Инициализируем dragState со всеми текущими значениями
+                  // Initialize dragState with all current values
                   const initialDragState: {[key: string]: number} = {};
                   weeks.forEach(w => {
                     initialDragState[w.id] = w.budget;
@@ -394,40 +394,40 @@ const FlightByWeek: React.FC<FlightByWeekProps> = ({
                     const newPercentage = (clampedY / maxContainerHeight) * 100;
                     const newBudget = (newPercentage / 100) * totalBudget;
                     
-                    // Перераспределяем остальной бюджет между другими неделями
+                    // Redistribute remaining budget among other weeks
                     const otherWeeks = weeks.filter(w => w.id !== week.id);
                     const unlockedWeeks = otherWeeks.filter(w => !w.isLocked);
-                    const lockedWeeks = otherWeeks.filter(w => w.isLocked); // Включает hiatus недели
+                    const lockedWeeks = otherWeeks.filter(w => w.isLocked); // Includes hiatus weeks
                     
-                    // Вычисляем сумму заблокированных недель
+                    // Calculate sum of locked weeks
                     const lockedBudgetSum = lockedWeeks.reduce((sum, w) => sum + w.budget, 0);
                     const remainingBudget = totalBudget - newBudget - lockedBudgetSum;
                     
                     if (remainingBudget >= 0 && unlockedWeeks.length > 0) {
-                      // Равномерно распределяем остальной бюджет только между незаблокированными неделями
+                      // Evenly distribute remaining budget only among unlocked weeks
                       const equalShare = remainingBudget / unlockedWeeks.length;
                       
-                      // Обновляем dragState для всех недель
+                      // Update dragState for all weeks
                       setDragState(prevState => {
                         const newState = { ...prevState };
                         newState[week.id] = newBudget;
-                        // Обновляем только незаблокированные недели
+                        // Update only unlocked weeks
                         unlockedWeeks.forEach(otherWeek => {
                           newState[otherWeek.id] = equalShare;
                         });
-                        // Заблокированные недели остаются без изменений
+                        // Locked weeks remain unchanged
                         lockedWeeks.forEach(lockedWeek => {
                           newState[lockedWeek.id] = lockedWeek.budget;
                         });
                         return newState;
                       });
                       
-                      // Также обновляем реальные значения для корректной валидации
+                      // Also update actual values for correct validation
                       updateWeekBudget(week.id, newBudget);
                       unlockedWeeks.forEach(otherWeek => {
                         updateWeekBudget(otherWeek.id, equalShare);
                       });
-                      // Заблокированные недели не обновляем
+                      // Don't update locked weeks
                     }
                   };
                   
@@ -437,10 +437,10 @@ const FlightByWeek: React.FC<FlightByWeekProps> = ({
                     document.body.style.cursor = '';
                     document.body.style.userSelect = '';
                     
-                    // Завершаем drag операцию
+                    // End drag operation
                     setIsDragging(false);
                     
-                    // Очищаем состояние перетаскивания
+                    // Clear drag state
                     setDragState({});
                   };
                   
@@ -450,7 +450,7 @@ const FlightByWeek: React.FC<FlightByWeekProps> = ({
                   document.addEventListener('mouseup', handleMouseUp);
                 }}
               >
-                {/* Actual Bar - заполняет весь контейнер */}
+                {/* Actual Bar - fills entire container */}
                 <div
                   className="absolute bottom-0 left-0 right-0 w-full h-full transition-none"
                   style={{
@@ -459,7 +459,7 @@ const FlightByWeek: React.FC<FlightByWeekProps> = ({
                   }}
                 />
                 
-                {/* Drag Handle - теперь сверху контейнера */}
+                {/* Drag Handle - now on top of container */}
                 <div
                   className="absolute left-1/2 transform -translate-x-1/2 bg-gray-400 rounded-full opacity-70 hover:opacity-100 transition-opacity"
                   style={{

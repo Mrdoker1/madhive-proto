@@ -9,17 +9,17 @@ export interface BreadcrumbStep {
   id: string;
   label: string;
   status: BreadcrumbStepStatus;
-  isSection?: boolean; // Флаг для названия секции (без кружка)
-  onClick?: () => void; // Обработчик клика для навигации
-  disabled?: boolean; // Дополнительная блокировка
-  tooltip?: string; // Подсказка при наведении
+  isSection?: boolean; // Flag for section name (without circle)
+  onClick?: () => void; // Click handler for navigation
+  disabled?: boolean; // Additional lock
+  tooltip?: string; // Tooltip on hover
 }
 
 interface BreadcrumbsProps {
   steps: BreadcrumbStep[];
-  showProgress?: boolean; // Показывать прогресс в процентах
+  showProgress?: boolean; // Show progress in percentage
   className?: string;
-  onStepClick?: (step: BreadcrumbStep) => void; // Глобальный обработчик клика
+  onStepClick?: (step: BreadcrumbStep) => void; // Global click handler
 }
 
 const Breadcrumbs: React.FC<BreadcrumbsProps> = ({ 
@@ -28,7 +28,7 @@ const Breadcrumbs: React.FC<BreadcrumbsProps> = ({
   className = '', 
   onStepClick 
 }) => {
-  // Вычисляем прогресс выполнения
+  // Calculate completion progress
   const completedSteps = steps.filter(step => step.status === 'completed' && !step.isSection).length;
   const totalSteps = steps.filter(step => !step.isSection).length;
   const progressPercentage = totalSteps > 0 ? Math.round((completedSteps / totalSteps) * 100) : 0;
@@ -102,7 +102,7 @@ const Breadcrumbs: React.FC<BreadcrumbsProps> = ({
   };
 
   const getStepTextColor = (step: BreadcrumbStep) => {
-    // Секции (названия флоу) всегда черные
+    // Sections (flow names) are always black
     if (step.isSection) return '#000000';
     
     if (step.disabled || step.status === 'disabled') return '#999999';
@@ -112,10 +112,10 @@ const Breadcrumbs: React.FC<BreadcrumbsProps> = ({
   };
 
   const isClickable = (step: BreadcrumbStep) => {
-    // Секции (названия флоу) не кликабельны
+    // Sections (flow names) are not clickable
     if (step.isSection) return false;
     
-    // Шаги кликабельны только если явно передан onClick или onStepClick
+    // Steps are clickable only if onClick or onStepClick is explicitly provided
     return !step.disabled && step.status !== 'disabled' && (step.onClick || onStepClick);
   };
 
@@ -140,7 +140,7 @@ const Breadcrumbs: React.FC<BreadcrumbsProps> = ({
               onClick={() => handleStepClick(step)}
               title={step.tooltip}
             >
-              {/* Показываем кружок только если это не секция */}
+              {/* Show circle only if it's not a section */}
               {!step.isSection && renderStepIcon(step.status)}
               <span 
                 className={`transition-colors ${step.isSection ? 'font-semibold' : 'font-medium'}`}

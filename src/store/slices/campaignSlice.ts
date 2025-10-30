@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-// Типы для данных кампании
+// Types for campaign data
 export interface CampaignGeneralData {
   campaignName: string;
   advertiser: string;
@@ -11,7 +11,7 @@ export interface CampaignGeneralData {
   cpeCode: string;
   campaignOwner: string;
   campaignApprover: string;
-  spotLength: string[]; // Массив выбранных длительностей: ['15', '30', '60']
+  spotLength: string[]; // Array of selected durations: ['15', '30', '60']
 }
 
 export interface CampaignBudgetData {
@@ -51,7 +51,7 @@ export interface BroadcasterWithStations {
 export interface CampaignLinearData {
   broadcasters: string[];
   measurementProvider: string;
-  broadcastersWithStations?: BroadcasterWithStations[]; // Детальная информация о broadcasters и их stations
+  broadcastersWithStations?: BroadcasterWithStations[]; // Detailed information about broadcasters and their stations
 }
 
 export interface CampaignAudienceData {
@@ -84,7 +84,7 @@ export interface CampaignMarketsData {
   selectedMarkets: string[];
   selectedRegion?: string;
   mode: 'include' | 'exclude';
-  marketsDetails?: MarketBudget[]; // Детальная информация о markets и stations
+  marketsDetails?: MarketBudget[]; // Detailed information about markets and stations
 }
 
 export interface CampaignDaypartsData {
@@ -93,10 +93,10 @@ export interface CampaignDaypartsData {
 
 export interface CampaignChannelsData {
   selectedChannels: string[];
-  budgetAllocation?: Record<string, number>; // Распределение бюджета по каналам
+  budgetAllocation?: Record<string, number>; // Budget allocation by channels
 }
 
-// Данные для секций по каждому каналу в omnichannel кампании
+// Data for sections by each channel in omnichannel campaign
 export interface ChannelSectionData {
   audience: CampaignAudienceData;
   geo: {
@@ -105,8 +105,8 @@ export interface ChannelSectionData {
     targetNationally: boolean;
   };
   dayparts: CampaignDaypartsData;
-  interests: string[]; // Для Interests section
-  keywords?: string[]; // Для Keywords section (только для search)
+  interests: string[]; // For Interests section
+  keywords?: string[]; // For Keywords section (search only)
   estimations: {
     audienceEstimation: number;
     marketEstimation: number;
@@ -115,8 +115,8 @@ export interface ChannelSectionData {
 
 // Omnichannel specific data
 export interface OmnichannelData {
-  carryOverMode: boolean; // Режим "carry over" - данные распространяются на все каналы
-  channelData: Record<string, ChannelSectionData>; // Данные по каждому каналу отдельно
+  carryOverMode: boolean; // "Carry over" mode - data propagates to all channels
+  channelData: Record<string, ChannelSectionData>; // Data for each channel separately
 }
 
 export interface SavedCampaign {
@@ -145,18 +145,18 @@ export interface CampaignState {
   channels: CampaignChannelsData;
   omnichannel: OmnichannelData;
   
-  // Вычисляемые поля
+  // Computed fields
   estimations: {
     budgetEstimation: number;
     audienceEstimation: number;
     marketEstimation: number;
   };
   
-  // Список сохранённых кампаний
+  // List of saved campaigns
   savedCampaigns: SavedCampaign[];
 }
 
-// Начальное состояние
+// Initial state
 const initialState: CampaignState = {
   general: {
     campaignName: '',
@@ -168,7 +168,7 @@ const initialState: CampaignState = {
     cpeCode: '',
     campaignOwner: '',
     campaignApprover: '',
-    spotLength: ['60'] // По умолчанию выбран :60
+    spotLength: ['60'] // Default selected :60
   },
   budget: {
     totalBudget: 0,
@@ -207,7 +207,7 @@ const initialState: CampaignState = {
     selectedChannels: []
   },
   omnichannel: {
-    carryOverMode: true, // По умолчанию режим carry over активен
+    carryOverMode: true, // Carry over mode is active by default
     channelData: {}
   },
   estimations: {
@@ -348,7 +348,7 @@ const campaignSlice = createSlice({
       });
     },
     
-    // Обновление estimations для конкретного канала
+    // Update estimations for specific channel
     updateChannelEstimations: (
       state,
       action: PayloadAction<{
@@ -366,7 +366,7 @@ const campaignSlice = createSlice({
       }
     },
     
-    // Удаление данных канала (когда канал отключается)
+    // Remove channel data (when channel is disabled)
     removeChannelData: (state, action: PayloadAction<string>) => {
       const channel = action.payload;
       delete state.omnichannel.channelData[channel];
@@ -379,7 +379,7 @@ const campaignSlice = createSlice({
 
     // Utility Actions
     resetCampaign: (state) => {
-      // Сохраняем список кампаний при сбросе
+      // Save campaign list on reset
       const savedCampaigns = state.savedCampaigns;
       return { ...initialState, savedCampaigns };
     },
@@ -403,7 +403,7 @@ const campaignSlice = createSlice({
         channels: state.channels,
         createdAt: new Date().toISOString()
       };
-      state.savedCampaigns.unshift(newCampaign); // Добавляем в начало списка
+      state.savedCampaigns.unshift(newCampaign); // Add to beginning of list
     }
   }
 });

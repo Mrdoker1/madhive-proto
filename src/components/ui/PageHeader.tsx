@@ -5,17 +5,17 @@ import { Button } from '@mantine/core';
 
 interface PageHeaderProps {
   title: string;
-  /** Показать правую кнопку */
+  /** Show right button */
   showRightButton?: boolean;
-  /** Текст правой кнопки (по умолчанию "Next") */
+  /** Right button text (default "Next") */
   rightButtonText?: string;
-  /** Активность правой кнопки (вкл/выкл) */
+  /** Right button active state (on/off) */
   rightButtonActive?: boolean;
-  /** Обработчик клика правой кнопки */
+  /** Right button click handler */
   onRightButtonClick?: () => void;
-  /** Дополнительный контент рядом с заголовком */
+  /** Additional content next to title */
   actions?: React.ReactNode;
-  /** Кастомная кнопка справа (заменяет стандартную кнопку) */
+  /** Custom right button (replaces standard button) */
   rightButtonComponent?: React.ReactNode;
 }
 
@@ -54,7 +54,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({
         {actions}
       </div>
 
-      {/* Правая кнопка - либо кастомная, либо стандартная */}
+      {/* Right button - either custom or standard */}
       {rightButtonComponent ? (
         rightButtonComponent
       ) : showRightButton ? (

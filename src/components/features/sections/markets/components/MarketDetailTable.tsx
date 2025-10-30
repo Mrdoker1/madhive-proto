@@ -6,7 +6,7 @@ import { IconChevronDown, IconChevronRight } from '@tabler/icons-react';
 import type { MarketWithStationsData } from '../types';
 import { calculateStationImpressions } from '../utils/marketCalculations';
 
-// Функция для форматирования процентов (максимум 2 знака после запятой)
+// Function to format percentages (maximum 2 decimal places)
 const formatPercentage = (value: number): string => {
   return Number(value.toFixed(2)).toString();
 };
@@ -28,12 +28,12 @@ const MarketDetailTable: React.FC<MarketDetailTableProps> = ({
   onDetailSelectAll,
   onDetailPercentageChange
 }) => {
-  // Состояние для валидации станций
+  // State for station validation
   const [previousStationValues, setPreviousStationValues] = useState<Record<string, number>>({});
   const [stationErrorTooltips, setStationErrorTooltips] = useState<Record<string, boolean>>({});
   const stationInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
-  // Обработчик фокуса для станций
+  // Focus handler for stations
   const handleStationPercentageFocus = (stationId: string, currentValue: number) => {
     setPreviousStationValues(prev => ({
       ...prev,
@@ -41,14 +41,14 @@ const MarketDetailTable: React.FC<MarketDetailTableProps> = ({
     }));
   };
 
-  // Обработчик потери фокуса для станций - валидация
+  // Blur handler for stations - validation
   const handleStationPercentageBlur = (stationId: string, newValue: string) => {
     const numericValue = parseFloat(newValue) || 0;
     const currentStation = market.stations.find(s => s.id === stationId);
     
     if (!currentStation) return;
 
-    // Рассчитываем общий процент станций в этом маркете если бы мы применили новое значение
+    // Calculate total percentage of stations in this market if we were to apply new value
     const otherStationsTotal = market.stations.reduce((total, station) => {
       if (station.id === stationId || !station.selected) return total;
       return total + station.percentage;
@@ -56,18 +56,18 @@ const MarketDetailTable: React.FC<MarketDetailTableProps> = ({
     
     const wouldBeTotal = otherStationsTotal + numericValue;
     
-    // Если превышает 100%, показываем ошибку и возвращаем предыдущее значение
+    // If exceeds 100%, show error and revert to previous value
     if (wouldBeTotal > 100) {
       setStationErrorTooltips(prev => ({
         ...prev,
         [stationId]: true
       }));
       
-      // Возвращаем предыдущее значение
+      // Revert to previous value
       const previousValue = previousStationValues[stationId] || currentStation.percentage;
       onDetailPercentageChange(stationId, previousValue.toString());
       
-      // Скрываем tooltip через 3 секунды
+      // Hide tooltip after 3 seconds
       setTimeout(() => {
         setStationErrorTooltips(prev => ({
           ...prev,
@@ -75,7 +75,7 @@ const MarketDetailTable: React.FC<MarketDetailTableProps> = ({
         }));
       }, 3000);
     } else {
-      // Убираем ошибку если она была
+      // Remove error if it was present
       setStationErrorTooltips(prev => ({
         ...prev,
         [stationId]: false
@@ -99,7 +99,7 @@ const MarketDetailTable: React.FC<MarketDetailTableProps> = ({
 
   return (
     <div style={{ marginTop: '24px' }}>
-      {/* Header с информацией о рынке и кнопкой коллапса */}
+      {/* Header with market info and collapse button */}
       <div 
         style={{ 
           display: 'flex', 
@@ -130,11 +130,11 @@ const MarketDetailTable: React.FC<MarketDetailTableProps> = ({
         </div>
       </div>
 
-      {/* Детальная таблица */}
+      {/* Detail table */}
       <Collapse in={isExpanded}>
         <Table>
           <TableTbody>
-            {/* Header row для детальной таблицы */}
+            {/* Header row for detail table */}
             <TableTr style={{ height: '48px' }}>
               <TableTh style={{ width: '40px', textAlign: 'center' }}>
                 <Checkbox

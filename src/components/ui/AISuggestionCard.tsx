@@ -11,7 +11,7 @@ interface AISuggestionCardProps {
   className?: string;
 }
 
-// Компонент для typing эффекта (с Framer Motion)
+// Component for typing effect (with Framer Motion)
 const TypingText: React.FC<{ text: string }> = ({ text }) => {
   const [displayedText, setDisplayedText] = useState('');
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -47,14 +47,14 @@ const AISuggestionCard: React.FC<AISuggestionCardProps> = ({
   pageKey = 'default',
   className = '' 
 }) => {
-  // Получаем AI подсказки для текущей страницы
+  // Get AI suggestions for current page
   const { suggestion, isLoading: aiLoading } = useAISuggestion(pageKey);
   
-  // Получаем текущего AI провайдера из настроек
+  // Get current AI provider from settings
   const [aiProvider, setAiProvider] = useState<string>('DeepSeek');
   
   useEffect(() => {
-    // Загружаем настройки AI провайдера
+    // Load AI provider settings
     fetch('/api/settings')
       .then(res => res.json())
       .then(data => {

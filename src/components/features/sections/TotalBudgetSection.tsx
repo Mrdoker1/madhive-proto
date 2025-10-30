@@ -19,22 +19,22 @@ const TotalBudgetSection: React.FC<TotalBudgetSectionProps> = ({
   const globalBudget = useAppSelector((state) => state.campaign.budget.totalBudget);
   const [totalBudget, setTotalBudget] = useState('');
 
-  // Функция для форматирования числа с разделителями
+  // Function to format number with separators
   const formatNumber = (value: string): string => {
-    // Убираем все нецифровые символы кроме точки
+    // Remove all non-digit characters except dot
     const cleanValue = value.replace(/[^\d.]/g, '');
     const parts = cleanValue.split('.');
-    // Форматируем целую часть с разделителями
+    // Format integer part with separators
     parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
     return parts.join('.');
   };
 
-  // Функция для парсинга форматированного числа
+  // Function to parse formatted number
   const parseFormattedNumber = (value: string): number => {
     return parseFloat(value.replace(/,/g, '')) || 0;
   };
 
-  // Синхронизируем локальное состояние с глобальным при загрузке
+  // Synchronize local state with global state on load
   useEffect(() => {
     if (globalBudget > 0) {
       setTotalBudget(formatNumber(globalBudget.toString()));
@@ -43,19 +43,19 @@ const TotalBudgetSection: React.FC<TotalBudgetSectionProps> = ({
 
   const handleBudgetChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
-    // Убираем запятые для валидации
+    // Remove commas for validation
     const cleanValue = value.replace(/,/g, '');
     
-    // Разрешаем только цифры и точку для десятичных чисел
+    // Allow only digits and dot for decimal numbers
     if (/^\d*\.?\d*$/.test(cleanValue)) {
-      // Сохраняем с форматированием
+      // Save with formatting
       setTotalBudget(formatNumber(cleanValue));
       
-      // Обновляем глобальный стейт
+      // Update global state
       const numericValue = parseFloat(cleanValue) || 0;
       dispatch(updateBudgetData({ totalBudget: numericValue }));
       
-      // Вызываем onChange для обратной совместимости
+      // Call onChange for backward compatibility
       if (onChange) {
         onChange(numericValue);
       }
@@ -72,7 +72,7 @@ const TotalBudgetSection: React.FC<TotalBudgetSectionProps> = ({
           leftSection={
             <IconCurrencyDollar 
               size={18} 
-              style={{ color: '#9CA3AF' }} // Тусклый серый цвет
+              style={{ color: '#9CA3AF' }} // Dim gray color
             />
           }
           styles={{
@@ -80,7 +80,7 @@ const TotalBudgetSection: React.FC<TotalBudgetSectionProps> = ({
               width: '100%'
             },
             input: {
-              paddingLeft: '44px', // Дополнительный отступ слева для иконки
+              paddingLeft: '44px', // Additional left padding for icon
             }
           }}
         />

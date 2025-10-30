@@ -42,7 +42,7 @@ export const SuggestedChannelSlider: React.FC<SuggestedChannelSliderProps> = ({
         ease: "easeOut"
       }}
     >
-      {/* Текст с предложением */}
+      {/* Suggestion text */}
       <div style={{
         display: 'flex',
         alignItems: 'center',
@@ -60,7 +60,7 @@ export const SuggestedChannelSlider: React.FC<SuggestedChannelSliderProps> = ({
         />
       </div>
 
-      {/* Слайдер канала (неактивный) */}
+      {/* Channel slider (inactive) */}
       <div style={{ 
         display: 'flex', 
         alignItems: 'center', 
@@ -68,7 +68,7 @@ export const SuggestedChannelSlider: React.FC<SuggestedChannelSliderProps> = ({
         minHeight: '40px',
         opacity: 0.7
       }}>
-        {/* Иконка канала - 32px черная */}
+        {/* Channel icon - 32px black */}
         <Image
           src={`/assets/icons/channels/${channelId}.svg`}
           alt={channelName}
@@ -77,12 +77,12 @@ export const SuggestedChannelSlider: React.FC<SuggestedChannelSliderProps> = ({
           style={{ filter: 'brightness(0)', flexShrink: 0, marginRight: '8px' }}
         />
         
-        {/* Название канала - 12px */}
+        {/* Channel name - 12px */}
         <Text size="12px" fw={500} c="#1F2937" style={{ minWidth: '80px', flexShrink: 0, marginRight: '16px' }}>
           {channelName}
         </Text>
         
-        {/* Placeholder для бюджета */}
+        {/* Budget placeholder */}
         <div style={{
           width: '140px',
           height: '40px',
@@ -98,13 +98,13 @@ export const SuggestedChannelSlider: React.FC<SuggestedChannelSliderProps> = ({
           <Text size="14px" c="#9CA3AF">Not allocated</Text>
         </div>
         
-        {/* Placeholder для слайдера */}
+        {/* Slider placeholder */}
         <div style={{ 
           flex: 1, 
           minWidth: '200px', 
           marginRight: '16px'
         }}>
-          {/* Метрики (скрыты) */}
+          {/* Metrics (hidden) */}
           <div style={{
             display: 'flex',
             justifyContent: 'flex-end',
@@ -117,7 +117,7 @@ export const SuggestedChannelSlider: React.FC<SuggestedChannelSliderProps> = ({
             <span>Reach%: ---%</span>
           </div>
           
-          {/* Неактивный слайдер */}
+          {/* Inactive slider */}
           <div style={{
             height: '6px',
             backgroundColor: '#E5E7EB',
@@ -137,7 +137,7 @@ export const SuggestedChannelSlider: React.FC<SuggestedChannelSliderProps> = ({
           </div>
         </div>
         
-        {/* Кнопка добавления */}
+        {/* Add button */}
         <ActionIcon
           variant="subtle"
           color="gray"

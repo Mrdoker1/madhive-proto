@@ -20,18 +20,18 @@ interface DateRangeInputProps {
   error?: string;
   className?: string;
   onChange?: (startDate: string, endDate: string) => void;
-  // Новые пропсы для ограничений и внешнего управления значениями
+  // New props for constraints and external value management
   minDate?: Date;
   maxDate?: Date;
   selectedStartDate?: string;
   selectedEndDate?: string;
-  key?: string; // Для принудительного ре-рендера компонента
-  // Для подсветки hiatus дат в Active режиме
+  key?: string; // For forced component re-render
+  // For highlighting hiatus dates in Active mode
   hiatusStartDate?: string;
   hiatusEndDate?: string;
   isActiveMode?: boolean;
   disabled?: boolean;
-  // Для Hiatus режима с множественными диапазонами
+  // For Hiatus mode with multiple ranges
   isHiatusMode?: boolean;
   onHiatusRangesChange?: (ranges: HiatusRange[]) => void;
 }
@@ -58,36 +58,36 @@ const DateRangeInput: React.FC<DateRangeInputProps> = ({
   const [startDate, setStartDate] = useState(selectedStartDate || '');
   const [endDate, setEndDate] = useState(selectedEndDate || '');
   
-  // Локальное состояние для множественных hiatus диапазонов
+  // Local state for multiple hiatus ranges
   const [hiatusRanges, setHiatusRanges] = useState<HiatusRange[]>([]);
   
-  // Для принудительного ре-рендера календаря
+  // For forced calendar re-render
   const [calendarKey, setCalendarKey] = useState(0);
   
-  // Счетчик для генерации уникальных ID (избегаем Date.now() для SSR)
+  // Counter for generating unique IDs (avoid Date.now() for SSR)
   const [idCounter, setIdCounter] = useState(0);
   
-  // Флаг для определения что компонент смонтирован на клиенте
+  // Flag to determine that component is mounted on client
   const [isMounted, setIsMounted] = useState(false);
   
-  // Инициализируем компонент только на клиенте
+  // Initialize component only on client
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
-  // Уведомляем родительский компонент об изменениях hiatus ranges
+  // Notify parent component of hiatus ranges changes
   useEffect(() => {
     if (isMounted && onHiatusRangesChange) {
       onHiatusRangesChange(hiatusRanges);
     }
   }, [hiatusRanges, onHiatusRangesChange, isMounted]);
   
-  // Инициализируем календарь в hiatus режиме
+  // Initialize calendar in hiatus mode
   useEffect(() => {
     if (isMounted && isHiatusMode) {
-      // Используем конкретную дату чтобы избежать проблем с SSR
+      // Use specific date to avoid SSR issues
       const today = new Date();
-      today.setHours(0, 0, 0, 0); // Нормализуем время
+      today.setHours(0, 0, 0, 0); // Normalize time
       setDateRange([{
         startDate: today,
         endDate: today,
@@ -96,11 +96,11 @@ const DateRangeInput: React.FC<DateRangeInputProps> = ({
     }
   }, [isMounted, isHiatusMode]);
   
-  // Сбрасываем dateRange при изменении calendarKey в hiatus режиме
+  // Reset dateRange when calendarKey changes in hiatus mode
   useEffect(() => {
     if (isMounted && isHiatusMode && calendarKey > 0) {
       const today = new Date();
-      today.setHours(0, 0, 0, 0); // Нормализуем время
+      today.setHours(0, 0, 0, 0); // Normalize time
       setDateRange([{
         startDate: today,
         endDate: today,
@@ -109,14 +109,14 @@ const DateRangeInput: React.FC<DateRangeInputProps> = ({
     }
   }, [isMounted, calendarKey, isHiatusMode]);
   
-  // Функция для парсинга даты из строки
+  // Function to parse date from string
   const parseDate = (dateStr: string): Date | null => {
     if (!dateStr) return null;
     const [month, day, year] = dateStr.split('/');
     return new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
   };
   
-  // Состояние для react-date-range
+  // State for react-date-range
   const [dateRange, setDateRange] = useState([
     {
       startDate: selectedStartDate ? (parseDate(selectedStartDate) || new Date()) : new Date(),
@@ -125,9 +125,9 @@ const DateRangeInput: React.FC<DateRangeInputProps> = ({
     }
   ]);
   
-  // Обновляем локальное состояние при изменении внешних пропсов
+  // Update local state when external props change
   React.useEffect(() => {
-    // В hiatus режиме не синхронизируем автоматически, чтобы не мешать сбросу
+    // In hiatus mode don't sync automatically to not interfere with reset
     if (isHiatusMode) return;
     
     if (selectedStartDate !== undefined && selectedStartDate !== startDate) {
@@ -137,7 +137,7 @@ const DateRangeInput: React.FC<DateRangeInputProps> = ({
       setEndDate(selectedEndDate);
     }
     
-    // Обновляем dateRange для календаря только если даты действительно изменились
+    // Update dateRange for calendar only if dates actually changed
     const newStartDate = selectedStartDate ? (parseDate(selectedStartDate) || new Date()) : new Date();
     const newEndDate = selectedEndDate ? (parseDate(selectedEndDate) || new Date()) : new Date();
     
@@ -145,7 +145,7 @@ const DateRangeInput: React.FC<DateRangeInputProps> = ({
       const currentStart = prevRange[0]?.startDate;
       const currentEnd = prevRange[0]?.endDate;
       
-      // Проверяем, изменились ли даты
+      // Check if dates have changed
       if (currentStart?.getTime() !== newStartDate.getTime() || 
           currentEnd?.getTime() !== newEndDate.getTime()) {
         return [{
@@ -159,7 +159,7 @@ const DateRangeInput: React.FC<DateRangeInputProps> = ({
   }, [selectedStartDate, selectedEndDate, startDate, endDate, isHiatusMode]);
 
 
-  // Состояние для независимых календарей
+  // State for independent calendars
   const [leftCalendarDate, setLeftCalendarDate] = useState(new Date());
   const [rightCalendarDate, setRightCalendarDate] = useState(() => {
     const date = new Date();
@@ -175,11 +175,11 @@ const DateRangeInput: React.FC<DateRangeInputProps> = ({
     return `${month}/${day}/${year}`;
   };
 
-  // Создаем массив заблокированных дат
+  // Create array of disabled dates
   const getDisabledDates = (): Date[] => {
     const disabledDates: Date[] = [];
 
-    // В Active режиме блокируем старые hiatus даты (для обратной совместимости)
+    // In Active mode block old hiatus dates (for backward compatibility)
     if (isActiveMode && hiatusStartDate && hiatusEndDate) {
       const hiatusStart = parseDate(hiatusStartDate);
       const hiatusEnd = parseDate(hiatusEndDate);
@@ -193,7 +193,7 @@ const DateRangeInput: React.FC<DateRangeInputProps> = ({
       }
     }
 
-    // В Hiatus режиме показываем уже выбранные диапазоны как disabled (серые)
+    // In Hiatus mode show already selected ranges as disabled (gray)
     if (isHiatusMode) {
       hiatusRanges.forEach(range => {
         const rangeStart = parseDate(range.start);
@@ -218,9 +218,9 @@ const DateRangeInput: React.FC<DateRangeInputProps> = ({
     const formattedStartDate = formatDateFromObj(selection.startDate);
     const formattedEndDate = formatDateFromObj(selection.endDate);
 
-    // В режиме Hiatus добавляем новый диапазон если выбран полный диапазон
+    // In Hiatus mode add new range if full range is selected
     if (isHiatusMode && formattedStartDate && formattedEndDate && formattedStartDate !== formattedEndDate) {
-      // Проверяем, не пересекается ли новый диапазон с уже существующими
+      // Check if new range doesn't overlap with existing ones
       const isOverlapping = hiatusRanges.some(range => {
         const rangeStart = parseDate(range.start);
         const rangeEnd = parseDate(range.end);
@@ -229,7 +229,7 @@ const DateRangeInput: React.FC<DateRangeInputProps> = ({
 
         if (!rangeStart || !rangeEnd || !newStart || !newEnd) return false;
 
-        // Проверяем пересечение диапазонов
+        // Check range overlap
         return !(newEnd < rangeStart || newStart > rangeEnd);
       });
 
@@ -240,27 +240,27 @@ const DateRangeInput: React.FC<DateRangeInputProps> = ({
           end: formattedEndDate
         };
         
-        // Увеличиваем счетчик для следующего ID
+        // Increment counter for next ID
         setIdCounter(prev => prev + 1);
 
-        // Добавляем новый диапазон в локальное состояние
+        // Add new range to local state
         setHiatusRanges(prev => {
           const newRanges = [...prev, newRange];
           return newRanges;
         });
         
-        // Сбрасываем состояние сразу
+        // Reset state immediately
         setStartDate('');
         setEndDate('');
         
-        // Принудительно обновляем календарь
+        // Force calendar update
         setCalendarKey(prev => prev + 1);
       }
 
       return;
     }
 
-    // Обычный режим (Active) или промежуточное состояние выбора
+    // Normal mode (Active) or intermediate selection state
     if (formattedStartDate !== startDate || formattedEndDate !== endDate) {
       setDateRange([selection]);
       setStartDate(formattedStartDate);
@@ -272,13 +272,13 @@ const DateRangeInput: React.FC<DateRangeInputProps> = ({
     }
   };
 
-  // Функция для удаления hiatus диапазона
+  // Function to remove hiatus range
   const removeHiatusRange = (id: string) => {
     setHiatusRanges(prev => {
       const newRanges = prev.filter(range => range.id !== id);
       return newRanges;
     });
-    // Принудительно обновляем календарь
+    // Force calendar update
     setCalendarKey(prev => prev + 1);
   };
 
@@ -311,7 +311,7 @@ const DateRangeInput: React.FC<DateRangeInputProps> = ({
           backgroundColor: '#FFFFFF',
           borderRadius: '6px',
           border: `1px solid ${hasError ? '#FA5252' : 'var(--form-input-border)'}`,
-          minHeight: '42px' // Стандартная высота Mantine input
+          minHeight: '42px' // Standard Mantine input height
         }}
       >
         {/* Calendar Icon */}
@@ -392,12 +392,12 @@ const DateRangeInput: React.FC<DateRangeInputProps> = ({
           }
           
           
-          /* Переопределяем цвет текста для всех дней календаря */
+          /* Override text color for all calendar days */
           :global(.rdrDayNumber) {
             color: #000000 !important;
           }
           
-          /* Цвет текста для выбранных дат */
+          /* Text color for selected dates */
           :global(.rdrDayStartOfRange .rdrDayNumber),
           :global(.rdrDayEndOfRange .rdrDayNumber),
           :global(.rdrDayInRange .rdrDayNumber) {
@@ -405,9 +405,9 @@ const DateRangeInput: React.FC<DateRangeInputProps> = ({
           }
           `}</style>
         
-        {/* Переопределение точного стиля сегодняшнего дня */}
+        {/* Override exact style for today's date */}
         <style jsx global>{`
-          /* Точное переопределение псевдоэлемента :after для сегодняшнего дня */
+          /* Exact override of :after pseudo-element for today's date */
           .rdrDayToday .rdrDayNumber:after,
           .rdrDayToday .rdrDayNumber::after,
           .rdrDay.rdrDayToday .rdrDayNumber:after,
@@ -424,7 +424,7 @@ const DateRangeInput: React.FC<DateRangeInputProps> = ({
             background-color: #FF9BD3 !important;
           }
           
-          /* В режиме Hiatus показываем disabled даты (уже выбранные hiatus) точно как обычные disabled */
+          /* In Hiatus mode show disabled dates (already selected hiatus) exactly like regular disabled */
           ${isHiatusMode ? `
             .rdrDayDisabled .rdrDayNumber {
               color: #999 !important;

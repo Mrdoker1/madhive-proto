@@ -54,10 +54,10 @@ const SummaryRow: React.FC<SummaryRowProps> = ({ label, value, editRoute, isEmpt
 };
 
 const CampaignSummarySection: React.FC = () => {
-  // Получаем данные из Redux store
+  // Get data from Redux store
   const campaign = useAppSelector((state) => state.campaign);
 
-  // Форматирование бюджета
+  // Format budget
   const formatCurrency = (amount: number) => {
     if (amount === 0) return '';
     return new Intl.NumberFormat('en-US', {
@@ -67,7 +67,7 @@ const CampaignSummarySection: React.FC = () => {
     }).format(amount);
   };
 
-  // Форматирование дат
+  // Format dates
   const formatDate = (dateString: string) => {
     if (!dateString) return '';
     const date = new Date(dateString);
@@ -78,7 +78,7 @@ const CampaignSummarySection: React.FC = () => {
     });
   };
 
-  // Вычисление продолжительности кампании
+  // Calculate campaign duration
   const getCampaignDuration = () => {
     if (!campaign.flight.startDate || !campaign.flight.endDate) return '';
     
@@ -90,7 +90,7 @@ const CampaignSummarySection: React.FC = () => {
     return `Campaign of ${diffDays} Days from ${formatDate(campaign.flight.startDate)} to ${formatDate(campaign.flight.endDate)}`;
   };
 
-  // Форматирование списков
+  // Format lists
   const formatArray = (arr: string[], limit = 3) => {
     if (arr.length === 0) return '';
     if (arr.length <= limit) {
@@ -99,7 +99,7 @@ const CampaignSummarySection: React.FC = () => {
     return `${arr.slice(0, limit).join(', ')} +${arr.length - limit} more`;
   };
 
-  // Форматирование данных аудитории в строку
+  // Format audience data to string
   const formatAudienceString = () => {
     const parts = [];
     if (campaign.audience.gender.length > 0) {
@@ -114,21 +114,21 @@ const CampaignSummarySection: React.FC = () => {
     return parts.join(', ');
   };
 
-  // Форматирование Markets данных
+  // Format Markets data
   const formatMarketsString = () => {
     return formatArray(campaign.markets.selectedMarkets);
   };
 
-  // Форматирование Daypart Summary
+  // Format Daypart Summary
   const formatDaypartSummary = () => {
     const selectedSlots = campaign.dayparts.selectedSlots;
     
     if (!selectedSlots || Object.keys(selectedSlots).length === 0) return '';
     
-    // Группируем дни по временным интервалам
+    // Group days by time ranges
     const timeRanges: Record<string, string[]> = {};
     
-    // Список дней для правильного порядка (начинается с Monday)
+    // List of days for correct order (starts with Monday)
     const dayOrder = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
     const dayNames = {
       'Sun': 'Sun',
@@ -140,7 +140,7 @@ const CampaignSummarySection: React.FC = () => {
       'Sat': 'Sat'
     };
     
-    // Функция для форматирования времени
+    // Function to format time
     const formatHour = (hour: number): string => {
       if (hour === 0) return '12am';
       if (hour < 12) return `${hour}am`;
@@ -148,7 +148,7 @@ const CampaignSummarySection: React.FC = () => {
       return `${hour - 12}pm`;
     };
     
-    // Для каждого дня находим непрерывные временные интервалы
+    // Find continuous time intervals for each day
     dayOrder.forEach(day => {
       if (!selectedSlots[day]) return;
       
@@ -159,7 +159,7 @@ const CampaignSummarySection: React.FC = () => {
         
       if (selectedHours.length === 0) return;
       
-      // Группируем непрерывные часы в диапазоны
+      // Group continuous hours into ranges
       let ranges: string[] = [];
       let start = selectedHours[0];
       let end = selectedHours[0];
@@ -168,12 +168,12 @@ const CampaignSummarySection: React.FC = () => {
         if (i < selectedHours.length && selectedHours[i] === end + 1) {
           end = selectedHours[i];
         } else {
-          // Завершаем текущий диапазон
+          // Complete current range
           let range;
           if (start === end) {
             range = formatHour(start);
           } else {
-            // Диапазон включает конечный час, поэтому добавляем +1 к end
+            // Range includes end hour, so add +1 to end
             range = `${formatHour(start)}-${formatHour(end + 1)}`;
           }
           ranges.push(range);
@@ -185,7 +185,7 @@ const CampaignSummarySection: React.FC = () => {
         }
       }
       
-      // Группируем дни с одинаковыми временными диапазонами
+      // Group days with same time ranges
       const timeKey = ranges.join(', ');
       if (!timeRanges[timeKey]) {
         timeRanges[timeKey] = [];
@@ -193,9 +193,9 @@ const CampaignSummarySection: React.FC = () => {
       timeRanges[timeKey].push(dayNames[day as keyof typeof dayNames]);
     });
     
-    // Формируем итоговую строку
+    // Form final string
     const formattedRanges = Object.entries(timeRanges).map(([timeRange, days]) => {
-      // Группируем смежные дни
+      // Group consecutive days
       const groupedDays = groupConsecutiveDays(days);
       return `${groupedDays} ${timeRange}`;
     });
@@ -203,7 +203,7 @@ const CampaignSummarySection: React.FC = () => {
     return formattedRanges.join(', ');
   };
   
-  // Вспомогательная функция для группировки смежных дней
+  // Helper function to group consecutive days
   const groupConsecutiveDays = (days: string[]): string => {
     const dayOrder = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     const sortedDays = days.sort((a, b) => dayOrder.indexOf(a) - dayOrder.indexOf(b));
@@ -211,7 +211,7 @@ const CampaignSummarySection: React.FC = () => {
     if (sortedDays.length === 0) return '';
     if (sortedDays.length === 1) return sortedDays[0];
     
-    // Проверяем на специальные группы
+    // Check for special groups
     const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
     const weekend = ['Sat', 'Sun'];
     
@@ -223,14 +223,14 @@ const CampaignSummarySection: React.FC = () => {
       return 'Sat/Sun';
     }
     
-    // Группируем смежные дни
+    // Group consecutive days
     const groups: string[] = [];
     let start = 0;
     
     while (start < sortedDays.length) {
       let end = start;
       
-      // Находим конец текущей группы смежных дней
+      // Find end of current consecutive group
       while (end + 1 < sortedDays.length) {
         const currentIndex = dayOrder.indexOf(sortedDays[end]);
         const nextIndex = dayOrder.indexOf(sortedDays[end + 1]);
@@ -242,7 +242,7 @@ const CampaignSummarySection: React.FC = () => {
         }
       }
       
-      // Формируем группу
+      // Form group
       if (start === end) {
         groups.push(sortedDays[start]);
       } else if (end === start + 1) {

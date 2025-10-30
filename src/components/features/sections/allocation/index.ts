@@ -1,16 +1,16 @@
-// Основные компоненты
+// Main components
 export { AllocationSection } from './AllocationSection';
 
-// Компоненты графика
+// Chart components
 export { DraggablePoint } from './components/DraggablePoint';
 export { ChartGrid } from './components/ChartGrid';
 export { ChartAxes } from './components/ChartAxes';
 export { ChartLines } from './components/ChartLines';
 
-// Компоненты слайдеров
+// Slider components
 export { SimpleSlider, ChannelSlider } from './components/sliders';
 
-// Экспорт типов для использования в других компонентах
+// Export types for use in other components
 export type { 
   ChannelPoint, 
   ChannelAllocation as ChartChannelAllocation, 
@@ -19,20 +19,20 @@ export type {
   DraggablePointProps 
 } from './types';
 
-// Экспорт типов слайдеров
+// Export slider types
 export type { 
   ChannelAllocation, 
   SimpleSliderProps, 
   ChannelSliderProps 
 } from './components/sliders';
 
-// Экспорт констант для переиспользования
+// Export constants for reuse
 export { channelColors, channelNames, CHART_CONFIG, CHANNEL_REACH_COEFFICIENTS } from './constants';
 
-// Экспорт констант слайдеров
+// Export slider constants
 export { SLIDER_CONFIG } from './components/sliders';
 
-// Экспорт утилит
+// Export utilities
 export { 
   createParabolicPath, 
   calculateChartPosition, 
@@ -44,7 +44,7 @@ export {
   debugSmartRedistribution
 } from './utils';
 
-// Экспорт утилит слайдеров
+// Export slider utilities
 export { 
   fetchForecastMetrics, 
   isChannelInefficient, 

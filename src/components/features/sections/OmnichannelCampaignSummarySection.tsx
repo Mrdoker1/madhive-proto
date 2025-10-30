@@ -7,7 +7,7 @@ import { Table, TableTbody, TableTr, TableTd, Text, ActionIcon } from '@mantine/
 import { IconEdit } from '@tabler/icons-react';
 import Image from 'next/image';
 
-// Конфигурация каналов
+// Channel configuration
 const CHANNEL_CONFIG: Record<string, { name: string; icon: string }> = {
   preroll: { name: 'Pre Roll', icon: '/assets/icons/channels/preroll.svg' },
   ctv: { name: 'CTV', icon: '/assets/icons/channels/ctv.svg' },
@@ -66,13 +66,13 @@ const SummaryRow: React.FC<SummaryRowProps> = ({ label, value, editRoute, isEmpt
 
 const OmnichannelCampaignSummarySection: React.FC = () => {
   const router = useRouter();
-  // Получаем данные из Redux store
+  // Get data from Redux store
   const campaign = useAppSelector((state) => state.campaign);
   const selectedChannels = useAppSelector((state) => state.campaign.channels.selectedChannels);
   const budgetAllocation = useAppSelector((state) => state.campaign.channels.budgetAllocation);
   const channelData = useAppSelector((state) => state.campaign.omnichannel.channelData);
 
-  // Форматирование бюджета
+  // Format budget
   const formatCurrency = (amount: number) => {
     if (amount === 0) return '';
     return new Intl.NumberFormat('en-US', {
@@ -83,7 +83,7 @@ const OmnichannelCampaignSummarySection: React.FC = () => {
     }).format(amount);
   };
 
-  // Форматирование дат
+  // Format dates
   const formatDate = (dateString: string) => {
     if (!dateString) return '';
     const date = new Date(dateString);
@@ -94,7 +94,7 @@ const OmnichannelCampaignSummarySection: React.FC = () => {
     });
   };
 
-  // Вычисление продолжительности кампании
+  // Calculate campaign duration
   const getCampaignDuration = () => {
     if (!campaign.flight.startDate || !campaign.flight.endDate) return '';
     
@@ -106,7 +106,7 @@ const OmnichannelCampaignSummarySection: React.FC = () => {
     return `Campaign of ${diffDays} Days from ${formatDate(campaign.flight.startDate)} to ${formatDate(campaign.flight.endDate)}`;
   };
 
-  // Форматирование списков
+  // Format lists
   const formatArray = (arr: string[], limit = 3) => {
     if (!arr || arr.length === 0) return '';
     if (arr.length <= limit) {
@@ -115,10 +115,10 @@ const OmnichannelCampaignSummarySection: React.FC = () => {
     return `${arr.slice(0, limit).join(', ')} +${arr.length - limit} more`;
   };
 
-  // Получаем выбранные каналы (исключая linear_tv)
+  // Get selected channels (excluding linear_tv)
   const omnichannelChannels = selectedChannels.filter(ch => ch !== 'linear_tv');
 
-  // Форматирование данных аудитории канала в строку
+  // Format channel audience data to string
   const formatChannelAudienceString = (channelId: string) => {
     const data = channelData[channelId];
     if (!data) return '';
@@ -142,7 +142,7 @@ const OmnichannelCampaignSummarySection: React.FC = () => {
     return parts.length > 0 ? parts.join(', ') : '';
   };
 
-  // Форматирование Geo (ZIP codes) данных для канала
+  // Format Geo (ZIP codes) data for channel
   const formatChannelGeoString = (channelId: string) => {
     const data = channelData[channelId];
     if (!data || !data.geo?.selectedZipCodes || data.geo.selectedZipCodes.length === 0) {
@@ -154,21 +154,21 @@ const OmnichannelCampaignSummarySection: React.FC = () => {
     return formatArray(data.geo.selectedZipCodes);
   };
 
-  // Форматирование Interests для канала
+  // Format Interests for channel
   const formatChannelInterestsString = (channelId: string) => {
     const data = channelData[channelId];
     if (!data || !data.interests || data.interests.length === 0) return '';
     return formatArray(data.interests);
   };
 
-  // Форматирование Keywords для канала (для search)
+  // Format Keywords for channel (for search)
   const formatChannelKeywordsString = (channelId: string) => {
     const data = channelData[channelId];
     if (!data || !data.keywords || data.keywords.length === 0) return '';
     return formatArray(data.keywords);
   };
 
-  // Форматирование Daypart Summary для канала
+  // Format Daypart Summary for channel
   const formatChannelDaypartSummary = (channelId: string) => {
     const data = channelData[channelId];
     if (!data || !data.dayparts?.selectedSlots) return '';
@@ -177,7 +177,7 @@ const OmnichannelCampaignSummarySection: React.FC = () => {
     
     if (!selectedSlots || Object.keys(selectedSlots).length === 0) return '';
     
-    // Группируем дни по временным интервалам
+    // Group days by time intervals
     const timeRanges: Record<string, string[]> = {};
     
     const dayOrder = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -353,7 +353,7 @@ const OmnichannelCampaignSummarySection: React.FC = () => {
           ? ((budget / campaign.budget.totalBudget) * 100).toFixed(1)
           : '0';
         
-        // Проверяем есть ли данные для канала
+        // Check if there is data for channel
         const hasAudience = formatChannelAudienceString(channelId) !== '';
         const hasGeo = formatChannelGeoString(channelId) !== '';
         const hasInterests = formatChannelInterestsString(channelId) !== '';
@@ -412,7 +412,7 @@ const OmnichannelCampaignSummarySection: React.FC = () => {
                   />
                 )}
 
-                {/* Keywords (только для search) */}
+                {/* Keywords (only for search) */}
                 {channelId === 'search' && hasKeywords && (
                   <SummaryRow
                     label="Keywords"
