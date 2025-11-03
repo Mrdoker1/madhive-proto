@@ -106,7 +106,7 @@ export interface ChannelSectionData {
   };
   dayparts: CampaignDaypartsData;
   interests: string[]; // For Interests section
-  keywords?: string[]; // For Keywords section (search only)
+  keywords: string[]; // For Keywords section (search only)
   estimations: {
     audienceEstimation: number;
     marketEstimation: number;
@@ -300,6 +300,7 @@ const campaignSlice = createSlice({
             selectedSlots: {}
           },
           interests: [],
+          keywords: [],
           estimations: {
             audienceEstimation: 0,
             marketEstimation: 0
@@ -307,9 +308,11 @@ const campaignSlice = createSlice({
         };
       }
       
-      // Handle interests separately as it's a direct array
+      // Handle interests and keywords separately as they're direct arrays
       if (section === 'interests') {
         state.omnichannel.channelData[channel].interests = Array.isArray(data) ? data : [];
+      } else if (section === 'keywords') {
+        state.omnichannel.channelData[channel].keywords = Array.isArray(data) ? data : [];
       } else {
         state.omnichannel.channelData[channel][section] = { 
           ...state.omnichannel.channelData[channel][section], 
@@ -339,6 +342,7 @@ const campaignSlice = createSlice({
               selectedSlots: {}
             },
             interests: [],
+            keywords: [],
             estimations: {
               audienceEstimation: 0,
               marketEstimation: 0

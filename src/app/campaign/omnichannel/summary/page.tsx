@@ -6,21 +6,12 @@ import SectionWrapper from "@/components/ui/SectionWrapper";
 import { BreadcrumbStep } from "@/components/ui/Breadcrumbs";
 import NextButton from "@/components/ui/NextButton";
 import OmnichannelCampaignSummarySection from "@/components/features/sections/OmnichannelCampaignSummarySection";
-import OmnichannelRightSidebar from "@/components/layout/OmnichannelRightSidebar";
-import { useAppDispatch, useAppSelector } from '@/hooks/useRedux';
+import { useAppDispatch } from '@/hooks/useRedux';
 import { saveCampaign } from '@/store/slices/campaignSlice';
-import { useMemo } from 'react';
 
 export default function OmnichannelSummaryPage() {
   const router = useRouter();
   const dispatch = useAppDispatch();
-  
-  const selectedChannelsFromRedux = useAppSelector((state) => state.campaign.channels.selectedChannels);
-  
-  // Filter selected channels (exclude linear_tv)
-  const availableChannels = useMemo(() => {
-    return selectedChannelsFromRedux.filter(channelId => channelId !== 'linear_tv');
-  }, [selectedChannelsFromRedux]);
   
   // Breadcrumbs for Summary page
   const breadcrumbSteps: BreadcrumbStep[] = [
@@ -70,8 +61,7 @@ export default function OmnichannelSummaryPage() {
       <PageLayout 
         breadcrumbs={breadcrumbSteps} 
         title="Summary"
-        showRightSidebar={true}
-        rightSidebarContent={<OmnichannelRightSidebar selectedChannels={availableChannels} readOnly={true} pageKey="omnichannel-summary" />}
+        showRightSidebar={false}
         footerContent={
           <NextButton 
             active={true}

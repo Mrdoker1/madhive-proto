@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { MultiSelect, Button, Group, Text, Select, TextInput } from '@mantine/core';
 import { keyWordsData, categoryOptions, keywordsByAdvertiser } from '@/data/keyWordsData';
 import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
@@ -22,11 +22,21 @@ const KeyWordsSection = ({ channel = 'search' }: KeyWordsSectionProps) => {
   const [generatedKeyWords, setGeneratedKeyWords] = useState<string[]>([]);
   const [showGenerator, setShowGenerator] = useState<boolean>(false);
   const [customKeyword, setCustomKeyword] = useState<string>('');
+  const isInitialMount = useRef(true);
+  const prevChannelRef = useRef<string | undefined>(undefined);
 
-  // Load keywords from Redux on mount
+  // Load keywords from Redux on mount or channel change
   useEffect(() => {
-    if (channel && channelData[channel]?.keywords) {
-      setSelectedKeyWords(channelData[channel].keywords || []);
+    // Only load from Redux if channel changed or it's initial mount
+    if (channel && (prevChannelRef.current !== channel || isInitialMount.current)) {
+      prevChannelRef.current = channel;
+      if (channelData[channel]?.keywords) {
+        const keywords = channelData[channel].keywords;
+        // Ensure keywords is always an array
+        setSelectedKeyWords(Array.isArray(keywords) ? keywords : []);
+      } else {
+        setSelectedKeyWords([]);
+      }
     }
   }, [channel, channelData]);
 
@@ -47,7 +57,13 @@ const KeyWordsSection = ({ channel = 'search' }: KeyWordsSectionProps) => {
 
   // Save keywords to Redux on change
   useEffect(() => {
-    if (channel && selectedKeyWords.length >= 0) {
+    // Skip on initial mount to avoid loop
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+    
+    if (channel) {
       dispatch(updateChannelSectionData({
         channel,
         section: 'keywords',

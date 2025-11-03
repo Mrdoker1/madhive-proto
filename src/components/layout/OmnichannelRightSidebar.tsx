@@ -192,15 +192,26 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({
       return <div style={{ width: '100%', backgroundColor: '#E5E5E5' }} />;
     }
 
-    // Use actual budget allocation from Redux
+    // Calculate total allocated budget for selected channels
+    const totalAllocated = selectedChannels.reduce((sum, channelId) => {
+      return sum + (budgetAllocation[channelId] || 0);
+    }, 0);
+
+    // If no budget allocated, show gray bar
+    if (totalAllocated === 0) {
+      return <div style={{ width: '100%', backgroundColor: '#E5E5E5' }} />;
+    }
+
+    // Calculate percentage relative to allocated budget (not total budget)
     return selectedChannels.map(channelId => {
-      const percentOfTotal = getChannelBudgetPercent(channelId);
+      const channelBudget = budgetAllocation[channelId] || 0;
+      const percentOfAllocated = (channelBudget / totalAllocated) * 100;
       
       return (
         <div 
           key={channelId}
           style={{ 
-            width: `${percentOfTotal}%`, 
+            width: `${percentOfAllocated}%`, 
             backgroundColor: CHANNEL_COLORS[channelId] || '#E5E5E5' 
           }} 
         />

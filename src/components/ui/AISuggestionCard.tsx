@@ -69,6 +69,7 @@ const AISuggestionCard: React.FC<AISuggestionCardProps> = ({
     <Card
       padding="md"
       radius="md"
+      style={{ minWidth: '352px' }}
       styles={{
         root: {
           backgroundColor: '#FFFFFF',
