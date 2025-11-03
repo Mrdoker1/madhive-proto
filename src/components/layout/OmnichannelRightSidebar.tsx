@@ -78,26 +78,36 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({
     }
   };
 
-  const allChannelPills: ChannelPill[] = [
-    { id: 'total', label: 'Total' },
-    { id: 'ctv', label: 'CTV' },
-    { id: 'preroll', label: 'Preroll' },
-    { id: 'audio', label: 'Audio' },
-    { id: 'social', label: 'Social' },
-    { id: 'search', label: 'Search' },
-    { id: 'email', label: 'Email' }
-  ];
+  const allChannelPills: Record<ChannelType, ChannelPill> = {
+    'total': { id: 'total', label: 'Total' },
+    'ctv': { id: 'ctv', label: 'CTV' },
+    'preroll': { id: 'preroll', label: 'Preroll' },
+    'audio': { id: 'audio', label: 'Audio' },
+    'social': { id: 'social', label: 'Social' },
+    'search': { id: 'search', label: 'Search' },
+    'email': { id: 'email', label: 'Email' }
+  };
   
-  // Filter pills: always show Total + selected channels
+  // Filter pills: always show Total + selected channels, sorted by budget (descending)
   const channelPills = useMemo(() => {
     if (selectedChannels.length === 0) {
-      return allChannelPills; // If nothing selected, show all
+      // If nothing selected, return all channels (not sorted)
+      return Object.values(allChannelPills);
     }
     
-    return allChannelPills.filter(pill => 
-      pill.id === 'total' || selectedChannels.includes(pill.id)
-    );
-  }, [selectedChannels]);
+    // Sort selected channels by budget (from highest to lowest)
+    const sortedChannels = [...selectedChannels].sort((a, b) => {
+      const budgetA = budgetAllocation?.[a] || 0;
+      const budgetB = budgetAllocation?.[b] || 0;
+      return budgetB - budgetA; // Descending order
+    });
+    
+    // Always put Total first, then sorted channels
+    return [
+      allChannelPills['total'],
+      ...sortedChannels.map(channelId => allChannelPills[channelId as ChannelType])
+    ];
+  }, [selectedChannels, budgetAllocation]);
   
   // If active channel is not in available list, switch to Total
   useEffect(() => {
@@ -117,10 +127,19 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({
     { id: 'email', label: 'Email' }
   ];
 
-  // Filter legend only for selected channels
-  const visibleLegendChannels = selectedChannels.length > 0
-    ? allLegendChannels.filter(channel => selectedChannels.includes(channel.id))
-    : allLegendChannels;
+  // Filter legend only for selected channels and sort by budget
+  const visibleLegendChannels = useMemo(() => {
+    const channels = selectedChannels.length > 0
+      ? allLegendChannels.filter(channel => selectedChannels.includes(channel.id))
+      : allLegendChannels;
+    
+    // Sort by budget (descending)
+    return channels.sort((a, b) => {
+      const budgetA = budgetAllocation?.[a.id] || 0;
+      const budgetB = budgetAllocation?.[b.id] || 0;
+      return budgetB - budgetA;
+    });
+  }, [selectedChannels, budgetAllocation]);
 
   // Calculate budget percentage for channel
   const getChannelBudgetPercent = (channelId: string): number => {
@@ -202,8 +221,15 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({
       return <div style={{ width: '100%', backgroundColor: '#E5E5E5' }} />;
     }
 
+    // Sort channels by budget (descending) for consistent order
+    const sortedChannels = [...selectedChannels].sort((a, b) => {
+      const budgetA = budgetAllocation[a] || 0;
+      const budgetB = budgetAllocation[b] || 0;
+      return budgetB - budgetA;
+    });
+
     // Calculate percentage relative to allocated budget (not total budget)
-    return selectedChannels.map(channelId => {
+    return sortedChannels.map(channelId => {
       const channelBudget = budgetAllocation[channelId] || 0;
       const percentOfAllocated = (channelBudget / totalAllocated) * 100;
       
@@ -237,7 +263,14 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({
       return <div style={{ width: '100%', backgroundColor: '#E5E5E5' }} />;
     }
 
-    return selectedChannels.map(channelId => {
+    // Sort channels by budget (descending) for consistent order
+    const sortedChannels = [...selectedChannels].sort((a, b) => {
+      const budgetA = budgetAllocation?.[a] || 0;
+      const budgetB = budgetAllocation?.[b] || 0;
+      return budgetB - budgetA;
+    });
+
+    return sortedChannels.map(channelId => {
       const percentOfTotal = getChannelAudiencePercent(channelId);
       
       return (
@@ -270,7 +303,14 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({
       return <div style={{ width: '100%', backgroundColor: '#E5E5E5' }} />;
     }
 
-    return selectedChannels.map(channelId => {
+    // Sort channels by budget (descending) for consistent order
+    const sortedChannels = [...selectedChannels].sort((a, b) => {
+      const budgetA = budgetAllocation?.[a] || 0;
+      const budgetB = budgetAllocation?.[b] || 0;
+      return budgetB - budgetA;
+    });
+
+    return sortedChannels.map(channelId => {
       const percentOfTotal = getChannelMarketPercent(channelId);
       
       return (

@@ -29,17 +29,23 @@ export default function OmnichannelDetailsPage() {
   const selectedChannelsFromRedux = useAppSelector((state) => state.campaign.channels.selectedChannels);
   const carryOverMode = useAppSelector((state) => state.campaign.omnichannel.carryOverMode);
   const channelData = useAppSelector((state) => state.campaign.omnichannel.channelData);
+  const budgetAllocation = useAppSelector((state) => state.campaign.channels.budgetAllocation);
   
-  // Filter selected channels (exclude linear_tv, it's not shown on this page)
+  // Filter selected channels (exclude linear_tv, it's not shown on this page) and sort by budget (descending)
   const availableChannels = useMemo(() => {
-    return selectedChannelsFromRedux.filter(channelId => channelId !== 'linear_tv') as ChannelType[];
-  }, [selectedChannelsFromRedux]);
+    const filtered = selectedChannelsFromRedux.filter(channelId => channelId !== 'linear_tv') as ChannelType[];
+    
+    // Sort by budget (from highest to lowest)
+    return filtered.sort((a, b) => {
+      const budgetA = budgetAllocation?.[a] || 0;
+      const budgetB = budgetAllocation?.[b] || 0;
+      return budgetB - budgetA; // Descending order
+    });
+  }, [selectedChannelsFromRedux, budgetAllocation]);
   
   // Set active channel - first from available
   const [activeChannel, setActiveChannel] = useState<ChannelType | null>(null);
   const firstChannelRef = useRef<ChannelType | null>(null);
-  
-  const budgetAllocation = useAppSelector((state) => state.campaign.channels.budgetAllocation);
   
   // Initialize data for each channel on first load
   useEffect(() => {
@@ -109,19 +115,19 @@ export default function OmnichannelDetailsPage() {
   ];
 
   // Pills for channel switching (only user-selected channels)
-  const allChannelPills: ChannelPill[] = [
-    { id: 'ctv', label: 'CTV' },
-    { id: 'preroll', label: 'Pre Roll' },
-    { id: 'audio', label: 'Audio' },
-    { id: 'social', label: 'Social' },
-    { id: 'search', label: 'Search' },
-    { id: 'email', label: 'Email' }
-  ];
+  const allChannelPills: Record<ChannelType, ChannelPill> = {
+    'ctv': { id: 'ctv', label: 'CTV' },
+    'preroll': { id: 'preroll', label: 'Pre Roll' },
+    'audio': { id: 'audio', label: 'Audio' },
+    'social': { id: 'social', label: 'Social' },
+    'search': { id: 'search', label: 'Search' },
+    'email': { id: 'email', label: 'Email' }
+  };
   
-  // Filter pills for selected channels only
+  // Create pills for selected channels in the same order as availableChannels (sorted by budget)
   const channelPills = useMemo(() => {
-    return allChannelPills.filter(pill => availableChannels.includes(pill.id as ChannelType));
-  }, [availableChannels, allChannelPills]);
+    return availableChannels.map(channelId => allChannelPills[channelId]);
+  }, [availableChannels]);
 
   // Navigation anchors - different for each channel
   const getAnchorItems = (): AnchorItem[] => {
