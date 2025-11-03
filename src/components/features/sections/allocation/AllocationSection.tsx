@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useCallback, useRef, useEffect } from 'react';
-import { Text, Group } from '@mantine/core';
+import { Text, Group, Switch } from '@mantine/core';
 import { AnimatePresence } from 'framer-motion';
 import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
 import { updateChannelsData } from '@/store/slices/campaignSlice';
@@ -40,6 +40,7 @@ export const AllocationSection: React.FC = () => {
   // Unified state for channels (contains data for chart and sliders)
   const [channelData, setChannelData] = useState<Record<string, ChannelPoint & SliderChannelAllocation>>({});
   const [isLoading, setIsLoading] = useState<Record<string, boolean>>({});
+  const [showChannelColors, setShowChannelColors] = useState(false); // Setting for showing colors on labels
 
 
   // Track container dimensions
@@ -485,9 +486,23 @@ export const AllocationSection: React.FC = () => {
           {/* Channel Sliders */}
           {allChannels.length > 0 && (
             <div>
-              <Text size="13px" fw={400} c="#1F2937" mb="20px">
-                Budget allocation by channel:
-              </Text>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                <Text size="13px" fw={400} c="#1F2937">
+                  Budget allocation by channel:
+                </Text>
+                {/* <Switch
+                  label="Show channel colors on labels"
+                  checked={showChannelColors}
+                  onChange={(event) => setShowChannelColors(event.currentTarget.checked)}
+                  size="sm"
+                  styles={{
+                    label: {
+                      fontSize: '12px',
+                      color: '#6B7280'
+                    }
+                  }}
+                /> */}
+              </div>
               <AnimatePresence mode="popLayout">
                 {allChannels.map(channel => (
                   <ChannelSlider 
@@ -496,6 +511,7 @@ export const AllocationSection: React.FC = () => {
                     onBudgetChange={handleBudgetChange}
                     onRemove={handleRemoveChannel}
                     isLoading={isLoading[channel.id]}
+                    showChannelColors={showChannelColors}
                   />
                 ))}
               </AnimatePresence>

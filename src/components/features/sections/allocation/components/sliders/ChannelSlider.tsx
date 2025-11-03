@@ -14,7 +14,8 @@ export const ChannelSlider: React.FC<ChannelSliderProps> = ({
   allocation, 
   onBudgetChange, 
   onRemove,
-  isLoading = false 
+  isLoading = false,
+  showChannelColors = false 
 }) => {
   const totalBudget = useAppSelector((state) => state.campaign.budget.totalBudget) || 390250;
   
@@ -150,6 +151,7 @@ export const ChannelSlider: React.FC<ChannelSliderProps> = ({
             max={totalBudget}
             step={100} // Step of 100 dollars for precise control
             color={allocation.color} // Keep original channel color
+            showChannelColors={showChannelColors}
             onChange={handleSliderChange}
           />
         </div>

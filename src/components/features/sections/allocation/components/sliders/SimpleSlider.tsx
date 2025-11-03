@@ -3,10 +3,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { SimpleSliderProps } from './types';
 
-export const SimpleSlider: React.FC<SimpleSliderProps> = ({ value, max, step = 100, color = '#EC4899', onChange }) => {
+export const SimpleSlider: React.FC<SimpleSliderProps> = ({ value, max, step = 100, color = '#EC4899', showChannelColors = false, onChange }) => {
   const [localValue, setLocalValue] = useState(value);
   const [isDragging, setIsDragging] = useState(false);
   const sliderRef = useRef<HTMLDivElement>(null);
+  
+  // Use primary color if showChannelColors is false, otherwise use channel color
+  const PRIMARY_COLOR = 'var(--primary-color)';
+  const labelColor = showChannelColors ? color : PRIMARY_COLOR;
   
   // Synchronize with external value when not dragging
   useEffect(() => {
@@ -88,7 +92,7 @@ export const SimpleSlider: React.FC<SimpleSliderProps> = ({ value, max, step = 1
         left: 0,
         width: `${percent}%`,
         height: '20px',
-        backgroundColor: '#4B5563',
+        backgroundColor: 'var(--primary-color)',
         borderRadius: percent > 0 ? '4px 0 0 4px' : '4px'
       }} />
       
@@ -100,7 +104,7 @@ export const SimpleSlider: React.FC<SimpleSliderProps> = ({ value, max, step = 1
         transform: 'translateX(-50%)',
         width: '2px',
         height: '27px',
-        backgroundColor: color
+        backgroundColor: labelColor
       }} />
       
       {/* Marker */}
@@ -111,7 +115,7 @@ export const SimpleSlider: React.FC<SimpleSliderProps> = ({ value, max, step = 1
           left: `${percent}%`,
           top: '28px',
           transform: 'translateX(-50%)',
-          backgroundColor: color,
+          backgroundColor: labelColor,
           color: 'white',
           padding: '4px 8px',
           borderRadius: '4px',

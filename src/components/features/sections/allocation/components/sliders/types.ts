@@ -13,6 +13,7 @@ export interface SimpleSliderProps {
   max: number;
   step?: number; // Step for value change (default 100)
   color?: string; // Marker color (default pink)
+  showChannelColors?: boolean; // Show channel colors on labels (default false)
   onChange: (value: number) => void;
 }
 
@@ -21,4 +22,5 @@ export interface ChannelSliderProps {
   onBudgetChange: (channelId: string, newBudget: number) => void;
   onRemove: (channelId: string) => void;
   isLoading?: boolean;
+  showChannelColors?: boolean; // Show channel colors on labels (default false)
 }
