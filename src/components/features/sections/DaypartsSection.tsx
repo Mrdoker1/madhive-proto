@@ -383,7 +383,7 @@ const DaypartsSection = ({ channel, isFirstChannel = true }: DaypartsSectionProp
                   />
                   <span style={{ 
                     fontWeight: '400', 
-                    fontSize: '10px',
+                    fontSize: '11px',
                     minWidth: '55px'
                   }}>
                     {hourData.display}

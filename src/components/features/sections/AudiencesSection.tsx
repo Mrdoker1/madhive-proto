@@ -1,4 +1,4 @@
-import { Checkbox, Text, Grid } from '@mantine/core';
+import { Checkbox, Text, Grid, Divider } from '@mantine/core';
 import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
 import { updateAudienceData, updateChannelSectionData, setCarryOverMode, updateChannelEstimations } from '@/store/slices/campaignSlice';
 import { audienceCategories } from '@/data/audienceData';
@@ -28,6 +28,17 @@ const AudiencesSection = ({ channel, isFirstChannel = true }: AudiencesSectionPr
       ? [...currentValues, value]
       : currentValues.filter(item => item !== value);
     
+    updateCategoryData(category, newValues);
+  };
+
+  // Handler for selecting/deselecting entire category
+  const handleCategoryCheckboxChange = (categoryKey: string, allOptions: string[], checked: boolean) => {
+    const newValues = checked ? allOptions : [];
+    updateCategoryData(categoryKey as keyof typeof audienceData, newValues);
+  };
+
+  // Common function to update category data
+  const updateCategoryData = (category: keyof typeof audienceData, newValues: string[]) => {
     // If this is omnichannel and we're NOT on first tab, disable carry over mode
     if (channel && !isFirstChannel && carryOverMode) {
       dispatch(setCarryOverMode(false));
@@ -90,15 +101,49 @@ const AudiencesSection = ({ channel, isFirstChannel = true }: AudiencesSectionPr
     }
   };
 
+  // Check if all options in category are selected
+  const isCategoryChecked = (categoryKey: string, options: string[]): boolean => {
+    const selectedValues = audienceData[categoryKey as keyof typeof audienceData] || [];
+    return options.length > 0 && options.every(option => selectedValues.includes(option));
+  };
+
+  // Check if some (but not all) options in category are selected
+  const isCategoryIndeterminate = (categoryKey: string, options: string[]): boolean => {
+    const selectedValues = audienceData[categoryKey as keyof typeof audienceData] || [];
+    const selectedCount = options.filter(option => selectedValues.includes(option)).length;
+    return selectedCount > 0 && selectedCount < options.length;
+  };
+
 
   return (
     <Grid>
       {audienceCategories.map((category) => (
         <Grid.Col key={category.key} span={2.4}>
           <div>
-            <Text size="sm" fw={500} mb="xs" style={{ color: 'var(--form-label-color)' }}>
-              {category.title}
-            </Text>
+            {/* Category header with checkbox */}
+            <Checkbox
+              label={
+                <Text size="sm" fw={600} mb="md" style={{ color: '#000000' }}>
+                  {category.title}
+                </Text>
+              }
+              size="sm"
+              checked={isCategoryChecked(category.key, category.options)}
+              indeterminate={isCategoryIndeterminate(category.key, category.options)}
+              onChange={(event) => 
+                handleCategoryCheckboxChange(category.key, category.options, event.currentTarget.checked)
+              }
+              styles={{
+                root: {
+                  // marginBottom: '12px'
+                }
+              }}
+            />
+            
+            {/* Divider */}
+            <Divider mb="md" color="#E5E5E5" />
+            
+            {/* Individual options */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               {category.options.map((option) => (
                 <Checkbox

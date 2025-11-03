@@ -8,7 +8,7 @@ export interface InterestCategory {
 export const interestCategories: InterestCategory[] = [
   {
     id: 'arts',
-    title: 'Arts & Entertainment',
+    title: 'Art',
     interests: [
       'Arts & Entertainment',
       'Celebrities & Entertainment News',
@@ -21,7 +21,7 @@ export const interestCategories: InterestCategory[] = [
   },
   {
     id: 'auto',
-    title: 'Auto, Cars and Trucks',
+    title: 'Auto',
     interests: [
       'Auto, Cars and Trucks',
       'Car Parts & Accessories',

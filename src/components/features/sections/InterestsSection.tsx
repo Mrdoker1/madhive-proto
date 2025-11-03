@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Checkbox, Text, Button, Grid, Badge, CloseButton } from '@mantine/core';
+import { Checkbox, Text, Button, Grid, Badge, CloseButton, Divider } from '@mantine/core';
 import { interestCategories, type InterestCategory } from '@/data/interestsData';
 import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
 import { updateChannelSectionData, setCarryOverMode, updateChannelEstimations } from '@/store/slices/campaignSlice';
@@ -30,7 +30,27 @@ const InterestsSection = ({ channel, isFirstChannel = false }: InterestsSectionP
     const newInterests = checked
       ? [...selectedInterests, interest]
       : selectedInterests.filter(i => i !== interest);
+    
+    updateInterestsData(newInterests);
+  };
 
+  // Handler for selecting/deselecting entire category
+  const handleCategoryToggle = (category: InterestCategory, checked: boolean) => {
+    let newInterests: string[];
+    
+    if (checked) {
+      // Add all interests from this category
+      newInterests = [...new Set([...selectedInterests, ...category.interests])];
+    } else {
+      // Remove all interests from this category
+      newInterests = selectedInterests.filter(interest => !category.interests.includes(interest));
+    }
+    
+    updateInterestsData(newInterests);
+  };
+
+  // Common function to update interests data
+  const updateInterestsData = (newInterests: string[]) => {
     // If this is not the first channel and carry over is active, disable it
     if (!isFirstChannel && carryOverMode) {
       dispatch(setCarryOverMode(false));
@@ -89,6 +109,17 @@ const InterestsSection = ({ channel, isFirstChannel = false }: InterestsSectionP
     }
   };
 
+  // Check if all interests in category are selected
+  const isCategoryChecked = (category: InterestCategory): boolean => {
+    return category.interests.length > 0 && category.interests.every(interest => selectedInterests.includes(interest));
+  };
+
+  // Check if some (but not all) interests in category are selected
+  const isCategoryIndeterminate = (category: InterestCategory): boolean => {
+    const selectedCount = category.interests.filter(interest => selectedInterests.includes(interest)).length;
+    return selectedCount > 0 && selectedCount < category.interests.length;
+  };
+
   const handleRemoveInterest = (interest: string) => {
     handleInterestToggle(interest, false);
   };
@@ -123,9 +154,28 @@ const InterestsSection = ({ channel, isFirstChannel = false }: InterestsSectionP
           {interestCategories.map((category) => (
             <Grid.Col key={category.id} span={6}>
               <div>
-                <Text size="sm" fw={600} mb="md" style={{ color: '#000000' }}>
-                  {category.title}
-                </Text>
+                {/* Category header with checkbox */}
+                <Checkbox
+                  label={
+                    <Text size="sm" fw={600} mb="md" style={{color: '#000000' }}>
+                      {category.title}
+                    </Text>
+                  }
+                  size="sm"
+                  checked={isCategoryChecked(category)}
+                  indeterminate={isCategoryIndeterminate(category)}
+                  onChange={(event) => handleCategoryToggle(category, event.currentTarget.checked)}
+                  styles={{
+                    root: {
+                      // marginBottom: '2px'
+                    }
+                  }}
+                />
+                
+                {/* Divider */}
+                <Divider mb="md" color="#E5E5E5" />
+                
+                {/* Individual interests */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                   {getVisibleInterests(category).map((interest) => (
                     <Checkbox
