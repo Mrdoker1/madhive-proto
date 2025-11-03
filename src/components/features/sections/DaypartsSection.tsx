@@ -355,7 +355,7 @@ const DaypartsSection = ({ channel, isFirstChannel = true }: DaypartsSectionProp
                         styles={{
                           root: {
                             height: '24px',
-                            fontSize: '11px',
+                            fontSize: '12px',
                             padding: '0 8px'
                           }
                         }}
