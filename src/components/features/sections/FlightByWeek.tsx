@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { TextInput, Tooltip } from '@mantine/core';
+import { TextInput, Tooltip, Modal, Button, NumberInput } from '@mantine/core';
 import { IconCurrencyDollar, IconLock, IconLockOpen, IconInfoCircle } from '@tabler/icons-react';
 
 interface WeekData {
@@ -51,6 +51,11 @@ const FlightByWeek: React.FC<FlightByWeekProps> = ({
   const [dragState, setDragState] = useState<{[key: string]: number}>({});
   const [isDragging, setIsDragging] = useState(false);
   const [showBudgetTooltip, setShowBudgetTooltip] = useState(false);
+  
+  // Modal state for manual budget input
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editingWeek, setEditingWeek] = useState<WeekData | null>(null);
+  const [editBudgetValue, setEditBudgetValue] = useState<number | string>('');
 
   // Memoize hiatusRanges for dependency stability
   const stableHiatusRanges = useMemo(() => hiatusRanges || [], [hiatusRanges]);
@@ -64,6 +69,74 @@ const FlightByWeek: React.FC<FlightByWeekProps> = ({
           : week
       )
     );
+  };
+
+  // Calculate available budget for a specific week
+  const calculateAvailableBudget = (weekId: string): number => {
+    // Calculate sum of all locked weeks budget (excluding current week)
+    const lockedWeeks = weeks.filter(w => w.isLocked && w.id !== weekId);
+    const lockedBudgetSum = lockedWeeks.reduce((sum, w) => sum + w.budget, 0);
+    
+    // Available budget = total budget - locked budget
+    return totalBudget - lockedBudgetSum;
+  };
+
+  // Handle double click to open edit modal
+  const handleDoubleClick = (week: WeekData) => {
+    if (week.isLocked) return; // Don't allow editing locked weeks
+    
+    const availableBudget = calculateAvailableBudget(week.id);
+    
+    setEditingWeek(week);
+    setEditBudgetValue(Math.round(week.budget));
+    setEditModalOpen(true);
+  };
+
+  // Handle modal budget save
+  const handleSaveBudgetEdit = () => {
+    if (!editingWeek) return;
+    
+    const newBudget = typeof editBudgetValue === 'string' ? parseFloat(editBudgetValue) : editBudgetValue;
+    
+    if (isNaN(newBudget) || newBudget < 0) {
+      return; // Invalid input
+    }
+    
+    // Calculate max available budget for this week
+    const maxAvailableBudget = calculateAvailableBudget(editingWeek.id);
+    
+    // Clamp budget to available budget
+    const clampedBudget = Math.min(newBudget, maxAvailableBudget);
+    
+    // Update the week budget
+    updateWeekBudget(editingWeek.id, clampedBudget);
+    
+    // Redistribute remaining budget among other unlocked weeks
+    const otherUnlockedWeeks = weeks.filter(w => w.id !== editingWeek.id && !w.isLocked);
+    
+    if (otherUnlockedWeeks.length > 0) {
+      // Calculate sum of locked weeks (excluding current week)
+      const lockedWeeks = weeks.filter(w => w.isLocked && w.id !== editingWeek.id);
+      const lockedBudgetSum = lockedWeeks.reduce((sum, w) => sum + w.budget, 0);
+      
+      const remainingBudget = totalBudget - clampedBudget - lockedBudgetSum;
+      const equalShare = Math.max(0, remainingBudget / otherUnlockedWeeks.length);
+      
+      otherUnlockedWeeks.forEach(week => {
+        updateWeekBudget(week.id, equalShare);
+      });
+    }
+    
+    setEditModalOpen(false);
+    setEditingWeek(null);
+    setEditBudgetValue('');
+  };
+
+  // Handle modal close
+  const handleCloseModal = () => {
+    setEditModalOpen(false);
+    setEditingWeek(null);
+    setEditBudgetValue('');
   };
 
   // Function to generate weeks from date range
@@ -356,6 +429,7 @@ const FlightByWeek: React.FC<FlightByWeekProps> = ({
                   opacity: isHiatusWeek ? 0.4 : (week.isLocked ? 0.6 : 1)
                 }}
                 tabIndex={-1}
+                onDoubleClick={() => handleDoubleClick(week)}
                 onMouseDown={(e) => {
                   // Prohibit drag for locked weeks
                   if (week.isLocked) {
@@ -498,9 +572,74 @@ const FlightByWeek: React.FC<FlightByWeekProps> = ({
       {/* Summary */}
       <div className="mt-4 p-3 bg-gray-50 rounded-lg">
         <div className="text-center" style={{ fontSize: '14px', color: '#666' }}>
-          Drag bars up and down to redistribute budget across weeks
+          Drag bars up and down to redistribute budget across weeks, or double-click to enter exact amount
         </div>
       </div>
+
+      {/* Edit Budget Modal */}
+      <Modal
+        opened={editModalOpen}
+        onClose={handleCloseModal}
+        title={editingWeek ? `Edit Budget for Week ${editingWeek.id.replace('week-', '')}` : 'Edit Budget'}
+        centered
+        size="sm"
+      >
+        {editingWeek && (() => {
+          const maxAvailable = calculateAvailableBudget(editingWeek.id);
+          const lockedWeeksCount = weeks.filter(w => w.isLocked).length;
+          const currentValue = typeof editBudgetValue === 'string' ? parseFloat(editBudgetValue) : editBudgetValue;
+          const isOverMax = !isNaN(currentValue) && currentValue > maxAvailable;
+          const isInvalid = !editBudgetValue || editBudgetValue === '' || isNaN(currentValue) || currentValue < 0;
+          
+          return (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div>
+                {lockedWeeksCount > 0 && (
+                  <div style={{ fontSize: '13px', color: '#999', marginBottom: '8px' }}>
+                    Locked Weeks Budget: ${(totalBudget - maxAvailable).toLocaleString()}
+                  </div>
+                )}
+                <div style={{ fontSize: '12px', color: '#999' }}>
+                  Maximum Available: ${Math.round(maxAvailable).toLocaleString()}
+                </div>
+              </div>
+
+              <div>
+                <NumberInput
+                  label="Budget Amount"
+                  placeholder="Enter budget"
+                  value={editBudgetValue}
+                  onChange={setEditBudgetValue}
+                  min={0}
+                  max={maxAvailable}
+                  prefix="$"
+                  thousandSeparator=","
+                  hideControls
+                  error={isOverMax ? `Maximum available budget is $${Math.round(maxAvailable).toLocaleString()}` : undefined}
+                  styles={{
+                    input: {
+                      fontSize: '16px',
+                      padding: '8px 12px'
+                    }
+                  }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', marginTop: '8px' }}>
+                <Button variant="outline" onClick={handleCloseModal}>
+                  Cancel
+                </Button>
+                <Button 
+                  onClick={handleSaveBudgetEdit}
+                  disabled={isInvalid || isOverMax}
+                >
+                  Save
+                </Button>
+              </div>
+            </div>
+          );
+        })()}
+      </Modal>
     </div>
   );
 };
