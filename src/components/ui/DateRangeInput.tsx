@@ -34,6 +34,8 @@ interface DateRangeInputProps {
   // For Hiatus mode with multiple ranges
   isHiatusMode?: boolean;
   onHiatusRangesChange?: (ranges: HiatusRange[]) => void;
+  // External hiatus ranges for synchronization
+  hiatusRanges?: HiatusRange[];
 }
 
 const DateRangeInput: React.FC<DateRangeInputProps> = ({
@@ -53,7 +55,8 @@ const DateRangeInput: React.FC<DateRangeInputProps> = ({
   isActiveMode,
   disabled = false,
   isHiatusMode = false,
-  onHiatusRangesChange
+  onHiatusRangesChange,
+  hiatusRanges: externalHiatusRanges
 }) => {
   const [startDate, setStartDate] = useState(selectedStartDate || '');
   const [endDate, setEndDate] = useState(selectedEndDate || '');
@@ -74,13 +77,6 @@ const DateRangeInput: React.FC<DateRangeInputProps> = ({
   useEffect(() => {
     setIsMounted(true);
   }, []);
-
-  // Notify parent component of hiatus ranges changes
-  useEffect(() => {
-    if (isMounted && onHiatusRangesChange) {
-      onHiatusRangesChange(hiatusRanges);
-    }
-  }, [hiatusRanges, onHiatusRangesChange, isMounted]);
   
   // Initialize calendar in hiatus mode
   useEffect(() => {
@@ -108,6 +104,13 @@ const DateRangeInput: React.FC<DateRangeInputProps> = ({
       }]);
     }
   }, [isMounted, calendarKey, isHiatusMode]);
+  
+  // Synchronize external hiatus ranges with internal state
+  useEffect(() => {
+    if (externalHiatusRanges !== undefined) {
+      setHiatusRanges(externalHiatusRanges);
+    }
+  }, [externalHiatusRanges]);
   
   // Function to parse date from string
   const parseDate = (dateStr: string): Date | null => {
@@ -246,6 +249,10 @@ const DateRangeInput: React.FC<DateRangeInputProps> = ({
         // Add new range to local state
         setHiatusRanges(prev => {
           const newRanges = [...prev, newRange];
+          // Notify parent component about change
+          if (onHiatusRangesChange) {
+            onHiatusRangesChange(newRanges);
+          }
           return newRanges;
         });
         
@@ -276,10 +283,55 @@ const DateRangeInput: React.FC<DateRangeInputProps> = ({
   const removeHiatusRange = (id: string) => {
     setHiatusRanges(prev => {
       const newRanges = prev.filter(range => range.id !== id);
+      // Notify parent component about change
+      if (onHiatusRangesChange) {
+        onHiatusRangesChange(newRanges);
+      }
       return newRanges;
     });
     // Force calendar update
     setCalendarKey(prev => prev + 1);
+  };
+
+  // Check if date is in hiatus range
+  const isDateInHiatus = (date: Date): boolean => {
+    if (!hiatusRanges || hiatusRanges.length === 0) return false;
+    
+    return hiatusRanges.some(range => {
+      const rangeStart = parseDate(range.start);
+      const rangeEnd = parseDate(range.end);
+      
+      if (!rangeStart || !rangeEnd) return false;
+      
+      // Normalize dates for comparison
+      const checkDate = new Date(date);
+      checkDate.setHours(0, 0, 0, 0);
+      rangeStart.setHours(0, 0, 0, 0);
+      rangeEnd.setHours(0, 0, 0, 0);
+      
+      return checkDate >= rangeStart && checkDate <= rangeEnd;
+    });
+  };
+
+  // Custom day content renderer
+  const dayContentRenderer = (day: Date) => {
+    const isHiatusDay = isDateInHiatus(day);
+    
+    return (
+      <span 
+        className={isActiveMode && isHiatusDay ? 'hiatus-day-marker' : ''}
+        style={{
+          position: 'relative',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: '100%',
+          height: '100%'
+        }}
+      >
+        {day.getDate()}
+      </span>
+    );
   };
 
   const hasError = !!error;
@@ -427,10 +479,22 @@ const DateRangeInput: React.FC<DateRangeInputProps> = ({
           /* In Hiatus mode show disabled dates (already selected hiatus) exactly like regular disabled */
           ${isHiatusMode ? `
             .rdrDayDisabled .rdrDayNumber {
-              color: #999 !important;
+              color: #999999 !important;
               background-color: transparent !important;
             }
           ` : ''}
+          
+          /* Hiatus days styling in Active mode */
+          .rdrDay:has(.hiatus-day-marker) .rdrDayNumber {
+            background-color: rgba(255, 255, 255, 0.15) !important;
+          }
+          
+          /* Hiatus days in selected range - darker background */
+          .rdrDayInRange:has(.hiatus-day-marker) .rdrDayNumber,
+          .rdrDayStartOfRange:has(.hiatus-day-marker) .rdrDayNumber,
+          .rdrDayEndOfRange:has(.hiatus-day-marker) .rdrDayNumber {
+            background-color: rgba(255, 0, 208, 0.4) !important;
+          }
         `}</style>
         
         <div style={{ 
@@ -452,6 +516,7 @@ const DateRangeInput: React.FC<DateRangeInputProps> = ({
             minDate={minDate}
             maxDate={maxDate}
             disabledDates={getDisabledDates()}
+            dayContentRenderer={dayContentRenderer}
           />
           {disabled && (
             <div style={{

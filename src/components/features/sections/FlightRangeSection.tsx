@@ -103,8 +103,18 @@ const FlightRangeSection: React.FC<FlightRangeSectionProps> = ({
     console.log('Date range changed:', startDate, endDate);
     
     if (flightStatus === 'active') {
-      // Check if active range actually changed
-      const rangeChanged = activeDateRange.start !== startDate || activeDateRange.end !== endDate;
+      // Check if this is a complete range (both dates selected and different)
+      const isCompleteRange = startDate && endDate && startDate !== endDate;
+      
+      // Check if the complete range is different from current one
+      const isRangeChanged = isCompleteRange && 
+        (activeDateRange.start !== startDate || activeDateRange.end !== endDate);
+      
+      // If we have a previously selected range with hiatus periods, and now selecting a new complete range - clear hiatus
+      const shouldClearHiatus = isRangeChanged && 
+        activeDateRange.start && 
+        activeDateRange.end && 
+        currentHiatusRanges.length > 0;
       
       setActiveDateRange({ start: startDate, end: endDate });
       // Update global state
@@ -113,8 +123,8 @@ const FlightRangeSection: React.FC<FlightRangeSectionProps> = ({
         endDate: endDate 
       }));
       
-      // Clear hiatus dates ONLY when active range changes
-      if (rangeChanged && (activeDateRange.start || activeDateRange.end)) {
+      // Clear hiatus dates only when completing selection of a new range
+      if (shouldClearHiatus) {
         setHiatusDates({ start: '', end: '' });
         setCurrentHiatusRanges([]);
         dispatch(updateFlightData({ 
@@ -312,6 +322,7 @@ const FlightRangeSection: React.FC<FlightRangeSectionProps> = ({
           isActiveMode={flightStatus === 'active'}
           isHiatusMode={flightStatus === 'hiatus'}
           onHiatusRangesChange={handleHiatusRangesChange}
+          hiatusRanges={currentHiatusRanges}
           // Block calendar in Hiatus mode if dates not selected in Active
           disabled={flightStatus === 'hiatus' && (!activeDateRange.start || !activeDateRange.end)}
         />
