@@ -478,7 +478,7 @@ const DateRangeInput: React.FC<DateRangeInputProps> = ({
       {/* Hiatus Ranges Display */}
       {isHiatusMode && hiatusRanges.length > 0 && (
         <div style={{ marginTop: '12px' }}>
-          <div style={{ fontSize: '12px', color: '#6c757d', marginBottom: '8px' }}>
+          <div style={{ fontSize: '14px', color: '#6c757d', marginBottom: '8px' }}>
             Selected Hiatus Periods:
           </div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
 import { updateBudgetData } from '@/store/slices/campaignSlice';
@@ -17,12 +17,14 @@ import {
   validateGeneralDetails, 
   validateTotalBudget, 
   validateGoal, 
-  validateFlightRange
+  validateFlightRange,
+  scrollToFirstError
 } from '@/utils/validation';
 
 export default function NewCampaignPage() {
   const router = useRouter();
   const dispatch = useAppDispatch();
+  const [showErrors, setShowErrors] = useState(false);
   
   // Get data from global state
   const totalBudget = useAppSelector((state) => state.campaign.budget.totalBudget);
@@ -69,25 +71,32 @@ export default function NewCampaignPage() {
     { id: 'flight-range', label: 'Flight Range', anchor: '#flight-range' }
   ];
 
-  // Check form validity
-  const isFormValid = useMemo(() => {
-    const errors = [
+  // Get all validation errors
+  const validationErrors = useMemo(() => {
+    return [
       ...validateGeneralDetails(generalData),
       ...validateTotalBudget(budgetData),
       ...validateGoal(goalData),
       ...validateFlightRange(flightData)
     ];
-    return errors.length === 0;
   }, [generalData, budgetData, goalData, flightData]);
 
-  // Error message
+  // Check form validity
+  const isFormValid = validationErrors.length === 0;
+
+  // Error message - show only when user tried to submit
   const errorMessage = useMemo(() => {
-    if (isFormValid) return '';
-    return 'Please fill in all required fields to continue';
-  }, [isFormValid]);
+    if (!showErrors || isFormValid) return '';
+    return validationErrors[0]?.message || 'Please fill in all required fields to continue';
+  }, [showErrors, isFormValid, validationErrors]);
 
   const handleNextClick = () => {
-    if (!isFormValid) return;
+    // Check validation
+    if (!isFormValid) {
+      setShowErrors(true);
+      scrollToFirstError(validationErrors);
+      return;
+    }
     
     console.log('Moving to next step - Channel Details');
     router.push('/campaign/linear/details');
@@ -104,7 +113,7 @@ export default function NewCampaignPage() {
         title="Campaign Information"
         footerContent={
           <NextButton 
-            active={isFormValid}
+            active={true}
             onClick={handleNextClick}
             text="Next"
             errorMessage={errorMessage}

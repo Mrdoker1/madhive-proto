@@ -119,7 +119,7 @@ const AISettingsSection: React.FC = () => {
 
       <div style={{ maxWidth: '800px' }}>
         <div style={{ marginBottom: '8px' }}>
-          <label style={{ fontSize: '12px', fontWeight: 500, color: '#374151', display: 'block', marginBottom: '8px' }}>
+          <label style={{ fontSize: '13px', fontWeight: 500, color: '#374151', display: 'block', marginBottom: '8px' }}>
             {aiProvider === 'deepseek' ? 'DeepSeek API Key' : 'OpenAI API Key'}
           </label>
           <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>

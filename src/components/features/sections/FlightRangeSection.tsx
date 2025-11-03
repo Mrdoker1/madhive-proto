@@ -19,7 +19,7 @@ type DateRange = { start: string; end: string };
 // Styles for Extend Campaign button
 const extendButtonStyles = {  
   root: {
-    fontSize: '12px',
+    fontSize: '13px',
     height: '32px',
     padding: '0 16px',
     borderColor: '#C2B9C6',
@@ -274,7 +274,7 @@ const FlightRangeSection: React.FC<FlightRangeSectionProps> = ({
           onClick={handleExtendCampaign}
           styles={{
             root: {
-              fontSize: '12px',
+              fontSize: '13px',
               height: '32px',
               padding: '0 16px',
               borderColor: '#E5E5E5',

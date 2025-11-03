@@ -115,7 +115,7 @@ export const SimpleSlider: React.FC<SimpleSliderProps> = ({ value, max, step = 1
           color: 'white',
           padding: '4px 8px',
           borderRadius: '4px',
-          fontSize: '12px',
+          fontSize: '13px',
           fontWeight: 500,
           cursor: 'grab',
           userSelect: 'none',

@@ -168,7 +168,7 @@ const KeyWordsSection = ({ channel = 'search' }: KeyWordsSectionProps) => {
               padding: '24px',
               backgroundColor: '#FAFAFA'
             }}>
-              <Text size="12px" fw={400} mb="lg" c="#6B7280">
+              <Text size="13px" fw={400} mb="lg" c="#6B7280">
                 Tell us more so we can generate some keywords for you
               </Text>
 

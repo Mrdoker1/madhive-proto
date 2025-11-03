@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import PageLayout from "@/components/layout/PageLayout";
 import NavigationAnchors, { AnchorItem } from "@/components/ui/NavigationAnchors";
 import SectionWrapper from "@/components/ui/SectionWrapper";
@@ -13,10 +13,11 @@ import MarketsSection from "@/components/features/sections/markets";
 import BroadcastersAndProgramsSection from "@/components/features/sections/BroadcastersAndProgramsSection";
 import DaypartsSection from "@/components/features/sections/DaypartsSection";
 import { useAppSelector } from '@/hooks/useRedux';
-import { validateMarkets, validateBroadcastersAndPrograms } from '@/utils/validation';
+import { validateMarkets, validateBroadcastersAndPrograms, scrollToFirstError } from '@/utils/validation';
 
 export default function ChannelDetailsPage() {
   const router = useRouter();
+  const [showErrors, setShowErrors] = useState(false);
   
   // Get data from Redux for validation
   const selectedMarkets = useAppSelector((state) => state.campaign.markets.selectedMarkets);
@@ -61,38 +62,32 @@ export default function ChannelDetailsPage() {
     { id: 'dayparts', label: 'Dayparts', anchor: '#dayparts' }
   ];
 
-  // Check form validity
-  const isFormValid = useMemo(() => {
-    const errors = [
+  // Get all validation errors
+  const validationErrors = useMemo(() => {
+    return [
       ...validateMarkets(selectedMarkets),
       ...validateBroadcastersAndPrograms(broadcasters, broadcastersWithStations)
     ];
-    return errors.length === 0;
   }, [selectedMarkets, broadcasters, broadcastersWithStations]);
 
-  // Error message
+  // Check form validity
+  const isFormValid = validationErrors.length === 0;
+
+  // Error message - show only when user tried to submit
   const errorMessage = useMemo(() => {
-    if (isFormValid) return '';
-    
-    // Check each validation separately for more precise message
-    const marketErrors = validateMarkets(selectedMarkets);
-    if (marketErrors.length > 0) {
-      return marketErrors[0].message;
-    }
-    
-    const broadcasterErrors = validateBroadcastersAndPrograms(broadcasters, broadcastersWithStations);
-    if (broadcasterErrors.length > 0) {
-      return broadcasterErrors[0].message;
-    }
-    
-    return 'Please fill in all required fields to continue';
-  }, [isFormValid, selectedMarkets, broadcasters, broadcastersWithStations]);
+    if (!showErrors || isFormValid) return '';
+    return validationErrors[0]?.message || 'Please fill in all required fields to continue';
+  }, [showErrors, isFormValid, validationErrors]);
 
   const handleNextClick = () => {
-    if (!isFormValid) return;
+    // Check validation
+    if (!isFormValid) {
+      setShowErrors(true);
+      scrollToFirstError(validationErrors);
+      return;
+    }
     
     console.log('Moving to next step - Generate Proposal');
-    // Navigate to proposal page
     router.push('/campaign/linear/proposal');
   };
 
@@ -110,7 +105,7 @@ export default function ChannelDetailsPage() {
         rightSidebarPageKey="linear-details"
         footerContent={
           <NextButton 
-            active={isFormValid}
+            active={true}
             onClick={handleNextClick}
             text="Next"
             showBack={true}

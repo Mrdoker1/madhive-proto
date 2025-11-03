@@ -399,7 +399,7 @@ export const AllocationSection: React.FC = () => {
                     backgroundColor: point.color
                   }}
                 />
-                <Text size="12px" fw={500}>{point.name}</Text>
+                <Text size="13px" fw={500}>{point.name}</Text>
               </Group>
             ))}
           </Group>
@@ -485,7 +485,7 @@ export const AllocationSection: React.FC = () => {
           {/* Channel Sliders */}
           {allChannels.length > 0 && (
             <div>
-              <Text size="12px" fw={400} c="#1F2937" mb="20px">
+              <Text size="13px" fw={400} c="#1F2937" mb="20px">
                 Budget allocation by channel:
               </Text>
               <AnimatePresence mode="popLayout">

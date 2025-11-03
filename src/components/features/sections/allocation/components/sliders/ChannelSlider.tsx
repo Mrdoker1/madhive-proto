@@ -97,7 +97,7 @@ export const ChannelSlider: React.FC<ChannelSliderProps> = ({
         />
         
         {/* Channel name - 12px */}
-        <Text size="12px" fw={500} c="#1F2937" style={{ minWidth: '80px', flexShrink: 0, marginRight: '16px' }}>
+        <Text size="13px" fw={500} c="#1F2937" style={{ minWidth: '80px', flexShrink: 0, marginRight: '16px' }}>
           {allocation.name}
         </Text>
         
@@ -133,7 +133,7 @@ export const ChannelSlider: React.FC<ChannelSliderProps> = ({
             display: 'flex',
             justifyContent: 'flex-end',
             gap: '16px',
-            fontSize: '12px',
+            fontSize: '13px',
             color: '#6B7280',
             marginBottom: '4px'
           }}>

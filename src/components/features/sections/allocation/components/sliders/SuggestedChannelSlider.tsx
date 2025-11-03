@@ -78,7 +78,7 @@ export const SuggestedChannelSlider: React.FC<SuggestedChannelSliderProps> = ({
         />
         
         {/* Channel name - 12px */}
-        <Text size="12px" fw={500} c="#1F2937" style={{ minWidth: '80px', flexShrink: 0, marginRight: '16px' }}>
+        <Text size="13px" fw={500} c="#1F2937" style={{ minWidth: '80px', flexShrink: 0, marginRight: '16px' }}>
           {channelName}
         </Text>
         
@@ -109,7 +109,7 @@ export const SuggestedChannelSlider: React.FC<SuggestedChannelSliderProps> = ({
             display: 'flex',
             justifyContent: 'flex-end',
             gap: '16px',
-            fontSize: '12px',
+            fontSize: '13px',
             color: '#D1D5DB',
             marginBottom: '4px'
           }}>

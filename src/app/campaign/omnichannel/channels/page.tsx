@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useEffect, useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { Text } from '@mantine/core';
 import PageLayout from "@/components/layout/PageLayout";
 import NavigationAnchors, { AnchorItem } from "@/components/ui/NavigationAnchors";
@@ -12,10 +12,11 @@ import SelectChannelsSection from "@/components/features/sections/SelectChannels
 import AllocationSection from "@/components/features/sections/AllocationSection";
 import RightSidebar from "@/components/layout/RightSidebar";
 import { useAppSelector } from '@/hooks/useRedux';
-import { validateSelectChannels, validateAllocation } from '@/utils/validation';
+import { validateSelectChannels, validateAllocation, scrollToFirstError } from '@/utils/validation';
 
 export default function OmnichannelChannelsPage() {
   const router = useRouter();
+  const [showErrors, setShowErrors] = useState(false);
   
   const selectedChannelsFromRedux = useAppSelector((state) => state.campaign.channels.selectedChannels);
   const budgetAllocation = useAppSelector((state) => state.campaign.channels.budgetAllocation);
@@ -25,32 +26,22 @@ export default function OmnichannelChannelsPage() {
     return selectedChannelsFromRedux.filter(channelId => channelId !== 'linear_tv');
   }, [selectedChannelsFromRedux]);
 
-  // Check form validity
-  const isFormValid = useMemo(() => {
-    const errors = [
+  // Get all validation errors
+  const validationErrors = useMemo(() => {
+    return [
       ...validateSelectChannels(availableChannels),
       ...validateAllocation(budgetAllocation, availableChannels)
     ];
-    return errors.length === 0;
   }, [availableChannels, budgetAllocation]);
 
-  // Error message
+  // Check form validity
+  const isFormValid = validationErrors.length === 0;
+
+  // Error message - show only when user tried to submit
   const errorMessage = useMemo(() => {
-    if (isFormValid) return '';
-    
-    // Check each validation separately for more precise message
-    const channelErrors = validateSelectChannels(availableChannels);
-    if (channelErrors.length > 0) {
-      return channelErrors[0].message;
-    }
-    
-    const allocationErrors = validateAllocation(budgetAllocation, availableChannels);
-    if (allocationErrors.length > 0) {
-      return allocationErrors[0].message;
-    }
-    
-    return 'Please fill in all required fields to continue';
-  }, [isFormValid, availableChannels, budgetAllocation]);
+    if (!showErrors || isFormValid) return '';
+    return validationErrors[0]?.message || 'Please fill in all required fields to continue';
+  }, [showErrors, isFormValid, validationErrors]);
 
   // Breadcrumbs for Channels page
   const breadcrumbSteps: BreadcrumbStep[] = [
@@ -89,7 +80,12 @@ export default function OmnichannelChannelsPage() {
   ];
 
   const handleNextClick = () => {
-    if (!isFormValid) return;
+    // Check validation
+    if (!isFormValid) {
+      setShowErrors(true);
+      scrollToFirstError(validationErrors);
+      return;
+    }
     
     console.log('Moving to next step - Channel Details');
     router.push('/campaign/omnichannel/details');
@@ -109,7 +105,7 @@ export default function OmnichannelChannelsPage() {
         rightSidebarContent={<RightSidebar isOmnichannel={true} pageKey="omnichannel-channels" />}
         footerContent={
           <NextButton 
-            active={isFormValid}
+            active={true}
             onClick={handleNextClick}
             text="Next"
             showBack={true}

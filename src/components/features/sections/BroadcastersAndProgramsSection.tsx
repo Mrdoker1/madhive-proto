@@ -650,7 +650,7 @@ const BroadcastersAndProgramsSection = () => {
                                 textAlign: 'center',
                                 padding: '4px 20px 4px 0',
                                 height: '28px',
-                                fontSize: '12px',
+                                fontSize: '13px',
                                 borderColor: stationErrorTooltips[station.id] ? '#fa5252' : undefined
                               },
                               section: {

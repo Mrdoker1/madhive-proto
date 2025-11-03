@@ -71,7 +71,7 @@ const MapSettingsSection: React.FC = () => {
 
       <div style={{ maxWidth: '800px' }}>
         <div style={{ marginBottom: '8px' }}>
-          <label style={{ fontSize: '12px', fontWeight: 500, color: '#374151', display: 'block', marginBottom: '8px' }}>
+          <label style={{ fontSize: '13px', fontWeight: 500, color: '#374151', display: 'block', marginBottom: '8px' }}>
             Mapbox API Key
           </label>
           <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
@@ -115,7 +115,7 @@ const MapSettingsSection: React.FC = () => {
           </div>
         </div>
 
-        <p style={{ fontSize: '12px', color: '#6B7280', marginTop: '8px', marginBottom: '16px' }}>
+        <p style={{ fontSize: '13px', color: '#6B7280', marginTop: '8px', marginBottom: '16px' }}>
           Get a free API key at{' '}
           <a
             href="https://account.mapbox.com/"

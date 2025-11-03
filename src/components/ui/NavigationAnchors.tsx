@@ -123,7 +123,7 @@ const NavigationAnchors: React.FC<NavigationAnchorsProps> = ({
             orientation === 'vertical' ? 'text-right' : 'text-center'
           } ${activeAnchor === item.id ? 'active-anchor' : ''}`}
           style={{
-            fontSize: '12px',
+            fontSize: '14px',
             color: activeAnchor === item.id ? activeColor : textColor,
             background: 'none',
             border: 'none',

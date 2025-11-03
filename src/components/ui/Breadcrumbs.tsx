@@ -145,7 +145,7 @@ const Breadcrumbs: React.FC<BreadcrumbsProps> = ({
               <span 
                 className={`transition-colors ${step.isSection ? 'font-semibold' : 'font-medium'}`}
                 style={{ 
-                  fontSize: '12px',
+                  fontSize: '13px',
                   color: getStepTextColor(step)
                 }}
               >

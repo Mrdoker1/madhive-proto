@@ -92,7 +92,7 @@ const theme = createTheme({
         color: 'var(--primary-color)',
         styles: {
           root: {
-            fontSize: '12px',
+            fontSize: '13px',
             fontWeight: 500,
             borderRadius: '6px',
             height: '32px'
@@ -152,7 +152,7 @@ const theme = createTheme({
           pill: {
             backgroundColor: '#EBE6EC',
             borderRadius: '4px',
-            fontSize: '12px'
+            fontSize: '13px'
           }
         }
       }
@@ -163,7 +163,7 @@ const theme = createTheme({
         radius: 'xs',
         styles: {
           label: {
-            fontSize: '12px',
+            fontSize: '13px',
             color: '#000000',
             fontWeight: 400
           }

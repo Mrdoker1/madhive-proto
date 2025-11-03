@@ -784,7 +784,7 @@ const ProposalSection: React.FC<ProposalSectionProps> = ({ onValidationChange })
             clearable
             styles={{
               input: {
-                fontSize: '12px'
+                fontSize: '13px'
               }
             }}
           />
@@ -861,7 +861,7 @@ const ProposalSection: React.FC<ProposalSectionProps> = ({ onValidationChange })
             styles={{
               input: {
                 fontWeight: 500,
-                fontSize: '12px'
+                fontSize: '13px'
               }
             }}
           />
@@ -883,7 +883,7 @@ const ProposalSection: React.FC<ProposalSectionProps> = ({ onValidationChange })
                 value={market.id}
                 styles={{
                   tab: {
-                    fontSize: '12px'
+                    fontSize: '13px'
                   }
                 }}
               >

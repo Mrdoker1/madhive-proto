@@ -9,10 +9,11 @@ import { BreadcrumbStep } from "@/components/ui/Breadcrumbs";
 import NextButton from "@/components/ui/NextButton";
 import RightSidebar from "@/components/layout/RightSidebar";
 import ProposalSection from "@/components/features/sections/ProposalSection";
-import { validateProgramSelection, validateProgramBudget } from '@/utils/validation';
+import { validateProgramSelection, validateProgramBudget, scrollToFirstError } from '@/utils/validation';
 
 export default function GenerateProposalPage() {
   const router = useRouter();
+  const [showErrors, setShowErrors] = useState(false);
   
   // State for validation data
   const [programSelections, setProgramSelections] = useState<any>({});
@@ -66,33 +67,30 @@ export default function GenerateProposalPage() {
     setStationBudgets(budgets);
   }, []);
 
-  // Check form validity
-  const isFormValid = useMemo(() => {
-    const selectionErrors = validateProgramSelection(programSelections);
-    const budgetErrors = validateProgramBudget(programSelections, stationPrograms, stationBudgets);
-    return selectionErrors.length === 0 && budgetErrors.length === 0;
+  // Get all validation errors
+  const validationErrors = useMemo(() => {
+    return [
+      ...validateProgramSelection(programSelections),
+      ...validateProgramBudget(programSelections, stationPrograms, stationBudgets)
+    ];
   }, [programSelections, stationPrograms, stationBudgets]);
 
-  // Error message
+  // Check form validity
+  const isFormValid = validationErrors.length === 0;
+
+  // Error message - show only when user tried to submit
   const errorMessage = useMemo(() => {
-    if (isFormValid) return '';
-    
-    // Check each validation separately for more precise message
-    const selectionErrors = validateProgramSelection(programSelections);
-    if (selectionErrors.length > 0) {
-      return selectionErrors[0].message;
-    }
-    
-    const budgetErrors = validateProgramBudget(programSelections, stationPrograms, stationBudgets);
-    if (budgetErrors.length > 0) {
-      return budgetErrors[0].message;
-    }
-    
-    return 'Please fill in all required fields to continue';
-  }, [isFormValid, programSelections, stationPrograms, stationBudgets]);
+    if (!showErrors || isFormValid) return '';
+    return validationErrors[0]?.message || 'Please fill in all required fields to continue';
+  }, [showErrors, isFormValid, validationErrors]);
 
   const handleNextClick = () => {
-    if (!isFormValid) return;
+    // Check validation
+    if (!isFormValid) {
+      setShowErrors(true);
+      scrollToFirstError(validationErrors);
+      return;
+    }
     
     console.log('Moving to next step - Summary');
     router.push('/campaign/linear/summary');
@@ -112,7 +110,7 @@ export default function GenerateProposalPage() {
         rightSidebarContent={<RightSidebar pageKey="linear-proposal" />}
         footerContent={
           <NextButton 
-            active={isFormValid}
+            active={true}
             onClick={handleNextClick}
             text="Next"
             showBack={true}

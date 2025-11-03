@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
 import { updateBudgetData, updateGeneralData, updateChannelsData } from '@/store/slices/campaignSlice';
 import PageLayout from "@/components/layout/PageLayout";
@@ -17,12 +17,14 @@ import {
   validateGeneralDetails, 
   validateTotalBudget, 
   validateGoal, 
-  validateFlightRange
+  validateFlightRange,
+  scrollToFirstError
 } from '@/utils/validation';
 
 export default function OmnichannelNewCampaignPage() {
   const router = useRouter();
   const dispatch = useAppDispatch();
+  const [showErrors, setShowErrors] = useState(false);
   
   // Get data from global state
   const totalBudget = useAppSelector((state) => state.campaign.budget.totalBudget);
@@ -75,25 +77,32 @@ export default function OmnichannelNewCampaignPage() {
     { id: 'flight-range', label: 'Flight Range', anchor: '#flight-range' }
   ];
 
-  // Check form validity
-  const isFormValid = useMemo(() => {
-    const errors = [
+  // Get all validation errors
+  const validationErrors = useMemo(() => {
+    return [
       ...validateGeneralDetails(generalData),
       ...validateTotalBudget(budgetData),
       ...validateGoal(goalData),
       ...validateFlightRange(flightData)
     ];
-    return errors.length === 0;
   }, [generalData, budgetData, goalData, flightData]);
 
-  // Error message
+  // Check form validity
+  const isFormValid = validationErrors.length === 0;
+
+  // Error message - show only when user tried to submit
   const errorMessage = useMemo(() => {
-    if (isFormValid) return '';
-    return 'Please fill in all required fields to continue';
-  }, [isFormValid]);
+    if (!showErrors || isFormValid) return '';
+    return validationErrors[0]?.message || 'Please fill in all required fields to continue';
+  }, [showErrors, isFormValid, validationErrors]);
 
   const handleNextClick = () => {
-    if (!isFormValid) return;
+    // Check validation
+    if (!isFormValid) {
+      setShowErrors(true);
+      scrollToFirstError(validationErrors);
+      return;
+    }
     
     console.log('Moving to next step - Channels');
     router.push('/campaign/omnichannel/channels');
@@ -110,7 +119,7 @@ export default function OmnichannelNewCampaignPage() {
         title="Campaign Information"
         footerContent={
           <NextButton 
-            active={isFormValid}
+            active={true}
             onClick={handleNextClick}
             text="Next"
             errorMessage={errorMessage}

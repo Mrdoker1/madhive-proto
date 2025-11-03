@@ -319,7 +319,7 @@ const FlightByDay: React.FC<FlightByDayProps> = ({
           position: 'absolute',
           top: '24px',
           left: '24px',
-          fontSize: '12px',
+          fontSize: '14px',
           color: '#999',
           fontWeight: 500
         }}>
@@ -363,7 +363,7 @@ const FlightByDay: React.FC<FlightByDayProps> = ({
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    fontSize: '10px',
+                    fontSize: '12px',
                     fontWeight: 500,
                     color: '#666',
                     minHeight: '30px'

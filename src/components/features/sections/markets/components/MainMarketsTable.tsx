@@ -154,7 +154,7 @@ const MainMarketsTable: React.FC<MainMarketsTableProps> = ({
                     rightSection={<Text size="xs" c="dimmed">%</Text>}
                     styles={{
                       input: {
-                        fontSize: '12px',
+                        fontSize: '13px',
                         padding: '4px 20px 4px 0',
                         height: '28px',
                         textAlign: 'center',

@@ -298,7 +298,7 @@ const FlightByWeek: React.FC<FlightByWeekProps> = ({
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '4px',
-                fontSize: '10px', 
+                fontSize: '12px', 
                 color: isHiatusWeek ? '#9CA3AF' : 'var(--primary-color)',
                 fontWeight: 500,
                 marginBottom: '4px',
@@ -473,7 +473,7 @@ const FlightByWeek: React.FC<FlightByWeekProps> = ({
               
               {/* Week Label */}
               <div style={{ 
-                fontSize: '10px', 
+                fontSize: '12px', 
                 color: '#666',
                 marginTop: '8px',
                 textAlign: 'center'
@@ -483,7 +483,7 @@ const FlightByWeek: React.FC<FlightByWeekProps> = ({
               
               {/* Percentage */}
               <div style={{ 
-                fontSize: '9px', 
+                fontSize: '12px', 
                 color: '#999',
                 marginTop: '2px',
                 textAlign: 'center'
@@ -497,7 +497,7 @@ const FlightByWeek: React.FC<FlightByWeekProps> = ({
 
       {/* Summary */}
       <div className="mt-4 p-3 bg-gray-50 rounded-lg">
-        <div className="text-center" style={{ fontSize: '12px', color: '#666' }}>
+        <div className="text-center" style={{ fontSize: '14px', color: '#666' }}>
           Drag bars up and down to redistribute budget across weeks
         </div>
       </div>
