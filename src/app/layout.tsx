@@ -175,7 +175,7 @@ const theme = createTheme({
         color: 'var(--primary-color)',
         styles: {
           label: {
-            fontSize: '14px',
+            fontSize: '13px',
             color: '#000000'
           }
         }
