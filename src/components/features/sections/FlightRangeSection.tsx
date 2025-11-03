@@ -103,18 +103,25 @@ const FlightRangeSection: React.FC<FlightRangeSectionProps> = ({
     console.log('Date range changed:', startDate, endDate);
     
     if (flightStatus === 'active') {
+      // Check if active range actually changed
+      const rangeChanged = activeDateRange.start !== startDate || activeDateRange.end !== endDate;
+      
       setActiveDateRange({ start: startDate, end: endDate });
       // Update global state
       dispatch(updateFlightData({ 
         startDate: startDate, 
         endDate: endDate 
       }));
-      // Clear hiatus dates when active range changes
-      setHiatusDates({ start: '', end: '' });
-      dispatch(updateFlightData({ 
-        hiatusStartDate: '',
-        hiatusEndDate: ''
-      }));
+      
+      // Clear hiatus dates ONLY when active range changes
+      if (rangeChanged && (activeDateRange.start || activeDateRange.end)) {
+        setHiatusDates({ start: '', end: '' });
+        setCurrentHiatusRanges([]);
+        dispatch(updateFlightData({ 
+          hiatusStartDate: '',
+          hiatusEndDate: ''
+        }));
+      }
     }
     // In hiatus mode calendar manages ranges itself
   };
@@ -292,7 +299,6 @@ const FlightRangeSection: React.FC<FlightRangeSectionProps> = ({
       {/* 16px spacing between radio buttons and datepicker */}
       <div style={{ marginTop: '16px' }}>
         <DualCalendar
-          key={flightStatus} // Forced re-render on mode change
           size="md"
           required={true}
           onChange={handleDateRangeChange}
