@@ -101,6 +101,7 @@ export interface ChannelSectionData {
   audience: CampaignAudienceData;
   geo: {
     selectedZipCodes: string[];
+    geoType?: string; // Type of geo: 'zip_codes', 'dmas', 'states', 'districts'
     country: string;
     targetNationally: boolean;
   };
@@ -293,6 +294,7 @@ const campaignSlice = createSlice({
           },
           geo: {
             selectedZipCodes: [],
+            geoType: 'zip_codes',
             country: 'United States',
             targetNationally: true
           },

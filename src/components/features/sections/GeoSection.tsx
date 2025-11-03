@@ -1,8 +1,10 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { Select, Checkbox, MultiSelect, Button, Group, Text } from '@mantine/core';
+import { IconPlus } from '@tabler/icons-react';
 import { zipCodesData } from '@/data/zipCodesData';
+import { dmasData, statesData, districtsData, geoTypeOptions, type GeoType } from '@/data/geoTypesData';
 import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
 import { updateChannelSectionData, setCarryOverMode, updateChannelEstimations } from '@/store/slices/campaignSlice';
 import { calculateAudienceEstimation, calculateMarketEstimation } from '@/utils/estimationCalculators';
@@ -20,31 +22,126 @@ const GeoSection = ({ channel, isFirstChannel = true }: GeoSectionProps) => {
   
   // Get data for current channel
   const geoData = channel 
-    ? (channelData[channel]?.geo || { selectedZipCodes: [], country: 'United States', targetNationally: true })
-    : { selectedZipCodes: [], country: 'United States', targetNationally: true };
+    ? (channelData[channel]?.geo || { selectedZipCodes: [], geoType: 'zip_codes', country: 'United States', targetNationally: true })
+    : { selectedZipCodes: [], geoType: 'zip_codes', country: 'United States', targetNationally: true };
   
-  const [selectedZipCodes, setSelectedZipCodes] = useState<string[]>(geoData.selectedZipCodes);
+  const [geoType, setGeoType] = useState<GeoType>((geoData.geoType as GeoType) || 'zip_codes');
+  const [selectedItems, setSelectedItems] = useState<string[]>(geoData.selectedZipCodes);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Get data based on geo type
+  const geoDataOptions = useMemo(() => {
+    switch (geoType) {
+      case 'dmas':
+        return dmasData;
+      case 'states':
+        return statesData;
+      case 'districts':
+        return districtsData;
+      case 'zip_codes':
+      default:
+        return zipCodesData;
+    }
+  }, [geoType]);
+
+  // Get label for MultiSelect
+  const geoLabel = useMemo(() => {
+    switch (geoType) {
+      case 'dmas':
+        return 'DMAs';
+      case 'states':
+        return 'States';
+      case 'districts':
+        return 'Districts';
+      case 'zip_codes':
+      default:
+        return 'Zip Codes';
+    }
+  }, [geoType]);
 
   // Synchronize local state with Redux when channel changes
   useEffect(() => {
-    setSelectedZipCodes(geoData.selectedZipCodes);
-  }, [channel, geoData.selectedZipCodes]);
+    setSelectedItems(geoData.selectedZipCodes);
+    setGeoType((geoData.geoType as GeoType) || 'zip_codes');
+  }, [channel, geoData.selectedZipCodes, geoData.geoType]);
 
-  const handleZipCodesChange = (values: string[]) => {
-    // If this is omnichannel and we're NOT on first tab, disable carry over mode
-    if (channel && !isFirstChannel && carryOverMode) {
-      dispatch(setCarryOverMode(false));
-    }
+  const handleGeoTypeChange = (value: string | null) => {
+    if (!value) return;
     
-    setSelectedZipCodes(values);
+    const newGeoType = value as GeoType;
+    setGeoType(newGeoType);
+    // Reset selected items when type changes
+    setSelectedItems([]);
     
     // Update data in Redux
     if (channel) {
       dispatch(updateChannelSectionData({
         channel,
         section: 'geo',
-        data: { selectedZipCodes: values }
+        data: { selectedZipCodes: [], geoType: newGeoType }
+      }));
+      
+      // Recalculate estimations with empty selection
+      const audienceData = channelData[channel]?.audience || {
+        gender: [], age: [], income: [], education: [], householdSize: []
+      };
+      const interests = channelData[channel]?.interests || [];
+      const channelBudget = budgetAllocation?.[channel] || 0;
+      
+      const audienceEstimation = calculateAudienceEstimation(audienceData, interests, channelBudget, channel, []);
+      const newMarketEstimation = calculateMarketEstimation([], channelBudget, channel);
+      
+      dispatch(updateChannelEstimations({
+        channel,
+        audienceEstimation,
+        marketEstimation: newMarketEstimation
+      }));
+      
+      // If carry over mode is active, copy data to all channels
+      if (carryOverMode && isFirstChannel) {
+        const allChannels = Object.keys(channelData);
+        allChannels.forEach(ch => {
+          if (ch !== channel) {
+            dispatch(updateChannelSectionData({
+              channel: ch,
+              section: 'geo',
+              data: { selectedZipCodes: [], geoType: newGeoType }
+            }));
+            
+            // Update estimations for other channels too
+            const chAudienceData = channelData[ch]?.audience || {
+              gender: [], age: [], income: [], education: [], householdSize: []
+            };
+            const chInterests = channelData[ch]?.interests || [];
+            const chChannelBudget = budgetAllocation?.[ch] || 0;
+            const chAudienceEstimation = calculateAudienceEstimation(chAudienceData, chInterests, chChannelBudget, ch, []);
+            const chMarketEstimation = calculateMarketEstimation([], chChannelBudget, ch);
+            
+            dispatch(updateChannelEstimations({
+              channel: ch,
+              audienceEstimation: chAudienceEstimation,
+              marketEstimation: chMarketEstimation
+            }));
+          }
+        });
+      }
+    }
+  };
+
+  const handleGeoItemsChange = (values: string[]) => {
+    // If this is omnichannel and we're NOT on first tab, disable carry over mode
+    if (channel && !isFirstChannel && carryOverMode) {
+      dispatch(setCarryOverMode(false));
+    }
+    
+    setSelectedItems(values);
+    
+    // Update data in Redux
+    if (channel) {
+      dispatch(updateChannelSectionData({
+        channel,
+        section: 'geo',
+        data: { selectedZipCodes: values, geoType }
       }));
       
       // Recalculate estimations for channel
@@ -71,7 +168,7 @@ const GeoSection = ({ channel, isFirstChannel = true }: GeoSectionProps) => {
             dispatch(updateChannelSectionData({
               channel: ch,
               section: 'geo',
-              data: { selectedZipCodes: values }
+              data: { selectedZipCodes: values, geoType }
             }));
             
             // Update estimations for other channels too
@@ -95,7 +192,14 @@ const GeoSection = ({ channel, isFirstChannel = true }: GeoSectionProps) => {
   };
 
   const handleReset = () => {
-    handleZipCodesChange([]);
+    handleGeoItemsChange([]);
+  };
+
+  const handleSelectAll = () => {
+    const allValues = geoDataOptions.map(option => 
+      typeof option === 'string' ? option : option.value
+    );
+    handleGeoItemsChange(allValues);
   };
 
   const handleAddGeo = () => {
@@ -116,8 +220,16 @@ const GeoSection = ({ channel, isFirstChannel = true }: GeoSectionProps) => {
         Geographic selection allows you to target nationwide or specific locations within a country.
       </Text>
 
-      {/* Country Select and Checkbox */}
+      {/* Type, Country Select and Checkbox */}
       <div style={{ display: 'flex', alignItems: 'flex-end', gap: '16px', marginBottom: '24px' }}>
+        <div style={{ flex: 1 }}>
+          <Select
+            label="Type"
+            value={geoType}
+            data={geoTypeOptions}
+            onChange={handleGeoTypeChange}
+          />
+        </div>
         <div style={{ flex: 1 }}>
           <Select
             label="Country"
@@ -142,23 +254,37 @@ const GeoSection = ({ channel, isFirstChannel = true }: GeoSectionProps) => {
         />
       </div>
 
-      {/* Zip Codes MultiSelect */}
+      {/* Dynamic MultiSelect based on Type */}
       <MultiSelect
-        label="Zip Codes"
-        placeholder="Select zip codes"
-        data={zipCodesData}
-        value={selectedZipCodes}
-        onChange={handleZipCodesChange}
+        label={geoLabel}
+        placeholder={`Select ${geoLabel.toLowerCase()}`}
+        data={geoDataOptions}
+        value={selectedItems}
+        onChange={handleGeoItemsChange}
         searchable
         clearable
         maxDropdownHeight={200}
-        mb="lg"
+        mb="md"
       />
 
-      {/* Buttons */}
+      {/* Add Geo button on the left */}
+      <Button 
+        variant="subtle"
+        onClick={handleAddGeo}
+        leftSection={<IconPlus size={16} />}
+        styles={{
+          root: {
+            fontSize: '14px'
+          }
+        }}
+      >
+        Add Geo
+      </Button>
+
+      {/* Buttons on the right */}
       <Group justify="flex-end" gap="4px">
-        <Button variant="outline" onClick={handleAddGeo}>
-          Add Geo
+        <Button variant="outline" onClick={handleSelectAll}>
+          Select All
         </Button>
         <Button variant="subtle" onClick={handleReset}>
           Reset
