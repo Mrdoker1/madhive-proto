@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState, useMemo, useEffect, useCallback } from 'react';
-import { Tabs, Accordion, Table, Checkbox, Group, Text, Badge, TextInput, Select, Button, Tooltip, Menu, Pagination } from '@mantine/core';
+import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
+import { Tabs, Accordion, Table, Checkbox, Group, Text, Badge, TextInput, Select, Button, Tooltip, Menu, Pagination, NumberInput, Popover, RangeSlider } from '@mantine/core';
 import { IconSearch, IconPlus, IconAlertCircle } from '@tabler/icons-react';
 import { getProgramsByStation, Program } from '@/data/programsData';
 import { useAppSelector } from '@/hooks/useRedux';
@@ -103,13 +103,24 @@ const ProposalSection: React.FC<ProposalSectionProps> = ({ onValidationChange })
           const broadcasterStations = broadcaster.stations.filter(s => 
             s.marketId === market.id && s.selected
           );
+          
+          // Calculate total percentage of all selected stations in this broadcaster
+          const allBroadcasterStations = broadcaster.stations.filter(s => s.selected);
+          const totalPercentage = allBroadcasterStations.reduce((sum, s) => sum + s.percentage, 0);
+          
           broadcasterStations.forEach(station => {
+            // Station budget for this specific market = (station percentage / total percentage) * total station budget
+            // This gives us the portion of station's total budget allocated to this market
+            const stationBudgetForMarket = totalPercentage > 0
+              ? (station.budget * station.percentage) / totalPercentage
+              : 0;
+            
             marketStations.push({
               id: station.id,
               name: station.name,
               selected: station.selected,
               percentage: station.percentage,
-              budget: station.budget,
+              budget: stationBudgetForMarket,
               marketId: station.marketId,
               broadcasterId: station.broadcasterId,
               cpm: station.cpm,
@@ -178,12 +189,14 @@ const ProposalSection: React.FC<ProposalSectionProps> = ({ onValidationChange })
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDaypartFilter, setSelectedDaypartFilter] = useState<string | null>(null);
   const [programPages, setProgramPages] = useState<Record<string, number>>({});
+  const [rateFilter, setRateFilter] = useState<[number, number]>([0, 10000]);
+  const [budgetPopoverOpened, setBudgetPopoverOpened] = useState(false);
   const PROGRAMS_PER_PAGE = 20;
   
   // Reset pagination when filters change
   useEffect(() => {
     setProgramPages({});
-  }, [searchQuery, selectedDaypartFilter]);
+  }, [searchQuery, selectedDaypartFilter, rateFilter[0], rateFilter[1]]);
   
   // Extract selected days of week from dayparts
   const selectedDaysOfWeek = useMemo(() => {
@@ -347,6 +360,36 @@ const ProposalSection: React.FC<ProposalSectionProps> = ({ onValidationChange })
     return programs;
   }, [selectedMarketsWithStations, updateProgramDates]);
 
+  // Calculate min and max rate from all programs
+  const rateRange = useMemo((): [number, number] => {
+    let minRate = Infinity;
+    let maxRate = 0;
+    
+    Object.values(stationPrograms).forEach(programs => {
+      programs.forEach(program => {
+        if (program.rate < minRate) minRate = program.rate;
+        if (program.rate > maxRate) maxRate = program.rate;
+      });
+    });
+    
+    if (minRate === Infinity) {
+      return [0, 10000];
+    }
+    
+    return [Math.floor(minRate / 100) * 100, Math.ceil(maxRate / 100) * 100];
+  }, [stationPrograms]);
+  
+  // Update rate filter when rate range changes
+  useEffect(() => {
+    setRateFilter(prev => {
+      // Only update if range actually changed
+      if (prev[0] !== rateRange[0] || prev[1] !== rateRange[1]) {
+        return rateRange;
+      }
+      return prev;
+    });
+  }, [rateRange[0], rateRange[1]]);
+
   // Function to get selected programs for station
   const getSelectedPrograms = (stationId: string): Program[] => {
     const programs = stationPrograms[stationId] || [];
@@ -386,6 +429,9 @@ const ProposalSection: React.FC<ProposalSectionProps> = ({ onValidationChange })
     return { totalImpressions, totalRate, avgCPM };
   }, [programSelections, stationPrograms]);
 
+  // Track previous validation data to prevent infinite loops
+  const prevValidationDataRef = useRef<string>('');
+
   // Pass validation data to parent component
   useEffect(() => {
     if (onValidationChange) {
@@ -414,7 +460,20 @@ const ProposalSection: React.FC<ProposalSectionProps> = ({ onValidationChange })
       });
 
       const isValid = hasSelectedPrograms && !budgetExceeded;
-      onValidationChange(isValid, programSelections, stationPrograms, stationBudgets);
+      
+      // Create a stable string representation of validation data
+      const currentData = JSON.stringify({
+        isValid,
+        selections: programSelections,
+        stationIds: Object.keys(stationPrograms),
+        budgets: stationBudgets
+      });
+      
+      // Only call onValidationChange if data actually changed
+      if (currentData !== prevValidationDataRef.current) {
+        prevValidationDataRef.current = currentData;
+        onValidationChange(isValid, programSelections, stationPrograms, stationBudgets);
+      }
     }
   }, [programSelections, stationPrograms, selectedMarketsWithStations, onValidationChange]);
 
@@ -471,11 +530,13 @@ const ProposalSection: React.FC<ProposalSectionProps> = ({ onValidationChange })
     const totals = calculateStationTotals(stationId);
     const budgetExceeded = checkBudgetExceeded(stationId, allocatedBudget);
 
-    // Filter by search and daypart
+    // Filter by search, daypart, and rate range
     const filteredPrograms = programs.filter(program => {
       const matchesSearch = program.name.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesDaypart = !selectedDaypartFilter || program.daypart === selectedDaypartFilter;
-      return matchesSearch && matchesDaypart;
+      const matchesRate = program.rate >= rateFilter[0] && program.rate <= rateFilter[1];
+      
+      return matchesSearch && matchesDaypart && matchesRate;
     });
 
     // Pagination
@@ -788,6 +849,56 @@ const ProposalSection: React.FC<ProposalSectionProps> = ({ onValidationChange })
               }
             }}
           />
+          <Popover 
+            width={360} 
+            position="bottom" 
+            withArrow 
+            shadow="md"
+            opened={budgetPopoverOpened}
+            onChange={setBudgetPopoverOpened}
+          >
+            <Popover.Target>
+              <TextInput
+                value={`Budget: ${rateFilter[0].toLocaleString()} - ${rateFilter[1].toLocaleString()}`}
+                onClick={() => setBudgetPopoverOpened(true)}
+                readOnly
+                size="sm"
+                w={200}
+                styles={{
+                  input: {
+                    cursor: 'pointer',
+                    fontSize: '13px'
+                  }
+                }}
+              />
+            </Popover.Target>
+            <Popover.Dropdown>
+              <div style={{ padding: '20px' }}>
+                <Text size="sm" fw={600} mb={20}>
+                  Budget Range: ${rateFilter[0].toLocaleString()} - ${rateFilter[1].toLocaleString()}
+                </Text>
+                <RangeSlider
+                  value={rateFilter}
+                  onChange={setRateFilter}
+                  min={rateRange[0]}
+                  max={rateRange[1]}
+                  step={100}
+                  color="var(--primary-color)"
+                  size="md"
+                  styles={{
+                    bar: {
+                      backgroundColor: 'var(--primary-color)'
+                    }
+                  }}
+                  label={null}
+                />
+                <Group justify="space-between" mt={12}>
+                  <Text size="xs" c="dimmed">${rateRange[0].toLocaleString()}</Text>
+                  <Text size="xs" c="dimmed">${rateRange[1].toLocaleString()}</Text>
+                </Group>
+              </div>
+            </Popover.Dropdown>
+          </Popover>
 {/* Add market button is hidden */}
         </Group>
 
