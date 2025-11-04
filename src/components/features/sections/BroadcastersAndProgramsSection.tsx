@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useMemo, useRef, useEffect } from 'react';
-import { MultiSelect, Button, Group, Table, Checkbox, TextInput, Text, Collapse, Tooltip } from '@mantine/core';
+import { MultiSelect, Button, Group, Table, Checkbox, TextInput, Text, Collapse, Tooltip, Pagination, Select } from '@mantine/core';
 import { IconChevronDown, IconChevronRight } from '@tabler/icons-react';
 import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
 import { updateLinearData, type BroadcasterWithStations, type BroadcasterStationBudget } from '@/store/slices/campaignSlice';
@@ -44,9 +44,13 @@ const BroadcastersAndProgramsSection = () => {
   const [broadcasterStations, setBroadcasterStations] = useState<LocalBroadcasterWithStations[]>([]);
   const [previousStationValues, setPreviousStationValues] = useState<Record<string, number>>({});
   const [stationErrorTooltips, setStationErrorTooltips] = useState<Record<string, boolean>>({});
+  const [broadcasterPages, setBroadcasterPages] = useState<Record<string, number>>({});
+  const [broadcasterPageSizes, setBroadcasterPageSizes] = useState<Record<string, number>>({});
   const stationInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
   const previousMarketBudgetsRef = useRef<string>('');
   const isInitialLoad = useRef<boolean>(true);
+  
+  const PAGE_SIZE_OPTIONS = ['10', '20', '50', '100'];
 
   // Get available broadcasters based on selected markets
   const availableBroadcasters = useMemo(() => {
@@ -551,6 +555,23 @@ const BroadcastersAndProgramsSection = () => {
           return null;
         }
 
+        // Pagination logic
+        const currentPage = broadcasterPages[broadcaster.id] || 1;
+        const pageSize = broadcasterPageSizes[broadcaster.id] || 10;
+        const totalPages = Math.ceil(visibleStations.length / pageSize);
+        const startIndex = (currentPage - 1) * pageSize;
+        const endIndex = startIndex + pageSize;
+        const paginatedStations = visibleStations.slice(startIndex, endIndex);
+        
+        const handlePageSizeChange = (value: string | null) => {
+          if (value) {
+            const newSize = parseInt(value);
+            setBroadcasterPageSizes(prev => ({ ...prev, [broadcaster.id]: newSize }));
+            // Reset to page 1 when changing page size
+            setBroadcasterPages(prev => ({ ...prev, [broadcaster.id]: 1 }));
+          }
+        };
+
         return (
           <div key={broadcaster.id} style={{ marginTop: '24px' }}>
             {/* Header with broadcaster info and collapse button */}
@@ -617,7 +638,7 @@ const BroadcastersAndProgramsSection = () => {
                   </Table.Tr>
                   
                   {/* Station rows */}
-                  {visibleStations.map((station) => (
+                  {paginatedStations.map((station) => (
                     <Table.Tr key={station.id} style={{ height: '48px' }}>
                       <Table.Td>
                         <Checkbox
@@ -679,6 +700,31 @@ const BroadcastersAndProgramsSection = () => {
                   ))}
                 </Table.Tbody>
               </Table>
+              
+              {/* Pagination Controls */}
+              {visibleStations.length > 10 && (
+                <Group justify="space-between" align="center" mt="lg">
+                  <Group gap="xs" align="center">
+                    <Text size="sm" c="dimmed">Show</Text>
+                    <Select
+                      data={PAGE_SIZE_OPTIONS}
+                      value={pageSize.toString()}
+                      onChange={handlePageSizeChange}
+                      size="xs"
+                      w={70}
+                    />
+                    <Text size="sm" c="dimmed">items</Text>
+                  </Group>
+                  {totalPages > 1 && (
+                    <Pagination
+                      total={totalPages}
+                      value={currentPage}
+                      onChange={(page) => setBroadcasterPages(prev => ({ ...prev, [broadcaster.id]: page }))}
+                      size="sm"
+                    />
+                  )}
+                </Group>
+              )}
             </Collapse>
           </div>
         );
