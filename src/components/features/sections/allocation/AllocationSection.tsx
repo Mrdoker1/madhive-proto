@@ -4,7 +4,7 @@ import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { Text, Group, Switch } from '@mantine/core';
 import { AnimatePresence } from 'framer-motion';
 import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
-import { updateChannelsData } from '@/store/slices/campaignSlice';
+import { updateChannelsData, updateChannelEstimations } from '@/store/slices/campaignSlice';
 import { ChannelPoint, ChannelAllocation, ChartDimensions } from './types';
 import { channelColors, channelNames, CHART_CONFIG, CHANNEL_REACH_COEFFICIENTS } from './constants';
 import { DraggablePoint } from './components/DraggablePoint';
@@ -109,6 +109,13 @@ export const AllocationSection: React.FC = () => {
         // Get metrics for sliders
         const metrics = await fetchForecastMetrics(channelId, budgetPerChannel, totalBudget);
         
+        // Save estimations to Redux immediately
+        dispatch(updateChannelEstimations({
+          channel: channelId,
+          audienceEstimation: metrics.audienceEstimation,
+          marketEstimation: metrics.marketEstimation
+        }));
+        
         // Calculate reach by new formula considering totalBudget
         const calculatedReach = calculateReachByFormula(channelId, budgetPerChannel, totalBudget);
         
@@ -183,6 +190,7 @@ export const AllocationSection: React.FC = () => {
         
         return {
           id,
+          metrics, // Include full metrics for Redux save
           data: {
             ...updatedChannelData[id],
             budget: newChannelBudget,
@@ -195,6 +203,15 @@ export const AllocationSection: React.FC = () => {
       });
 
       const results = await Promise.all(metricPromises);
+      
+      // Save estimations to Redux for all channels
+      results.forEach(result => {
+        dispatch(updateChannelEstimations({
+          channel: result.id,
+          audienceEstimation: result.metrics.audienceEstimation,
+          marketEstimation: result.metrics.marketEstimation
+        }));
+      });
       
       // Apply all updates simultaneously
       const finalData = { ...updatedChannelData };
@@ -257,6 +274,7 @@ export const AllocationSection: React.FC = () => {
         
         return {
           id,
+          metrics, // Include full metrics for Redux save
           data: {
             ...updatedChannelData[id],
             budget: newChannelBudget,
@@ -269,6 +287,15 @@ export const AllocationSection: React.FC = () => {
       });
 
       const results = await Promise.all(metricPromises);
+      
+      // Save estimations to Redux for all channels
+      results.forEach(result => {
+        dispatch(updateChannelEstimations({
+          channel: result.id,
+          audienceEstimation: result.metrics.audienceEstimation,
+          marketEstimation: result.metrics.marketEstimation
+        }));
+      });
       
       // Apply all updates simultaneously
       const finalData = { ...updatedChannelData };

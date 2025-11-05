@@ -15,7 +15,9 @@ export async function fetchForecastMetrics(channelId: string, budget: number, to
   if (!config) {
     return {
       maxReach: 0,
-      reachPercent: 0
+      reachPercent: 0,
+      audienceEstimation: 0,
+      marketEstimation: 0
     };
   }
   
@@ -25,10 +27,31 @@ export async function fetchForecastMetrics(channelId: string, budget: number, to
   // Reach% = percentage of channel budget from total budget (slider position)
   const reachPercent = totalBudget > 0 ? Math.round((budget / totalBudget) * 100) : 0;
   
+  // Calculate Market Estimation
+  const baseMarket: Record<string, number> = {
+    'ctv': 184000000,
+    'audio': 151000000,
+    'social': 240000000,
+    'preroll': 117000000,
+    'search': 117000000,
+    'email': 67000000
+  };
+  
+  const market = baseMarket[channelId] || 100000000;
+  const budgetFactor = Math.min(0.9, Math.sqrt(budget / 100000) * 0.15);
+  const marketEstimation = Math.round(market * budgetFactor);
+  
+  // Calculate Audience Estimation (percentage of market)
+  const audienceFactor = Math.min(0.8, Math.sqrt(budget / 100000) * 0.25);
+  const audienceEstimation = Math.round(marketEstimation * audienceFactor);
+  
+  console.log(`📊 fetchForecastMetrics: ${channelId}, budget: ${budget}, market: ${marketEstimation}, audience: ${audienceEstimation}`);
   
   return {
     maxReach: Math.round(maxPossibleReach), // Maximum achievable reach with full budget
-    reachPercent: Math.min(99, Math.max(1, reachPercent))
+    reachPercent: Math.min(99, Math.max(1, reachPercent)),
+    audienceEstimation,
+    marketEstimation
   };
 }
 
