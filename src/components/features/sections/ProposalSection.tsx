@@ -207,7 +207,7 @@ const ProposalSection: React.FC<ProposalSectionProps> = ({ onValidationChange })
     if (!market || !market.stations || market.stations.length === 0) return;
     
     // Find first station with programs
-    const firstStationWithPrograms = market.stations.find(station => {
+    const firstStationWithPrograms = market.stations.find((station: BroadcasterStationBudget) => {
       const programs = getProgramsByStation(station.id);
       return programs && programs.length > 0;
     });
