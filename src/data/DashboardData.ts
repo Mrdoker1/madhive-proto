@@ -158,5 +158,37 @@ export const campaignTableData: CampaignTableRow[] = [
     incrementalReachTrend: [73000, 143000, 210000, 275000, 338000, 398000, 455000, 510000, 563000, 613000],
     uniqueReach: 2234567,
     uniqueReachTrend: [113000, 222000, 327000, 428000, 525000, 618000, 707000, 792000, 875000, 952000],
+  },
+  // Dodge campaigns
+  {
+    id: "dodge-charger-national",
+    advertiser: "Dodge",
+    campaign: "Dodge Charger National",
+    impressions: 3009600,
+    impressionsTrend: [95000, 98000, 102000, 105000, 108000, 112000, 115000, 118000, 121000, 125000],
+    reach: 1654321,
+    reachTrend: [85000, 167000, 245000, 320000, 392000, 460000, 525000, 587000, 646000, 702000],
+    frequency: 1.8,
+    frequencyTrend: [1.1, 1.2, 1.2, 1.3, 1.3, 1.4, 1.4, 1.5, 1.5, 1.6],
+    incrementalReach: 745678,
+    incrementalReachTrend: [43000, 84000, 123000, 160000, 196000, 230000, 263000, 293000, 323000, 351000],
+    uniqueReach: 1234567,
+    uniqueReachTrend: [67000, 131000, 193000, 252000, 309000, 363000, 414000, 463000, 510000, 554000],
+  },
+  // Chrysler campaigns
+  {
+    id: "chrysler-pacifica-family",
+    advertiser: "Chrysler",
+    campaign: "Chrysler Pacifica Family",
+    impressions: 1202400,
+    impressionsTrend: [38000, 39000, 41000, 42000, 44000, 45000, 47000, 48000, 50000, 51000],
+    reach: 876543,
+    reachTrend: [45000, 88000, 130000, 170000, 208000, 244000, 278000, 310000, 341000, 370000],
+    frequency: 1.4,
+    frequencyTrend: [1.0, 1.1, 1.1, 1.2, 1.2, 1.3, 1.3, 1.4, 1.4, 1.5],
+    incrementalReach: 395432,
+    incrementalReachTrend: [23000, 44000, 65000, 85000, 104000, 122000, 139000, 155000, 170000, 185000],
+    uniqueReach: 654321,
+    uniqueReachTrend: [35000, 69000, 102000, 133000, 163000, 192000, 219000, 244000, 268000, 291000],
   }
 ];

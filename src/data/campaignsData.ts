@@ -134,7 +134,7 @@ const realMockCampaigns: CampaignSummary[] = [
     sparkline: Array(24).fill(0),
   },
   {
-    id: 'real-3',
+    id: 'jgc-holiday-pre',
     name: 'JGC Holiday Pre-Launch',
     status: 'Over Pace',
     channels: ['Social', 'Display', 'Audio'],
@@ -151,7 +151,7 @@ const realMockCampaigns: CampaignSummary[] = [
     sparkline: genSparkByIndex(3),
   },
   {
-    id: 'real-4',
+    id: 'ford-mach-e-ev',
     name: 'Ford Mach-E EV Intro',
     status: 'Under Pace',
     channels: ['Linear TV', 'CTV', 'Display'],
@@ -168,7 +168,7 @@ const realMockCampaigns: CampaignSummary[] = [
     sparkline: genSparkByIndex(4),
   },
   {
-    id: 'real-5',
+    id: 'toyota-q3-brand',
     name: 'Toyota Q3 Brand Push',
     status: 'Way Over Pace',
     channels: ['Linear TV', 'CTV', 'Social', 'Display'],
@@ -185,7 +185,7 @@ const realMockCampaigns: CampaignSummary[] = [
     sparkline: genSparkByIndex(5),
   },
   {
-    id: 'real-6',
+    id: 'chevy-silverado',
     name: 'Chevy Silverado Summer Sale',
     status: 'Way Under Pace',
     channels: ['Linear TV', 'Display'],
@@ -202,7 +202,7 @@ const realMockCampaigns: CampaignSummary[] = [
     sparkline: genSparkByIndex(6),
   },
   {
-    id: 'real-7',
+    id: 'q3-ford-f150',
     name: 'Q3 25 Ford F150 TRISTATE',
     status: 'On Target',
     channels: ['Linear TV', 'CTV'],
@@ -219,7 +219,7 @@ const realMockCampaigns: CampaignSummary[] = [
     sparkline: genSparkByIndex(7),
   },
   {
-    id: 'real-8',
+    id: 'hyundai-sonata-sept',
     name: 'Hyundai Sonata Sept Event',
     status: 'On Target',
     channels: ['Linear TV', 'Display', 'Social'],
@@ -236,7 +236,7 @@ const realMockCampaigns: CampaignSummary[] = [
     sparkline: genSparkByIndex(8),
   },
   {
-    id: 'real-9',
+    id: 'lincoln-aviator-luxury',
     name: 'Lincoln Aviator Luxury',
     status: 'On Target',
     channels: ['Linear TV', 'CTV', 'Social'],
@@ -253,7 +253,7 @@ const realMockCampaigns: CampaignSummary[] = [
     sparkline: genSparkByIndex(9),
   },
   {
-    id: 'real-10',
+    id: 'dodge-charger-national',
     name: 'Dodge Charger National',
     status: 'On Target',
     channels: ['Linear TV', 'CTV', 'Display', 'Social'],
@@ -270,7 +270,7 @@ const realMockCampaigns: CampaignSummary[] = [
     sparkline: genSparkByIndex(10),
   },
   {
-    id: 'real-11',
+    id: 'chrysler-pacifica-family',
     name: 'Chrysler Pacifica Family',
     status: 'On Target',
     channels: ['CTV', 'Display', 'Social'],
@@ -287,7 +287,7 @@ const realMockCampaigns: CampaignSummary[] = [
     sparkline: genSparkByIndex(11),
   },
   {
-    id: 'real-12',
+    id: 'august-ram-truck',
     name: 'August Ram Truck Month',
     status: 'Completed',
     channels: ['Linear TV', 'CTV', 'Display'],

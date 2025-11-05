@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Progress } from '@mantine/core';
 import { Line, ResponsiveContainer, ComposedChart, Area } from 'recharts';
 import type { CampaignSummary } from '@/data/campaignsData';
@@ -34,7 +34,14 @@ function formatChannelName(channel: string): string {
 }
 
 export default function CampaignListItem({ c }: { c: CampaignSummary }) {
+  const router = useRouter();
   const data = c.sparkline.map((v, i) => ({ i, v }));
+  
+  const handleClick = () => {
+    // Navigate to dashboard for this campaign
+    router.push(`/dashboard?campaignId=${c.id}`);
+  };
+  
   return (
     <div
       className="grid items-center"
@@ -46,14 +53,16 @@ export default function CampaignListItem({ c }: { c: CampaignSummary }) {
         paddingBottom: 0,
         borderTop: '1px solid var(--border-color)',
         width: 'fit-content',
-        fontSize: '12px'
+        fontSize: '12px',
+        cursor: 'pointer'
       }}
+      onClick={handleClick}
     >
       {/* Name */}
       <div style={{ position: 'sticky', left: '0', zIndex: 1, background: 'var(--page-background)', paddingLeft: '16px', paddingRight: '16px', paddingTop: '20px', paddingBottom: '20px' }}>
-        <Link href="#" style={{ color: '#2563eb', textDecoration: 'none', fontWeight: 500, fontSize: '12px' }}>
+        <span style={{ color: '#2563eb', textDecoration: 'none', fontWeight: 500, fontSize: '12px' }}>
           {c.name}
-        </Link>
+        </span>
       </div>
 
       {/* Pacing Status */}

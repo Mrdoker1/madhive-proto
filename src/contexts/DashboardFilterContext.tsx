@@ -1,6 +1,7 @@
 'use client';
 
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { campaignTableData } from '@/data/DashboardData';
 
 interface DashboardFilterContextType {
   campaignType: string | null;
@@ -16,11 +17,27 @@ interface DashboardFilterContextType {
 
 const DashboardFilterContext = createContext<DashboardFilterContextType | undefined>(undefined);
 
-export const DashboardFilterProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+interface DashboardFilterProviderProps {
+  children: ReactNode;
+  initialCampaignId?: string | null;
+}
+
+export const DashboardFilterProvider: React.FC<DashboardFilterProviderProps> = ({ children, initialCampaignId }) => {
   const [campaignType, setCampaignType] = useState<string | null>('linear');
   const [dateRange, setDateRange] = useState<string | null>('last_30_days');
   const [advertiser, setAdvertiser] = useState<string | null>(null);
-  const [campaign, setCampaign] = useState<string | null>(null);
+  const [campaign, setCampaign] = useState<string | null>(initialCampaignId || null);
+
+  // Auto-select advertiser when initialCampaignId is provided
+  useEffect(() => {
+    if (initialCampaignId) {
+      const campaignData = campaignTableData.find(row => row.id === initialCampaignId);
+      if (campaignData) {
+        setAdvertiser(campaignData.advertiser);
+        setCampaign(initialCampaignId);
+      }
+    }
+  }, [initialCampaignId]);
 
   const resetFilters = () => {
     setCampaignType('linear');

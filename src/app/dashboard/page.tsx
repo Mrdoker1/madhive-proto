@@ -1,15 +1,19 @@
 'use client';
 
-import React from 'react';
+import React, { Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import DashboardHeader from '@/components/layout/DashboardHeader';
 import DashboardFilters from '@/components/features/dashboard/DashboardFilters';
 import DashboardContent from '@/components/features/dashboard/DashboardContent';
 import { DashboardFilterProvider } from '@/contexts/DashboardFilterContext';
 
-export default function DashboardPage() {
+function DashboardPageContent() {
+  const searchParams = useSearchParams();
+  const campaignId = searchParams.get('campaignId');
+  
   return (
-    <DashboardFilterProvider>
+    <DashboardFilterProvider initialCampaignId={campaignId}>
       <motion.div 
         className="flex flex-col h-full overflow-hidden"
         initial={{ opacity: 0 }}
@@ -46,6 +50,14 @@ export default function DashboardPage() {
         </motion.main>
       </motion.div>
     </DashboardFilterProvider>
+  );
+}
+
+export default function DashboardPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <DashboardPageContent />
+    </Suspense>
   );
 }
 
