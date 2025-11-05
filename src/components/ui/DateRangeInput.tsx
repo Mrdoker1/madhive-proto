@@ -105,6 +105,13 @@ const DateRangeInput: React.FC<DateRangeInputProps> = ({
     }
   }, [isMounted, calendarKey, isHiatusMode]);
   
+  // Notify parent component when hiatus ranges change
+  useEffect(() => {
+    if (isHiatusMode && onHiatusRangesChange && isMounted) {
+      onHiatusRangesChange(hiatusRanges);
+    }
+  }, [hiatusRanges, isHiatusMode, onHiatusRangesChange, isMounted]);
+  
   // Synchronize external hiatus ranges with internal state
   useEffect(() => {
     if (externalHiatusRanges !== undefined) {
@@ -247,14 +254,7 @@ const DateRangeInput: React.FC<DateRangeInputProps> = ({
         setIdCounter(prev => prev + 1);
 
         // Add new range to local state
-        setHiatusRanges(prev => {
-          const newRanges = [...prev, newRange];
-          // Notify parent component about change
-          if (onHiatusRangesChange) {
-            onHiatusRangesChange(newRanges);
-          }
-          return newRanges;
-        });
+        setHiatusRanges(prev => [...prev, newRange]);
         
         // Reset state immediately
         setStartDate('');
@@ -281,14 +281,7 @@ const DateRangeInput: React.FC<DateRangeInputProps> = ({
 
   // Function to remove hiatus range
   const removeHiatusRange = (id: string) => {
-    setHiatusRanges(prev => {
-      const newRanges = prev.filter(range => range.id !== id);
-      // Notify parent component about change
-      if (onHiatusRangesChange) {
-        onHiatusRangesChange(newRanges);
-      }
-      return newRanges;
-    });
+    setHiatusRanges(prev => prev.filter(range => range.id !== id));
     // Force calendar update
     setCalendarKey(prev => prev + 1);
   };
