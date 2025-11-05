@@ -3,8 +3,6 @@
 import { useRouter } from 'next/navigation';
 import { useState, useCallback, useMemo } from 'react';
 import PageLayout from "@/components/layout/PageLayout";
-import NavigationAnchors, { AnchorItem } from "@/components/ui/NavigationAnchors";
-import SectionWrapper from "@/components/ui/SectionWrapper";
 import { BreadcrumbStep } from "@/components/ui/Breadcrumbs";
 import NextButton from "@/components/ui/NextButton";
 import RightSidebar from "@/components/layout/RightSidebar";
@@ -48,11 +46,6 @@ export default function GenerateProposalPage() {
       label: 'Summary', 
       status: 'pending'
     }
-  ];
-
-  // Anchors for page navigation
-  const anchorItems: AnchorItem[] = [
-    { id: 'proposal', label: 'Proposal', anchor: '#proposal' }
   ];
 
   // Callback to get validation data from ProposalSection
@@ -121,31 +114,9 @@ export default function GenerateProposalPage() {
         }
       >
         <div style={{ backgroundColor: 'var(--page-background)', paddingTop: '32px', paddingBottom: '96px', paddingLeft: '32px', paddingRight: '32px', minHeight: '100%' }}>
-          <div style={{ display: 'flex', justifyContent: 'center', margin: '0 auto' }}>
-            {/* Left column with navigation */}
-            <div className="w-64" style={{ paddingRight: '20px', position: 'sticky', top: '32px', height: 'fit-content' }}>
-              <NavigationAnchors 
-                items={anchorItems}
-                orientation="vertical"
-                activeColor="#2A1037"
-                textColor="#666666"
-                className="space-y-6"
-              />
-            </div>
-            {/* Main content */}
-            <div style={{ paddingLeft: '20px', width: '100%', maxWidth: '1200px' }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '40px' }}>
-              
-              {/* Proposal Section */}
-              <SectionWrapper 
-                id="proposal" 
-                title="Proposal"
-                required
-              >
-                <ProposalSection onValidationChange={handleValidationChange} />
-              </SectionWrapper>
-              
-              </div>
+          <div style={{ display: 'flex', justifyContent: 'center', margin: '0 auto', maxWidth: '1200px' }}>
+            <div style={{ width: '100%' }}>
+              <ProposalSection onValidationChange={handleValidationChange} />
             </div>
           </div>
         </div>

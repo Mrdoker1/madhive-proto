@@ -571,8 +571,9 @@ const ProposalSection: React.FC<ProposalSectionProps> = ({ onValidationChange })
     };
 
     return (
-      <div>
+      <div style={{ overflowX: 'auto', maxWidth: '100%' }}>
         <Table
+          style={{ tableLayout: 'fixed' }}
           styles={{
             tr: {
               height: '48px'
@@ -581,7 +582,7 @@ const ProposalSection: React.FC<ProposalSectionProps> = ({ onValidationChange })
         >
           <Table.Thead>
             <Table.Tr>
-              <Table.Th style={{ width: '40px' }}>
+              <Table.Th style={{ width: '40px', minWidth: '40px' }}>
                 <Checkbox
                   checked={allSelected}
                   indeterminate={someSelected && !allSelected}
@@ -589,31 +590,31 @@ const ProposalSection: React.FC<ProposalSectionProps> = ({ onValidationChange })
                   color="var(--primary-color)"
                 />
               </Table.Th>
-              <Table.Th style={{ width: '140px' }}>
+              <Table.Th style={{ width: '160px', minWidth: '160px' }}>
                 <Text size="xs" fw={500}>Program Name</Text>
               </Table.Th>
-              <Table.Th style={{ width: '120px' }}>
+              <Table.Th style={{ width: '120px', minWidth: '120px' }}>
                 <Text size="xs" fw={500}>Daypart</Text>
               </Table.Th>
-              <Table.Th>
+              <Table.Th style={{ width: '80px', minWidth: '80px' }}>
                 <Text size="xs" fw={500}>Air Time</Text>
               </Table.Th>
-              <Table.Th>
+              <Table.Th style={{ width: '100px', minWidth: '100px' }}>
                 <Text size="xs" fw={500}>Air Start Date</Text>
               </Table.Th>
-              <Table.Th>
+              <Table.Th style={{ width: '100px', minWidth: '100px' }}>
                 <Text size="xs" fw={500}>Air End Date</Text>
               </Table.Th>
-              <Table.Th>
+              <Table.Th style={{ width: '160px', minWidth: '160px' }}>
                 <Text size="xs" fw={500}>Days of Week</Text>
               </Table.Th>
-              <Table.Th>
+              <Table.Th style={{ width: '90px', minWidth: '90px', textAlign: 'right' }}>
                 <Text size="xs" fw={500}>Rate</Text>
               </Table.Th>
-              <Table.Th>
+              <Table.Th style={{ width: '100px', minWidth: '100px', textAlign: 'right' }}>
                 <Text size="xs" fw={500}>Impressions</Text>
               </Table.Th>
-              <Table.Th>
+              <Table.Th style={{ width: '80px', minWidth: '80px', textAlign: 'right' }}>
                 <Text size="xs" fw={500}>CPM</Text>
               </Table.Th>
             </Table.Tr>
@@ -690,13 +691,13 @@ const ProposalSection: React.FC<ProposalSectionProps> = ({ onValidationChange })
                         ))}
                       </Group>
                     </Table.Td>
-                    <Table.Td>
+                    <Table.Td style={{ textAlign: 'right' }}>
                       <Text size="xs">{formatCurrency(program.rate)}</Text>
                     </Table.Td>
-                    <Table.Td>
+                    <Table.Td style={{ textAlign: 'right' }}>
                       <Text size="xs">{formatNumber(program.impressions)}</Text>
                     </Table.Td>
-                    <Table.Td>
+                    <Table.Td style={{ textAlign: 'right' }}>
                       <Text size="xs">{formatCPM(program.cpm)}</Text>
                     </Table.Td>
                   </Table.Tr>
