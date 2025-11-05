@@ -199,6 +199,25 @@ const ProposalSection: React.FC<ProposalSectionProps> = ({ onValidationChange })
     setProgramPages({});
   }, [searchQuery, selectedDaypartFilter, rateFilter[0], rateFilter[1]]);
   
+  // Auto-expand first station for active market
+  useEffect(() => {
+    if (!activeMarketTab) return;
+    
+    const market = selectedMarketsWithStations.find(m => m.id === activeMarketTab);
+    if (!market || !market.stations || market.stations.length === 0) return;
+    
+    // Find first station with programs
+    const firstStationWithPrograms = market.stations.find(station => {
+      const programs = getProgramsByStation(station.id);
+      return programs && programs.length > 0;
+    });
+    
+    if (firstStationWithPrograms && !expandedStations.includes(firstStationWithPrograms.id)) {
+      setExpandedStations([firstStationWithPrograms.id]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeMarketTab, selectedMarketsWithStations.length]);
+  
   // Extract selected days of week from dayparts
   const selectedDaysOfWeek = useMemo(() => {
     const selectedSlots = daypartsData.selectedSlots;
@@ -730,7 +749,11 @@ const ProposalSection: React.FC<ProposalSectionProps> = ({ onValidationChange })
     }
 
     return (
-      <Accordion>
+      <Accordion 
+        multiple 
+        value={expandedStations} 
+        onChange={setExpandedStations}
+      >
         {availableStations.map((station: BroadcasterStationBudget) => {
           const programs = stationPrograms[station.id] || [];
           const totals = calculateStationTotals(station.id);
