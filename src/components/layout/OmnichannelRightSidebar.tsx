@@ -416,7 +416,7 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({
                     style={{
                       border: 'none',
                       outline: 'none',
-                      fontSize: '24px',
+                      fontSize: '22px',
                       fontWeight: 600,
                       textAlign: 'center',
                       backgroundColor: 'transparent',

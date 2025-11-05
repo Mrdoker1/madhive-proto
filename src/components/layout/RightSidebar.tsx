@@ -293,7 +293,7 @@ const RightSidebar: React.FC<RightSidebarProps> = ({ className = '', isOmnichann
                 style={{
                   border: 'none',
                   outline: 'none',
-                  fontSize: '24px',
+                  fontSize: '20px',
                   fontWeight: 600,
                   textAlign: 'center',
                   backgroundColor: 'transparent',

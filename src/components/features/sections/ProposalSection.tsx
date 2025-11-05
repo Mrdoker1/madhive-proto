@@ -191,6 +191,7 @@ const ProposalSection: React.FC<ProposalSectionProps> = ({ onValidationChange })
   const [programPages, setProgramPages] = useState<Record<string, number>>({});
   const [rateFilter, setRateFilter] = useState<[number, number]>([0, 10000]);
   const [budgetPopoverOpened, setBudgetPopoverOpened] = useState(false);
+  const [expandedStations, setExpandedStations] = useState<string[]>([]);
   const PROGRAMS_PER_PAGE = 20;
   
   // Reset pagination when filters change
