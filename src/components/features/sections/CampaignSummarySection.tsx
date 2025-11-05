@@ -309,7 +309,7 @@ const CampaignSummarySection: React.FC = () => {
 
       {/* Rich Section */}
       <div>
-        <Text size="lg" fw={600} mb="md" c="dark">Rich</Text>
+        <Text size="lg" fw={600} mb="md" c="dark">Targeting</Text>
         <Table>
           <TableTbody>
             {/* Budget */}

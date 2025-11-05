@@ -276,9 +276,9 @@ const DaypartsSection = ({ channel, isFirstChannel = true }: DaypartsSectionProp
             <div
               key={day}
               style={{
-                width: '24px',
-                height: '20px',
-                fontSize: '10px',
+                width: '32px',
+                height: '28px',
+                fontSize: '11px',
                 fontWeight: '500',
                 textAlign: 'center',
                 color: '#333',
@@ -313,8 +313,8 @@ const DaypartsSection = ({ channel, isFirstChannel = true }: DaypartsSectionProp
               <div
                 style={{
                   width: '220px',
-                  height: '24px',
-                  fontSize: '11px',
+                  height: '32px',
+                  fontSize: '12px',
                   display: 'flex',
                   alignItems: 'center',
                   color: '#333',
@@ -354,7 +354,7 @@ const DaypartsSection = ({ channel, isFirstChannel = true }: DaypartsSectionProp
                         }}
                         styles={{
                           root: {
-                            height: '24px',
+                            height: '32px',
                             fontSize: '12px',
                             padding: '0 8px'
                           }
@@ -408,11 +408,11 @@ const DaypartsSection = ({ channel, isFirstChannel = true }: DaypartsSectionProp
                   <div
                     key={`${day}-${hourData.hour}`}
                     style={{
-                      width: '24px',
-                      height: '24px',
+                      width: '32px',
+                      height: '32px',
                       backgroundColor,
                       cursor: 'pointer',
-                      borderRadius: '2px',
+                      borderRadius: '3px',
                       transition: 'background-color 0.1s ease',
                       flexShrink: 0
                     }}
