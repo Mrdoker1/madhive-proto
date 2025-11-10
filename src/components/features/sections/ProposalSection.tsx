@@ -920,6 +920,13 @@ const ProposalSection: React.FC<ProposalSectionProps> = ({ onValidationChange })
 
   return (
     <div>
+      {/* Custom styles for accordion hover */}
+      <style jsx global>{`
+        .mantine-Accordion-control:hover {
+          background-color: rgba(0, 0, 0, 0.04) !important;
+        }
+      `}</style>
+      
       {/* Toggle for Recommended/All Programs */}
       <Group mb="lg">
         <Switch
