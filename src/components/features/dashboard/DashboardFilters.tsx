@@ -65,9 +65,7 @@ const DashboardFilters: React.FC = () => {
         onChange={setCampaignType}
         data={[
           { value: 'linear', label: 'Linear' },
-          { value: 'omnichannel', label: 'Omnichannel' },
-          { value: 'ctv', label: 'CTV' },
-          { value: 'display', label: 'Display' }
+          { value: 'omnichannel', label: 'Omnichannel' }
         ]}
         placeholder="Campaign Type"
         styles={{
@@ -104,6 +102,7 @@ const DashboardFilters: React.FC = () => {
           { value: 'custom', label: 'Custom Range' }
         ]}
         placeholder="Date Range"
+        disabled
         styles={{
           input: {
             width: '180px',
@@ -112,7 +111,8 @@ const DashboardFilters: React.FC = () => {
             border: '1px solid var(--border-color)',
             borderRadius: '8px',
             fontSize: '14px',
-            color: '#000000'
+            color: '#000000',
+            opacity: 0.6
           }
         }}
       />

@@ -68,7 +68,7 @@ const MetricCard: React.FC<MetricCardProps> = ({
 };
 
 const MetricsSection: React.FC = () => {
-  const { advertiser, campaign } = useDashboardFilters();
+  const { advertiser, campaign, campaignType } = useDashboardFilters();
 
   // Calculate total metrics from campaign data considering filters
   const metricsData = useMemo(() => {
@@ -85,13 +85,20 @@ const MetricsSection: React.FC = () => {
 
     // If no data after filtering, return empty values
     if (filteredData.length === 0) {
-      return [
+      const baseMetrics = [
         { title: 'Impressions', value: '0', data: [], color: '#8B5CF6' },
         { title: 'Reach', value: '0', data: [], color: '#8B5CF6' },
-        { title: 'Frequency', value: '0.0', data: [], color: '#8B5CF6' },
-        { title: 'Incremental Reach', value: '0', data: [], color: '#8B5CF6' },
-        { title: 'Unique Reach', value: '0', data: [], color: '#8B5CF6' }
+        { title: 'Frequency', value: '0.0', data: [], color: '#8B5CF6' }
       ];
+      
+      // Add Incremental Reach only for Omnichannel
+      if (campaignType === 'omnichannel') {
+        baseMetrics.push({ title: 'Incremental Reach', value: '0', data: [], color: '#8B5CF6' });
+      }
+      
+      baseMetrics.push({ title: 'Unique Reach', value: '0', data: [], color: '#8B5CF6' });
+      
+      return baseMetrics;
     }
 
     const totalImpressions = filteredData.reduce((sum, row) => sum + row.impressions, 0);
@@ -115,7 +122,7 @@ const MetricsSection: React.FC = () => {
       return summedTrend;
     };
 
-    return [
+    const baseMetrics = [
       {
         title: 'Impressions',
         value: totalImpressions.toLocaleString('en-US'),
@@ -133,21 +140,28 @@ const MetricsSection: React.FC = () => {
         value: avgFrequency.toFixed(1),
         data: sumTrends('frequencyTrend').map(val => val / filteredData.length),
         color: '#8B5CF6'
-      },
-      {
+      }
+    ];
+    
+    // Add Incremental Reach only for Omnichannel
+    if (campaignType === 'omnichannel') {
+      baseMetrics.push({
         title: 'Incremental Reach',
         value: totalIncrementalReach.toLocaleString('en-US'),
         data: sumTrends('incrementalReachTrend'),
         color: '#8B5CF6'
-      },
-      {
-        title: 'Unique Reach',
-        value: totalUniqueReach.toLocaleString('en-US'),
-        data: sumTrends('uniqueReachTrend'),
-        color: '#8B5CF6'
-      }
-    ];
-  }, [advertiser, campaign]);
+      });
+    }
+    
+    baseMetrics.push({
+      title: 'Unique Reach',
+      value: totalUniqueReach.toLocaleString('en-US'),
+      data: sumTrends('uniqueReachTrend'),
+      color: '#8B5CF6'
+    });
+    
+    return baseMetrics;
+  }, [advertiser, campaign, campaignType]);
 
   return (
     <div

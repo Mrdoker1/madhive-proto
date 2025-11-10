@@ -6,7 +6,7 @@ import { campaignTableData, type CampaignTableRow } from '@/data/DashboardData';
 import { useDashboardFilters } from '@/contexts/DashboardFilterContext';
 
 const CampaignTable: React.FC = () => {
-  const { advertiser, campaign } = useDashboardFilters();
+  const { advertiser, campaign, campaignType } = useDashboardFilters();
   const [pageSize, setPageSize] = useState<number>(10);
   const [currentPage, setCurrentPage] = useState<number>(1);
 
@@ -88,6 +88,7 @@ const CampaignTable: React.FC = () => {
             { value: 'daypart', label: 'Daypart' }
           ]}
           defaultValue="campaign"
+          disabled
           styles={{
             input: {
               width: '200px',
@@ -95,7 +96,8 @@ const CampaignTable: React.FC = () => {
               backgroundColor: '#FFFFFF',
               border: '1px solid var(--border-color)',
               borderRadius: '8px',
-              fontSize: '14px'
+              fontSize: '14px',
+              opacity: 0.6
             }
           }}
         />
@@ -104,6 +106,7 @@ const CampaignTable: React.FC = () => {
           data={[
           ]}
           placeholder="- Select -"
+          disabled
           styles={{
             input: {
               width: '200px',
@@ -111,7 +114,8 @@ const CampaignTable: React.FC = () => {
               backgroundColor: '#FFFFFF',
               border: '1px solid var(--border-color)',
               borderRadius: '8px',
-              fontSize: '14px'
+              fontSize: '14px',
+              opacity: 0.6
             }
           }}
         />
@@ -172,16 +176,18 @@ const CampaignTable: React.FC = () => {
               }}>
                 Avg. Frequency
               </th>
-              <th style={{
-                padding: '16px 24px',
-                textAlign: 'right',
-                fontSize: '12px',
-                fontWeight: 500,
-                color: '#6B7280',
-                borderBottom: '1px solid var(--border-color)'
-              }}>
-                Incremental Reach
-              </th>
+              {campaignType === 'omnichannel' && (
+                <th style={{
+                  padding: '16px 24px',
+                  textAlign: 'right',
+                  fontSize: '12px',
+                  fontWeight: 500,
+                  color: '#6B7280',
+                  borderBottom: '1px solid var(--border-color)'
+                }}>
+                  Incremental Reach
+                </th>
+              )}
               <th style={{
                 padding: '16px 24px',
                 textAlign: 'right',
@@ -240,14 +246,16 @@ const CampaignTable: React.FC = () => {
                 }}>
                   {row.frequency.toFixed(1)}
                 </td>
-                <td style={{
-                  padding: '16px 24px',
-                  textAlign: 'right',
-                  fontSize: '14px',
-                  color: '#000000'
-                }}>
-                  {formatNumber(row.incrementalReach)}
-                </td>
+                {campaignType === 'omnichannel' && (
+                  <td style={{
+                    padding: '16px 24px',
+                    textAlign: 'right',
+                    fontSize: '14px',
+                    color: '#000000'
+                  }}>
+                    {formatNumber(row.incrementalReach)}
+                  </td>
+                )}
                 <td style={{
                   padding: '16px 24px',
                   textAlign: 'right',
