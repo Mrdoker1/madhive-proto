@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
-import { Tabs, Accordion, Table, Checkbox, Group, Text, Badge, TextInput, Select, Button, Tooltip, Menu, Pagination, NumberInput, Popover, RangeSlider } from '@mantine/core';
+import { Tabs, Accordion, Table, Checkbox, Group, Text, Badge, TextInput, Select, Button, Tooltip, Menu, Pagination, NumberInput, Popover, RangeSlider, Switch } from '@mantine/core';
 import { IconSearch, IconPlus, IconAlertCircle } from '@tabler/icons-react';
 import { getProgramsByStation, Program } from '@/data/programsData';
 import { useAppSelector } from '@/hooks/useRedux';
@@ -193,6 +193,7 @@ const ProposalSection: React.FC<ProposalSectionProps> = ({ onValidationChange })
   const [rateFilter, setRateFilter] = useState<[number, number]>([0, 10000]);
   const [budgetPopoverOpened, setBudgetPopoverOpened] = useState(false);
   const [expandedStations, setExpandedStations] = useState<string[]>([]);
+  const [showRecommended, setShowRecommended] = useState(true);
   const PROGRAMS_PER_PAGE = 20;
   
   // Reset pagination when filters change
@@ -417,6 +418,56 @@ const ProposalSection: React.FC<ProposalSectionProps> = ({ onValidationChange })
     const selections = programSelections[stationId] || {};
     return programs.filter(p => selections[p.id]);
   };
+
+  // Function to apply recommended program selections
+  const applyRecommendedSelections = useCallback(() => {
+    const newSelections: ProgramSelection = {};
+    
+    selectedMarketsWithStations.forEach(market => {
+      market.stations.forEach((station: BroadcasterStationBudget) => {
+        const programs = stationPrograms[station.id] || [];
+        
+        if (programs.length === 0) return;
+        
+        // Sort programs by CPM (best value first)
+        const sortedPrograms = [...programs].sort((a, b) => a.cpm - b.cpm);
+        
+        // Target: use 80-85% of station budget
+        const targetBudget = station.budget * 0.825;
+        let currentBudget = 0;
+        
+        newSelections[station.id] = {};
+        
+        // Select programs until we reach target budget
+        for (const program of sortedPrograms) {
+          if (currentBudget + program.rate <= targetBudget) {
+            newSelections[station.id][program.id] = true;
+            currentBudget += program.rate;
+          } else {
+            newSelections[station.id][program.id] = false;
+          }
+        }
+        
+        // If no programs selected (budget too small), select at least the cheapest one
+        const hasSelected = Object.values(newSelections[station.id]).some(v => v);
+        if (!hasSelected && sortedPrograms.length > 0) {
+          newSelections[station.id][sortedPrograms[0].id] = true;
+        }
+      });
+    });
+    
+    setProgramSelections(newSelections);
+  }, [selectedMarketsWithStations, stationPrograms]);
+
+  // Apply recommended selections when showRecommended is enabled
+  useEffect(() => {
+    if (showRecommended && Object.keys(stationPrograms).length > 0) {
+      applyRecommendedSelections();
+    } else if (!showRecommended) {
+      // Clear all selections when switching to "Show All Programs"
+      setProgramSelections({});
+    }
+  }, [showRecommended, stationPrograms, applyRecommendedSelections]);
 
   // Calculate totals for station
   const calculateStationTotals = (stationId: string) => {
@@ -869,6 +920,29 @@ const ProposalSection: React.FC<ProposalSectionProps> = ({ onValidationChange })
 
   return (
     <div>
+      {/* Toggle for Recommended/All Programs */}
+      <Group mb="lg">
+        <Switch
+          checked={showRecommended}
+          onChange={(event) => setShowRecommended(event.currentTarget.checked)}
+          label={showRecommended ? "Show Recommended Programs" : "Show All Programs"}
+          color="var(--primary-color)"
+          size="md"
+          styles={{
+            label: {
+              fontWeight: 500,
+              fontSize: '14px',
+              color: '#291036'
+            }
+          }}
+        />
+        <Text size="xs" c="dimmed">
+          {showRecommended 
+            ? "Showing programs selected by our AI system based on best value" 
+            : "Showing all available programs"}
+        </Text>
+      </Group>
+
       {/* Filters and controls */}
       <Group justify="space-between" mb="lg">
         <Group gap="md">
