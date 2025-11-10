@@ -58,9 +58,9 @@ export default function ChannelDetailsPage() {
   const anchorItems: AnchorItem[] = [
     { id: 'linear-details', label: 'Linear Details', anchor: '#linear-details' },
     { id: 'audiences', label: 'Audiences', anchor: '#audiences' },
+    { id: 'dayparts', label: 'Dayparts', anchor: '#dayparts' },
     { id: 'markets', label: 'Market/Weight', anchor: '#markets' },
-    { id: 'broadcasters', label: 'Broadcasters/Programs', anchor: '#broadcasters' },
-    { id: 'dayparts', label: 'Dayparts', anchor: '#dayparts' }
+    { id: 'broadcasters', label: 'Broadcasters/Programs', anchor: '#broadcasters' }
   ];
 
   // Get all validation errors
@@ -150,6 +150,14 @@ export default function ChannelDetailsPage() {
                 <AudiencesSection />
               </SectionWrapper>
 
+              {/* Dayparts Section */}
+              <SectionWrapper 
+                id="dayparts" 
+                title="Dayparts"
+              >
+                <DaypartsSection />
+              </SectionWrapper>
+
               {/* Markets Section */}
               <SectionWrapper 
                 id="markets" 
@@ -166,14 +174,6 @@ export default function ChannelDetailsPage() {
                 required
               >
                 <BroadcastersAndProgramsSection />
-              </SectionWrapper>
-
-              {/* Dayparts Section */}
-              <SectionWrapper 
-                id="dayparts" 
-                title="Dayparts"
-              >
-                <DaypartsSection />
               </SectionWrapper>
               
               </div>
