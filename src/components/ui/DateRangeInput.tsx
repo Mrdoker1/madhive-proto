@@ -312,7 +312,7 @@ const DateRangeInput: React.FC<DateRangeInputProps> = ({
     
     return (
       <span 
-        className={isActiveMode && isHiatusDay ? 'hiatus-day-marker' : ''}
+        className={isHiatusDay ? 'hiatus-day-marker' : ''}
         style={{
           position: 'relative',
           display: 'flex',
@@ -469,24 +469,57 @@ const DateRangeInput: React.FC<DateRangeInputProps> = ({
             background-color: #FF9BD3 !important;
           }
           
-          /* In Hiatus mode show disabled dates (already selected hiatus) exactly like regular disabled */
-          ${isHiatusMode ? `
-            .rdrDayDisabled .rdrDayNumber {
-              color: #999999 !important;
-              background-color: transparent !important;
-            }
-          ` : ''}
-          
-          /* Hiatus days styling in Active mode */
-          .rdrDay:has(.hiatus-day-marker) .rdrDayNumber {
-            background-color: rgba(255, 255, 255, 0.15) !important;
+          /* Hiatus days styling - orange background */
+          .rdrDay:has(.hiatus-day-marker) {
+            background-color: rgba(249, 115, 22, 0.35) !important;
           }
           
-          /* Hiatus days in selected range - darker background */
+          .rdrDay:has(.hiatus-day-marker) .rdrDayNumber {
+            color: #c2410c !important;
+          }
+          
+          .rdrDay:has(.hiatus-day-marker) .rdrInRange {
+            background-color: rgba(249, 115, 22, 0.35) !important;
+          }
+          
+          /* Hide edges for hiatus days in Active mode */
+          .rdrDay:has(.hiatus-day-marker) .rdrStartEdge,
+          .rdrDay:has(.hiatus-day-marker) .rdrEndEdge {
+            display: none !important;
+          }
+          
+          /* Hiatus days when disabled (in Hiatus mode) */
+          .rdrDayDisabled:has(.hiatus-day-marker) {
+            background-color: rgba(249, 115, 22, 0.15) !important;
+          }
+          
+          .rdrDayDisabled:has(.hiatus-day-marker) .rdrDayNumber {
+            color: #d97706 !important;
+          }
+          
+          /* Hiatus days in selected range - darker orange background */
+          .rdrDayInRange:has(.hiatus-day-marker),
+          .rdrDayStartOfRange:has(.hiatus-day-marker),
+          .rdrDayEndOfRange:has(.hiatus-day-marker) {
+            background-color: rgba(249, 115, 22, 0.5) !important;
+          }
+          
           .rdrDayInRange:has(.hiatus-day-marker) .rdrDayNumber,
           .rdrDayStartOfRange:has(.hiatus-day-marker) .rdrDayNumber,
           .rdrDayEndOfRange:has(.hiatus-day-marker) .rdrDayNumber {
-            background-color: rgba(255, 0, 208, 0.4) !important;
+            color: #9a3412 !important;
+          }
+          
+          .rdrDayInRange:has(.hiatus-day-marker) .rdrInRange,
+          .rdrDayStartOfRange:has(.hiatus-day-marker) .rdrInRange,
+          .rdrDayEndOfRange:has(.hiatus-day-marker) .rdrInRange {
+            background-color: rgba(249, 115, 22, 0.5) !important;
+          }
+          
+          /* Hide edges for selected hiatus days */
+          .rdrDayStartOfRange:has(.hiatus-day-marker) .rdrStartEdge,
+          .rdrDayEndOfRange:has(.hiatus-day-marker) .rdrEndEdge {
+            display: none !important;
           }
         `}</style>
         
