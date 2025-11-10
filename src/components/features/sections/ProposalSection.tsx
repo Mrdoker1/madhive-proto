@@ -41,6 +41,7 @@ const ProposalSection: React.FC<ProposalSectionProps> = ({ onValidationChange })
   const broadcastersWithStations = useAppSelector((state) => state.campaign.linear.broadcastersWithStations || []);
   const flightData = useAppSelector((state) => state.campaign.flight);
   const daypartsData = useAppSelector((state) => state.campaign.dayparts);
+  const spotLengths = useAppSelector((state) => state.campaign.general.spotLength || []);
   
   // Convert broadcaster names to IDs
   const broadcasterIds = useMemo(() => {
@@ -605,8 +606,11 @@ const ProposalSection: React.FC<ProposalSectionProps> = ({ onValidationChange })
               <Table.Th style={{ width: '100px', minWidth: '100px' }}>
                 <Text size="xs" fw={500}>Air End Date</Text>
               </Table.Th>
-              <Table.Th style={{ width: '160px', minWidth: '160px' }}>
+              <Table.Th style={{ width: '190px', minWidth: '190px' }}>
                 <Text size="xs" fw={500}>Days of Week</Text>
+              </Table.Th>
+              <Table.Th style={{ width: '90px', minWidth: '90px' }}>
+                <Text size="xs" fw={500}>Length</Text>
               </Table.Th>
               <Table.Th style={{ width: '90px', minWidth: '90px', textAlign: 'right' }}>
                 <Text size="xs" fw={500}>Rate</Text>
@@ -622,7 +626,7 @@ const ProposalSection: React.FC<ProposalSectionProps> = ({ onValidationChange })
           <Table.Tbody>
             {filteredPrograms.length === 0 ? (
               <Table.Tr>
-                <Table.Td colSpan={10} style={{ textAlign: 'center', padding: '20px' }}>
+                <Table.Td colSpan={11} style={{ textAlign: 'center', padding: '20px' }}>
                   <Text c="dimmed" size="xs">
                     {searchQuery || selectedDaypartFilter ? 'No programs found' : 'No programs available'}
                   </Text>
@@ -687,6 +691,30 @@ const ProposalSection: React.FC<ProposalSectionProps> = ({ onValidationChange })
                             }}
                           >
                             {getDayLetter(day)}
+                          </div>
+                        ))}
+                      </Group>
+                    </Table.Td>
+                    <Table.Td>
+                      <Group gap={4}>
+                        {spotLengths.map((length, index) => (
+                          <div
+                            key={`${length}-${index}`}
+                            style={{
+                              width: '28px',
+                              height: '20px',
+                              borderRadius: '10px',
+                              backgroundColor: '#291036',
+                              color: 'white',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              fontSize: '9px',
+                              fontWeight: 600,
+                              flexShrink: 0
+                            }}
+                          >
+                            :{length}
                           </div>
                         ))}
                       </Group>
