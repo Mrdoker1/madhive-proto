@@ -44,7 +44,7 @@ export default function ChannelDetailsPage() {
     },
     { 
       id: 'generate-proposal', 
-      label: 'Generate Proposal', 
+      label: 'Select Programs', 
       status: 'pending' // pending
     },
     { 
@@ -89,7 +89,7 @@ export default function ChannelDetailsPage() {
       return;
     }
     
-    console.log('Moving to next step - Generate Proposal');
+    console.log('Moving to next step - Select Programs');
     router.push('/campaign/linear/proposal');
   };
 

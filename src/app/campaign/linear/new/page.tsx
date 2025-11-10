@@ -53,7 +53,7 @@ export default function NewCampaignPage() {
     },
     { 
       id: 'generate-proposal', 
-      label: 'Generate Proposal', 
+      label: 'Select Programs', 
       status: 'pending'
     },
     { 

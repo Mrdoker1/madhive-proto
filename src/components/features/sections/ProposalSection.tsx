@@ -845,7 +845,7 @@ const ProposalSection: React.FC<ProposalSectionProps> = ({ onValidationChange })
       <Group justify="space-between" mb="lg">
         <Group gap="md">
           <TextInput
-            placeholder="Search"
+            placeholder="Search Program Name"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.currentTarget.value)}
             leftSection={<IconSearch size={16} />}

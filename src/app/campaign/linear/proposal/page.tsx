@@ -18,7 +18,7 @@ export default function GenerateProposalPage() {
   const [stationPrograms, setStationPrograms] = useState<any>({});
   const [stationBudgets, setStationBudgets] = useState<Record<string, number>>({});
   
-  // Breadcrumbs for Generate Proposal page
+  // Breadcrumbs for Select Programs page
   const breadcrumbSteps: BreadcrumbStep[] = [
     { 
       id: 'new-campaign', 
@@ -38,7 +38,7 @@ export default function GenerateProposalPage() {
     },
     { 
       id: 'generate-proposal', 
-      label: 'Generate Proposal', 
+      label: 'Select Programs', 
       status: 'current'
     },
     { 
@@ -98,7 +98,7 @@ export default function GenerateProposalPage() {
     <>
       <PageLayout 
         breadcrumbs={breadcrumbSteps} 
-        title="Generate Proposal"
+        title="Select Programs"
         showRightSidebar={true}
         rightSidebarContent={<RightSidebar pageKey="linear-proposal" />}
         footerContent={

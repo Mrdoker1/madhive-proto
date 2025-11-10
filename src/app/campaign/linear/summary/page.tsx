@@ -34,7 +34,7 @@ export default function SummaryPage() {
     },
     { 
       id: 'generate-proposal', 
-      label: 'Generate Proposal', 
+      label: 'Select Programs', 
       status: 'completed' // completed
     },
     { 
@@ -53,7 +53,7 @@ export default function SummaryPage() {
   };
 
   const handleBackClick = () => {
-    console.log('Returning to previous step - Generate Proposal');
+    console.log('Returning to previous step - Select Programs');
     router.push('/campaign/linear/proposal');
   };
 
