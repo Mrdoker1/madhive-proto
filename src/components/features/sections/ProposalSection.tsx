@@ -660,7 +660,7 @@ const ProposalSection: React.FC<ProposalSectionProps> = ({ onValidationChange })
               <Table.Th style={{ width: '190px', minWidth: '190px' }}>
                 <Text size="xs" fw={500}>Days of Week</Text>
               </Table.Th>
-              <Table.Th style={{ width: '90px', minWidth: '90px' }}>
+              <Table.Th style={{ width: '80px', minWidth: '40px' }}>
                 <Text size="xs" fw={500}>Length</Text>
               </Table.Th>
               <Table.Th style={{ width: '90px', minWidth: '90px', textAlign: 'right' }}>
