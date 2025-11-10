@@ -16,13 +16,20 @@ const GoalSection: React.FC<GoalSectionProps> = ({
   const globalGoalData = useAppSelector((state) => state.campaign.goal);
   
   const [goal, setGoal] = useState('');
-  const [selectedObjective, setSelectedObjective] = useState<string | null>(null);
+  const [selectedObjective, setSelectedObjective] = useState<string | null>('maximize-reach');
 
   // Synchronize local state with global on load
   useEffect(() => {
-    setSelectedObjective(globalGoalData.goalType || null);
+    setSelectedObjective(globalGoalData.goalType || 'maximize-reach');
     setGoal(globalGoalData.goalMetric || ''); // use goalMetric for text description
   }, [globalGoalData]);
+
+  // Set default objective on mount if not already set
+  useEffect(() => {
+    if (!globalGoalData.goalType) {
+      dispatch(updateGoalData({ goalType: 'maximize-reach' }));
+    }
+  }, []);
 
   const campaignObjectives = [
     { value: 'brand-awareness', label: 'Brand Awareness' },

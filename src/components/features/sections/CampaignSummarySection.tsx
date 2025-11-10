@@ -288,14 +288,6 @@ const CampaignSummarySection: React.FC = () => {
               isEmpty={!campaign.general.advertiser}
             />
 
-            {/* Agency */}
-            <SummaryRow
-              label="Agency"
-              value={campaign.general.agency}
-              editRoute="/campaign/linear/new#general-details"
-              isEmpty={!campaign.general.agency}
-            />
-
             {/* Spot Length */}
             <SummaryRow
               label="Spot Length"

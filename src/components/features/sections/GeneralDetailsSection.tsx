@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { TextInput, Select, Grid, Checkbox, Text, Group } from '@mantine/core';
 import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
 import { updateGeneralData } from '@/store/slices/campaignSlice';
-import { advertiserOptions, brandOptions, agencyOptions } from '@/data/generalDetailsData';
+import { advertiserOptions, brandOptions } from '@/data/generalDetailsData';
 
 interface GeneralDetailsSectionProps {
   className?: string;
@@ -20,7 +20,6 @@ const GeneralDetailsSection: React.FC<GeneralDetailsSectionProps> = ({
     campaignName: '',
     advertiser: '',
     brand: '',
-    agency: '',
     cpeCode: '',
     campaignOwner: '',
     campaignApprover: '',
@@ -33,7 +32,6 @@ const GeneralDetailsSection: React.FC<GeneralDetailsSectionProps> = ({
       campaignName: globalGeneralData.campaignName || '',
       advertiser: globalGeneralData.advertiser || '',
       brand: globalGeneralData.brand || '',
-      agency: globalGeneralData.agency || '',
       cpeCode: globalGeneralData.cpeCode || '',
       campaignOwner: globalGeneralData.campaignOwner || '',
       campaignApprover: globalGeneralData.campaignApprover || '',
@@ -50,13 +48,11 @@ const GeneralDetailsSection: React.FC<GeneralDetailsSectionProps> = ({
         ...prev, 
         [field]: newValue,
         brand: '', // Reset brand when advertiser changes
-        agency: '', // Reset agency when advertiser changes
         spotLength: ['60'] // Reset to default :60 when advertiser changes
       }));
       dispatch(updateGeneralData({ 
         advertiser: newValue,
         brand: '', // Reset brand in global state
-        agency: '', // Reset agency in global state
         spotLength: ['60'] // Reset to default :60 in global state
       }));
     } else {
@@ -70,8 +66,6 @@ const GeneralDetailsSection: React.FC<GeneralDetailsSectionProps> = ({
         dispatch(updateGeneralData({ campaignName: newValue }));
       } else if (field === 'brand') {
         dispatch(updateGeneralData({ brand: newValue }));
-      } else if (field === 'agency') {
-        dispatch(updateGeneralData({ agency: newValue }));
       } else if (field === 'cpeCode') {
         dispatch(updateGeneralData({ cpeCode: newValue }));
       } else if (field === 'campaignOwner') {
@@ -80,8 +74,8 @@ const GeneralDetailsSection: React.FC<GeneralDetailsSectionProps> = ({
         dispatch(updateGeneralData({ campaignApprover: newValue }));
       }
       
-      // Reset spot length when advertiser, brand or agency changes
-      if (field === 'brand' || field === 'agency') {
+      // Reset spot length when advertiser or brand changes
+      if (field === 'brand') {
         setFormData(prev => ({ ...prev, spotLength: ['60'] }));
         dispatch(updateGeneralData({ spotLength: ['60'] }));
       }
@@ -106,9 +100,6 @@ const GeneralDetailsSection: React.FC<GeneralDetailsSectionProps> = ({
 
   // Get brands for selected advertiser
   const availableBrandOptions = formData.advertiser ? brandOptions[formData.advertiser] || [] : [];
-  
-  // Get agencies for selected advertiser
-  const availableAgencyOptions = formData.advertiser ? agencyOptions[formData.advertiser] || [] : [];
 
   return (
     <div className={className}>
@@ -146,18 +137,8 @@ const GeneralDetailsSection: React.FC<GeneralDetailsSectionProps> = ({
         </Grid.Col>
       </Grid>
 
-      {/* Row with Agency and CPE Code */}
+      {/* Row with CPE Code and Campaign Owner */}
       <Grid mb="lg">
-        <Grid.Col span={6}>
-          <Select
-            label="Agency"
-            placeholder={formData.advertiser ? "- Select Agency -" : "Select Advertiser first"}
-            data={availableAgencyOptions}
-            value={formData.agency}
-            onChange={(value) => handleInputChange('agency', value)}
-            disabled={!formData.advertiser}
-          />
-        </Grid.Col>
         <Grid.Col span={6}>
           <TextInput
             label="CPE Code"
@@ -167,10 +148,6 @@ const GeneralDetailsSection: React.FC<GeneralDetailsSectionProps> = ({
             required
           />
         </Grid.Col>
-      </Grid>
-
-      {/* Row with Campaign Owner and Campaign Approver */}
-      <Grid mb="lg">
         <Grid.Col span={6}>
           <TextInput
             label="Campaign Owner"
@@ -180,6 +157,10 @@ const GeneralDetailsSection: React.FC<GeneralDetailsSectionProps> = ({
             required
           />
         </Grid.Col>
+      </Grid>
+
+      {/* Row with Campaign Approver and Spot Length */}
+      <Grid mb="lg">
         <Grid.Col span={6}>
           <TextInput
             label="Campaign Approver"
@@ -189,10 +170,6 @@ const GeneralDetailsSection: React.FC<GeneralDetailsSectionProps> = ({
             required
           />
         </Grid.Col>
-      </Grid>
-
-      {/* Spot Length */}
-      <Grid mb="lg">
         <Grid.Col span={6}>
           <div>
             <Text size="sm" fw={500} mb={8}>

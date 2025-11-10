@@ -7,7 +7,6 @@ export interface CampaignGeneralData {
   brand: string;
   product: string;
   campaignType: string;
-  agency: string;
   cpeCode: string;
   campaignOwner: string;
   campaignApprover: string;
@@ -165,7 +164,6 @@ const initialState: CampaignState = {
     brand: '',
     product: '',
     campaignType: 'Linear',
-    agency: '',
     cpeCode: '',
     campaignOwner: '',
     campaignApprover: '',
@@ -177,7 +175,7 @@ const initialState: CampaignState = {
     currency: 'USD'
   },
   goal: {
-    goalType: '',
+    goalType: 'maximize-reach',
     targetValue: 0,
     goalMetric: ''
   },

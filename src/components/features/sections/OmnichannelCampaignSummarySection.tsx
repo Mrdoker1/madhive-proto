@@ -326,14 +326,6 @@ const OmnichannelCampaignSummarySection: React.FC = () => {
               isEmpty={!campaign.general.advertiser}
             />
 
-            {/* Agency */}
-            <SummaryRow
-              label="Agency"
-              value={campaign.general.agency}
-              editRoute="/campaign/omnichannel/new#general-details"
-              isEmpty={!campaign.general.agency}
-            />
-
             {/* Total Budget */}
             <SummaryRow
               label="Total Budget"
