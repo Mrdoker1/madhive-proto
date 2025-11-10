@@ -116,7 +116,7 @@ const AISuggestionCard: React.FC<AISuggestionCardProps> = ({
             paddingRight: '30px'
           }}>
             <Text size="10px" style={{ color: 'grey', lineHeight: 1.3, }}>
-            AI responses may be inaccurate or incomplete. Powered by {aiProvider}.
+            AI responses may be inaccurate or incomplete. Powered by Maverick AI.
             </Text>
           </div>
         </>
