@@ -30,10 +30,12 @@ const getDaypartForHour = (hour: number) => {
   return daypartDefinitions.find(dp => dp.hours.includes(hour));
 };
 
-// Create hours array (0-23) with daypart info
+// Create hours array starting from 6 AM (broadcast day) with daypart info
 const createHoursData = () => {
   const hours = [];
-  for (let hour = 0; hour < 24; hour++) {
+  // Start from 6 AM (hour 6) and go through to 5 AM next day (hour 5)
+  for (let i = 0; i < 24; i++) {
+    const hour = (i + 6) % 24; // Start at 6, wrap around after 23
     const daypart = getDaypartForHour(hour);
     const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
     const period = hour < 12 ? 'am' : 'pm';
