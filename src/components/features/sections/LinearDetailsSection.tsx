@@ -18,6 +18,7 @@ const LinearDetailsSection = () => {
         data={['Nielsen', 'Comscore']}
         value={linearData.measurementProvider}
         onChange={handleMeasurementProviderChange}
+        required
       />
     </div>
   );

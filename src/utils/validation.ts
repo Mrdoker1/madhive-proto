@@ -216,6 +216,24 @@ export const validateAllocation = (
 };
 
 /**
+ * Validation for Linear Details
+ * Check that measurement provider is selected
+ */
+export const validateLinearDetails = (measurementProvider: string): ValidationError[] => {
+  const errors: ValidationError[] = [];
+
+  if (!measurementProvider || measurementProvider.trim() === '') {
+    errors.push({
+      field: 'measurementProvider',
+      message: 'Measurement provider is required',
+      sectionId: 'linear-details'
+    });
+  }
+
+  return errors;
+};
+
+/**
  * Validation for Markets (for Linear)
  * Check that at least one market is selected
  */

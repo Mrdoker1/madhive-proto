@@ -13,13 +13,14 @@ import MarketsSection from "@/components/features/sections/markets";
 import BroadcastersAndProgramsSection from "@/components/features/sections/BroadcastersAndProgramsSection";
 import DaypartsSection from "@/components/features/sections/DaypartsSection";
 import { useAppSelector } from '@/hooks/useRedux';
-import { validateMarkets, validateBroadcastersAndPrograms, scrollToFirstError } from '@/utils/validation';
+import { validateLinearDetails, validateMarkets, validateBroadcastersAndPrograms, scrollToFirstError } from '@/utils/validation';
 
 export default function ChannelDetailsPage() {
   const router = useRouter();
   const [showErrors, setShowErrors] = useState(false);
   
   // Get data from Redux for validation
+  const measurementProvider = useAppSelector((state) => state.campaign.linear.measurementProvider);
   const selectedMarkets = useAppSelector((state) => state.campaign.markets.selectedMarkets);
   const broadcasters = useAppSelector((state) => state.campaign.linear.broadcasters);
   const broadcastersWithStations = useAppSelector((state) => state.campaign.linear.broadcastersWithStations);
@@ -65,10 +66,11 @@ export default function ChannelDetailsPage() {
   // Get all validation errors
   const validationErrors = useMemo(() => {
     return [
+      ...validateLinearDetails(measurementProvider),
       ...validateMarkets(selectedMarkets),
       ...validateBroadcastersAndPrograms(broadcasters, broadcastersWithStations)
     ];
-  }, [selectedMarkets, broadcasters, broadcastersWithStations]);
+  }, [measurementProvider, selectedMarkets, broadcasters, broadcastersWithStations]);
 
   // Check form validity
   const isFormValid = validationErrors.length === 0;
@@ -135,6 +137,7 @@ export default function ChannelDetailsPage() {
               <SectionWrapper 
                 id="linear-details" 
                 title="Linear Details"
+                required
               >
                 <LinearDetailsSection />
               </SectionWrapper>
