@@ -9,6 +9,7 @@ import { getAvailableMarkets, getStationsByMarket } from '@/data/stationsData';
 import { getMarketById } from '@/data/marketsData';
 import { getBroadcasterByName } from '@/data/broadcastersData';
 import { BroadcasterStationBudget } from '@/store/slices/campaignSlice';
+import { TABLE_HEADERS } from '@/constants/tableHeaders';
 
 interface ProgramSelection {
   [stationId: string]: {
@@ -667,7 +668,7 @@ const ProposalSection: React.FC<ProposalSectionProps> = ({ onValidationChange })
                 <Text size="xs" fw={500}>Rate</Text>
               </Table.Th>
               <Table.Th style={{ width: '100px', minWidth: '100px', textAlign: 'right' }}>
-                <Text size="xs" fw={500}>Impressions</Text>
+                <Text size="xs" fw={500}>{TABLE_HEADERS.IMPRESSIONS}</Text>
               </Table.Th>
               <Table.Th style={{ width: '80px', minWidth: '80px', textAlign: 'right' }}>
                 <Text size="xs" fw={500}>CPM</Text>
@@ -852,7 +853,7 @@ const ProposalSection: React.FC<ProposalSectionProps> = ({ onValidationChange })
                       gap: '4px'
                     }}>
                       <Text size="10px" c="dimmed" style={{ lineHeight: 1 }}>
-                        Impressions
+                        {TABLE_HEADERS.IMPRESSIONS}
                       </Text>
                       <Text size="sm" fw={600} style={{ lineHeight: 1 }}>
                         {formatNumber(totals.totalImpressions)}
@@ -1044,7 +1045,7 @@ const ProposalSection: React.FC<ProposalSectionProps> = ({ onValidationChange })
             gap: '4px'
           }}>
             <Text size="10px" c="dimmed" style={{ lineHeight: 1 }}>
-              Impressions
+              {TABLE_HEADERS.IMPRESSIONS}
             </Text>
             <Text size="sm" fw={600} style={{ lineHeight: 1 }}>
               {formatNumber(calculateGrandTotals.totalImpressions)}

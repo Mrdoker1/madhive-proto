@@ -9,6 +9,7 @@ import { broadcastersData, getBroadcasterById } from '@/data/broadcastersData';
 import { getAvailableBroadcasters, getStationsByMarketAndBroadcaster, type StationData } from '@/data/stationsData';
 import InfoNotification from '@/components/ui/InfoNotification';
 import { AnimatePresence } from 'framer-motion';
+import { TABLE_HEADERS } from '@/constants/tableHeaders';
 
 interface StationWithData extends StationData {
   selected: boolean;
@@ -625,7 +626,7 @@ const BroadcastersAndProgramsSection = () => {
                       <Text size="xs" fw={500}>Budget</Text>
                     </Table.Th>
                     <Table.Th style={{ width: '100px' }}>
-                      <Text size="xs" fw={500}>Impression</Text>
+                      <Text size="xs" fw={500}>{TABLE_HEADERS.IMPRESSIONS}</Text>
                     </Table.Th>
                     <Table.Th style={{ width: '80px' }}>
                       <Text size="xs" fw={500}>CPM</Text>

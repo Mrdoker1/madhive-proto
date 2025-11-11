@@ -5,6 +5,7 @@ import { Table, TableTbody, TableTr, TableTd, TableTh, Checkbox, TextInput, Text
 import { IconChevronDown, IconChevronRight } from '@tabler/icons-react';
 import type { MarketWithStationsData } from '../types';
 import { calculateStationImpressions } from '../utils/marketCalculations';
+import { TABLE_HEADERS } from '@/constants/tableHeaders';
 
 // Function to format percentages (maximum 2 decimal places)
 const formatPercentage = (value: number): string => {
@@ -153,7 +154,7 @@ const MarketDetailTable: React.FC<MarketDetailTableProps> = ({
                 <Text size="xs" fw={500}>Budget</Text>
               </TableTh>
               <TableTh style={{ width: '100px' }}>
-                <Text size="xs" fw={500}>Impression</Text>
+                <Text size="xs" fw={500}>{TABLE_HEADERS.IMPRESSIONS}</Text>
               </TableTh>
               <TableTh style={{ width: '80px' }}>
                 <Text size="xs" fw={500}>CPM</Text>

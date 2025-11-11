@@ -8,6 +8,7 @@ import { marketsData } from '@/data/marketsData';
 import { getAvailableBroadcasters } from '@/data/stationsData';
 import { getBroadcasterById } from '@/data/broadcastersData';
 import MarketsFilter from './components/MarketsFilter';
+import { TABLE_HEADERS } from '@/constants/tableHeaders';
 
 interface MarketRow {
   id: string;
@@ -315,7 +316,7 @@ const MarketsSection = () => {
             <Table.Th><Text size="xs" fw={500}>Market</Text></Table.Th>
             <Table.Th style={{ width: '120px' }}><Text size="xs" fw={500}>% of Budget</Text></Table.Th>
             <Table.Th style={{ width: '100px' }}><Text size="xs" fw={500}>Budget</Text></Table.Th>
-            <Table.Th style={{ width: '120px' }}><Text size="xs" fw={500}>Impression</Text></Table.Th>
+            <Table.Th style={{ width: '120px' }}><Text size="xs" fw={500}>{TABLE_HEADERS.IMPRESSIONS}</Text></Table.Th>
             <Table.Th style={{ width: '80px' }}><Text size="xs" fw={500}>CPM</Text></Table.Th>
           </Table.Tr>
         </Table.Thead>

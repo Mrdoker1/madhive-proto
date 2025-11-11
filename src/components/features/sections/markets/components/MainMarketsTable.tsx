@@ -5,6 +5,7 @@ import { Checkbox, Table, TableThead, TableTbody, TableTr, TableTh, TableTd, Tex
 import type { MarketWithStationsData } from '../types';
 import type { MarketHandlers } from '../types';
 import { calculateMarketImpressions } from '../utils/marketCalculations';
+import { TABLE_HEADERS } from '@/constants/tableHeaders';
 
 interface MainMarketsTableProps {
   markets: MarketWithStationsData[];
@@ -114,7 +115,7 @@ const MainMarketsTable: React.FC<MainMarketsTableProps> = ({
             <Text size="xs" fw={500}>Budget</Text>
           </TableTh>
           <TableTh style={{ width: '120px' }}>
-            <Text size="xs" fw={500}>Impression</Text>
+            <Text size="xs" fw={500}>{TABLE_HEADERS.IMPRESSIONS}</Text>
           </TableTh>
           <TableTh style={{ width: '80px' }}>
             <Text size="xs" fw={500}>CPM</Text>
