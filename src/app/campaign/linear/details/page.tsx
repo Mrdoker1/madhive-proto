@@ -10,7 +10,7 @@ import NextButton from "@/components/ui/NextButton";
 import LinearDetailsSection from "@/components/features/sections/LinearDetailsSection";
 import AudiencesSection from "@/components/features/sections/AudiencesSection";
 import MarketsSection from "@/components/features/sections/markets";
-import BroadcastersAndProgramsSection from "@/components/features/sections/BroadcastersAndProgramsSection";
+import MarketStationsSection from "@/components/features/sections/MarketStationsSection";
 import DaypartsSection from "@/components/features/sections/DaypartsSection";
 import { useAppSelector } from '@/hooks/useRedux';
 import { validateLinearDetails, validateMarkets, validateBroadcastersAndPrograms, scrollToFirstError } from '@/utils/validation';
@@ -60,7 +60,7 @@ export default function ChannelDetailsPage() {
     { id: 'audiences', label: 'Audiences', anchor: '#audiences' },
     { id: 'dayparts', label: 'Dayparts', anchor: '#dayparts' },
     { id: 'markets', label: 'Market/Weight', anchor: '#markets' },
-    { id: 'broadcasters', label: 'Broadcasters/Programs', anchor: '#broadcasters' }
+    { id: 'broadcasters', label: 'Market Stations', anchor: '#broadcasters' }
   ];
 
   // Get all validation errors
@@ -167,13 +167,13 @@ export default function ChannelDetailsPage() {
                 <MarketsSection />
               </SectionWrapper>
 
-              {/* Broadcasters and Programs Section */}
+              {/* Market Stations Section */}
               <SectionWrapper 
                 id="broadcasters" 
-                title="Broadcasters/Programs"
+                title="Market Stations"
                 required
               >
-                <BroadcastersAndProgramsSection />
+                <MarketStationsSection />
               </SectionWrapper>
               
               </div>

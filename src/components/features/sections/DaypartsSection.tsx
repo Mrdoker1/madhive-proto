@@ -278,8 +278,8 @@ const DaypartsSection = ({ channel, isFirstChannel = true }: DaypartsSectionProp
             <div
               key={day}
               style={{
-                width: '32px',
-                height: '28px',
+                width: '28px',
+                height: '24px',
                 fontSize: '11px',
                 fontWeight: '500',
                 textAlign: 'center',
@@ -315,7 +315,7 @@ const DaypartsSection = ({ channel, isFirstChannel = true }: DaypartsSectionProp
               <div
                 style={{
                   width: '220px',
-                  height: '32px',
+                  height: '28px',
                   fontSize: '12px',
                   display: 'flex',
                   alignItems: 'center',
@@ -410,8 +410,8 @@ const DaypartsSection = ({ channel, isFirstChannel = true }: DaypartsSectionProp
                   <div
                     key={`${day}-${hourData.hour}`}
                     style={{
-                      width: '32px',
-                      height: '32px',
+                      width: '28px',
+                      height: '28px',
                       backgroundColor,
                       cursor: 'pointer',
                       borderRadius: '3px',

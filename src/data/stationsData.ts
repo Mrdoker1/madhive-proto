@@ -15,7 +15,7 @@ export const stationsData: StationData[] = [];
 
 // Fill stationsData from new structure with guaranteed ID uniqueness
 let globalStationIndex = 0;
-const usedIds = new Set<string>(); // Track used IDs
+const usedCombinations = new Set<string>(); // Track used combinations to prevent duplicates
 
 allBroadcasterStations.forEach(broadcaster => {
   broadcaster.stations.forEach((station) => {
@@ -24,22 +24,22 @@ allBroadcasterStations.forEach(broadcaster => {
       ? station.associatedDma.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
       : `unknown-${globalStationIndex}`;
     
-    // Generate base station ID
+    // Create unique combination key to check for duplicates
+    const combinationKey = `${broadcaster.broadcasterId}|${station.station}|${marketId}`;
+    
+    // Skip if this exact combination already exists
+    if (usedCombinations.has(combinationKey)) {
+      return;
+    }
+    usedCombinations.add(combinationKey);
+    
+    // Generate station ID
     const stationName = station.station.toLowerCase().replace(/[^a-z0-9]+/g, '-');
     const marketPart = marketId.substring(0, 20);
-    let stationId = `${broadcaster.broadcasterId}-${stationName}-${marketPart}`;
-    
-    // Check uniqueness and add index if needed
-    let uniqueId = stationId;
-    let counter = 1;
-    while (usedIds.has(uniqueId)) {
-      uniqueId = `${stationId}-${counter}`;
-      counter++;
-    }
-    usedIds.add(uniqueId);
+    const stationId = `${broadcaster.broadcasterId}-${stationName}-${marketPart}`;
     
     stationsData.push({
-      id: uniqueId,
+      id: stationId,
       name: station.station,
       marketId: marketId,
       broadcasterId: broadcaster.broadcasterId,
