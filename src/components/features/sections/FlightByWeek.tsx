@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { TextInput, Tooltip, Modal, Button, NumberInput } from '@mantine/core';
 import { IconCurrencyDollar, IconLock, IconLockOpen, IconInfoCircle } from '@tabler/icons-react';
+import InfoNotification from '@/components/ui/InfoNotification';
 
 interface WeekData {
   id: string;
@@ -303,15 +304,21 @@ const FlightByWeek: React.FC<FlightByWeekProps> = ({
   return (
     <div className={`${className}`}>
       {/* Header */}
-      <div className="mb-6">
+      <div className="mb-4">
         <h3 style={{ 
           fontSize: '16px', 
           fontWeight: 600, 
           color: '#000000',
-          marginBottom: '8px'
+          marginBottom: '16px'
         }}>
           Flight by Week
         </h3>
+        
+        {/* Info Notification */}
+        <InfoNotification 
+          message="Drag bars up and down to redistribute budget across weeks, or double-click to enter exact amount. Lock weeks to preserve their budget allocation during adjustments."
+        />
+        
         <div className="flex justify-between items-center">
           <span style={{ fontSize: '14px', color: '#666' }}>
             {weeks.length} weeks total
@@ -567,13 +574,6 @@ const FlightByWeek: React.FC<FlightByWeekProps> = ({
             </div>
           );
         })}
-      </div>
-
-      {/* Summary */}
-      <div className="mt-4 p-3 bg-gray-50 rounded-lg">
-        <div className="text-center" style={{ fontSize: '14px', color: '#666' }}>
-          Drag bars up and down to redistribute budget across weeks, or double-click to enter exact amount
-        </div>
       </div>
 
       {/* Edit Budget Modal */}
