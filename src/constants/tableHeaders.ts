@@ -6,7 +6,7 @@
 export const TABLE_HEADERS = {
   IMPRESSIONS: 'IMP',
   CPM: 'CPM',
-  BUDGET: 'Budget',
+  BUDGET: 'Rate',
   RATE: 'Rate',
   TOTAL: 'Total',
   PERCENTAGE_OF_BUDGET: '% of Budget',

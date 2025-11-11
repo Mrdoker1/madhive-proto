@@ -112,7 +112,7 @@ const MainMarketsTable: React.FC<MainMarketsTableProps> = ({
             <Text size="xs" fw={500}>% of Budget</Text>
           </TableTh>
           <TableTh style={{ width: '100px' }}>
-            <Text size="xs" fw={500}>Budget</Text>
+            <Text size="xs" fw={500}>{TABLE_HEADERS.BUDGET}</Text>
           </TableTh>
           <TableTh style={{ width: '120px' }}>
             <Text size="xs" fw={500}>{TABLE_HEADERS.IMPRESSIONS}</Text>
