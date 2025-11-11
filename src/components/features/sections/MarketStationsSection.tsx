@@ -627,7 +627,7 @@ const MarketStationsSection = () => {
                           >
                             <TextInput
                               ref={(el) => { stationInputRefs.current[station.id] = el; }}
-                              value={station.percentage > 0 ? formatPercentage(station.percentage) : ''}
+                              value={station.selected && station.percentage > 0 ? formatPercentage(station.percentage) : ''}
                               onChange={(event) => handleStationPercentageChange(market.id, station.id, event.target.value)}
                               onFocus={() => handleStationPercentageFocus(station.id, station.percentage)}
                               onBlur={(event) => handleStationPercentageBlur(market.id, station.id, event.target.value)}
@@ -640,6 +640,7 @@ const MarketStationsSection = () => {
                                   padding: '4px 20px 4px 0',
                                   height: '28px',
                                   fontSize: '13px',
+                                  backgroundColor: !station.selected ? '#f0f0f0' : 'white'
                                 }
                               }}
                               rightSection={
@@ -649,10 +650,10 @@ const MarketStationsSection = () => {
                           </Tooltip>
                         </Table.Td>
                         <Table.Td>
-                          <Text size="xs">${station.budget.toLocaleString('en-US', { maximumFractionDigits: 0 })}</Text>
+                          <Text size="xs">{station.selected && station.budget > 0 ? `$${station.budget.toLocaleString('en-US', { maximumFractionDigits: 0 })}` : '$0'}</Text>
                         </Table.Td>
                         <Table.Td>
-                          <Text size="xs">{calculateStationImpressions(station.budget, station.cpm)}</Text>
+                          <Text size="xs">{station.selected ? calculateStationImpressions(station.budget, station.cpm) : '#'}</Text>
                         </Table.Td>
                         <Table.Td>
                           <Text size="xs">{station.cpm}</Text>
