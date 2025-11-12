@@ -1,13 +1,14 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { PasswordInput, Button, Alert, Radio, Group } from '@mantine/core';
+import { PasswordInput, Button, Alert, Select } from '@mantine/core';
 import { IconKey, IconCheck, IconAlertCircle } from '@tabler/icons-react';
 
 const AISettingsSection: React.FC = () => {
-  const [aiProvider, setAiProvider] = useState<'deepseek' | 'openai'>('deepseek');
+  const [aiProvider, setAiProvider] = useState<'deepseek' | 'openai' | 'gemini'>('deepseek');
   const [deepseekApiKey, setDeepseekApiKey] = useState('');
   const [openaiApiKey, setOpenaiApiKey] = useState('');
+  const [geminiApiKey, setGeminiApiKey] = useState('');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
@@ -24,13 +25,18 @@ const AISettingsSection: React.FC = () => {
       setAiProvider(data.aiProvider || 'deepseek');
       setDeepseekApiKey(data.deepseekApiKey || '');
       setOpenaiApiKey(data.openaiApiKey || '');
+      setGeminiApiKey(data.geminiApiKey || '');
     } catch (err) {
       console.error('Failed to fetch settings:', err);
     }
   };
 
   const handleSave = async () => {
-    const currentApiKey = aiProvider === 'deepseek' ? deepseekApiKey : openaiApiKey;
+    const currentApiKey = aiProvider === 'deepseek' 
+      ? deepseekApiKey 
+      : aiProvider === 'openai' 
+        ? openaiApiKey 
+        : geminiApiKey;
     
     if (!currentApiKey.trim()) {
       setError('API key cannot be empty');
@@ -50,7 +56,8 @@ const AISettingsSection: React.FC = () => {
         body: JSON.stringify({
           aiProvider,
           deepseekApiKey,
-          openaiApiKey
+          openaiApiKey,
+          geminiApiKey
         }),
       });
 
@@ -75,52 +82,42 @@ const AISettingsSection: React.FC = () => {
         padding: '8px'
       }}
     >
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', gap: '20px' }}>
         <h2 style={{ fontSize: '16px', fontWeight: 600, color: '#111827', margin: 0 }}>
           AI Provider
         </h2>
 
-        <Radio.Group
+        <Select
           value={aiProvider}
-          onChange={(value) => setAiProvider(value as 'deepseek' | 'openai')}
-        >
-          <Group gap="md">
-            <Radio
-              value="deepseek"
-              label="DeepSeek"
-              styles={{
-                label: {
-                  fontSize: '12px',
-                  color: '#374151',
-                  cursor: 'pointer'
-                },
-                radio: {
-                  cursor: 'pointer'
-                }
-              }}
-            />
-            <Radio
-              value="openai"
-              label="OpenAI"
-              styles={{
-                label: {
-                  fontSize: '12px',
-                  color: '#374151',
-                  cursor: 'pointer'
-                },
-                radio: {
-                  cursor: 'pointer'
-                }
-              }}
-            />
-          </Group>
-        </Radio.Group>
+          onChange={(value) => setAiProvider(value as 'deepseek' | 'openai' | 'gemini')}
+          data={[
+            { value: 'deepseek', label: 'DeepSeek' },
+            { value: 'openai', label: 'OpenAI' },
+            { value: 'gemini', label: 'Google Gemini' }
+          ]}
+          styles={{
+            root: {
+              width: '200px'
+            },
+            input: {
+              fontSize: '14px',
+              padding: '8px 12px',
+              border: '1px solid var(--border-color)',
+              borderRadius: '8px',
+              height: '36px'
+            },
+            dropdown: {
+              borderRadius: '8px',
+              border: '1px solid var(--border-color)'
+            }
+          }}
+        />
       </div>
 
       <div style={{ maxWidth: '800px' }}>
         <div style={{ marginBottom: '8px' }}>
           <label style={{ fontSize: '13px', fontWeight: 500, color: '#374151', display: 'block', marginBottom: '8px' }}>
-            {aiProvider === 'deepseek' ? 'DeepSeek API Key' : 'OpenAI API Key'}
+            {aiProvider === 'deepseek' ? 'DeepSeek API Key' : aiProvider === 'openai' ? 'OpenAI API Key' : 'Google Gemini API Key'}
           </label>
           <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
             {aiProvider === 'deepseek' ? (
@@ -139,11 +136,27 @@ const AISettingsSection: React.FC = () => {
                   }
                 }}
               />
-            ) : (
+            ) : aiProvider === 'openai' ? (
               <PasswordInput
                 placeholder="sk-proj-..."
                 value={openaiApiKey}
                 onChange={(e) => setOpenaiApiKey(e.target.value)}
+                leftSection={<IconKey size={16} />}
+                style={{ flex: 1 }}
+                styles={{
+                  input: {
+                    fontSize: '14px',
+                    padding: '10px 12px 10px 36px',
+                    border: '1px solid var(--border-color)',
+                    borderRadius: '8px'
+                  }
+                }}
+              />
+            ) : (
+              <PasswordInput
+                placeholder="AIzaSy..."
+                value={geminiApiKey}
+                onChange={(e) => setGeminiApiKey(e.target.value)}
                 leftSection={<IconKey size={16} />}
                 style={{ flex: 1 }}
                 styles={{
@@ -194,7 +207,7 @@ const AISettingsSection: React.FC = () => {
                 platform.deepseek.com
               </a>
             </>
-          ) : (
+          ) : aiProvider === 'openai' ? (
             <>
               Get your OpenAI API key at{' '}
               <a
@@ -204,6 +217,18 @@ const AISettingsSection: React.FC = () => {
                 style={{ color: '#291036', textDecoration: 'underline' }}
               >
                 platform.openai.com
+              </a>
+            </>
+          ) : (
+            <>
+              Get your Google Gemini API key at{' '}
+              <a
+                href="https://aistudio.google.com/app/apikey"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: '#291036', textDecoration: 'underline' }}
+              >
+                aistudio.google.com
               </a>
             </>
           )}

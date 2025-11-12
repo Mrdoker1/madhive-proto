@@ -7,9 +7,10 @@ const SETTINGS_FILE = path.join(process.cwd(), 'settings.json');
 // Default settings
 const DEFAULT_SETTINGS = {
   mapboxApiKey: 'pk.eyJ1IjoibXJkb2tlcjEiLCJhIjoiY2szNGlvZHcxMDFweTNjcG4xeXRicng5ZSJ9.PAdeoloR2kVbvXM7LFO-zg',
-  aiProvider: 'deepseek', // 'deepseek' or 'openai'
+  aiProvider: 'deepseek', // 'deepseek', 'openai', or 'gemini'
   deepseekApiKey: 'sk-7aaa4dc884794c649de202fc2ae31a94',
-  openaiApiKey: ''
+  openaiApiKey: '',
+  geminiApiKey: ''
 };
 
 // Get settings

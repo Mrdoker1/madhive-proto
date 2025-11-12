@@ -7,7 +7,8 @@ const SETTINGS_FILE = path.join(process.cwd(), 'settings.json');
 const DEFAULT_SETTINGS = {
   aiProvider: 'deepseek',
   deepseekApiKey: 'sk-7aaa4dc884794c649de202fc2ae31a94',
-  openaiApiKey: ''
+  openaiApiKey: '',
+  geminiApiKey: ''
 };
 
 // Get AI settings
@@ -16,12 +17,18 @@ function getAISettings() {
     if (fs.existsSync(SETTINGS_FILE)) {
       const data = fs.readFileSync(SETTINGS_FILE, 'utf8');
       const settings = JSON.parse(data);
-      return {
-        provider: settings.aiProvider || DEFAULT_SETTINGS.aiProvider,
-        apiKey: settings.aiProvider === 'openai' 
-          ? settings.openaiApiKey || DEFAULT_SETTINGS.openaiApiKey
-          : settings.deepseekApiKey || DEFAULT_SETTINGS.deepseekApiKey
-      };
+      const provider = settings.aiProvider || DEFAULT_SETTINGS.aiProvider;
+      
+      let apiKey: string;
+      if (provider === 'openai') {
+        apiKey = settings.openaiApiKey || DEFAULT_SETTINGS.openaiApiKey;
+      } else if (provider === 'gemini') {
+        apiKey = settings.geminiApiKey || DEFAULT_SETTINGS.geminiApiKey;
+      } else {
+        apiKey = settings.deepseekApiKey || DEFAULT_SETTINGS.deepseekApiKey;
+      }
+      
+      return { provider, apiKey };
     }
   } catch (error) {
     console.error('Error reading AI settings:', error);
@@ -109,6 +116,41 @@ async function getOpenAISuggestion(apiKey: string, systemPrompt: string, context
     return data.choices[0]?.message?.content || 'No suggestion available.';
   } catch (error) {
     console.error('OpenAI request failed:', error);
+    throw error;
+  }
+}
+
+// Request to Google Gemini API
+async function getGeminiSuggestion(apiKey: string, systemPrompt: string, context: string): Promise<string> {
+  try {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        contents: [{
+          parts: [{
+            text: `${systemPrompt}\n\nCurrent campaign context:\n${context}\n\nProvide a brief suggestion to help optimize this campaign.`
+          }]
+        }],
+        generationConfig: {
+          temperature: 0.7,
+          maxOutputTokens: 150,
+        }
+      })
+    });
+
+    if (!response.ok) {
+      const errorData = await response.text();
+      console.error('Gemini API error:', errorData);
+      throw new Error(`Gemini API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.candidates?.[0]?.content?.parts?.[0]?.text || 'No suggestion available.';
+  } catch (error) {
+    console.error('Gemini request failed:', error);
     throw error;
   }
 }
@@ -458,6 +500,8 @@ export async function POST(request: NextRequest) {
     
     if (provider === 'openai') {
       suggestion = await getOpenAISuggestion(apiKey, systemPrompt, contextString);
+    } else if (provider === 'gemini') {
+      suggestion = await getGeminiSuggestion(apiKey, systemPrompt, contextString);
     } else {
       suggestion = await getDeepSeekSuggestion(apiKey, systemPrompt, contextString);
     }
