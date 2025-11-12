@@ -997,7 +997,7 @@ const ProposalSection: React.FC<ProposalSectionProps> = ({ onValidationChange })
           >
             <Popover.Target>
               <TextInput
-                value={`Budget: ${rateFilter[0].toLocaleString()} - ${rateFilter[1].toLocaleString()}`}
+                value={`Rate: ${rateFilter[0].toLocaleString()} - ${rateFilter[1].toLocaleString()}`}
                 onClick={() => setBudgetPopoverOpened(true)}
                 readOnly
                 size="sm"
@@ -1013,7 +1013,7 @@ const ProposalSection: React.FC<ProposalSectionProps> = ({ onValidationChange })
             <Popover.Dropdown>
               <div style={{ padding: '20px' }}>
                 <Text size="sm" fw={600} mb={20}>
-                  Budget Range: ${rateFilter[0].toLocaleString()} - ${rateFilter[1].toLocaleString()}
+                  Rate Range: ${rateFilter[0].toLocaleString()} - ${rateFilter[1].toLocaleString()}
                 </Text>
                 <RangeSlider
                   value={rateFilter}
