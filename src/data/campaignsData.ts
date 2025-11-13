@@ -38,17 +38,17 @@ function seededRandom(seed: number) {
   return () => (s = (s * 16807) % 2147483647) / 2147483647;
 }
 
-// Deterministic sparkline with шумом и редкими пиками/провалами
+// Deterministic sparkline with noise and rare spikes/drops
 const genSparkByIndex = (index: number): number[] => {
   const rand = seededRandom(12345 + index * 97);
   const length = 24;
   const arr: number[] = [];
   let value = 70 + (index % 8) * 2;
   for (let i = 0; i < length; i++) {
-    const trend = Math.sin((i + index) / 2.4) * 10; // базовая волна
-    const noise = (rand() - 0.5) * 10; // шум
+    const trend = Math.sin((i + index) / 2.4) * 10; // base wave
+    const noise = (rand() - 0.5) * 10; // noise
     value = 70 + trend + noise;
-    // редкие всплески/провалы
+    // rare spikes/drops
     if (rand() > 0.92) value += 18;
     if (rand() < 0.08) value -= 16;
     arr.push(Math.max(40, Math.min(110, Math.round(value))));

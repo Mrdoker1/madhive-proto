@@ -221,7 +221,7 @@ export const AllocationSection: React.FC = () => {
       
       setChannelData(finalData);
       
-      console.log('[handleBudgetChange] ✅ Метрики обновлены!');
+      console.log('[handleBudgetChange] ✅ Metrics updated!');
       
     } catch (error) {
       console.error('Failed to fetch metrics:', error);

@@ -1,9 +1,9 @@
 /**
  * Dashboard Data
  * 
- * Этот файл содержит данные о кампаниях для дашборда с географическими DMA зонами.
+ * This file contains campaign data for the dashboard with geographic DMA zones.
  * 
- * Доступные кампании с DMA данными:
+ * Available campaigns with DMA data:
  * - Ford Motor Company: Ford Mach-E EV Intro, Q3 25 Ford F150 TRISTATE
  * - Toyota Motor Company: Toyota Q3 Brand Push
  * - Chevrolet: Chevy Silverado Summer Sale
@@ -12,7 +12,7 @@
  * - Lincoln: Lincoln Aviator Luxury
  * - Jeep: JGC Holiday Pre-Launch
  * 
- * Для просмотра DMA зон выберите Advertiser и Campaign в фильтрах Dashboard.
+ * To view DMA zones, select Advertiser and Campaign in the Dashboard filters.
  */
 
 export interface CampaignTableRow {

@@ -58581,15 +58581,15 @@ export const programsData: Program[] = [
 ];
 
 export const getProgramsByStation = (stationId: string): Program[] => {
-  // Новые station IDs имеют формат: broadcaster-stationname-marketpart
-  // Старые program.stationId имеют формат: broadcaster-randomname
+  // New station IDs have format: broadcaster-stationname-marketpart
+  // Old program.stationId have format: broadcaster-randomname
   // 
-  // Извлекаем broadcasterId из нового stationId
-  // Например: 'hubbard-broadcasting-wnyt-albany' -> 'hubbard-broadcasting'
+  // Extract broadcasterId from new stationId
+  // Example: 'hubbard-broadcasting-wnyt-albany' -> 'hubbard-broadcasting'
   const parts = stationId.split('-');
   
-  // Определяем broadcaster ID (может быть multi-word, например 'hubbard-broadcasting')
-  // Поэтому ищем все программы этого broadcaster
+  // Determine broadcaster ID (can be multi-word, e.g. 'hubbard-broadcasting')
+  // So we search for all programs of this broadcaster
   let broadcasterId = '';
   if (stationId.startsWith('hubbard-broadcasting')) {
     broadcasterId = 'hubbard-broadcasting';
@@ -58598,12 +58598,12 @@ export const getProgramsByStation = (stationId: string): Program[] => {
   } else if (stationId.startsWith('morgan-murphy')) {
     broadcasterId = 'morgan-murphy';
   } else {
-    // Для single-word broadcasters (abc, cbs, nbc, etc.)
+    // For single-word broadcasters (abc, cbs, nbc, etc.)
     broadcasterId = parts[0];
   }
   
-  // Возвращаем все программы для этого broadcaster
-  // Это даст общий набор программ для всех станций broadcaster'а
+  // Return all programs for this broadcaster
+  // This will give a common set of programs for all broadcaster's stations
   return programsData.filter(program => 
     program.stationId.startsWith(broadcasterId)
   );

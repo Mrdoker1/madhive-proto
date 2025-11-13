@@ -92,7 +92,7 @@ export const allBroadcasterStations: BroadcasterStations[] = [
   }
 ];
 
-// Вспомогательные функции
+// Helper functions
 export const getAllStations = (): StationInfo[] => {
   return allBroadcasterStations.flatMap(b => b.stations);
 };
