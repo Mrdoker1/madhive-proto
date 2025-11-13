@@ -11,6 +11,7 @@ interface WeekData {
   endDate: Date;
   budget: number;
   isLocked?: boolean; // Add field for locking
+  isHiatusWeek?: boolean; // Add field to mark hiatus weeks
 }
 
 interface HiatusRange {
@@ -144,35 +145,49 @@ const FlightByWeek: React.FC<FlightByWeekProps> = ({
   const generateWeeks = useCallback((start: string, end: string): WeekData[] => {
     if (!start || !end) return [];
 
-    // Local function to check if week is in hiatus
-    const isWeekInHiatus = (weekStart: Date, weekEnd: Date): boolean => {
-      // Determine actual week boundaries within selected campaign range
-      const actualWeekStart = weekStart > startDateObj ? weekStart : startDateObj;
-      const actualWeekEnd = weekEnd < endDateObj ? weekEnd : endDateObj;
-      
-      // Check new multiple ranges
-      if (stableHiatusRanges && stableHiatusRanges.length > 0) {
-        return stableHiatusRanges.some(range => {
-          const hiatusStart = new Date(range.start);
-          const hiatusEnd = new Date(range.end);
-          
-          // Week is locked only if its ACTIVE PART is FULLY within hiatus range
-          return actualWeekStart >= hiatusStart && actualWeekEnd <= hiatusEnd;
-        });
-      }
-      
-      // Backward compatibility with old API
-      if (!hiatusStartDate || !hiatusEndDate) return false;
-      
-      const hiatusStart = new Date(hiatusStartDate);
-      const hiatusEnd = new Date(hiatusEndDate);
-      
-      // Week is locked only if its ACTIVE PART is FULLY within hiatus range
-      return actualWeekStart >= hiatusStart && actualWeekEnd <= hiatusEnd;
-    };
-
     const startDateObj = new Date(start);
     const endDateObj = new Date(end);
+
+    // Local function to check if week is in hiatus
+    // Week is hiatus only if ALL active days (within campaign range) are in hiatus
+    const isWeekInHiatus = (weekStart: Date, weekEnd: Date): boolean => {
+      // Helper to check if a specific day is in hiatus
+      const isDayInHiatus = (date: Date): boolean => {
+        if (stableHiatusRanges && stableHiatusRanges.length > 0) {
+          return stableHiatusRanges.some(range => {
+            const rangeStart = new Date(range.start);
+            const rangeEnd = new Date(range.end);
+            return date >= rangeStart && date <= rangeEnd;
+          });
+        }
+        
+        if (hiatusStartDate && hiatusEndDate) {
+          const hiatusStart = new Date(hiatusStartDate);
+          const hiatusEnd = new Date(hiatusEndDate);
+          return date >= hiatusStart && date <= hiatusEnd;
+        }
+        
+        return false;
+      };
+      
+      // Constrain week by campaign boundaries
+      const actualStart = weekStart < startDateObj ? startDateObj : weekStart;
+      const actualEnd = weekEnd > endDateObj ? endDateObj : weekEnd;
+      
+      // Count active days (days within campaign range and NOT in hiatus)
+      let activeDays = 0;
+      const tempDate = new Date(actualStart);
+      
+      while (tempDate <= actualEnd) {
+        if (!isDayInHiatus(new Date(tempDate))) {
+          activeDays++;
+        }
+        tempDate.setDate(tempDate.getDate() + 1);
+      }
+      
+      // Week is hiatus only if it has NO active days
+      return activeDays === 0;
+    };
     const weeksArray: WeekData[] = [];
 
     // Start with Monday of the start date's week
@@ -199,7 +214,8 @@ const FlightByWeek: React.FC<FlightByWeekProps> = ({
         startDate: new Date(currentWeekStart),
         endDate: actualEnd,
         budget: isHiatusWeek ? 0 : 0, // If week is in hiatus, budget is 0
-        isLocked: isHiatusWeek // Lock weeks in hiatus
+        isLocked: isHiatusWeek, // Lock weeks in hiatus
+        isHiatusWeek: isHiatusWeek // Mark hiatus weeks
       });
 
       currentWeekStart.setDate(currentWeekStart.getDate() + 7);
@@ -219,12 +235,12 @@ const FlightByWeek: React.FC<FlightByWeekProps> = ({
   const weeksWithBudget = useMemo(() => {
     if (generatedWeeks.length === 0) return [];
     
-    const activeWeeks = generatedWeeks.filter(week => !week.isLocked);
+    const activeWeeks = generatedWeeks.filter(week => !week.isHiatusWeek);
     const budgetPerWeek = activeWeeks.length > 0 ? totalBudget / activeWeeks.length : 0;
     
     return generatedWeeks.map(week => ({
       ...week,
-      budget: week.isLocked ? 0 : budgetPerWeek
+      budget: week.isHiatusWeek ? 0 : budgetPerWeek
     }));
   }, [generatedWeeks, totalBudget]);
 
@@ -361,7 +377,7 @@ const FlightByWeek: React.FC<FlightByWeekProps> = ({
           const containerHeight = Math.min(Math.max(percentage * 2, 15), 120);
           
           // Check if week is hiatus
-          const isHiatusWeek = week.isLocked && currentBudget === 0;
+          const isHiatusWeek = week.isHiatusWeek === true;
           
           return (
             <div 
@@ -378,7 +394,7 @@ const FlightByWeek: React.FC<FlightByWeekProps> = ({
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '4px',
-                fontSize: '12px', 
+                fontSize: '14px', 
                 color: isHiatusWeek ? '#9CA3AF' : 'var(--primary-color)',
                 fontWeight: 500,
                 marginBottom: '4px',
@@ -554,7 +570,7 @@ const FlightByWeek: React.FC<FlightByWeekProps> = ({
               
               {/* Week Label */}
               <div style={{ 
-                fontSize: '12px', 
+                fontSize: '14px', 
                 color: '#666',
                 marginTop: '8px',
                 textAlign: 'center'

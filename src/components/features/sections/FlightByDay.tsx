@@ -1,6 +1,8 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { Tooltip } from '@mantine/core';
+import { IconPlayerPause } from '@tabler/icons-react';
 
 interface WeekData {
   id: string;
@@ -311,7 +313,6 @@ const FlightByDay: React.FC<FlightByDayProps> = ({
         outline: '1px dashed #C4B5C7',
         borderRadius: '8px',
         padding: '24px',
-        minHeight: '200px',
         position: 'relative'
       }}>
         {/* Total days counter */}
@@ -331,10 +332,10 @@ const FlightByDay: React.FC<FlightByDayProps> = ({
           style={{ 
             display: 'flex',
             alignItems: 'end',
-            height: '180px',
+            minHeight: '180px',
             gap: '8px',
             position: 'relative',
-            marginTop: '24px'
+            marginTop: '48px',
           }}
         >
           {displayItems.map((item, index) => {
@@ -352,52 +353,81 @@ const FlightByDay: React.FC<FlightByDayProps> = ({
               const height = Math.max(calculatedHeight, 15);
               
               return (
-                <div 
+                <Tooltip
                   key={week.id}
-                  style={{ 
-                    flex: 1,
-                    height: `${height}px`,
-                    backgroundColor: '#D7CEDA',
-                    borderRadius: '8px 8px 0 0',
-                    position: 'relative',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '12px',
-                    fontWeight: 500,
-                    color: '#666',
-                    minHeight: '30px'
-                  }}
-                  title={`Week ${week.weekNumber}: ${formatDate(week.startDate)} - ${formatDate(week.endDate)}`}
+                  label={`Week ${week.weekNumber}: ${formatDate(week.startDate)} - ${formatDate(week.endDate)}`}
+                  position="top"
+                  withArrow
+                  openDelay={0}
+                  closeDelay={100}
                 >
-                  {`${week.activeDays}d`}
-                </div>
+                  <div
+                    style={{ 
+                      flex: 1,
+                      height: `${height}px`,
+                      backgroundColor: '#D7CEDA',
+                      borderRadius: '8px 8px 0 0',
+                      position: 'relative',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '12px',
+                      fontWeight: 500,
+                      color: '#666',
+                      minHeight: '30px',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {`${week.activeDays}d`}
+                  </div>
+                </Tooltip>
               );
             } else {
               // Hiatus block
               const hiatus = item.data as HiatusBlock;
+              
+              // Calculate hiatus duration in days
+              const hiatusDays = Math.ceil((hiatus.endDate.getTime() - hiatus.startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+              
+              // Bar height similar to weeks, based on hiatus days
+              const heightPercentage = maxDays > 0 ? (hiatusDays / maxDays) * 100 : 0;
+              const calculatedHeight = (heightPercentage / 100) * 160;
+              const height = Math.max(calculatedHeight, 15);
+              
               return (
-                <div
+                <Tooltip
                   key={hiatus.id}
-                  style={{
-                    flex: 1,
-                    display: 'flex',
-                    alignItems: 'flex-end',
-                    justifyContent: 'center',
-                    textAlign: 'center',
-                    fontSize: '11px',
-                    color: '#666',
-                    fontWeight: 500,
-                    backgroundColor: 'transparent'
-                  }}
+                  label={`Hiatus Period: ${formatDate(hiatus.startDate)} - ${formatDate(hiatus.endDate)}`}
+                  position="top"
+                  withArrow
+                  openDelay={0}
+                  closeDelay={100}
                 >
-                  <div>
-                    <div style={{ marginBottom: '2px' }}>Hiatus</div>
-                    <div style={{ fontSize: '9px' }}>
-                      {formatDate(hiatus.startDate)} - {formatDate(hiatus.endDate)}
-                    </div>
+                  <div
+                    style={{ 
+                      flex: 1,
+                      height: `${height}px`,
+                      backgroundColor: 'transparent',
+                      borderRadius: '8px 8px 0 0',
+                      border: '2px dashed #C4B5C7',
+                      position: 'relative',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '4px',
+                      fontSize: '11px',
+                      fontWeight: 600,
+                      color: '#999',
+                      minHeight: '30px',
+                      cursor: 'pointer',
+                      letterSpacing: '0.5px'
+                    }}
+                  >
+                    <IconPlayerPause size={16} color="#999" stroke={1.5} />
+                    HIATUS
                   </div>
-                </div>
+                </Tooltip>
               );
             }
           })}
