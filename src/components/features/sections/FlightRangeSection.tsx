@@ -73,6 +73,10 @@ const FlightRangeSection: React.FC<FlightRangeSectionProps> = ({
       start: globalFlightData.hiatusStartDate || '',
       end: globalFlightData.hiatusEndDate || ''
     });
+    // Restore hiatus ranges from Redux
+    if (globalFlightData.hiatusRanges !== undefined) {
+      setCurrentHiatusRanges(globalFlightData.hiatusRanges);
+    }
   }, [globalFlightData]);
   
   // Computed values for current display
@@ -129,7 +133,8 @@ const FlightRangeSection: React.FC<FlightRangeSectionProps> = ({
         setCurrentHiatusRanges([]);
         dispatch(updateFlightData({ 
           hiatusStartDate: '',
-          hiatusEndDate: ''
+          hiatusEndDate: '',
+          hiatusRanges: []
         }));
       }
     }
@@ -151,7 +156,9 @@ const FlightRangeSection: React.FC<FlightRangeSectionProps> = ({
   const handleHiatusRangesChange = useCallback((ranges: Array<{id: string, start: string, end: string}>) => {
     console.log('Hiatus ranges changed:', ranges);
     setCurrentHiatusRanges(ranges);
-  }, []);
+    // Save hiatus ranges to Redux
+    dispatch(updateFlightData({ hiatusRanges: ranges }));
+  }, [dispatch]);
 
   // Handler for data from FlightByWeek
   const handleWeekDataChange = useCallback((weeks: any[]) => {

@@ -31,6 +31,7 @@ export interface CampaignFlightData {
   flightStatus: 'active' | 'hiatus';
   hiatusStartDate?: string;
   hiatusEndDate?: string;
+  hiatusRanges?: Array<{id: string, start: string, end: string}>;
 }
 
 export interface BroadcasterStationBudget extends StationBudget {
