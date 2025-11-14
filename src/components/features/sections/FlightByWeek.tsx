@@ -358,16 +358,22 @@ const FlightByWeek: React.FC<FlightByWeekProps> = ({
         </div>
       </div>
 
-      {/* Interactive Bars */}
+      {/* Interactive Bars - with horizontal scroll */}
       <div 
-        className="flex items-end p-4rounded-lg"
         style={{ 
-          borderColor: '#E6E3E8', 
-          height: '200px',
-          gap: '8px',
+          overflowX: 'auto',
           marginBottom: '32px',
+          paddingBottom: '8px'
         }}
       >
+        <div 
+          className="flex items-end"
+          style={{ 
+            minWidth: weeks.length > 10 ? `${weeks.length * 90}px` : '100%',
+            height: '200px',
+            gap: '8px',
+          }}
+        >
         {weeks.map((week, index) => {
           // Use dragState if active, otherwise regular budget
           const currentBudget = dragState[week.id] !== undefined ? dragState[week.id] : week.budget;
@@ -384,8 +390,8 @@ const FlightByWeek: React.FC<FlightByWeekProps> = ({
               key={week.id}
               className="flex flex-col items-center"
               style={{ 
-                flex: 1,
-                minWidth: '20px'
+                flex: weeks.length > 10 ? '0 0 80px' : 1,
+                minWidth: '80px'
               }}
             >
               {/* Budget Display with Lock */}
@@ -398,7 +404,7 @@ const FlightByWeek: React.FC<FlightByWeekProps> = ({
                 color: isHiatusWeek ? '#9CA3AF' : 'var(--primary-color)',
                 fontWeight: 500,
                 marginBottom: '4px',
-                height: '15px',
+                minHeight: '20px',
                 textAlign: 'center'
               }}>
                 {/* Lock/Unlock Button - only for weeks not in hiatus */}
@@ -421,9 +427,9 @@ const FlightByWeek: React.FC<FlightByWeekProps> = ({
                     title={week.isLocked ? 'Unlock budget' : 'Lock budget'}
                   >
                     {week.isLocked ? (
-                      <IconLock size={12} />
+                      <IconLock size={16} />
                     ) : (
-                      <IconLockOpen size={12} />
+                      <IconLockOpen size={16} />
                     )}
                   </button>
                 )}
@@ -590,6 +596,7 @@ const FlightByWeek: React.FC<FlightByWeekProps> = ({
             </div>
           );
         })}
+        </div>
       </div>
 
       {/* Edit Budget Modal */}
