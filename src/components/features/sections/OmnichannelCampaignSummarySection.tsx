@@ -375,54 +375,46 @@ const OmnichannelCampaignSummarySection: React.FC = () => {
                 />
 
                 {/* Audience */}
-                {hasAudience && (
-                  <SummaryRow
-                    label="Audience"
-                    value={formatChannelAudienceString(channelId)}
-                    editRoute={`/campaign/omnichannel/details#audiences-${channelId}`}
-                    isEmpty={false}
-                  />
-                )}
+                <SummaryRow
+                  label="Audience"
+                  value={formatChannelAudienceString(channelId)}
+                  editRoute={`/campaign/omnichannel/details#audiences-${channelId}`}
+                  isEmpty={!hasAudience}
+                />
 
                 {/* Geo (ZIP Codes) */}
-                {hasGeo && (
-                  <SummaryRow
-                    label="Geo"
-                    value={formatChannelGeoString(channelId)}
-                    editRoute={`/campaign/omnichannel/details#geo-${channelId}`}
-                    isEmpty={false}
-                  />
-                )}
+                <SummaryRow
+                  label="Geo"
+                  value={formatChannelGeoString(channelId)}
+                  editRoute={`/campaign/omnichannel/details#geo-${channelId}`}
+                  isEmpty={!hasGeo}
+                />
 
                 {/* Interests */}
-                {hasInterests && (
-                  <SummaryRow
-                    label="Interests"
-                    value={formatChannelInterestsString(channelId)}
-                    editRoute={`/campaign/omnichannel/details#interests-${channelId}`}
-                    isEmpty={false}
-                  />
-                )}
+                <SummaryRow
+                  label="Interests"
+                  value={formatChannelInterestsString(channelId)}
+                  editRoute={`/campaign/omnichannel/details#interests-${channelId}`}
+                  isEmpty={!hasInterests}
+                />
 
                 {/* Keywords (only for search) */}
-                {channelId === 'search' && hasKeywords && (
+                {channelId === 'search' && (
                   <SummaryRow
                     label="Keywords"
                     value={formatChannelKeywordsString(channelId)}
                     editRoute={`/campaign/omnichannel/details#keywords-${channelId}`}
-                    isEmpty={false}
+                    isEmpty={!hasKeywords}
                   />
                 )}
 
                 {/* Dayparts */}
-                {hasDayparts && (
-                  <SummaryRow
-                    label="Daypart Summary"
-                    value={formatChannelDaypartSummary(channelId)}
-                    editRoute={`/campaign/omnichannel/details#dayparts-${channelId}`}
-                    isEmpty={false}
-                  />
-                )}
+                <SummaryRow
+                  label="Daypart Summary"
+                  value={formatChannelDaypartSummary(channelId)}
+                  editRoute={`/campaign/omnichannel/details#dayparts-${channelId}`}
+                  isEmpty={!hasDayparts}
+                />
               </TableTbody>
             </Table>
           </div>
