@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Text, Card } from '@mantine/core';
-import { IconCurrencyDollar } from '@tabler/icons-react';
+import { Text, Card, Tooltip } from '@mantine/core';
+import { IconCurrencyDollar, IconInfoCircle } from '@tabler/icons-react';
 import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
 import { updateBudgetData, updateEstimations } from '@/store/slices/campaignSlice';
 import AISuggestionCard from '@/components/ui/AISuggestionCard';
@@ -306,9 +306,23 @@ const RightSidebar: React.FC<RightSidebarProps> = ({ className = '', isOmnichann
 
         {/* Audience Estimation */}
         <div>
-          <Text size="sm" fw={500} style={{ color: 'var(--form-label-color)', marginBottom: '8px' }}>
-            Audience Estimation
-          </Text>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+            <Text size="sm" fw={500} style={{ color: 'var(--form-label-color)' }}>
+              Audience Estimation
+            </Text>
+            <Tooltip
+              label={isOmnichannel 
+                ? "Dynamic estimation of your audience size based on selected channels, budget allocation, and targeting. This correlates with the Total Reach shown in the allocation chart."
+                : "Estimated audience size based on your budget, targeting criteria, and market conditions."
+              }
+              position="right"
+              withArrow
+              multiline
+              w={280}
+            >
+              <IconInfoCircle size={14} color="#666" style={{ cursor: 'help' }} />
+            </Tooltip>
+          </div>
           
           <div style={{ 
             backgroundColor: '#FFFFFF',

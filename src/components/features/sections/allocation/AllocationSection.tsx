@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState, useCallback, useRef, useEffect } from 'react';
-import { Text, Group, Switch } from '@mantine/core';
+import { Text, Group, Switch, Tooltip } from '@mantine/core';
+import { IconInfoCircle } from '@tabler/icons-react';
 import { AnimatePresence } from 'framer-motion';
 import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
 import { updateChannelsData, updateChannelEstimations } from '@/store/slices/campaignSlice';
@@ -362,8 +363,48 @@ export const AllocationSection: React.FC = () => {
     }));
   }, [dispatch, selectedChannels]);
   
+  // Calculate deduplicated Total Reach with overlap
+  // Overlap coefficients between channel types (how much audiences overlap)
+  const OVERLAP_COEFFICIENTS: Record<string, Record<string, number>> = {
+    'ctv': { 'ctv': 0, 'audio': 0.25, 'social': 0.30, 'preroll': 0.35, 'search': 0.20, 'email': 0.15 },
+    'audio': { 'ctv': 0.25, 'audio': 0, 'social': 0.30, 'preroll': 0.25, 'search': 0.20, 'email': 0.15 },
+    'social': { 'ctv': 0.30, 'audio': 0.30, 'social': 0, 'preroll': 0.35, 'search': 0.40, 'email': 0.25 },
+    'preroll': { 'ctv': 0.35, 'audio': 0.25, 'social': 0.35, 'preroll': 0, 'search': 0.30, 'email': 0.20 },
+    'search': { 'ctv': 0.20, 'audio': 0.20, 'social': 0.40, 'preroll': 0.30, 'search': 0, 'email': 0.25 },
+    'email': { 'ctv': 0.15, 'audio': 0.15, 'social': 0.25, 'preroll': 0.20, 'search': 0.25, 'email': 0 }
+  };
+
+  // Calculate deduplicated Total Reach
+  const calculateDeduplicatedReach = (channels: ChannelPoint[]): number => {
+    if (channels.length === 0) return 0;
+    if (channels.length === 1) return channels[0].reach;
+
+    // Simple reach sum
+    const totalSimpleReach = channels.reduce((sum, ch) => sum + ch.reach, 0);
+    
+    // Calculate overlap adjustments between all pairs of channels
+    let totalOverlap = 0;
+    for (let i = 0; i < channels.length; i++) {
+      for (let j = i + 1; j < channels.length; j++) {
+        const ch1 = channels[i];
+        const ch2 = channels[j];
+        
+        // Get overlap coefficient for this pair
+        const overlapCoeff = OVERLAP_COEFFICIENTS[ch1.id]?.[ch2.id] || 0.25;
+        
+        // Overlap = min(reach1, reach2) × overlap_coefficient
+        const overlap = Math.min(ch1.reach, ch2.reach) * overlapCoeff;
+        totalOverlap += overlap;
+      }
+    }
+    
+    // Deduplicated reach = total sum - overlaps
+    return Math.max(0, totalSimpleReach - totalOverlap);
+  };
+
   // Calculate allocations for budget bar
   const totalAllocatedBudget = points.reduce((sum, point) => sum + point.budget, 0);
+  const totalReach = calculateDeduplicatedReach(points); // Use deduplicated reach
   const chartAllocations: ChannelAllocation[] = points.map(point => ({
     ...point,
     percentage: totalAllocatedBudget > 0 ? (point.budget / totalAllocatedBudget) * 100 : 0
@@ -464,7 +505,38 @@ export const AllocationSection: React.FC = () => {
       {/* Interactive Chart */}
       <div>
         <div ref={chartContainerRef} style={{ width: '100%', height: '400px', position: 'relative', overflow: 'hidden' }}>
-          <svg width="100%" height="350" style={{ overflow: 'visible' }}>
+          {/* Total Reach Badge - positioned inside chart */}
+          <Tooltip
+            label="Total Reach shows deduplicated unique audience across all channels."
+            position="left"
+            withArrow
+            multiline
+            w={320}
+          >
+            <div style={{ 
+              position: 'absolute',
+              top: '40px',
+              right: '20px',
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '8px',
+              backgroundColor: 'var(--primary-color)',
+              padding: '8px 16px',
+              borderRadius: '8px',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+              cursor: 'help',
+              zIndex: 10
+            }}>
+              <Text size="13px" fw={500} c="#FFFFFF">
+                Total Reach:
+              </Text>
+              <Text size="13px" fw={700} c="#FFFFFF">
+                {Math.round(totalReach).toLocaleString()}
+              </Text>
+              <IconInfoCircle size={16} color="#FFFFFF" style={{ opacity: 0.8 }} />
+            </div>
+          </Tooltip>
+          <svg width="100%" height="370" style={{ overflow: 'visible' }}>
             <ChartGrid 
               chartWidth={chartWidth}
               chartHeight={chartHeight}
