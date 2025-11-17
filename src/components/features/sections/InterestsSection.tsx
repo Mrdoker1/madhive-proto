@@ -224,7 +224,7 @@ const InterestsSection = ({ channel, isFirstChannel = false }: InterestsSectionP
         }}
       >
         <Text size="sm" c="dimmed" mb="lg">
-          Select 3 or more interests
+        Select interest segments
         </Text>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
           {selectedInterests.map((interest) => (
