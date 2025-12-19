@@ -15,7 +15,7 @@ const LinearDetailsSection = () => {
       <Select
         label="Measurement Providers"
         placeholder="Select measurement provider"
-        data={['Nielsen', 'Comscore']}
+        data={['Nielsen HH C3', 'Comscore HH C3', 'Videoamp HH C3']}
         value={linearData.measurementProvider}
         onChange={handleMeasurementProviderChange}
         required
