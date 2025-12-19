@@ -8,7 +8,6 @@ import SectionWrapper from "@/components/ui/SectionWrapper";
 import { BreadcrumbStep } from "@/components/ui/Breadcrumbs";
 import NextButton from "@/components/ui/NextButton";
 import ChannelPills, { ChannelPill } from "@/components/ui/ChannelPills";
-import AudiencesSection from "@/components/features/sections/AudiencesSection";
 import InterestsSection from "@/components/features/sections/InterestsSection";
 import GeoSection from "@/components/features/sections/GeoSection";
 import DaypartsSection from "@/components/features/sections/DaypartsSection";
@@ -136,14 +135,12 @@ export default function OmnichannelDetailsPage() {
     if (activeChannel === 'search') {
       return [
         { id: 'keywords', label: 'Key Words', anchor: '#keywords' },
-        { id: 'audiences', label: 'Audiences', anchor: '#audiences' },
         { id: 'geo', label: 'Geo', anchor: '#geo' },
         { id: 'dayparts', label: 'Dayparts', anchor: '#dayparts' }
       ];
     }
     
     return [
-      { id: 'audiences', label: 'Audiences', anchor: '#audiences' },
       { id: 'interests', label: 'Interests', anchor: '#interests' },
       { id: 'geo', label: 'Geo', anchor: '#geo' },
       { id: 'dayparts', label: 'Dayparts', anchor: '#dayparts' }
@@ -182,13 +179,6 @@ export default function OmnichannelDetailsPage() {
     // Common content for Pre Roll, CTV, Audio, Email
     const commonContent = (
       <>
-        <SectionWrapper id="audiences" title="Audiences">
-          <AudiencesSection 
-            channel={activeChannel || 'preroll'} 
-            isFirstChannel={activeChannel === firstChannelRef.current}
-          />
-        </SectionWrapper>
-
         <SectionWrapper id="interests" title="Interests">
           <InterestsSection 
             channel={activeChannel || 'preroll'}
@@ -225,12 +215,6 @@ export default function OmnichannelDetailsPage() {
           <>
             <SectionWrapper id="keywords" title="Key Words">
               <KeyWordsSection channel="search" />
-            </SectionWrapper>
-            <SectionWrapper id="audiences" title="Audiences">
-              <AudiencesSection 
-                channel={activeChannel} 
-                isFirstChannel={activeChannel === firstChannelRef.current}
-              />
             </SectionWrapper>
             <SectionWrapper id="geo" title="Geo">
               <GeoSection 

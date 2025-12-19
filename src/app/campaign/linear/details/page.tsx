@@ -8,7 +8,6 @@ import SectionWrapper from "@/components/ui/SectionWrapper";
 import { BreadcrumbStep } from "@/components/ui/Breadcrumbs";
 import NextButton from "@/components/ui/NextButton";
 import LinearDetailsSection from "@/components/features/sections/LinearDetailsSection";
-import AudiencesSection from "@/components/features/sections/AudiencesSection";
 import MarketsSection from "@/components/features/sections/markets";
 import MarketStationsSection from "@/components/features/sections/MarketStationsSection";
 import DaypartsSection from "@/components/features/sections/DaypartsSection";
@@ -59,7 +58,6 @@ export default function ChannelDetailsPage() {
   // Anchors for page navigation
   const anchorItems: AnchorItem[] = [
     { id: 'linear-details', label: 'Linear Details', anchor: '#linear-details' },
-    { id: 'audiences', label: 'Audiences', anchor: '#audiences' },
     { id: 'dayparts', label: 'Dayparts', anchor: '#dayparts' },
     { id: 'markets', label: 'Market/Weight', anchor: '#markets' },
     { id: 'broadcasters', label: 'Market Stations', anchor: '#broadcasters' }
@@ -144,14 +142,6 @@ export default function ChannelDetailsPage() {
                 required
               >
                 <LinearDetailsSection />
-              </SectionWrapper>
-
-              {/* Audiences Section */}
-              <SectionWrapper 
-                id="audiences" 
-                title="Audiences"
-              >
-                <AudiencesSection />
               </SectionWrapper>
 
               {/* Dayparts Section */}

@@ -13,6 +13,7 @@ import GeneralDetailsSection from "@/components/features/sections/GeneralDetails
 import TotalBudgetSection from "@/components/features/sections/TotalBudgetSection";
 import GoalSection from "@/components/features/sections/GoalSection";
 import FlightRangeSection from "@/components/features/sections/FlightRangeSection";
+import AudiencesSection from "@/components/features/sections/AudiencesSection";
 import NextButton from "@/components/ui/NextButton";
 import { 
   validateGeneralDetails, 
@@ -76,7 +77,8 @@ export default function OmnichannelNewCampaignPage() {
     { id: 'general-details', label: 'General', anchor: '#general-details' },
     { id: 'total-budget', label: 'Total Budget', anchor: '#total-budget' },
     { id: 'goal', label: 'Goal', anchor: '#goal' },
-    { id: 'flight-range', label: 'Flight Range', anchor: '#flight-range' }
+    { id: 'flight-range', label: 'Flight Range', anchor: '#flight-range' },
+    { id: 'demos', label: 'Demos', anchor: '#demos' }
   ];
 
   // Get all validation errors
@@ -179,6 +181,14 @@ export default function OmnichannelNewCampaignPage() {
               required
             >
               <FlightRangeSection totalBudget={totalBudget} />
+            </SectionWrapper>
+
+            {/* Demos Section */}
+            <SectionWrapper 
+              id="demos" 
+              title="Demos"
+            >
+              <AudiencesSection />
             </SectionWrapper>
               
               </div>
