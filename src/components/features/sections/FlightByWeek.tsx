@@ -574,14 +574,14 @@ const FlightByWeek: React.FC<FlightByWeekProps> = ({
                 />
               </div>
               
-              {/* Week Label */}
+              {/* Week Label with Start Date */}
               <div style={{ 
                 fontSize: '14px', 
                 color: '#666',
                 marginTop: '8px',
                 textAlign: 'center'
               }}>
-                W{index + 1}
+                W{index + 1}&nbsp;&nbsp;{week.startDate.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit' })}
               </div>
               
               {/* Percentage */}
