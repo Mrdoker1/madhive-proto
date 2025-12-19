@@ -12,6 +12,7 @@ import SelectChannelsSection from "@/components/features/sections/SelectChannels
 import AllocationSection from "@/components/features/sections/AllocationSection";
 import RightSidebar from "@/components/layout/RightSidebar";
 import { useAppSelector } from '@/hooks/useRedux';
+import { RootState } from '@/store/store';
 import { validateSelectChannels, validateAllocation, scrollToFirstError } from '@/utils/validation';
 
 export default function OmnichannelChannelsPage() {
@@ -20,6 +21,7 @@ export default function OmnichannelChannelsPage() {
   
   const selectedChannelsFromRedux = useAppSelector((state) => state.campaign.channels.selectedChannels);
   const budgetAllocation = useAppSelector((state) => state.campaign.channels.budgetAllocation);
+  const showNavigationAnchors = useAppSelector((state: RootState) => state.uiSettings.showNavigationAnchors);
   
   // Filter selected channels (exclude linear_tv)
   const availableChannels = useMemo(() => {
@@ -117,17 +119,19 @@ export default function OmnichannelChannelsPage() {
       >
         <div style={{ backgroundColor: 'var(--page-background)', paddingTop: '32px', paddingBottom: '96px', paddingLeft: '32px', paddingRight: '32px', minHeight: '100%' }}>
           <div style={{ display: 'flex', justifyContent: 'center', margin: '0 auto' }}>
-            <div className="w-64" style={{ paddingRight: '20px', position: 'sticky', top: '32px', height: 'fit-content' }}>
-              <NavigationAnchors 
-                items={anchorItems}
-                orientation="vertical"
-                activeColor="#2A1037"
-                textColor="#666666"
-                className="space-y-6"
-              />
-            </div>
+            {showNavigationAnchors && (
+              <div className="w-64" style={{ paddingRight: '20px', position: 'sticky', top: '32px', height: 'fit-content' }}>
+                <NavigationAnchors 
+                  items={anchorItems}
+                  orientation="vertical"
+                  activeColor="#2A1037"
+                  textColor="#666666"
+                  className="space-y-6"
+                />
+              </div>
+            )}
             {/* Main content */}
-            <div style={{ paddingLeft: '20px', width: '100%', maxWidth: '800px' }}>
+            <div style={{ paddingLeft: showNavigationAnchors ? '20px' : '0', width: '100%', maxWidth: '800px' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '40px' }}>
               
               {/* Select Channels Section */}

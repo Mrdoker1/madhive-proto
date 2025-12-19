@@ -13,6 +13,7 @@ import MarketsSection from "@/components/features/sections/markets";
 import MarketStationsSection from "@/components/features/sections/MarketStationsSection";
 import DaypartsSection from "@/components/features/sections/DaypartsSection";
 import { useAppSelector } from '@/hooks/useRedux';
+import { RootState } from '@/store/store';
 import { validateLinearDetails, validateMarkets, validateBroadcastersAndPrograms, scrollToFirstError } from '@/utils/validation';
 
 export default function ChannelDetailsPage() {
@@ -24,6 +25,7 @@ export default function ChannelDetailsPage() {
   const selectedMarkets = useAppSelector((state) => state.campaign.markets.selectedMarkets);
   const broadcasters = useAppSelector((state) => state.campaign.linear.broadcasters);
   const broadcastersWithStations = useAppSelector((state) => state.campaign.linear.broadcastersWithStations);
+  const showNavigationAnchors = useAppSelector((state: RootState) => state.uiSettings.showNavigationAnchors);
   // Breadcrumbs for Channel Details page - updated statuses
   const breadcrumbSteps: BreadcrumbStep[] = [
     { 
@@ -120,17 +122,19 @@ export default function ChannelDetailsPage() {
         <div style={{ backgroundColor: 'var(--page-background)', paddingTop: '32px', paddingBottom: '96px', paddingLeft: '32px', paddingRight: '32px', minHeight: '100%' }}>
           <div style={{ display: 'flex', justifyContent: 'center', margin: '0 auto' }}>
             {/* Left column with navigation */}
-            <div className="w-64" style={{ paddingRight: '20px', position: 'sticky', top: '32px', height: 'fit-content' }}>
-              <NavigationAnchors 
-                items={anchorItems}
-                orientation="vertical"
-                activeColor="#2A1037"
-                textColor="#666666"
-                className="space-y-6"
-              />
-            </div>
+            {showNavigationAnchors && (
+              <div className="w-64" style={{ paddingRight: '20px', position: 'sticky', top: '32px', height: 'fit-content' }}>
+                <NavigationAnchors 
+                  items={anchorItems}
+                  orientation="vertical"
+                  activeColor="#2A1037"
+                  textColor="#666666"
+                  className="space-y-6"
+                />
+              </div>
+            )}
             {/* Main content */}
-            <div style={{ paddingLeft: '20px', width: '100%', maxWidth: '800px' }}>
+            <div style={{ paddingLeft: showNavigationAnchors ? '20px' : '0', width: '100%', maxWidth: '800px' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '40px' }}>
               
               {/* Linear Details Section */}

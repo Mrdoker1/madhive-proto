@@ -25,6 +25,7 @@ const Header: React.FC = () => {
             height={40}
             className="h-8 w-auto"
             priority
+            unoptimized
           />
         </div>
 
@@ -42,26 +43,42 @@ const Header: React.FC = () => {
           </div>
         </div>
 
-        {/* Right - Notifications and User */}
-        <div className="flex items-center shrink-0" style={{ gap: '0px' }}>
-          <div className="flex items-center justify-center" style={{ width: '64px', height: '64px' }}>
+        {/* Right - Notifications, Help and User */}
+        <div className="flex items-center shrink-0 gap-4" style={{ paddingRight: '16px' }}>
+          <div className="flex items-center justify-center" style={{ width: '40px', height: '40px' }}>
+            <Image
+              src="/assets/icons/header/help.svg"
+              alt="Help & Support"
+              width={24}
+              height={24}
+              className="w-6 h-6"
+              unoptimized
+            />
+          </div>
+
+          <div className="flex items-center justify-center" style={{ width: '40px', height: '40px' }}>
             <Image
               src="/assets/icons/header/notification.svg"
               alt="Notifications"
               width={24}
               height={24}
-              className="w-6 h-6 text-gray-700"
+              className="w-6 h-6"
             />
           </div>
           
-          <div className="flex items-center justify-center" style={{ width: '64px', height: '64px' }}>
-            <Image
-              src="/assets/icons/header/user.svg"
-              alt="User"
-              width={24}
-              height={24}
-              className="w-6 h-6 text-gray-700"
-            />
+          <div className="flex items-center gap-3">
+            <div className="flex items-center justify-center" style={{ width: '40px', height: '40px' }}>
+              <Image
+                src="/assets/icons/header/user.svg"
+                alt="User"
+                width={24}
+                height={24}
+                className="w-6 h-6"
+              />
+            </div>
+            <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
+              DemoUserAccount
+            </span>
           </div>
         </div>
       </div>

@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
 import { updateBudgetData } from '@/store/slices/campaignSlice';
+import { RootState } from '@/store/store';
 import PageLayout from "@/components/layout/PageLayout";
 import NavigationAnchors, { AnchorItem } from "@/components/ui/NavigationAnchors";
 import SectionWrapper from "@/components/ui/SectionWrapper";
@@ -32,6 +33,7 @@ export default function NewCampaignPage() {
   const budgetData = useAppSelector((state) => state.campaign.budget);
   const goalData = useAppSelector((state) => state.campaign.goal);
   const flightData = useAppSelector((state) => state.campaign.flight);
+  const showNavigationAnchors = useAppSelector((state: RootState) => state.uiSettings.showNavigationAnchors);
   
   // Breadcrumbs for New Campaign page - status indication only
   const breadcrumbSteps: BreadcrumbStep[] = [
@@ -123,17 +125,19 @@ export default function NewCampaignPage() {
         <div style={{ backgroundColor: 'var(--page-background)', paddingTop: '32px', paddingBottom: '96px', paddingLeft: '32px', paddingRight: '32px', minHeight: '100%' }}>
           <div style={{ display: 'flex', justifyContent: 'center', margin: '0 auto' }}>
             {/* Left column with navigation */}
-            <div className="w-64" style={{ paddingRight: '20px', position: 'sticky', top: '32px', height: 'fit-content' }}>
-              <NavigationAnchors 
-                items={anchorItems}
-                orientation="vertical"
-                activeColor="#2A1037"
-                textColor="#666666"
-                className="space-y-6"
-              />
-            </div>
+            {showNavigationAnchors && (
+              <div className="w-64" style={{ paddingRight: '20px', position: 'sticky', top: '32px', height: 'fit-content' }}>
+                <NavigationAnchors 
+                  items={anchorItems}
+                  orientation="vertical"
+                  activeColor="#2A1037"
+                  textColor="#666666"
+                  className="space-y-6"
+                />
+              </div>
+            )}
             {/* Main content */}
-            <div style={{ paddingLeft: '20px', width: '100%', maxWidth: '960px' }}>
+            <div style={{ paddingLeft: showNavigationAnchors ? '20px' : '0', width: '100%', maxWidth: '960px' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '40px' }}>
               
               {/* General Details Section */}

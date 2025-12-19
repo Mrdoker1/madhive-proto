@@ -1,12 +1,21 @@
 'use client';
 
 import Link from "next/link";
-import { Text, Table, TableThead, TableTbody, TableTr, TableTh, TableTd } from '@mantine/core';
+import { Text, Table, TableThead, TableTbody, TableTr, TableTh, TableTd, Checkbox } from '@mantine/core';
 import PageLayout from "@/components/layout/PageLayout";
 import MapSettingsSection from '@/components/features/settings/MapSettingsSection';
 import AISettingsSection from '@/components/features/settings/AISettingsSection';
+import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
+import { setShowNavigationAnchors } from '@/store/slices/uiSettingsSlice';
 
 export default function Home() {
+  const dispatch = useAppDispatch();
+  const showNavigationAnchors = useAppSelector((state) => state.uiSettings.showNavigationAnchors);
+
+  const handleNavigationToggle = (event: React.ChangeEvent<HTMLInputElement>) => {
+    dispatch(setShowNavigationAnchors(event.currentTarget.checked));
+  };
+
   return (
     <PageLayout>
       <div style={{ backgroundColor: 'var(--page-background)' }} className="h-full">
@@ -134,6 +143,27 @@ export default function Home() {
               <div style={{ flex: 1 }}>
                 <AISettingsSection />
               </div>
+            </div>
+          </div>
+
+          {/* Navigation Settings */}
+          <div className="w-full max-w-6xl flex justify-center" style={{ paddingBottom: '40px' }}>
+            <div style={{ 
+              width: '100%', 
+              maxWidth: '800px', 
+              padding: '20px', 
+              backgroundColor: 'white', 
+              borderRadius: '8px',
+              border: '1px solid #E5E7EB'
+            }}>
+              <Text size="sm" fw={600} mb="md" c="black">Navigation Settings</Text>
+              <Checkbox
+                label="Show page sections navigator"
+                description="Display navigation anchors on the left side of campaign pages"
+                checked={showNavigationAnchors}
+                onChange={handleNavigationToggle}
+                size="sm"
+              />
             </div>
           </div>
         </div>

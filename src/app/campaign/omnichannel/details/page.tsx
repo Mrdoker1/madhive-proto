@@ -18,6 +18,7 @@ import InfoNotification from "@/components/ui/InfoNotification";
 import { Text } from '@mantine/core';
 import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
 import { setCarryOverMode, initializeChannelData, updateChannelEstimations } from '@/store/slices/campaignSlice';
+import { RootState } from '@/store/store';
 import { AnimatePresence } from 'framer-motion';
 import { calculateAudienceEstimation, calculateMarketEstimation } from '@/utils/estimationCalculators';
 
@@ -30,6 +31,7 @@ export default function OmnichannelDetailsPage() {
   const carryOverMode = useAppSelector((state) => state.campaign.omnichannel.carryOverMode);
   const channelData = useAppSelector((state) => state.campaign.omnichannel.channelData);
   const budgetAllocation = useAppSelector((state) => state.campaign.channels.budgetAllocation);
+  const showNavigationAnchors = useAppSelector((state: RootState) => state.uiSettings.showNavigationAnchors);
   
   // Filter selected channels (exclude linear_tv, it's not shown on this page) and sort by budget (descending)
   const availableChannels = useMemo(() => {
@@ -280,17 +282,19 @@ export default function OmnichannelDetailsPage() {
         <div style={{ backgroundColor: 'var(--page-background)', paddingTop: '32px', paddingBottom: '96px', paddingLeft: '32px', paddingRight: '32px', minHeight: '100%' }}>
           <div style={{ display: 'flex', justifyContent: 'center', margin: '0 auto' }}>
             {/* Left column with navigation */}
-            <div className="w-64" style={{ paddingRight: '20px', position: 'sticky', top: '32px', height: 'fit-content' }}>
-              <NavigationAnchors 
-                items={getAnchorItems()}
-                orientation="vertical"
-                activeColor="#2A1037"
-                textColor="#666666"
-                className="space-y-6"
-              />
-            </div>
+            {showNavigationAnchors && (
+              <div className="w-64" style={{ paddingRight: '20px', position: 'sticky', top: '32px', height: 'fit-content' }}>
+                <NavigationAnchors 
+                  items={getAnchorItems()}
+                  orientation="vertical"
+                  activeColor="#2A1037"
+                  textColor="#666666"
+                  className="space-y-6"
+                />
+              </div>
+            )}
             {/* Main content */}
-            <div style={{ paddingLeft: '20px', width: '100%', maxWidth: '800px' }}>
+            <div style={{ paddingLeft: showNavigationAnchors ? '20px' : '0', width: '100%', maxWidth: '800px' }}>
               {/* Carry over notification */}
               <AnimatePresence>
                 {carryOverMode && (
