@@ -6,14 +6,19 @@ import PageLayout from "@/components/layout/PageLayout";
 import MapSettingsSection from '@/components/features/settings/MapSettingsSection';
 import AISettingsSection from '@/components/features/settings/AISettingsSection';
 import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
-import { setShowNavigationAnchors } from '@/store/slices/uiSettingsSlice';
+import { setShowNavigationAnchors, setShowFlightByDay } from '@/store/slices/uiSettingsSlice';
 
 export default function Home() {
   const dispatch = useAppDispatch();
   const showNavigationAnchors = useAppSelector((state) => state.uiSettings.showNavigationAnchors);
+  const showFlightByDay = useAppSelector((state) => state.uiSettings.showFlightByDay);
 
   const handleNavigationToggle = (event: React.ChangeEvent<HTMLInputElement>) => {
     dispatch(setShowNavigationAnchors(event.currentTarget.checked));
+  };
+
+  const handleFlightByDayToggle = (event: React.ChangeEvent<HTMLInputElement>) => {
+    dispatch(setShowFlightByDay(event.currentTarget.checked));
   };
 
   return (
@@ -146,24 +151,44 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Navigation Settings */}
+          {/* UI Settings */}
           <div className="w-full max-w-6xl flex justify-center" style={{ paddingBottom: '40px' }}>
-            <div style={{ 
-              width: '100%', 
-              maxWidth: '800px', 
-              padding: '20px', 
-              backgroundColor: 'white', 
-              borderRadius: '8px',
-              border: '1px solid #E5E7EB'
-            }}>
-              <Text size="sm" fw={600} mb="md" c="black">Navigation Settings</Text>
-              <Checkbox
-                label="Show page sections navigator"
-                description="Display navigation anchors on the left side of campaign pages"
-                checked={showNavigationAnchors}
-                onChange={handleNavigationToggle}
-                size="sm"
-              />
+            <div style={{ display: 'flex', gap: '32px', width: '100%', maxWidth: '800px' }}>
+              {/* Navigation Settings */}
+              <div style={{ 
+                flex: 1,
+                padding: '20px', 
+                backgroundColor: 'white', 
+                borderRadius: '8px',
+                border: '1px solid #E5E7EB'
+              }}>
+                <Text size="sm" fw={600} mb="md" c="black">Navigation Settings</Text>
+                <Checkbox
+                  label="Show page sections navigator"
+                  description="Display navigation anchors on the left side of campaign pages"
+                  checked={showNavigationAnchors}
+                  onChange={handleNavigationToggle}
+                  size="sm"
+                />
+              </div>
+
+              {/* Flight Settings */}
+              <div style={{ 
+                flex: 1,
+                padding: '20px', 
+                backgroundColor: 'white', 
+                borderRadius: '8px',
+                border: '1px solid #E5E7EB'
+              }}>
+                <Text size="sm" fw={600} mb="md" c="black">Flight Settings</Text>
+                <Checkbox
+                  label="Show Flight by Day chart"
+                  description="Display the visual day/week breakdown chart in the Flight Range section"
+                  checked={showFlightByDay}
+                  onChange={handleFlightByDayToggle}
+                  size="sm"
+                />
+              </div>
             </div>
           </div>
         </div>

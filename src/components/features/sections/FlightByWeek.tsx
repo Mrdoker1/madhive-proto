@@ -327,7 +327,7 @@ const FlightByWeek: React.FC<FlightByWeekProps> = ({
           color: '#000000',
           marginBottom: '16px'
         }}>
-          Flight by Week
+          Spend by Week
         </h3>
         
         {/* Info Notification */}

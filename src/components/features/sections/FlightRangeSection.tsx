@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Radio, Button, Group } from '@mantine/core';
 import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
 import { updateFlightData } from '@/store/slices/campaignSlice';
+import { RootState } from '@/store/store';
 import DualCalendar from '@/components/ui/DateRangeInput';
 import FlightByWeek from './FlightByWeek';
 import FlightByDay from './FlightByDay';
@@ -44,6 +45,7 @@ const FlightRangeSection: React.FC<FlightRangeSectionProps> = ({
   const dispatch = useAppDispatch();
   const globalFlightData = useAppSelector((state) => state.campaign.flight);
   const globalBudget = useAppSelector((state) => state.campaign.budget.totalBudget);
+  const showFlightByDay = useAppSelector((state: RootState) => state.uiSettings.showFlightByDay);
   
   const [flightStatus, setFlightStatus] = useState<'active' | 'hiatus'>('active');
   const [activeDateRange, setActiveDateRange] = useState<DateRange>({ start: '', end: '' });
@@ -338,18 +340,20 @@ const FlightRangeSection: React.FC<FlightRangeSectionProps> = ({
       {/* Show components only if dates are selected, otherwise show message */}
       {activeDateRange.start && activeDateRange.end ? (
         <>
-          {/* Flight by Day Component */}
-          <div style={{ marginTop: '24px' }}>
-            <FlightByDay
-              startDate={activeDateRange.start}
-              endDate={activeDateRange.end}
-              hiatusStartDate={hiatusDates.start}
-              hiatusEndDate={hiatusDates.end}
-              hiatusRanges={currentHiatusRanges}
-              weeks={dayWeeks}
-              hiatusBlocks={dayHiatusBlocks}
-            />
-          </div>
+          {/* Flight by Day Component - conditionally rendered based on settings */}
+          {showFlightByDay && (
+            <div style={{ marginTop: '24px' }}>
+              <FlightByDay
+                startDate={activeDateRange.start}
+                endDate={activeDateRange.end}
+                hiatusStartDate={hiatusDates.start}
+                hiatusEndDate={hiatusDates.end}
+                hiatusRanges={currentHiatusRanges}
+                weeks={dayWeeks}
+                hiatusBlocks={dayHiatusBlocks}
+              />
+            </div>
+          )}
 
           {/* Flight by Week Component */}
           <div style={{ marginTop: '24px' }}>

@@ -543,6 +543,7 @@ const DateRangeInput: React.FC<DateRangeInputProps> = ({
             maxDate={maxDate}
             disabledDates={getDisabledDates()}
             dayContentRenderer={dayContentRenderer}
+            weekStartsOn={1}
           />
           {disabled && (
             <div style={{
