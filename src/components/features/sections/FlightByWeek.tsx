@@ -12,6 +12,8 @@ interface WeekData {
   budget: number;
   isLocked?: boolean; // Add field for locking
   isHiatusWeek?: boolean; // Add field to mark hiatus weeks
+  activeDays?: number; // Number of active (non-hiatus) days in the week
+  totalDays?: number; // Total days in the week (within campaign range)
 }
 
 interface HiatusRange {
@@ -148,46 +150,46 @@ const FlightByWeek: React.FC<FlightByWeekProps> = ({
     const startDateObj = new Date(start);
     const endDateObj = new Date(end);
 
-    // Local function to check if week is in hiatus
-    // Week is hiatus only if ALL active days (within campaign range) are in hiatus
-    const isWeekInHiatus = (weekStart: Date, weekEnd: Date): boolean => {
-      // Helper to check if a specific day is in hiatus
-      const isDayInHiatus = (date: Date): boolean => {
-        if (stableHiatusRanges && stableHiatusRanges.length > 0) {
-          return stableHiatusRanges.some(range => {
-            const rangeStart = new Date(range.start);
-            const rangeEnd = new Date(range.end);
-            return date >= rangeStart && date <= rangeEnd;
-          });
-        }
-        
-        if (hiatusStartDate && hiatusEndDate) {
-          const hiatusStart = new Date(hiatusStartDate);
-          const hiatusEnd = new Date(hiatusEndDate);
-          return date >= hiatusStart && date <= hiatusEnd;
-        }
-        
-        return false;
-      };
+    // Helper to check if a specific day is in hiatus
+    const isDayInHiatus = (date: Date): boolean => {
+      if (stableHiatusRanges && stableHiatusRanges.length > 0) {
+        return stableHiatusRanges.some(range => {
+          const rangeStart = new Date(range.start);
+          const rangeEnd = new Date(range.end);
+          return date >= rangeStart && date <= rangeEnd;
+        });
+      }
       
+      if (hiatusStartDate && hiatusEndDate) {
+        const hiatusStart = new Date(hiatusStartDate);
+        const hiatusEnd = new Date(hiatusEndDate);
+        return date >= hiatusStart && date <= hiatusEnd;
+      }
+      
+      return false;
+    };
+
+    // Function to calculate active days in a week
+    const calculateWeekDays = (weekStart: Date, weekEnd: Date): { activeDays: number; totalDays: number } => {
       // Constrain week by campaign boundaries
       const actualStart = weekStart < startDateObj ? startDateObj : weekStart;
       const actualEnd = weekEnd > endDateObj ? endDateObj : weekEnd;
       
-      // Count active days (days within campaign range and NOT in hiatus)
       let activeDays = 0;
+      let totalDays = 0;
       const tempDate = new Date(actualStart);
       
       while (tempDate <= actualEnd) {
+        totalDays++;
         if (!isDayInHiatus(new Date(tempDate))) {
           activeDays++;
         }
         tempDate.setDate(tempDate.getDate() + 1);
       }
       
-      // Week is hiatus only if it has NO active days
-      return activeDays === 0;
+      return { activeDays, totalDays };
     };
+
     const weeksArray: WeekData[] = [];
 
     // Start with Monday of the start date's week
@@ -206,16 +208,21 @@ const FlightByWeek: React.FC<FlightByWeekProps> = ({
       // Don't go beyond selected range
       const actualEnd = currentWeekEnd > endDateObj ? endDateObj : currentWeekEnd;
       
-      // Check if week falls in hiatus range
-      const isHiatusWeek = isWeekInHiatus(new Date(currentWeekStart), actualEnd);
+      // Calculate active and total days for this week
+      const { activeDays, totalDays } = calculateWeekDays(new Date(currentWeekStart), actualEnd);
+      
+      // Week is hiatus only if it has NO active days
+      const isHiatusWeek = activeDays === 0;
 
       weeksArray.push({
         id: `week-${weekCounter}`,
         startDate: new Date(currentWeekStart),
         endDate: actualEnd,
-        budget: isHiatusWeek ? 0 : 0, // If week is in hiatus, budget is 0
+        budget: 0, // Will be calculated in weeksWithBudget
         isLocked: isHiatusWeek, // Lock weeks in hiatus
-        isHiatusWeek: isHiatusWeek // Mark hiatus weeks
+        isHiatusWeek: isHiatusWeek, // Mark hiatus weeks
+        activeDays: activeDays,
+        totalDays: totalDays
       });
 
       currentWeekStart.setDate(currentWeekStart.getDate() + 7);
@@ -231,17 +238,23 @@ const FlightByWeek: React.FC<FlightByWeekProps> = ({
     return generateWeeks(startDate, endDate);
   }, [startDate, endDate, generateWeeks]);
 
-  // Memoize weeks with budget
+  // Memoize weeks with budget - distributed proportionally based on active days
   const weeksWithBudget = useMemo(() => {
     if (generatedWeeks.length === 0) return [];
     
-    const activeWeeks = generatedWeeks.filter(week => !week.isHiatusWeek);
-    const budgetPerWeek = activeWeeks.length > 0 ? totalBudget / activeWeeks.length : 0;
+    // Calculate total active days across all weeks
+    const totalActiveDays = generatedWeeks.reduce((sum, week) => sum + (week.activeDays || 0), 0);
     
-    return generatedWeeks.map(week => ({
-      ...week,
-      budget: week.isHiatusWeek ? 0 : budgetPerWeek
-    }));
+    // Distribute budget proportionally based on active days
+    return generatedWeeks.map(week => {
+      if (week.isHiatusWeek || !week.activeDays || totalActiveDays === 0) {
+        return { ...week, budget: 0 };
+      }
+      
+      // Pro-rata budget based on proportion of active days
+      const weekBudget = (week.activeDays / totalActiveDays) * totalBudget;
+      return { ...week, budget: weekBudget };
+    });
   }, [generatedWeeks, totalBudget]);
 
   // Update weeks state when memoized data changes
