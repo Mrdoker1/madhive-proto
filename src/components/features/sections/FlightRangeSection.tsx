@@ -279,7 +279,7 @@ const FlightRangeSection: React.FC<FlightRangeSectionProps> = ({
     <div className={`${className}`}>
       {/* Radio buttons and Extend Campaign button */}
       <div className="flex items-center justify-between">
-        <Radio.Group value={flightStatus} onChange={handleFlightStatusChange}>
+        <Radio.Group name="flight-status" value={flightStatus} onChange={handleFlightStatusChange}>
           <Group gap="16px">
             <Radio 
               value="active" 

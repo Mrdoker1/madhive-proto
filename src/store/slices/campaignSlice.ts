@@ -176,7 +176,7 @@ const initialState: CampaignState = {
     currency: 'USD'
   },
   goal: {
-    goalType: 'maximize-reach',
+    goalType: 'maximize-impressions',
     targetValue: 0,
     goalMetric: ''
   },

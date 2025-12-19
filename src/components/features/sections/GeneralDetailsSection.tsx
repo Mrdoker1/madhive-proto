@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { TextInput, Select, Grid, Checkbox, Text, Group } from '@mantine/core';
+import { TextInput, Select, Grid, Checkbox, Text, Group, Button, Tooltip } from '@mantine/core';
+import { IconUpload, IconInfoCircle } from '@tabler/icons-react';
 import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
 import { updateGeneralData } from '@/store/slices/campaignSlice';
 import { advertiserOptions, brandOptions } from '@/data/generalDetailsData';
@@ -20,7 +21,9 @@ const GeneralDetailsSection: React.FC<GeneralDetailsSectionProps> = ({
     campaignName: '',
     advertiser: '',
     brand: '',
-    cpeCode: '',
+    cpeClient: '',
+    cpeProduct: '',
+    cpeEstimate: '',
     campaignOwner: '',
     campaignApprover: '',
     spotLength: ['60']
@@ -28,11 +31,15 @@ const GeneralDetailsSection: React.FC<GeneralDetailsSectionProps> = ({
 
   // Synchronize local state with global on load
   useEffect(() => {
+    // Parse CPE code into parts (format: "client-product-estimate")
+    const cpeParts = (globalGeneralData.cpeCode || '').split('-');
     setFormData({
       campaignName: globalGeneralData.campaignName || '',
       advertiser: globalGeneralData.advertiser || '',
       brand: globalGeneralData.brand || '',
-      cpeCode: globalGeneralData.cpeCode || '',
+      cpeClient: cpeParts[0] || '',
+      cpeProduct: cpeParts[1] || '',
+      cpeEstimate: cpeParts[2] || '',
       campaignOwner: globalGeneralData.campaignOwner || '',
       campaignApprover: globalGeneralData.campaignApprover || '',
       spotLength: globalGeneralData.spotLength || ['60']
@@ -66,8 +73,11 @@ const GeneralDetailsSection: React.FC<GeneralDetailsSectionProps> = ({
         dispatch(updateGeneralData({ campaignName: newValue }));
       } else if (field === 'brand') {
         dispatch(updateGeneralData({ brand: newValue }));
-      } else if (field === 'cpeCode') {
-        dispatch(updateGeneralData({ cpeCode: newValue }));
+      } else if (field === 'cpeClient' || field === 'cpeProduct' || field === 'cpeEstimate') {
+        // Combine CPE fields into single code
+        const updatedFormData = { ...formData, [field]: newValue };
+        const cpeCode = `${updatedFormData.cpeClient}-${updatedFormData.cpeProduct}-${updatedFormData.cpeEstimate}`;
+        dispatch(updateGeneralData({ cpeCode }));
       } else if (field === 'campaignOwner') {
         dispatch(updateGeneralData({ campaignOwner: newValue }));
       } else if (field === 'campaignApprover') {
@@ -103,6 +113,32 @@ const GeneralDetailsSection: React.FC<GeneralDetailsSectionProps> = ({
 
   return (
     <div className={className}>
+      {/* Upload Planning Brief and Info */}
+      <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+        <Button
+          variant="outline"
+          size="xs"
+          leftSection={<IconUpload size={14} />}
+          disabled
+          style={{ 
+            color: '#9CA3AF',
+            borderColor: '#D1D5DB',
+            cursor: 'not-allowed'
+          }}
+        >
+          Upload Planning Brief
+        </Button>
+        <Tooltip
+          label="Fill in the campaign details below or upload a planning brief to auto-populate fields."
+          position="left"
+          withArrow
+          multiline
+          w={250}
+        >
+          <IconInfoCircle size={18} color="#9CA3AF" style={{ cursor: 'help' }} />
+        </Tooltip>
+      </div>
+
       {/* Campaign Name - full width */}
       <TextInput
         label="Campaign Name"
@@ -137,16 +173,32 @@ const GeneralDetailsSection: React.FC<GeneralDetailsSectionProps> = ({
         </Grid.Col>
       </Grid>
 
-      {/* Row with CPE Code and Campaign Owner */}
+      {/* Row with CPE codes and Campaign Owner */}
       <Grid mb="lg">
         <Grid.Col span={6}>
-          <TextInput
-            label="CPE Code"
-            placeholder="Enter CPE Code"
-            value={formData.cpeCode}
-            onChange={(event) => handleInputChange('cpeCode', event.currentTarget.value)}
-            required
-          />
+          <Text size="sm" fw={500} mb={8}>
+            CPE Code <span style={{ color: 'red' }}>*</span>
+          </Text>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <TextInput
+              placeholder="Client"
+              value={formData.cpeClient}
+              onChange={(event) => handleInputChange('cpeClient', event.currentTarget.value)}
+              style={{ flex: 1 }}
+            />
+            <TextInput
+              placeholder="Product"
+              value={formData.cpeProduct}
+              onChange={(event) => handleInputChange('cpeProduct', event.currentTarget.value)}
+              style={{ flex: 1 }}
+            />
+            <TextInput
+              placeholder="Estimate"
+              value={formData.cpeEstimate}
+              onChange={(event) => handleInputChange('cpeEstimate', event.currentTarget.value)}
+              style={{ flex: 1 }}
+            />
+          </div>
         </Grid.Col>
         <Grid.Col span={6}>
           <TextInput
@@ -155,6 +207,38 @@ const GeneralDetailsSection: React.FC<GeneralDetailsSectionProps> = ({
             value={formData.campaignOwner}
             onChange={(event) => handleInputChange('campaignOwner', event.currentTarget.value)}
             required
+          />
+        </Grid.Col>
+      </Grid>
+
+      {/* Row with Location and Email (auto-populated from user login) */}
+      <Grid mb="lg">
+        <Grid.Col span={6}>
+          <TextInput
+            label="Location"
+            value="New York, NY"
+            readOnly
+            styles={{
+              input: {
+                backgroundColor: '#F9FAFB',
+                color: '#6B7280',
+                cursor: 'default'
+              }
+            }}
+          />
+        </Grid.Col>
+        <Grid.Col span={6}>
+          <TextInput
+            label="Email"
+            value="demo@programmatic.tv"
+            readOnly
+            styles={{
+              input: {
+                backgroundColor: '#F9FAFB',
+                color: '#6B7280',
+                cursor: 'default'
+              }
+            }}
           />
         </Grid.Col>
       </Grid>

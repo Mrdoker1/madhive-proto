@@ -112,7 +112,7 @@ export default function NewCampaignPage() {
     <>
       <PageLayout 
         breadcrumbs={breadcrumbSteps} 
-        title="Campaign Information"
+        title="Create Campaign"
         footerContent={
           <NextButton 
             active={true}

@@ -118,7 +118,7 @@ export default function OmnichannelNewCampaignPage() {
     <>
       <PageLayout
         breadcrumbs={breadcrumbSteps} 
-        title="Campaign Information"
+        title="Create Campaign"
         footerContent={
           <NextButton 
             active={true}
