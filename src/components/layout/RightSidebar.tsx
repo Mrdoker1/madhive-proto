@@ -271,20 +271,20 @@ const RightSidebar: React.FC<RightSidebarProps> = ({ className = '', isOmnichann
       }}
     >
       <div className="space-y-6" style={{ display: 'flex', flexDirection: 'column', padding: '24px', gap: '16px' }}>
-        {/* Budget Estimation */}
+        {/* Budget Estimate */}
         <div>
           <Text size="sm" fw={500} style={{ color: 'var(--form-label-color)', marginBottom: '8px' }}>
-            Budget Estimation
+            Budget Estimate
           </Text>
           
           <div style={{ 
             backgroundColor: '#FFFFFF',
             borderRadius: '8px',
-            padding: '8px 16px',
+            padding: '12px 16px',
             marginBottom: '16px'
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-              <IconCurrencyDollar size={20} color="#666" />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <IconCurrencyDollar size={18} color="#666" />
               <input
                 type="text"
                 value={budgetInput}
@@ -293,9 +293,9 @@ const RightSidebar: React.FC<RightSidebarProps> = ({ className = '', isOmnichann
                 style={{
                   border: 'none',
                   outline: 'none',
-                  fontSize: '20px',
+                  fontSize: '16px',
                   fontWeight: 600,
-                  textAlign: 'center',
+                  textAlign: 'left',
                   backgroundColor: 'transparent',
                   width: '100%'
                 }}
@@ -304,15 +304,15 @@ const RightSidebar: React.FC<RightSidebarProps> = ({ className = '', isOmnichann
           </div>
         </div>
 
-        {/* Audience Estimation */}
+        {/* Audience Estimate */}
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
             <Text size="sm" fw={500} style={{ color: 'var(--form-label-color)' }}>
-              Audience Estimation
+              Audience Estimate
             </Text>
             <Tooltip
               label={isOmnichannel 
-                ? "Dynamic estimation of your audience size based on selected channels, budget allocation, and targeting. This correlates with the Total Reach shown in the allocation chart."
+                ? "Dynamic estimate of your audience size based on selected channels, budget allocation, and targeting. This correlates with the Total Reach shown in the allocation chart."
                 : "Estimated audience size based on your budget, targeting criteria, and market conditions."
               }
               position="right"
@@ -327,32 +327,32 @@ const RightSidebar: React.FC<RightSidebarProps> = ({ className = '', isOmnichann
           <div style={{ 
             backgroundColor: '#FFFFFF',
             borderRadius: '8px',
-            padding: '8px 16px',
+            padding: '12px 16px',
             marginBottom: '16px'
           }}>
-            <Text size="xl" fw={600} ta="center">
+            <Text size="md" fw={600} ta="left">
               {audienceEstimation > 0 ? audienceEstimation.toLocaleString('en-US') : '--'}
             </Text>
           </div>
         </div>
 
-        {/* Market Estimation */}
+        {/* Market Estimate */}
         <div>
           <Text size="sm" fw={500} style={{ color: 'var(--form-label-color)', marginBottom: '8px' }}>
-            Market Estimation
+            Market Estimate
           </Text>
           
           <div style={{ 
             backgroundColor: '#FFFFFF',
             borderRadius: '8px',
-            padding: '24px 16px',
+            padding: '12px 16px',
             marginBottom: '16px'
           }}>
             {!isOmnichannel && linearMarketDetails ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {/* Markets */}
-                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'baseline', gap: '8px' }}>
-                  <Text size="xl" fw={600} style={{ color: '#000' }}>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
+                  <Text size="md" fw={600} style={{ color: '#000' }}>
                     {linearMarketDetails.marketsCount}
                   </Text>
                   <Text size="sm" style={{ color: '#666' }}>
@@ -361,8 +361,8 @@ const RightSidebar: React.FC<RightSidebarProps> = ({ className = '', isOmnichann
                 </div>
                 
                 {/* Broadcasters */}
-                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'baseline', gap: '8px' }}>
-                  <Text size="xl" fw={600} style={{ color: '#000' }}>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
+                  <Text size="md" fw={600} style={{ color: '#000' }}>
                     {linearMarketDetails.broadcastersCount}
                   </Text>
                   <Text size="sm" style={{ color: '#666' }}>
@@ -371,43 +371,17 @@ const RightSidebar: React.FC<RightSidebarProps> = ({ className = '', isOmnichann
                 </div>
                 
                 {/* Stations */}
-                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'baseline', gap: '8px' }}>
-                  <Text size="xl" fw={600} style={{ color: '#000' }}>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
+                  <Text size="md" fw={600} style={{ color: '#000' }}>
                     {linearMarketDetails.programsCount}
                   </Text>
                   <Text size="sm" style={{ color: '#666' }}>
                     Stations
                   </Text>
                 </div>
-                
-                {/* Impressions */}
-                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'baseline', gap: '8px' }}>
-                  <Text size="xl" fw={600} style={{ color: '#000' }}>
-                    {linearMarketDetails.totalImpressions > 0 
-                      ? linearMarketDetails.totalImpressions.toLocaleString('en-US', { maximumFractionDigits: 0 })
-                      : '#'
-                    }
-                  </Text>
-                  <Text size="sm" style={{ color: '#666' }}>
-                    Impressions
-                  </Text>
-                </div>
-                
-                {/* Average CPM */}
-                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'baseline', gap: '8px' }}>
-                  <Text size="xl" fw={600} style={{ color: '#000' }}>
-                    {linearMarketDetails.averageCPM > 0 
-                      ? `$${linearMarketDetails.averageCPM.toFixed(2)}`
-                      : '#'
-                    }
-                  </Text>
-                  <Text size="sm" style={{ color: '#666' }}>
-                    Avg. CPM
-                  </Text>
-                </div>
               </div>
             ) : (
-              <Text size="xl" fw={600} ta="center">
+              <Text size="md" fw={600} ta="left">
                 {marketEstimation > 0 ? marketEstimation.toLocaleString('en-US') : '--'}
               </Text>
             )}

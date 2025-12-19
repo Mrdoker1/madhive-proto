@@ -386,28 +386,28 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({
         overflowY: 'auto',
         flex: 1
       }}>
-        {/* Budget Estimation */}
+        {/* Budget Estimate */}
         <div>
           <Text size="sm" fw={500} style={{ color: 'var(--form-label-color)', marginBottom: '8px' }}>
-            Budget Estimation
+            Budget Estimate
           </Text>
           
           <div style={{ 
             backgroundColor: '#FFFFFF',
             borderRadius: '8px',
-            padding: '8px 16px',
+            padding: '12px 16px',
             marginBottom: '8px'
           }}>
             {activeChannel === 'total' ? (
               readOnly ? (
                 // Read-only mode - show text
-                <Text size="xl" fw={600} ta="center">
+                <Text size="md" fw={600} ta="left">
                   $ {totalBudget.toLocaleString('en-US')}
                 </Text>
               ) : (
                 // Edit mode - show input
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-                  <IconCurrencyDollar size={20} color="#666" />
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <IconCurrencyDollar size={18} color="#666" />
                   <input
                     type="text"
                     value={budgetInput}
@@ -416,9 +416,9 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({
                     style={{
                       border: 'none',
                       outline: 'none',
-                      fontSize: '22px',
+                      fontSize: '16px',
                       fontWeight: 600,
-                      textAlign: 'center',
+                      textAlign: 'left',
                       backgroundColor: 'transparent',
                       width: '100%'
                     }}
@@ -426,7 +426,7 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({
                 </div>
               )
             ) : (
-              <Text size="xl" fw={600} ta="center">
+              <Text size="md" fw={600} ta="left">
                 {budgetAllocation && budgetAllocation[activeChannel] ? (
                   `$ ${budgetAllocation[activeChannel].toLocaleString('en-US')}`
                 ) : (
@@ -490,20 +490,20 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({
           </div>
         </div>
 
-        {/* Audience Estimation - show only if at least one channel is selected AND budget is entered */}
+        {/* Audience Estimate - show only if at least one channel is selected AND budget is entered */}
         {selectedChannels.length > 0 && totalBudget > 0 && (
           <div>
             <Text size="sm" fw={500} style={{ color: 'var(--form-label-color)', marginBottom: '8px' }}>
-              Audience Estimation
+              Audience Estimate
             </Text>
             
             <div style={{ 
               backgroundColor: '#FFFFFF',
               borderRadius: '8px',
-              padding: '8px 16px',
+              padding: '12px 16px',
               marginBottom: '8px'
             }}>
-              <Text size="xl" fw={600} ta="center">
+              <Text size="md" fw={600} ta="left">
                 {getAudienceEstimation().toLocaleString('en-US')}
               </Text>
             </div>
@@ -611,20 +611,20 @@ const OmnichannelRightSidebar: React.FC<OmnichannelRightSidebarProps> = ({
           </div>
         )}
 
-        {/* Market Estimation - show only if at least one channel is selected AND budget is entered */}
+        {/* Market Estimate - show only if at least one channel is selected AND budget is entered */}
         {selectedChannels.length > 0 && totalBudget > 0 && (
           <div>
             <Text size="sm" fw={500} style={{ color: 'var(--form-label-color)', marginBottom: '8px' }}>
-              Market Estimation
+              Market Estimate
             </Text>
             
             <div style={{ 
               backgroundColor: '#FFFFFF',
               borderRadius: '8px',
-              padding: '8px 16px',
+              padding: '12px 16px',
               marginBottom: '8px'
             }}>
-              <Text size="xl" fw={600} ta="center">
+              <Text size="md" fw={600} ta="left">
                 {getMarketEstimation().toLocaleString('en-US')}
               </Text>
             </div>
