@@ -18,7 +18,7 @@ variables:
   DOCKER_TLS_CERTDIR: ""
   DOCKER_HOST: tcp://docker:2375
   DOCKER_BUILDKIT: 1
-  DEPLOY_HOST: 192.168.113.250
+  DEPLOY_HOST: 3.131.60.70
 
 default:
   tags:
@@ -76,17 +76,20 @@ deploy:
     - name: docker:27-dind
       alias: docker
   before_script:
-    - 'command -v ssh-agent >/dev/null || ( apt-get update -y && apt-get install openssh-client -y )'
+    - apk add --no-cache openssh-client
     - eval $(ssh-agent -s)
-    - chmod 400 "$SSH_PRIVATE_KEY"
-    - ssh-add "$SSH_PRIVATE_KEY"
+    - chmod 400 "$AWS_SSH_PRIVATE_KEY"
+    - ssh-add "$AWS_SSH_PRIVATE_KEY"
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
-    - cp "$SSH_KNOWN_HOSTS" ~/.ssh/known_hosts
+    - ssh-keyscan $DEPLOY_HOST >> ~/.ssh/known_hosts
     - chmod 644 ~/.ssh/known_hosts
     - echo "$HARBOR_PASSWORD" | docker login $HARBOR_URL -u $HARBOR_USERNAME --password-stdin
   script:
-    - docker context create remote --docker host=ssh://$DEPLOY_HOST
+    - docker pull $WEB_IMAGE
+    - echo "WEB_IMAGE=$WEB_IMAGE"
+    - docker save $WEB_IMAGE | gzip | ssh ubuntu@$DEPLOY_HOST 'gunzip | docker load'
+    - docker context create remote --docker "host=ssh://ubuntu@$DEPLOY_HOST" || true
     - docker --context remote compose up -d
   rules:
     - if: $CI_PIPELINE_SOURCE == "web"
