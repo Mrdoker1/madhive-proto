@@ -76,7 +76,7 @@ const Header: React.FC = () => {
                 className="w-6 h-6"
               />
             </div>
-            <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
+            <span className="font-medium" style={{ color: 'var(--text-primary)', fontSize: '14px' }}>
               DemoUserAccount
             </span>
           </div>
