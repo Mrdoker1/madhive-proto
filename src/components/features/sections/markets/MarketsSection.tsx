@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useMemo, useEffect } from 'react';
-import { Text, Group, Pagination, Select, Checkbox, Table, TextInput, Tooltip } from '@mantine/core';
+import { Text, Group, Pagination, Select, Checkbox, Table, NumberInput, Tooltip } from '@mantine/core';
 import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
 import { updateMarketsData, updateEstimations, updateLinearData } from '@/store/slices/campaignSlice';
 import { marketsData } from '@/data/marketsData';
@@ -186,8 +186,8 @@ const MarketsSection = () => {
     });
   };
 
-  const handlePercentageChange = (marketId: string, value: string) => {
-    const numericValue = parseFloat(value) || 0;
+  const handlePercentageChange = (marketId: string, value: string | number) => {
+    const numericValue = typeof value === 'number' ? value : (parseFloat(value) || 0);
     setMarkets(currentMarkets =>
       currentMarkets.map(market => {
         if (market.id === marketId) {
@@ -203,8 +203,8 @@ const MarketsSection = () => {
     setPreviousValues(prev => ({ ...prev, [marketId]: currentValue }));
   };
 
-  const handlePercentageBlur = (marketId: string, newValue: string) => {
-    const numericValue = parseFloat(newValue) || 0;
+  const handlePercentageBlur = (marketId: string, newValue: string | number) => {
+    const numericValue = typeof newValue === 'number' ? newValue : (parseFloat(newValue) || 0);
     const otherMarketsTotal = markets.reduce((total, market) => {
       if (market.id === marketId || !market.selected) return total;
       return total + market.percentage;
@@ -231,10 +231,6 @@ const MarketsSection = () => {
         handleSelect(market.id, shouldBeSelected);
       }
     });
-  };
-
-  const formatPercentage = (value: number): string => {
-    return Number(value.toFixed(2)).toString();
   };
 
   // Pagination
@@ -287,18 +283,22 @@ const MarketsSection = () => {
               <Table.Td>
                 {market.selected ? (
                   <Tooltip label="You have exceeded the maximum budget value" opened={errorTooltips[market.id] || false} color="red" position="top" withArrow>
-                    <TextInput
+                    <NumberInput
                       size="xs"
-                      value={formatPercentage(market.percentage)}
-                      onChange={(e) => handlePercentageChange(market.id, e.currentTarget.value)}
+                      value={Math.round(market.percentage)}
+                      onChange={(value) => handlePercentageChange(market.id, value)}
                       onFocus={() => handlePercentageFocus(market.id, market.percentage)}
-                      onBlur={(e) => handlePercentageBlur(market.id, e.currentTarget.value)}
-                      rightSection={<Text size="xs" c="dimmed">%</Text>}
+                      onBlur={() => handlePercentageBlur(market.id, market.percentage)}
+                      min={0}
+                      max={100}
+                      step={1}
+                      suffix="%"
+                      allowNegative={false}
+                      allowDecimal={false}
                       styles={{
+                        root: { width: '90px' },
                         input: {
                           fontSize: '13px',
-                          padding: '4px 20px 4px 0',
-                          height: '28px',
                           textAlign: 'center',
                           borderColor: errorTooltips[market.id] ? '#fa5252' : undefined
                         }

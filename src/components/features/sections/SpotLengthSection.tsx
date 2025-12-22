@@ -1,8 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Text, TextInput, Tooltip } from '@mantine/core';
-import { IconInfoCircle } from '@tabler/icons-react';
+import { Text, NumberInput, Tooltip } from '@mantine/core';
 import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
 import { updateGeneralData } from '@/store/slices/campaignSlice';
 
@@ -48,8 +47,8 @@ const SpotLengthSection: React.FC<SpotLengthSectionProps> = ({
     }));
   }, [dispatch]);
 
-  const handleChange = (field: keyof typeof values, value: string) => {
-    const numValue = parseFloat(value) || 0;
+  const handleChange = (field: keyof typeof values, value: string | number) => {
+    const numValue = typeof value === 'number' ? value : (parseFloat(value) || 0);
     const clampedValue = Math.max(0, Math.min(100, numValue));
     
     const newValues = {
@@ -63,6 +62,11 @@ const SpotLengthSection: React.FC<SpotLengthSectionProps> = ({
 
   return (
     <div className={className}>
+      {/* Description */}
+      <Text size="sm" c="dimmed" mb="md">
+        Allocate budget across spot durations. :30 is the standard rate. :15 = 60%, :60 = 200% of :30 rate.
+      </Text>
+
       {/* Spot Length Inputs */}
       <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-end' }}>
         {/* :15 */}
@@ -72,18 +76,19 @@ const SpotLengthSection: React.FC<SpotLengthSectionProps> = ({
               :15
             </Text>
           </Tooltip>
-          <TextInput
-            value={values.fifteen.toString()}
-            onChange={(e) => handleChange('fifteen', e.currentTarget.value)}
+          <NumberInput
+            value={values.fifteen}
+            onChange={(value) => handleChange('fifteen', value)}
             placeholder="0"
-            type="number"
             min={0}
             max={100}
-            rightSection={<Text size="sm" c="dimmed">%</Text>}
+            step={1}
+            suffix="%"
+            allowNegative={false}
+            clampBehavior="strict"
             styles={{
               input: {
-                textAlign: 'center',
-                paddingRight: '32px'
+                textAlign: 'center'
               }
             }}
           />
@@ -96,18 +101,19 @@ const SpotLengthSection: React.FC<SpotLengthSectionProps> = ({
               :30
             </Text>
           </Tooltip>
-          <TextInput
-            value={values.thirty.toString()}
-            onChange={(e) => handleChange('thirty', e.currentTarget.value)}
+          <NumberInput
+            value={values.thirty}
+            onChange={(value) => handleChange('thirty', value)}
             placeholder="0"
-            type="number"
             min={0}
             max={100}
-            rightSection={<Text size="sm" c="dimmed">%</Text>}
+            step={1}
+            suffix="%"
+            allowNegative={false}
+            clampBehavior="strict"
             styles={{
               input: {
-                textAlign: 'center',
-                paddingRight: '32px'
+                textAlign: 'center'
               }
             }}
           />
@@ -120,58 +126,42 @@ const SpotLengthSection: React.FC<SpotLengthSectionProps> = ({
               :60
             </Text>
           </Tooltip>
-          <TextInput
-            value={values.sixty.toString()}
-            onChange={(e) => handleChange('sixty', e.currentTarget.value)}
+          <NumberInput
+            value={values.sixty}
+            onChange={(value) => handleChange('sixty', value)}
             placeholder="0"
-            type="number"
             min={0}
             max={100}
-            rightSection={<Text size="sm" c="dimmed">%</Text>}
+            step={1}
+            suffix="%"
+            allowNegative={false}
+            clampBehavior="strict"
             styles={{
               input: {
-                textAlign: 'center',
-                paddingRight: '32px'
+                textAlign: 'center'
               }
             }}
           />
         </div>
 
         {/* Total */}
-        <Tooltip 
-          label="Total must equal 100%" 
-          position="top" 
-          withArrow
-          color={total === 100 ? 'green' : 'red'}
-        >
-          <Text 
-            size="sm" 
-            fw={600} 
-            c={total === 100 ? 'green' : 'red'}
-            style={{ 
-              paddingBottom: '10px',
-              cursor: 'help'
-            }}
-          >
-            = {total}%
-          </Text>
-        </Tooltip>
+        <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
+          <div style={{ height: '22px' }}></div>
+          <div style={{ height: '36px', display: 'flex', alignItems: 'center' }}>
+            <Text size="sm" fw={500}>
+              = {total}%
+            </Text>
+          </div>
+        </div>
 
-        {/* Info icon */}
-        <Tooltip 
-          label=":30 is the standard rate. :15 = 60% of :30, :60 = 200% of :30" 
-          position="top" 
-          withArrow
-          multiline
-          w={220}
-        >
-          <IconInfoCircle 
-            size={18} 
-            color="#999" 
-            style={{ marginBottom: '10px', cursor: 'help' }} 
-          />
-        </Tooltip>
-      </div>
+        </div>
+
+      {/* Hint message */}
+      {total !== 100 && (
+        <Text size="xs" c="red" mt="sm">
+          Total must equal 100% (currently {total}%)
+        </Text>
+      )}
     </div>
   );
 };

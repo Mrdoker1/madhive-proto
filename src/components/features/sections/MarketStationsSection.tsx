@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useMemo, useRef, useEffect } from 'react';
-import { Button, Group, Table, Checkbox, TextInput, Text, Collapse, Tooltip, Pagination, Select, MultiSelect } from '@mantine/core';
+import { Button, Group, Table, Checkbox, NumberInput, Text, Collapse, Tooltip, Pagination, Select, MultiSelect } from '@mantine/core';
 import { IconChevronDown, IconChevronRight } from '@tabler/icons-react';
 import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
 import { updateLinearData, type BroadcasterStationBudget } from '@/store/slices/campaignSlice';
@@ -25,11 +25,6 @@ interface MarketWithStations {
   stations: StationWithData[];
 }
 
-// Function to format percentages (maximum 2 decimal places)
-const formatPercentage = (value: number): string => {
-  return Number(value.toFixed(2)).toString();
-};
-
 const MarketStationsSection = () => {
   const dispatch = useAppDispatch();
   const marketsData = useAppSelector((state) => state.campaign.markets);
@@ -42,7 +37,6 @@ const MarketStationsSection = () => {
   const [stationErrorTooltips, setStationErrorTooltips] = useState<Record<string, boolean>>({});
   const [marketPages, setMarketPages] = useState<Record<string, number>>({});
   const [marketPageSizes, setMarketPageSizes] = useState<Record<string, number>>({});
-  const stationInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
   const previousMarketBudgetsRef = useRef<string>('');
   const isInitialLoad = useRef<boolean>(true);
   const shouldSaveToRedux = useRef<boolean>(false);
@@ -126,7 +120,7 @@ const MarketStationsSection = () => {
       // Calculate equal weighting for stations
       const marketBudget = market.budget || 0;
       const stationsCount = marketStationsData.length;
-      const equalPercentage = stationsCount > 0 ? 100 / stationsCount : 0;
+      const equalPercentage = stationsCount > 0 ? Math.round(100 / stationsCount) : 0;
       const equalBudget = stationsCount > 0 ? marketBudget / stationsCount : 0;
 
       const stations: StationWithData[] = marketStationsData.map(station => {
@@ -257,7 +251,7 @@ const MarketStationsSection = () => {
         }
         
         const equalBudget = newMarketBudget / stationsCount;
-        const equalPercentage = 100 / stationsCount;
+        const equalPercentage = Math.round(100 / stationsCount);
         
         const updatedStations = market.stations.map(station => {
           if (!station.selected) return station;
@@ -300,7 +294,7 @@ const MarketStationsSection = () => {
         }
         
         const equalBudget = market.budget / stationsCount;
-        const equalPercentage = 100 / stationsCount;
+        const equalPercentage = Math.round(100 / stationsCount);
         
         const reweightedStations = updatedStations.map(station => {
           if (!station.selected) {
@@ -345,7 +339,7 @@ const MarketStationsSection = () => {
         // Equal weighting
         const stationsCount = updatedStations.length;
         const equalBudget = market.budget / stationsCount;
-        const equalPercentage = 100 / stationsCount;
+        const equalPercentage = Math.round(100 / stationsCount);
         
         return {
           ...market,
@@ -365,8 +359,8 @@ const MarketStationsSection = () => {
   };
 
   // Handle percentage change
-  const handleStationPercentageChange = (marketId: string, stationId: string, value: string) => {
-    const numericValue = parseFloat(value) || 0;
+  const handleStationPercentageChange = (marketId: string, stationId: string, value: string | number) => {
+    const numericValue = typeof value === 'number' ? value : (parseFloat(value) || 0);
     
     setMarketStations(prev => {
       const updated = prev.map(market => {
@@ -389,8 +383,8 @@ const MarketStationsSection = () => {
   };
 
   // Handle percentage blur (validation)
-  const handleStationPercentageBlur = (marketId: string, stationId: string, value: string) => {
-    const numericValue = parseFloat(value) || 0;
+  const handleStationPercentageBlur = (marketId: string, stationId: string, value: string | number) => {
+    const numericValue = typeof value === 'number' ? value : (parseFloat(value) || 0);
     
     const market = marketStations.find(m => m.id === marketId);
     if (!market) return;
@@ -612,10 +606,10 @@ const MarketStationsSection = () => {
             {/* Stations Table */}
             <Collapse in={isExpanded}>
               <div style={{ padding: '0' }}>
-                <Table>
+                <Table style={{ width: '100%' }}>
                   <Table.Thead>
                     <Table.Tr style={{ height: '48px' }}>
-                      <Table.Th style={{ width: '40px' }}>
+                      <Table.Th style={{ width: '50px', paddingLeft: '16px' }}>
                         <Checkbox
                           checked={allSelected}
                           indeterminate={someSelected && !allSelected}
@@ -623,13 +617,13 @@ const MarketStationsSection = () => {
                           color="var(--primary-color)"
                         />
                       </Table.Th>
-                      <Table.Th style={{ width: '160px' }}>
+                      <Table.Th>
                         <Text size="xs" fw={500}>TV Stations</Text>
                       </Table.Th>
-                      <Table.Th style={{ width: '140px' }}>
+                      <Table.Th>
                         <Text size="xs" fw={500}>Media Owner</Text>
                       </Table.Th>
-                      <Table.Th style={{ width: '120px' }}>
+                      <Table.Th style={{ width: '120px', textAlign: 'center', paddingRight: '16px' }}>
                         <Text size="xs" fw={500}>% of Budget</Text>
                       </Table.Th>
                     </Table.Tr>
@@ -638,7 +632,7 @@ const MarketStationsSection = () => {
                   <Table.Tbody>
                     {paginatedStations.map((station) => (
                       <Table.Tr key={station.id} style={{ height: '48px' }}>
-                        <Table.Td>
+                        <Table.Td style={{ paddingLeft: '16px' }}>
                           <Checkbox
                             checked={station.selected}
                             onChange={(e) => handleStationSelect(market.id, station.id, e.currentTarget.checked)}
@@ -651,7 +645,7 @@ const MarketStationsSection = () => {
                         <Table.Td>
                           <Text size="xs">{station.broadcasterName}</Text>
                         </Table.Td>
-                        <Table.Td>
+                        <Table.Td style={{ paddingRight: '16px' }}>
                           <Tooltip
                             label="You have exceeded the maximum budget value"
                             opened={stationErrorTooltips[station.id] || false}
@@ -659,27 +653,28 @@ const MarketStationsSection = () => {
                             position="top"
                             withArrow
                           >
-                            <TextInput
-                              ref={(el) => { stationInputRefs.current[station.id] = el; }}
-                              value={station.selected && station.percentage > 0 ? formatPercentage(station.percentage) : ''}
-                              onChange={(event) => handleStationPercentageChange(market.id, station.id, event.target.value)}
+                            <NumberInput
+                              value={station.selected ? Math.round(station.percentage) : undefined}
+                              onChange={(value) => handleStationPercentageChange(market.id, station.id, value)}
                               onFocus={() => handleStationPercentageFocus(station.id, station.percentage)}
-                              onBlur={(event) => handleStationPercentageBlur(market.id, station.id, event.target.value)}
+                              onBlur={() => handleStationPercentageBlur(market.id, station.id, station.percentage)}
                               placeholder="0"
                               size="xs"
+                              min={0}
+                              max={100}
+                              step={1}
+                              suffix="%"
+                              allowNegative={false}
+                              allowDecimal={false}
                               disabled={!station.selected}
                               styles={{
+                                root: { width: '90px' },
                                 input: {
                                   textAlign: 'center',
-                                  padding: '4px 20px 4px 0',
-                                  height: '28px',
                                   fontSize: '13px',
                                   backgroundColor: !station.selected ? '#f0f0f0' : 'white'
                                 }
                               }}
-                              rightSection={
-                                <Text size="xs" c="dimmed" style={{ marginRight: '4px' }}>%</Text>
-                              }
                             />
                           </Tooltip>
                         </Table.Td>
