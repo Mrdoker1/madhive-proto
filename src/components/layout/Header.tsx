@@ -6,7 +6,7 @@ import Image from 'next/image';
 const Header: React.FC = () => {
   return (
     <header className="w-full h-16 border-b" style={{ backgroundColor: 'var(--header-background)', borderBottomColor: 'var(--border-color)' }}>
-      <div className="h-full max-w-full mx-auto flex items-center justify-between px-4 lg:px-6">
+      <div className="h-full max-w-full mx-auto flex items-center justify-between px-4 lg:px-6 relative">
         {/* Left - Burger Menu and Branding */}
         <div className="flex items-center shrink-0 gap-4">
           <div className="flex items-center justify-center" style={{ width: '64px', height: '64px' }}>
@@ -30,8 +30,8 @@ const Header: React.FC = () => {
         </div>
 
         {/* Center - MadHive Logo */}
-        <div className="flex items-center justify-center flex-1 px-4">
-          <div className="flex items-center justify-center">
+        <div className="absolute left-1/2 transform -translate-x-1/2 flex items-center">
+          <div style={{ position: 'relative' }}>
             <Image
               src="/assets/icons/header/logo.svg"
               alt="MadHive Logo"
@@ -40,6 +40,17 @@ const Header: React.FC = () => {
               className="h-8 w-auto max-w-[120px]"
               priority
             />
+            <span style={{ 
+              position: 'absolute', 
+              top: '-2px', 
+              right: '-32px', 
+              fontSize: '10px', 
+              color: '#000', 
+              fontWeight: 500, 
+              letterSpacing: '0.5px' 
+            }}>
+              Proto
+            </span>
           </div>
         </div>
 
