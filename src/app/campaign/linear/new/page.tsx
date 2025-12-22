@@ -51,7 +51,7 @@ export default function NewCampaignPage() {
     },
     { 
       id: 'channel-details', 
-      label: 'Channel Details', 
+      label: 'Media Outlets', 
       status: 'pending'
     },
     { 
@@ -102,7 +102,7 @@ export default function NewCampaignPage() {
       return;
     }
     
-    console.log('Moving to next step - Channel Details');
+    console.log('Moving to next step - Media Outlets');
     router.push('/campaign/linear/details');
   };
 

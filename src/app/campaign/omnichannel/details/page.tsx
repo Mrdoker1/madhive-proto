@@ -85,7 +85,7 @@ export default function OmnichannelDetailsPage() {
     setActiveChannel(channelId);
   };
 
-  // Breadcrumbs for Channel Details page
+  // Breadcrumbs for Media Outlets page
   const breadcrumbSteps: BreadcrumbStep[] = [
     { 
       id: 'omnichannel-campaign', 
@@ -105,7 +105,7 @@ export default function OmnichannelDetailsPage() {
     },
     { 
       id: 'channel-details', 
-      label: 'Channel Details', 
+      label: 'Media Outlets', 
       status: 'current'
     },
     { 
@@ -240,7 +240,7 @@ export default function OmnichannelDetailsPage() {
     <>
       <PageLayout 
         breadcrumbs={breadcrumbSteps} 
-        title={`Channel Details (${availableChannels.length})`}
+        title={`Media Outlets (${availableChannels.length})`}
         showRightSidebar={true}
         rightSidebarContent={<OmnichannelRightSidebar selectedChannels={availableChannels} readOnly={true} pageKey="omnichannel-details" />}
         headerActions={

@@ -914,7 +914,7 @@ const ProposalSection: React.FC<ProposalSectionProps> = ({ onValidationChange })
   if (!hasBroadcasters) {
     return (
       <Text c="dimmed" size="sm">
-        No broadcasters selected. Please select broadcasters in the Linear Details section on the Channel Details step.
+        No broadcasters selected. Please select broadcasters in the Linear Details section on the Media Outlets step.
       </Text>
     );
   }

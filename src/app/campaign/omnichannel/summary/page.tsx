@@ -33,7 +33,7 @@ export default function OmnichannelSummaryPage() {
     },
     { 
       id: 'channel-details', 
-      label: 'Channel Details', 
+      label: 'Media Outlets', 
       status: 'completed'
     },
     { 
@@ -52,7 +52,7 @@ export default function OmnichannelSummaryPage() {
   };
 
   const handleBackClick = () => {
-    console.log('Returning to previous step - Channel Details');
+    console.log('Returning to previous step - Media Outlets');
     router.push('/campaign/omnichannel/details');
   };
 

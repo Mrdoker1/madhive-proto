@@ -65,7 +65,7 @@ export default function OmnichannelChannelsPage() {
     },
     { 
       id: 'channel-details', 
-      label: 'Channel Details', 
+      label: 'Media Outlets', 
       status: 'pending'
     },
     { 
@@ -89,7 +89,7 @@ export default function OmnichannelChannelsPage() {
       return;
     }
     
-    console.log('Moving to next step - Channel Details');
+    console.log('Moving to next step - Media Outlets');
     router.push('/campaign/omnichannel/details');
   };
 

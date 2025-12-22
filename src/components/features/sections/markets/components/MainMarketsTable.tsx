@@ -4,8 +4,6 @@ import React, { useState, useRef } from 'react';
 import { Checkbox, Table, TableThead, TableTbody, TableTr, TableTh, TableTd, Text, TextInput, Tooltip } from '@mantine/core';
 import type { MarketWithStationsData } from '../types';
 import type { MarketHandlers } from '../types';
-import { calculateMarketImpressions } from '../utils/marketCalculations';
-import { TABLE_HEADERS } from '@/constants/tableHeaders';
 
 interface MainMarketsTableProps {
   markets: MarketWithStationsData[];
@@ -111,15 +109,6 @@ const MainMarketsTable: React.FC<MainMarketsTableProps> = ({
           <TableTh style={{ width: '120px' }}>
             <Text size="xs" fw={500}>% of Budget</Text>
           </TableTh>
-          <TableTh style={{ width: '100px' }}>
-            <Text size="xs" fw={500}>{TABLE_HEADERS.BUDGET}</Text>
-          </TableTh>
-          <TableTh style={{ width: '120px' }}>
-            <Text size="xs" fw={500}>{TABLE_HEADERS.IMPRESSIONS}</Text>
-          </TableTh>
-          <TableTh style={{ width: '80px' }}>
-            <Text size="xs" fw={500}>CPM</Text>
-          </TableTh>
         </TableTr>
       </TableThead>
       <TableTbody>
@@ -170,24 +159,6 @@ const MainMarketsTable: React.FC<MainMarketsTableProps> = ({
               ) : (
                 <Text size="xs" c="dimmed">-</Text>
               )}
-            </TableTd>
-            <TableTd>
-              <Text size="xs">
-                {market.budget > 0 ? `$${market.budget.toLocaleString('en-US', { maximumFractionDigits: 0 })}` : '$0'}
-              </Text>
-            </TableTd>
-            <TableTd>
-              <Text size="xs">{calculateMarketImpressions(market)}</Text>
-            </TableTd>
-            <TableTd>
-              <Text size="xs">
-                {market.stations.length > 0 ? 
-                  `$${(market.stations.reduce((sum, station) => {
-                    const cpmValue = parseFloat(station.cpm.replace('$', ''));
-                    return sum + cpmValue;
-                  }, 0) / market.stations.length).toFixed(2)}` 
-                  : '-'}
-              </Text>
             </TableTd>
           </TableTr>
         ))}

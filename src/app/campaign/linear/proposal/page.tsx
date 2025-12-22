@@ -33,7 +33,7 @@ export default function GenerateProposalPage() {
     },
     { 
       id: 'channel-details', 
-      label: 'Channel Details', 
+      label: 'Media Outlets', 
       status: 'completed'
     },
     { 
@@ -90,7 +90,7 @@ export default function GenerateProposalPage() {
   };
 
   const handleBackClick = () => {
-    console.log('Returning to previous step - Channel Details');
+    console.log('Returning to previous step - Media Outlets');
     router.push('/campaign/linear/details');
   };
 

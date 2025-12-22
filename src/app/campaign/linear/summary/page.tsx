@@ -29,7 +29,7 @@ export default function SummaryPage() {
     },
     { 
       id: 'channel-details', 
-      label: 'Channel Details', 
+      label: 'Media Outlets', 
       status: 'completed' // completed
     },
     { 

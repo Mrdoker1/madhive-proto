@@ -337,7 +337,7 @@ const OmnichannelCampaignSummarySection: React.FC = () => {
         </Table>
       </div>
 
-      {/* Channel Details Sections */}
+      {/* Media Outlets Sections */}
       {omnichannelChannels.map((channelId) => {
         const config = CHANNEL_CONFIG[channelId];
         const budget = budgetAllocation?.[channelId] || 0;

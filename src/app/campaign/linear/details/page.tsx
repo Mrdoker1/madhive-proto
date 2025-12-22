@@ -25,7 +25,7 @@ export default function ChannelDetailsPage() {
   const broadcasters = useAppSelector((state) => state.campaign.linear.broadcasters);
   const broadcastersWithStations = useAppSelector((state) => state.campaign.linear.broadcastersWithStations);
   const showNavigationAnchors = useAppSelector((state: RootState) => state.uiSettings.showNavigationAnchors);
-  // Breadcrumbs for Channel Details page - updated statuses
+  // Breadcrumbs for Media Outlets page - updated statuses
   const breadcrumbSteps: BreadcrumbStep[] = [
     { 
       id: 'new-campaign', 
@@ -40,7 +40,7 @@ export default function ChannelDetailsPage() {
     },
     { 
       id: 'channel-details', 
-      label: 'Channel Details', 
+      label: 'Media Outlets', 
       status: 'current' // current step
     },
     { 
@@ -102,7 +102,7 @@ export default function ChannelDetailsPage() {
     <>
       <PageLayout 
         breadcrumbs={breadcrumbSteps} 
-        title="Channel Details"
+        title="Media Outlets"
         showRightSidebar={true}
         rightSidebarPageKey="linear-details"
         footerContent={

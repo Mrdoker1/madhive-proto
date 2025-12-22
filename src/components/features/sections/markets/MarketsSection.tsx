@@ -5,10 +5,9 @@ import { Text, Group, Pagination, Select, Checkbox, Table, TextInput, Tooltip } 
 import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
 import { updateMarketsData, updateEstimations, updateLinearData } from '@/store/slices/campaignSlice';
 import { marketsData } from '@/data/marketsData';
-import { getAvailableBroadcasters } from '@/data/stationsData';
+import { getAvailableBroadcasters, getStationsByMarket } from '@/data/stationsData';
 import { getBroadcasterById } from '@/data/broadcastersData';
 import MarketsFilter from './components/MarketsFilter';
-import { TABLE_HEADERS } from '@/constants/tableHeaders';
 
 interface MarketRow {
   id: string;
@@ -19,61 +18,8 @@ interface MarketRow {
   selected: boolean;
   percentage: number;
   budget: number;
+  stationCount: number;
 }
-
-// Function to calculate station Impressions
-const calculateStationImpressions = (budget: number, cpm: string): number => {
-  const cpmValue = parseFloat(cpm.replace('$', ''));
-  if (budget === 0 || cpmValue === 0) return 0;
-  return (budget / cpmValue) * 1000;
-};
-
-// Function to calculate market Impressions
-const calculateMarketImpressions = (marketId: string, broadcastersWithStations: any[]): string => {
-  if (!broadcastersWithStations || broadcastersWithStations.length === 0) return '#';
-  
-  let totalImpressions = 0;
-  
-  // Iterate through all broadcasters and their stations
-  broadcastersWithStations.forEach(broadcaster => {
-    broadcaster.stations.forEach((station: any) => {
-      // If station belongs to this market and is selected
-      if (station.marketId === marketId && station.selected && station.budget > 0) {
-        totalImpressions += calculateStationImpressions(station.budget, station.cpm);
-      }
-    });
-  });
-  
-  if (totalImpressions === 0) return '#';
-  
-  // Format result
-  return totalImpressions.toLocaleString('en-US', { maximumFractionDigits: 0 });
-};
-
-// Function to calculate average market CPM
-const calculateMarketCPM = (marketId: string, broadcastersWithStations: any[]): string => {
-  if (!broadcastersWithStations || broadcastersWithStations.length === 0) return '#';
-  
-  let totalCPM = 0;
-  let stationCount = 0;
-  
-  // Iterate through all broadcasters and their stations
-  broadcastersWithStations.forEach(broadcaster => {
-    broadcaster.stations.forEach((station: any) => {
-      // If station belongs to this market and is selected
-      if (station.marketId === marketId && station.selected) {
-        const cpmValue = parseFloat(station.cpm.replace('$', ''));
-        totalCPM += cpmValue;
-        stationCount++;
-      }
-    });
-  });
-  
-  if (stationCount === 0) return '#';
-  
-  const averageCPM = totalCPM / stationCount;
-  return `$${averageCPM.toFixed(2)}`;
-};
 
 const MarketsSection = () => {
   const dispatch = useAppDispatch();
@@ -91,6 +37,7 @@ const MarketsSection = () => {
   useEffect(() => {
     const initialMarkets: MarketRow[] = marketsData.map(market => {
       const savedMarket = marketsReduxData.marketsDetails?.find(m => m.id === market.id);
+      const stations = getStationsByMarket(market.id);
       return {
         id: market.id,
         name: market.name,
@@ -99,7 +46,8 @@ const MarketsSection = () => {
         marketSize: market.marketSize,
         selected: savedMarket?.selected || false,
         percentage: savedMarket?.percentage || 0,
-        budget: savedMarket?.budget || 0
+        budget: savedMarket?.budget || 0,
+        stationCount: stations.length
       };
     });
     
@@ -128,7 +76,7 @@ const MarketsSection = () => {
     );
   }, [budgetData.totalBudget]);
   
-  // Function for automatic budget redistribution
+  // Function for automatic budget redistribution weighted by Nielsen TV HH (marketSize)
   const redistributeBudget = (updatedMarkets: MarketRow[]) => {
     const selectedMarkets = updatedMarkets.filter(m => m.selected);
     if (selectedMarkets.length === 0) {
@@ -139,14 +87,19 @@ const MarketsSection = () => {
       }));
     }
 
-    const percentagePerMarket = Math.round((100 / selectedMarkets.length) * 100) / 100;
+    // Calculate total market size of all selected markets
+    const totalMarketSize = selectedMarkets.reduce((sum, market) => sum + market.marketSize, 0);
 
     return updatedMarkets.map(market => {
       if (market.selected) {
-        const marketBudget = (budgetData.totalBudget * percentagePerMarket) / 100;
+        // Calculate percentage based on relative Nielsen TV HH (marketSize)
+        const percentageBySize = totalMarketSize > 0 
+          ? Math.round((market.marketSize / totalMarketSize) * 10000) / 100 // Round to 2 decimal places
+          : 0;
+        const marketBudget = (budgetData.totalBudget * percentageBySize) / 100;
         return {
           ...market,
-          percentage: percentagePerMarket,
+          percentage: percentageBySize,
           budget: marketBudget
         };
       }
@@ -314,10 +267,8 @@ const MarketsSection = () => {
               <Checkbox checked={allSelected} indeterminate={someSelected && !allSelected} onChange={(e) => handleSelectAll(e.currentTarget.checked)} />
             </Table.Th>
             <Table.Th><Text size="xs" fw={500}>Market</Text></Table.Th>
+            <Table.Th style={{ width: '80px' }}><Text size="xs" fw={500}>Stations</Text></Table.Th>
             <Table.Th style={{ width: '120px' }}><Text size="xs" fw={500}>% of Budget</Text></Table.Th>
-            <Table.Th style={{ width: '100px' }}><Text size="xs" fw={500}>{TABLE_HEADERS.BUDGET}</Text></Table.Th>
-            <Table.Th style={{ width: '120px' }}><Text size="xs" fw={500}>{TABLE_HEADERS.IMPRESSIONS}</Text></Table.Th>
-            <Table.Th style={{ width: '80px' }}><Text size="xs" fw={500}>CPM</Text></Table.Th>
           </Table.Tr>
         </Table.Thead>
         <Table.Tbody>
@@ -327,6 +278,7 @@ const MarketsSection = () => {
                 <Checkbox checked={market.selected} onChange={(e) => handleSelect(market.id, e.currentTarget.checked)} />
               </Table.Td>
               <Table.Td><Text size="xs">{market.name}</Text></Table.Td>
+              <Table.Td><Text size="xs">{market.stationCount}</Text></Table.Td>
               <Table.Td>
                 {market.selected ? (
                   <Tooltip label="You have exceeded the maximum budget value" opened={errorTooltips[market.id] || false} color="red" position="top" withArrow>
@@ -352,9 +304,6 @@ const MarketsSection = () => {
                   <Text size="xs" c="dimmed">-</Text>
                 )}
               </Table.Td>
-              <Table.Td><Text size="xs">{market.budget > 0 ? `$${market.budget.toLocaleString('en-US', { maximumFractionDigits: 0 })}` : '$0'}</Text></Table.Td>
-              <Table.Td><Text size="xs">{calculateMarketImpressions(market.id, linearData.broadcastersWithStations || [])}</Text></Table.Td>
-              <Table.Td><Text size="xs">{calculateMarketCPM(market.id, linearData.broadcastersWithStations || [])}</Text></Table.Td>
             </Table.Tr>
           ))}
         </Table.Tbody>

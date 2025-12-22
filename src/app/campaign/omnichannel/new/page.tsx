@@ -62,7 +62,7 @@ export default function OmnichannelNewCampaignPage() {
     },
     { 
       id: 'channel-details', 
-      label: 'Channel Details', 
+      label: 'Media Outlets', 
       status: 'pending'
     },
     { 

@@ -9,7 +9,6 @@ import { getBroadcasterById, broadcastersData } from '@/data/broadcastersData';
 import { stationsData, type StationData, getAvailableBroadcasters } from '@/data/stationsData';
 import InfoNotification from '@/components/ui/InfoNotification';
 import { AnimatePresence } from 'framer-motion';
-import { TABLE_HEADERS } from '@/constants/tableHeaders';
 
 interface StationWithData extends StationData {
   selected: boolean;
@@ -29,13 +28,6 @@ interface MarketWithStations {
 // Function to format percentages (maximum 2 decimal places)
 const formatPercentage = (value: number): string => {
   return Number(value.toFixed(2)).toString();
-};
-
-const calculateStationImpressions = (budget: number, cpm: string): string => {
-  const cpmValue = parseFloat(cpm.replace('$', ''));
-  if (budget === 0 || cpmValue === 0) return '#';
-  const impressions = (budget / cpmValue) * 1000;
-  return impressions.toLocaleString('en-US', { maximumFractionDigits: 0 });
 };
 
 const MarketStationsSection = () => {
@@ -142,21 +134,24 @@ const MarketStationsSection = () => {
         const broadcaster = getBroadcasterById(station.broadcasterId);
         const broadcasterName = broadcaster?.name || station.broadcasterId;
 
-        // Check if station was saved in Redux (for persistence)
-        let isSelected = false;
+        // Default to selected = true (all stations checked by default)
+        let isSelected = true;
         let savedPercentage = equalPercentage;
         let savedBudget = equalBudget;
 
-        if (isInitialLoad.current && savedStations.length > 0) {
+        // Check if station was saved in Redux (for persistence)
+        if (savedStations.length > 0) {
           // Try to find this station in saved data
           savedStations.forEach(savedBroadcaster => {
             const savedStation = savedBroadcaster.stations.find(s => s.id === station.id);
             if (savedStation) {
+              // Only use saved values if found
               isSelected = savedStation.selected;
               savedPercentage = savedStation.percentage;
               savedBudget = savedStation.budget;
             }
           });
+          // If not found in saved data, keep default (selected = true with equal distribution)
         }
 
         return {
@@ -179,7 +174,57 @@ const MarketStationsSection = () => {
     
     setMarketStations(marketsWithStations);
     isInitialLoad.current = false;
-  }, [marketsData.selectedMarkets, marketsData.marketsDetails, linearData.broadcasters]);
+    
+    // Always expand all markets by default (add any new markets to expanded set)
+    if (marketsWithStations.length > 0) {
+      setExpandedMarkets(prev => {
+        const newSet = new Set(prev);
+        marketsWithStations.forEach(m => newSet.add(m.id));
+        return newSet;
+      });
+      
+      // Auto-save to Redux when stations are loaded with default selections
+      // This ensures data is persisted even if user doesn't interact with checkboxes
+      const hasSelectedStations = marketsWithStations.some(m => m.stations.some(s => s.selected));
+      if (hasSelectedStations) {
+        // Convert market-grouped data to broadcaster-grouped format for Redux
+        const broadcasterGroupedData: any[] = [];
+        
+        marketsWithStations.forEach(market => {
+          market.stations.forEach(station => {
+            if (!station.selected) return;
+            
+            let broadcaster = broadcasterGroupedData.find(b => b.id === station.broadcasterId);
+            
+            if (!broadcaster) {
+              const broadcasterInfo = getBroadcasterById(station.broadcasterId);
+              broadcaster = {
+                id: station.broadcasterId,
+                name: broadcasterInfo?.name || station.broadcasterId,
+                stations: []
+              };
+              broadcasterGroupedData.push(broadcaster);
+            }
+            
+            broadcaster.stations.push({
+              id: station.id,
+              name: station.name,
+              selected: station.selected,
+              percentage: station.percentage,
+              budget: station.budget,
+              marketId: station.marketId,
+              broadcasterId: station.broadcasterId,
+              cpm: station.cpm,
+              marketShare: station.marketShare,
+              audienceSize: station.audienceSize
+            });
+          });
+        });
+        
+        dispatch(updateLinearData({ broadcastersWithStations: broadcasterGroupedData }));
+      }
+    }
+  }, [marketsData.selectedMarkets, marketsData.marketsDetails, linearData.broadcasters, dispatch]);
 
   // Recalculate budgets when market budgets change
   useEffect(() => {
@@ -511,8 +556,11 @@ const MarketStationsSection = () => {
         const selectedStations = market.stations.filter(s => s.selected);
         const allSelected = market.stations.length > 0 && market.stations.every(s => s.selected);
         const someSelected = selectedStations.length > 0;
-        const totalStationBudget = selectedStations.reduce((sum, s) => sum + s.budget, 0);
-        const totalStationPercentage = selectedStations.reduce((sum, s) => sum + s.percentage, 0);
+        
+        // Get market budget and percentage from marketsData
+        const marketInfo = marketsData.marketsDetails?.find(m => m.id === market.id);
+        const marketBudget = marketInfo?.budget || 0;
+        const marketPercentage = marketInfo?.percentage || 0;
         
         // Pagination
         const pageSize = marketPageSizes[market.id] || 10;
@@ -556,14 +604,9 @@ const MarketStationsSection = () => {
                   {market.name} ({market.stations.length})
                 </Text>
               </Group>
-              <Group gap={20}>
-                <Text size="xs" c="dimmed">
-                  Total Budget: ${totalStationBudget.toLocaleString('en-US', { maximumFractionDigits: 0 })}
-                </Text>
-                <Text size="xs" c="dimmed">
-                  Total %: {totalStationPercentage.toFixed(1)}%
-                </Text>
-              </Group>
+              <Text size="xs" c="dimmed">
+                Market Budget / Pct: ${marketBudget.toLocaleString('en-US', { maximumFractionDigits: 0 })} / {marketPercentage.toFixed(1)}%
+              </Text>
             </div>
 
             {/* Stations Table */}
@@ -588,15 +631,6 @@ const MarketStationsSection = () => {
                       </Table.Th>
                       <Table.Th style={{ width: '120px' }}>
                         <Text size="xs" fw={500}>% of Budget</Text>
-                      </Table.Th>
-                      <Table.Th style={{ width: '120px' }}>
-                        <Text size="xs" fw={500}>{TABLE_HEADERS.BUDGET}</Text>
-                      </Table.Th>
-                      <Table.Th style={{ width: '100px' }}>
-                        <Text size="xs" fw={500}>{TABLE_HEADERS.IMPRESSIONS}</Text>
-                      </Table.Th>
-                      <Table.Th style={{ width: '80px' }}>
-                        <Text size="xs" fw={500}>CPM</Text>
                       </Table.Th>
                     </Table.Tr>
                   </Table.Thead>
@@ -648,15 +682,6 @@ const MarketStationsSection = () => {
                               }
                             />
                           </Tooltip>
-                        </Table.Td>
-                        <Table.Td>
-                          <Text size="xs">{station.selected && station.budget > 0 ? `$${station.budget.toLocaleString('en-US', { maximumFractionDigits: 0 })}` : '$0'}</Text>
-                        </Table.Td>
-                        <Table.Td>
-                          <Text size="xs">{station.selected ? calculateStationImpressions(station.budget, station.cpm) : '#'}</Text>
-                        </Table.Td>
-                        <Table.Td>
-                          <Text size="xs">{station.cpm}</Text>
                         </Table.Td>
                       </Table.Tr>
                     ))}

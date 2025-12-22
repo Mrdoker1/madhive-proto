@@ -23,7 +23,7 @@ Be specific and refer to actual values in your suggestion.`,
 
   // Linear Campaign - Details
   'linear-details': {
-    page: 'Linear Campaign - Channel Details',
+    page: 'Linear Campaign - Media Outlets',
     systemPrompt: `You are an AI assistant helping users configure linear TV campaign details.
 Analyze what IS and ISN'T configured, then give ONE specific, actionable suggestion (max 2 sentences).
 
@@ -80,7 +80,7 @@ Focus on what matters most for THIS specific campaign based on budget and goals.
 
   // Omnichannel Campaign - Details
   'omnichannel-details': {
-    page: 'Omnichannel Campaign - Channel Details',
+    page: 'Omnichannel Campaign - Media Outlets',
     systemPrompt: `You are an AI assistant helping users configure channel-specific targeting for their omnichannel campaign.
 Analyze targeting configuration across channels, then give ONE specific suggestion (max 2 sentences).
 

@@ -73,7 +73,7 @@ export default function Home() {
                     omnichannelHref: '/campaign/omnichannel/channels'
                   },
                   {
-                    title: 'Channel Details',
+                    title: 'Media Outlets',
                     description: 'Configure channel-specific settings, audience targeting, market selection, and dayparts',
                     linearHref: '/campaign/linear/details',
                     omnichannelHref: '/campaign/omnichannel/details'
