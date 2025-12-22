@@ -52,7 +52,7 @@ export default function OmnichannelNewCampaignPage() {
     },
     { 
       id: 'general', 
-      label: 'General', 
+      label: 'Create Campaign', 
       status: 'current'
     },
     { 

@@ -79,7 +79,7 @@ export default function Home() {
                     omnichannelHref: '/campaign/omnichannel/details'
                   },
                   {
-                    title: 'Generate Proposal',
+                    title: 'Guidelines',
                     description: 'Generate and review campaign proposal',
                     linearHref: '/campaign/linear/proposal',
                     omnichannelHref: null

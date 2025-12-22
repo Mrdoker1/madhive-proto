@@ -23,7 +23,7 @@ export default function OmnichannelSummaryPage() {
     },
     { 
       id: 'general', 
-      label: 'General', 
+      label: 'Create Campaign', 
       status: 'completed'
     },
     { 

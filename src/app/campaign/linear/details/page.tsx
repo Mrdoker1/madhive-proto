@@ -35,7 +35,7 @@ export default function ChannelDetailsPage() {
     },
     { 
       id: 'general', 
-      label: 'General', 
+      label: 'Create Campaign', 
       status: 'completed' // completed
     },
     { 
@@ -45,7 +45,7 @@ export default function ChannelDetailsPage() {
     },
     { 
       id: 'generate-proposal', 
-      label: 'Select Programs', 
+      label: 'Guidelines', 
       status: 'pending' // pending
     },
     { 
@@ -89,7 +89,7 @@ export default function ChannelDetailsPage() {
       return;
     }
     
-    console.log('Moving to next step - Select Programs');
+    console.log('Moving to next step - Guidelines');
     router.push('/campaign/linear/proposal');
   };
 

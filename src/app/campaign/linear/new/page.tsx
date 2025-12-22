@@ -46,7 +46,7 @@ export default function NewCampaignPage() {
     },
     { 
       id: 'general', 
-      label: 'General', 
+      label: 'Create Campaign', 
       status: 'current' // Set status based on current progress
     },
     { 
@@ -56,7 +56,7 @@ export default function NewCampaignPage() {
     },
     { 
       id: 'generate-proposal', 
-      label: 'Select Programs', 
+      label: 'Guidelines', 
       status: 'pending'
     },
     { 

@@ -38,6 +38,11 @@ const MarketsSection = () => {
     const initialMarkets: MarketRow[] = marketsData.map(market => {
       const savedMarket = marketsReduxData.marketsDetails?.find(m => m.id === market.id);
       const stations = getStationsByMarket(market.id);
+      
+      // Recalculate budget based on current total budget and saved percentage
+      const savedPercentage = savedMarket?.percentage || 0;
+      const recalculatedBudget = (budgetData.totalBudget * savedPercentage) / 100;
+      
       return {
         id: market.id,
         name: market.name,
@@ -45,15 +50,15 @@ const MarketsSection = () => {
         rank: market.rank,
         marketSize: market.marketSize,
         selected: savedMarket?.selected || false,
-        percentage: savedMarket?.percentage || 0,
-        budget: savedMarket?.budget || 0,
+        percentage: savedPercentage,
+        budget: recalculatedBudget,
         stationCount: stations.length
       };
     });
     
     initialMarkets.sort((a, b) => a.rank - b.rank);
     setMarkets(initialMarkets);
-  }, []);
+  }, [budgetData.totalBudget]);
 
   // Update budgets when total budget changes
   useEffect(() => {

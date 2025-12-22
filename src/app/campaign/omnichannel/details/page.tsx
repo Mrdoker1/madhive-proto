@@ -95,7 +95,7 @@ export default function OmnichannelDetailsPage() {
     },
     { 
       id: 'general', 
-      label: 'General', 
+      label: 'Create Campaign', 
       status: 'completed'
     },
     { 
