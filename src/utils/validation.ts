@@ -1,4 +1,4 @@
-import type { CampaignGeneralData, CampaignBudgetData, CampaignGoalData, CampaignFlightData } from '@/store/slices/campaignSlice';
+import type { CampaignGeneralData, CampaignBudgetData, CampaignGoalData, CampaignFlightData, SpotLengthMix } from '@/store/slices/campaignSlice';
 
 export interface ValidationError {
   field: string;
@@ -48,14 +48,6 @@ export const validateGeneralDetails = (data: CampaignGeneralData): ValidationErr
     errors.push({
       field: 'campaignApprover',
       message: 'Campaign Approver is required',
-      sectionId: 'general-details'
-    });
-  }
-
-  if (!data.spotLength || data.spotLength.length === 0) {
-    errors.push({
-      field: 'spotLength',
-      message: 'Spot Length is required',
       sectionId: 'general-details'
     });
   }
@@ -291,6 +283,35 @@ export const validateBroadcastersAndPrograms = (
         sectionId: 'broadcasters'
       });
     }
+  }
+
+  return errors;
+};
+
+/**
+ * Validation for Spot Length Mix
+ * Check that percentages add up to 100%
+ */
+export const validateSpotLengthMix = (spotLengthMix: SpotLengthMix | undefined): ValidationError[] => {
+  const errors: ValidationError[] = [];
+
+  if (!spotLengthMix) {
+    errors.push({
+      field: 'spotLengthMix',
+      message: 'Spot Length is required',
+      sectionId: 'spot-length'
+    });
+    return errors;
+  }
+
+  const total = spotLengthMix.fifteen + spotLengthMix.thirty + spotLengthMix.sixty;
+  
+  if (total !== 100) {
+    errors.push({
+      field: 'spotLengthMix',
+      message: `Spot Length percentages must add up to 100% (currently ${total}%)`,
+      sectionId: 'spot-length'
+    });
   }
 
   return errors;

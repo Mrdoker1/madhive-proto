@@ -1,6 +1,12 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 // Types for campaign data
+export interface SpotLengthMix {
+  fifteen: number; // Percentage for :15
+  thirty: number;  // Percentage for :30
+  sixty: number;   // Percentage for :60
+}
+
 export interface CampaignGeneralData {
   campaignName: string;
   advertiser: string;
@@ -11,6 +17,7 @@ export interface CampaignGeneralData {
   campaignOwner: string;
   campaignApprover: string;
   spotLength: string[]; // Array of selected durations: ['15', '30', '60']
+  spotLengthMix: SpotLengthMix; // Percentage mix for each spot length
 }
 
 export interface CampaignBudgetData {
@@ -168,7 +175,8 @@ const initialState: CampaignState = {
     cpeCode: '',
     campaignOwner: '',
     campaignApprover: '',
-    spotLength: ['60'] // Default selected :60
+    spotLength: ['60'], // Default selected :60
+    spotLengthMix: { fifteen: 0, thirty: 0, sixty: 100 } // Default 100% on :60
   },
   budget: {
     totalBudget: 0,

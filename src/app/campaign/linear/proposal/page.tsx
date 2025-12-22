@@ -7,11 +7,18 @@ import { BreadcrumbStep } from "@/components/ui/Breadcrumbs";
 import NextButton from "@/components/ui/NextButton";
 import RightSidebar from "@/components/layout/RightSidebar";
 import ProposalSection from "@/components/features/sections/ProposalSection";
-import { validateProgramSelection, validateProgramBudget, scrollToFirstError } from '@/utils/validation';
+import SpotLengthSection from "@/components/features/sections/SpotLengthSection";
+import DaypartsSection from "@/components/features/sections/DaypartsSection";
+import SectionWrapper from "@/components/ui/SectionWrapper";
+import { validateProgramSelection, validateProgramBudget, validateSpotLengthMix, scrollToFirstError } from '@/utils/validation';
+import { useAppSelector } from '@/hooks/useRedux';
 
 export default function GenerateProposalPage() {
   const router = useRouter();
   const [showErrors, setShowErrors] = useState(false);
+  
+  // Get spot length mix from Redux for validation
+  const spotLengthMix = useAppSelector((state) => state.campaign.general.spotLengthMix);
   
   // State for validation data
   const [programSelections, setProgramSelections] = useState<any>({});
@@ -63,10 +70,11 @@ export default function GenerateProposalPage() {
   // Get all validation errors
   const validationErrors = useMemo(() => {
     return [
+      ...validateSpotLengthMix(spotLengthMix),
       ...validateProgramSelection(programSelections),
       ...validateProgramBudget(programSelections, stationPrograms, stationBudgets)
     ];
-  }, [programSelections, stationPrograms, stationBudgets]);
+  }, [spotLengthMix, programSelections, stationPrograms, stationBudgets]);
 
   // Check form validity
   const isFormValid = validationErrors.length === 0;
@@ -115,7 +123,24 @@ export default function GenerateProposalPage() {
       >
         <div style={{ backgroundColor: 'var(--page-background)', paddingTop: '32px', paddingBottom: '96px', paddingLeft: '32px', paddingRight: '32px', minHeight: '100%' }}>
           <div style={{ display: 'flex', justifyContent: 'center', margin: '0 auto', maxWidth: '1200px' }}>
-            <div style={{ width: '100%' }}>
+            <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '40px' }}>
+              {/* Spot Length Section */}
+              <SectionWrapper 
+                id="spot-length" 
+                title="Spot Length"
+                required
+              >
+                <SpotLengthSection />
+              </SectionWrapper>
+
+              {/* Dayparts Section */}
+              <SectionWrapper 
+                id="dayparts" 
+                title="Dayparts"
+              >
+                <DaypartsSection />
+              </SectionWrapper>
+
               <ProposalSection onValidationChange={handleValidationChange} />
             </div>
           </div>

@@ -10,49 +10,53 @@ export interface PagePrompt {
 }
 
 export const AI_PROMPTS: Record<string, PagePrompt> = {
-  // Linear Campaign - New Campaign
+  // Linear Campaign - Create Campaign
   'linear-new': {
-    page: 'Linear Campaign - New Campaign',
+    page: 'Linear Campaign - Create Campaign',
     systemPrompt: `You are an AI assistant helping users create a linear TV advertising campaign. 
-This is the first step where users set up campaign name, budget, goals (impressions or spend), and flight dates.
+This is the first step where users set up: campaign details (name, advertiser, brand), total budget, goals (impressions or spend), flight dates with optional hiatus periods, and target demographics (demos).
 Based on the current campaign data, give a brief, actionable suggestion (max 2 sentences) to help optimize the setup.
-Consider: Is the budget appropriate for the goal? Are flight dates optimal? Is the daily budget reasonable?
+Consider: Is the budget appropriate for the goal? Are flight dates optimal? Is the daily budget reasonable? Are demos selected?
 Be specific and refer to actual values in your suggestion.`,
-    contextKeys: ['general', 'budget', 'goal', 'flightRange']
+    contextKeys: ['general', 'budget', 'goal', 'flight', 'audience']
   },
 
-  // Linear Campaign - Details
+  // Linear Campaign - Media Outlets (Markets & Stations)
   'linear-details': {
     page: 'Linear Campaign - Media Outlets',
-    systemPrompt: `You are an AI assistant helping users configure linear TV campaign details.
-Analyze what IS and ISN'T configured, then give ONE specific, actionable suggestion (max 2 sentences).
+    systemPrompt: `You are an AI assistant helping users select markets and TV stations for their linear TV campaign.
+On this page users select: markets (weighted by Nielsen TV HH %), broadcasters, and individual stations within each market.
+Analyze current market selection and station configuration, then give ONE specific, actionable suggestion (max 2 sentences).
 
-If everything is well configured, acknowledge it and suggest minor optimizations.
-If something important is missing (audiences, dayparts, broadcasters), point it out specifically.
-Be helpful but don't give generic advice - focus on the most important next step for THIS specific campaign.`,
-    contextKeys: ['budget', 'goal', 'markets', 'linear', 'audience', 'dayparts']
+Consider: Are selected markets appropriate for the budget? Is the market weight distribution optimal? Are enough stations selected?
+If markets are well configured, acknowledge it and suggest which broadcasters might provide best reach.
+Focus on market/station selection - dayparts and spot length are configured on the next page.`,
+    contextKeys: ['budget', 'goal', 'markets', 'linear']
   },
 
-  // Linear Campaign - Proposal
+  // Linear Campaign - Guidelines (Spot Length, Dayparts, Programs)
   'linear-proposal': {
-    page: 'Linear Campaign - Proposal',
-    systemPrompt: `You are an AI assistant helping users review their linear TV campaign proposal.
-The user has selected markets, broadcasters, and stations. Now they are choosing specific TV programs and reviewing budget allocation per station.
-Based on current program selections and budget distribution, give a brief suggestion (max 2 sentences).
-Consider: Are programs well-distributed? Is budget allocated efficiently? Are any stations over/under budget?
-Be specific about program names or budget amounts if relevant.`,
-    contextKeys: ['budget', 'linear']
+    page: 'Linear Campaign - Guidelines',
+    systemPrompt: `You are an AI assistant helping users configure buying guidelines for their linear TV campaign.
+On this page users configure: spot length mix (:15/:30/:60 percentages), dayparts (time slots), and program selections.
+Analyze current configuration, then give ONE specific, actionable suggestion (max 2 sentences).
+
+Rate card info: :30 is standard rate, :15 = 60% of :30, :60 = 200% of :30. This affects effective CPM.
+Consider: Is the spot length mix cost-effective? Are dayparts appropriate for the target audience? Are programs well-selected?
+If spot lengths add up to 100%, acknowledge it. If not, remind user they must total 100%.
+Focus on guidelines configuration - markets and stations were selected on the previous page.`,
+    contextKeys: ['budget', 'general', 'linear', 'dayparts']
   },
 
   // Linear Campaign - Summary
   'linear-summary': {
     page: 'Linear Campaign - Summary',
     systemPrompt: `You are an AI assistant helping users finalize their linear TV campaign.
-This is the final review step before launching. The user has completed all setup: budget, goals, markets, broadcasters, stations, and programs.
+This is the final review step before launching. The user has completed all setup: budget, goals, demos, flight range, markets, stations, spot length mix, dayparts, and programs.
 Review the complete configuration and provide a brief final recommendation (max 2 sentences).
-Consider: Is everything aligned? Any last-minute optimizations? Are audience estimations realistic?
+Consider: Is everything aligned? Is spot length mix cost-effective? Are market weights appropriate? Are audience estimations realistic?
 Give a confident summary or flag any concerns.`,
-    contextKeys: ['general', 'budget', 'goal', 'markets', 'linear', 'estimations']
+    contextKeys: ['general', 'budget', 'goal', 'markets', 'linear', 'dayparts', 'estimations']
   },
 
   // Omnichannel Campaign - New Campaign

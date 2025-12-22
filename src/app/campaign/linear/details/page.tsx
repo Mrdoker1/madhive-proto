@@ -10,7 +10,6 @@ import NextButton from "@/components/ui/NextButton";
 import LinearDetailsSection from "@/components/features/sections/LinearDetailsSection";
 import MarketsSection from "@/components/features/sections/markets";
 import MarketStationsSection from "@/components/features/sections/MarketStationsSection";
-import DaypartsSection from "@/components/features/sections/DaypartsSection";
 import { useAppSelector } from '@/hooks/useRedux';
 import { RootState } from '@/store/store';
 import { validateLinearDetails, validateMarkets, validateBroadcastersAndPrograms, scrollToFirstError } from '@/utils/validation';
@@ -58,7 +57,6 @@ export default function ChannelDetailsPage() {
   // Anchors for page navigation
   const anchorItems: AnchorItem[] = [
     { id: 'linear-details', label: 'Linear Details', anchor: '#linear-details' },
-    { id: 'dayparts', label: 'Dayparts', anchor: '#dayparts' },
     { id: 'markets', label: 'Market/Weight', anchor: '#markets' },
     { id: 'broadcasters', label: 'Market Stations', anchor: '#broadcasters' }
   ];
@@ -142,14 +140,6 @@ export default function ChannelDetailsPage() {
                 required
               >
                 <LinearDetailsSection />
-              </SectionWrapper>
-
-              {/* Dayparts Section */}
-              <SectionWrapper 
-                id="dayparts" 
-                title="Dayparts"
-              >
-                <DaypartsSection />
               </SectionWrapper>
 
               {/* Markets Section */}

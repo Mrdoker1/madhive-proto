@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { TextInput, Select, Grid, Checkbox, Text, Group, Button, Tooltip } from '@mantine/core';
+import { TextInput, Select, Grid, Text, Button, Tooltip } from '@mantine/core';
 import { IconUpload, IconInfoCircle } from '@tabler/icons-react';
 import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
 import { updateGeneralData } from '@/store/slices/campaignSlice';
@@ -25,8 +25,7 @@ const GeneralDetailsSection: React.FC<GeneralDetailsSectionProps> = ({
     cpeProduct: '',
     cpeEstimate: '',
     campaignOwner: '',
-    campaignApprover: '',
-    spotLength: ['60']
+    campaignApprover: ''
   });
 
   // Synchronize local state with global on load
@@ -41,8 +40,7 @@ const GeneralDetailsSection: React.FC<GeneralDetailsSectionProps> = ({
       cpeProduct: cpeParts[1] || '',
       cpeEstimate: cpeParts[2] || '',
       campaignOwner: globalGeneralData.campaignOwner || '',
-      campaignApprover: globalGeneralData.campaignApprover || '',
-      spotLength: globalGeneralData.spotLength || ['60']
+      campaignApprover: globalGeneralData.campaignApprover || ''
     });
   }, [globalGeneralData]);
 
@@ -54,13 +52,11 @@ const GeneralDetailsSection: React.FC<GeneralDetailsSectionProps> = ({
       setFormData(prev => ({ 
         ...prev, 
         [field]: newValue,
-        brand: '', // Reset brand when advertiser changes
-        spotLength: ['60'] // Reset to default :60 when advertiser changes
+        brand: '' // Reset brand when advertiser changes
       }));
       dispatch(updateGeneralData({ 
         advertiser: newValue,
-        brand: '', // Reset brand in global state
-        spotLength: ['60'] // Reset to default :60 in global state
+        brand: '' // Reset brand in global state
       }));
     } else {
       setFormData(prev => ({
@@ -84,31 +80,10 @@ const GeneralDetailsSection: React.FC<GeneralDetailsSectionProps> = ({
         dispatch(updateGeneralData({ campaignApprover: newValue }));
       }
       
-      // Reset spot length when advertiser or brand changes
-      if (field === 'brand') {
-        setFormData(prev => ({ ...prev, spotLength: ['60'] }));
-        dispatch(updateGeneralData({ spotLength: ['60'] }));
       }
-    }
   };
 
-  // Handler for Spot Length checkboxes
-  const handleSpotLengthChange = (value: string) => {
-    const currentSpotLengths = formData.spotLength;
-    const newSpotLengths = currentSpotLengths.includes(value)
-      ? currentSpotLengths.filter(v => v !== value)
-      : [...currentSpotLengths, value];
-    
-    setFormData(prev => ({
-      ...prev,
-      spotLength: newSpotLengths
-    }));
-    
-    // Update global state
-    dispatch(updateGeneralData({ spotLength: newSpotLengths }));
-  };
-
-  // Get brands for selected advertiser
+// Get brands for selected advertiser
   const availableBrandOptions = formData.advertiser ? brandOptions[formData.advertiser] || [] : [];
 
   return (
@@ -243,7 +218,7 @@ const GeneralDetailsSection: React.FC<GeneralDetailsSectionProps> = ({
         </Grid.Col>
       </Grid>
 
-      {/* Row with Campaign Approver and Spot Length */}
+      {/* Row with Campaign Approver */}
       <Grid mb="lg">
         <Grid.Col span={6}>
           <TextInput
@@ -253,30 +228,6 @@ const GeneralDetailsSection: React.FC<GeneralDetailsSectionProps> = ({
             onChange={(event) => handleInputChange('campaignApprover', event.currentTarget.value)}
             required
           />
-        </Grid.Col>
-        <Grid.Col span={6}>
-          <div>
-            <Text size="sm" fw={500} mb={8}>
-              Spot Length <span style={{ color: 'red' }}>*</span>
-            </Text>
-            <Group gap="md">
-              <Checkbox
-                label=":15"
-                checked={formData.spotLength.includes('15')}
-                onChange={() => handleSpotLengthChange('15')}
-              />
-              <Checkbox
-                label=":30"
-                checked={formData.spotLength.includes('30')}
-                onChange={() => handleSpotLengthChange('30')}
-              />
-              <Checkbox
-                label=":60"
-                checked={formData.spotLength.includes('60')}
-                onChange={() => handleSpotLengthChange('60')}
-              />
-            </Group>
-          </div>
         </Grid.Col>
       </Grid>
     </div>
