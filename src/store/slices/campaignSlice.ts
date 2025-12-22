@@ -94,8 +94,12 @@ export interface CampaignMarketsData {
   marketsDetails?: MarketBudget[]; // Detailed information about markets and stations
 }
 
+// Daypart percentage allocation by day: { daypartName: { Mon: 40, Tue: 40, ... } }
+export type DaypartPercentages = Record<string, Record<string, number>>;
+
 export interface CampaignDaypartsData {
   selectedSlots: Record<string, Record<number, boolean>>;
+  daypartPercentages?: DaypartPercentages; // Percentage allocation per daypart per day
 }
 
 export interface CampaignChannelsData {

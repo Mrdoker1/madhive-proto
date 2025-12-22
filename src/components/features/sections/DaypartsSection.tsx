@@ -1,7 +1,7 @@
-import { Text, Button, Group } from '@mantine/core';
-import { useState, useEffect } from 'react';
+import { Text, Button, Group, TextInput } from '@mantine/core';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
-import { updateDaypartsData, updateChannelSectionData, setCarryOverMode } from '@/store/slices/campaignSlice';
+import { updateDaypartsData, updateChannelSectionData, setCarryOverMode, DaypartPercentages } from '@/store/slices/campaignSlice';
 
 interface DaypartsState {
   [day: string]: { [hour: number]: boolean };
@@ -242,6 +242,153 @@ const DaypartsSection = ({ channel, isFirstChannel = true }: DaypartsSectionProp
     updateSlots(newSelectedSlots);
   };
 
+  // Get selected dayparts (dayparts that have at least one hour selected on any day)
+  const selectedDayparts = useMemo(() => {
+    const selected: string[] = [];
+    
+    daypartDefinitions.forEach(daypart => {
+      const hasSelection = days.some(day => 
+        daypart.hours.some(hour => daypartsData.selectedSlots[day]?.[hour])
+      );
+      if (hasSelection) {
+        selected.push(daypart.name);
+      }
+    });
+    
+    return selected;
+  }, [daypartsData.selectedSlots]);
+
+  // Track previous selected dayparts count to detect changes
+  const prevSelectedCountRef = useRef(selectedDayparts.length);
+
+  // Auto-redistribute when dayparts selection changes
+  useEffect(() => {
+    if (selectedDayparts.length !== prevSelectedCountRef.current && selectedDayparts.length > 0) {
+      // Selection changed, auto-redistribute
+      const equalPct = Math.floor(100 / selectedDayparts.length);
+      const remainder = 100 - (equalPct * selectedDayparts.length);
+      
+      const newPercentages: DaypartPercentages = {};
+      selectedDayparts.forEach((daypartName, index) => {
+        newPercentages[daypartName] = {};
+        days.forEach(day => {
+          newPercentages[daypartName][day] = equalPct + (index === 0 ? remainder : 0);
+        });
+      });
+      
+      if (channel) {
+        dispatch(updateChannelSectionData({
+          channel,
+          section: 'dayparts',
+          data: { 
+            selectedSlots: daypartsData.selectedSlots,
+            daypartPercentages: newPercentages 
+          }
+        }));
+      } else {
+        dispatch(updateDaypartsData({ 
+          selectedSlots: daypartsData.selectedSlots,
+          daypartPercentages: newPercentages 
+        }));
+      }
+    }
+    prevSelectedCountRef.current = selectedDayparts.length;
+  }, [selectedDayparts, daypartsData.selectedSlots, channel, dispatch]);
+
+  // Get current percentages from Redux
+  const daypartPercentages = useMemo(() => {
+    const existing = daypartsData.daypartPercentages || {};
+    const result: DaypartPercentages = {};
+    
+    selectedDayparts.forEach(daypartName => {
+      if (existing[daypartName]) {
+        result[daypartName] = { ...existing[daypartName] };
+      } else {
+        // Initialize with equal distribution for new dayparts
+        const equalPct = selectedDayparts.length > 0 ? Math.floor(100 / selectedDayparts.length) : 0;
+        const remainder = 100 - (equalPct * selectedDayparts.length);
+        const index = selectedDayparts.indexOf(daypartName);
+        result[daypartName] = {};
+        days.forEach(day => {
+          result[daypartName][day] = equalPct + (index === 0 ? remainder : 0);
+        });
+      }
+    });
+    
+    return result;
+  }, [selectedDayparts, daypartsData.daypartPercentages]);
+
+  // Calculate totals per day
+  const dayTotals = useMemo(() => {
+    const totals: Record<string, number> = {};
+    days.forEach(day => {
+      totals[day] = selectedDayparts.reduce((sum, dp) => {
+        return sum + (daypartPercentages[dp]?.[day] || 0);
+      }, 0);
+    });
+    return totals;
+  }, [daypartPercentages, selectedDayparts]);
+
+  // Update percentage for a daypart/day
+  const updatePercentage = useCallback((daypartName: string, day: string, value: string) => {
+    const numValue = Math.max(0, Math.min(100, parseInt(value) || 0));
+    
+    const newPercentages: DaypartPercentages = { ...daypartPercentages };
+    if (!newPercentages[daypartName]) {
+      newPercentages[daypartName] = {};
+    }
+    newPercentages[daypartName] = { ...newPercentages[daypartName], [day]: numValue };
+    
+    if (channel) {
+      dispatch(updateChannelSectionData({
+        channel,
+        section: 'dayparts',
+        data: { 
+          selectedSlots: daypartsData.selectedSlots,
+          daypartPercentages: newPercentages 
+        }
+      }));
+    } else {
+      dispatch(updateDaypartsData({ 
+        selectedSlots: daypartsData.selectedSlots,
+        daypartPercentages: newPercentages 
+      }));
+    }
+  }, [daypartPercentages, daypartsData.selectedSlots, channel, dispatch]);
+
+  // Auto-distribute percentages equally
+  const autoDistribute = useCallback(() => {
+    if (selectedDayparts.length === 0) return;
+    
+    const equalPct = Math.floor(100 / selectedDayparts.length);
+    const remainder = 100 - (equalPct * selectedDayparts.length);
+    
+    const newPercentages: DaypartPercentages = {};
+    selectedDayparts.forEach((daypartName, index) => {
+      newPercentages[daypartName] = {};
+      days.forEach(day => {
+        // Add remainder to first daypart
+        newPercentages[daypartName][day] = equalPct + (index === 0 ? remainder : 0);
+      });
+    });
+    
+    if (channel) {
+      dispatch(updateChannelSectionData({
+        channel,
+        section: 'dayparts',
+        data: { 
+          selectedSlots: daypartsData.selectedSlots,
+          daypartPercentages: newPercentages 
+        }
+      }));
+    } else {
+      dispatch(updateDaypartsData({ 
+        selectedSlots: daypartsData.selectedSlots,
+        daypartPercentages: newPercentages 
+      }));
+    }
+  }, [selectedDayparts, daypartsData.selectedSlots, channel, dispatch]);
+
   return (
     <div>
       {/* Description and control buttons */}
@@ -427,6 +574,110 @@ const DaypartsSection = ({ channel, isFirstChannel = true }: DaypartsSectionProp
           );
         })}
       </div>
+
+      {/* Percentage allocation table - appears when dayparts are selected */}
+      {selectedDayparts.length > 0 && (
+        <div style={{ marginTop: '32px' }}>
+          <Group justify="space-between" align="center" mb="md">
+            <Text size="sm" fw={500}>Daypart Budget Allocation</Text>
+            <Button size="xs" variant="subtle" onClick={autoDistribute}>
+              Auto-distribute
+            </Button>
+          </Group>
+          
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ 
+              width: '100%', 
+              borderCollapse: 'collapse',
+              fontSize: '13px'
+            }}>
+              <thead>
+                <tr style={{ borderBottom: '1px solid #E6E3E8' }}>
+                  <th style={{ 
+                    textAlign: 'left', 
+                    padding: '8px 12px',
+                    fontWeight: 500,
+                    width: '140px'
+                  }}>Daypart</th>
+                  {days.map(day => (
+                    <th key={day} style={{ 
+                      textAlign: 'left', 
+                      padding: '8px 8px',
+                      fontWeight: 500,
+                      width: '80px'
+                    }}>{day}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {selectedDayparts.map(daypartName => {
+                  const daypart = daypartDefinitions.find(dp => dp.name === daypartName);
+                  return (
+                    <tr key={daypartName} style={{ borderBottom: '1px solid #F0F0F0' }}>
+                      <td style={{ 
+                        textAlign: 'left', 
+                        padding: '6px 12px'
+                      }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <div
+                            style={{
+                              width: '8px',
+                              height: '8px',
+                              backgroundColor: daypart?.color || '#999',
+                              borderRadius: '2px'
+                            }}
+                          />
+                          <span>{daypartName}</span>
+                        </div>
+                      </td>
+                      {days.map(day => (
+                        <td key={day} style={{ padding: '4px 8px', textAlign: 'left' }}>
+                          <TextInput
+                            value={daypartPercentages[daypartName]?.[day]?.toString() || '0'}
+                            onChange={(e) => updatePercentage(daypartName, day, e.currentTarget.value)}
+                            type="number"
+                            min={0}
+                            max={100}
+                            size="xs"
+                            rightSection={<Text size="xs" c="dimmed">%</Text>}
+                            styles={{
+                              root: { width: '65px' },
+                              input: {
+                                textAlign: 'center',
+                                paddingRight: '24px',
+                                fontSize: '13px'
+                              }
+                            }}
+                          />
+                        </td>
+                      ))}
+                    </tr>
+                  );
+                })}
+                {/* Total row */}
+                <tr style={{ borderTop: '1px solid #E6E3E8' }}>
+                  <td style={{ 
+                    textAlign: 'left', 
+                    padding: '8px 12px',
+                    fontWeight: 500
+                  }}>Total</td>
+                  {days.map(day => {
+                    const total = dayTotals[day];
+                    return (
+                      <td key={day} style={{ 
+                        padding: '8px', 
+                        textAlign: 'left'
+                      }}>
+                        <span>{total}%</span>
+                      </td>
+                    );
+                  })}
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
