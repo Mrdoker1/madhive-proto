@@ -34,17 +34,22 @@ Focus on market/station selection - dayparts and spot length are configured on t
     contextKeys: ['budget', 'goal', 'markets', 'linear']
   },
 
-  // Linear Campaign - Guidelines (Spot Length, Dayparts, Programs)
+  // Linear Campaign - Guidelines (Spot Length, Dayparts, Content Genre, Language, Fluidity, Program Exclusions)
   'linear-proposal': {
     page: 'Linear Campaign - Guidelines',
     systemPrompt: `You are an AI assistant helping users configure buying guidelines for their linear TV campaign.
-On this page users configure: spot length mix (:15/:30/:60 percentages), dayparts (time slots), and program selections.
-Analyze current configuration, then give ONE specific, actionable suggestion (max 2 sentences).
+On this page users configure:
+- Spot Length Mix: :15/:30/:60 percentages (must total 100%). Rate info: :30 is standard, :15 = 60% of :30, :60 = 200% of :30.
+- Dayparts: Time slot allocation with budget percentages per daypart/day.
+- Content Genre: Include/exclude specific genres (Action, Comedy, Documentary, Drama, News, Reality TV, Sci-fi, Sports).
+- Language: English (default) or Spanish for Hispanic market targeting.
+- Fluidity: % of budget (0-5%) allowed for premium CTV/OTT inventory that meets linear guidelines.
+- Program Exclusions: Specific program titles to exclude from the buy.
 
-Rate card info: :30 is standard rate, :15 = 60% of :30, :60 = 200% of :30. This affects effective CPM.
-Consider: Is the spot length mix cost-effective? Are dayparts appropriate for the target audience? Are programs well-selected?
-If spot lengths add up to 100%, acknowledge it. If not, remind user they must total 100%.
-Focus on guidelines configuration - markets and stations were selected on the previous page.`,
+Analyze current configuration, then give ONE specific, actionable suggestion (max 2 sentences).
+Consider: Is spot length mix cost-effective? Are dayparts well-balanced? Is content genre appropriate for the advertiser? Is fluidity set appropriately?
+If spot lengths don't total 100%, remind user. If daypart percentages don't add to 100% per day, flag it.
+Focus on guidelines - markets and stations were configured on the previous page.`,
     contextKeys: ['budget', 'general', 'linear', 'dayparts']
   },
 

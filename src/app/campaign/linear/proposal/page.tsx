@@ -14,8 +14,10 @@ import LanguageSection from "@/components/features/sections/LanguageSection";
 import FluiditySection from "@/components/features/sections/FluiditySection";
 import ProgramExclusionSection from "@/components/features/sections/ProgramExclusionSection";
 import SectionWrapper from "@/components/ui/SectionWrapper";
+import NavigationAnchors, { AnchorItem } from "@/components/ui/NavigationAnchors";
 import { validateSpotLengthMix, scrollToFirstError } from '@/utils/validation';
 import { useAppSelector } from '@/hooks/useRedux';
+import { RootState } from '@/store/store';
 
 export default function GenerateProposalPage() {
   const router = useRouter();
@@ -23,6 +25,17 @@ export default function GenerateProposalPage() {
   
   // Get spot length mix from Redux for validation
   const spotLengthMix = useAppSelector((state) => state.campaign.general.spotLengthMix);
+  const showNavigationAnchors = useAppSelector((state: RootState) => state.uiSettings.showNavigationAnchors);
+
+  // Anchors for page navigation
+  const anchorItems: AnchorItem[] = [
+    { id: 'spot-length', label: 'Spot Length', anchor: '#spot-length' },
+    { id: 'dayparts', label: 'Dayparts', anchor: '#dayparts' },
+    { id: 'content-genre', label: 'Content Genre', anchor: '#content-genre' },
+    { id: 'language', label: 'Language', anchor: '#language' },
+    { id: 'fluidity', label: 'Fluidity', anchor: '#fluidity' },
+    { id: 'program-exclusion', label: 'Program Exclusion', anchor: '#program-exclusion' }
+  ];
   
   // State for validation data (kept for future use when Program Selector is enabled)
   // const [programSelections, setProgramSelections] = useState<any>({});
@@ -127,8 +140,22 @@ export default function GenerateProposalPage() {
         }
       >
         <div style={{ backgroundColor: 'var(--page-background)', paddingTop: '32px', paddingBottom: '96px', paddingLeft: '32px', paddingRight: '32px', minHeight: '100%' }}>
-          <div style={{ display: 'flex', justifyContent: 'center', margin: '0 auto', maxWidth: '1200px' }}>
-            <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '40px' }}>
+          <div style={{ display: 'flex', justifyContent: 'center', margin: '0 auto' }}>
+            {/* Left column with navigation */}
+            {showNavigationAnchors && (
+              <div className="w-64" style={{ paddingRight: '20px', position: 'sticky', top: '32px', height: 'fit-content' }}>
+                <NavigationAnchors 
+                  items={anchorItems}
+                  orientation="vertical"
+                  activeColor="#2A1037"
+                  textColor="#666666"
+                  className="space-y-6"
+                />
+              </div>
+            )}
+            {/* Main content */}
+            <div style={{ paddingLeft: showNavigationAnchors ? '20px' : '0', width: '100%', maxWidth: '800px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '40px' }}>
               {/* Spot Length Section */}
               <SectionWrapper 
                 id="spot-length" 
@@ -180,6 +207,7 @@ export default function GenerateProposalPage() {
 
               {/* Program Selector is hidden - uncomment to enable */}
               {/* <ProposalSection onValidationChange={handleValidationChange} /> */}
+              </div>
             </div>
           </div>
         </div>
