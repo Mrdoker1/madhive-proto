@@ -9,6 +9,10 @@ import RightSidebar from "@/components/layout/RightSidebar";
 import ProposalSection from "@/components/features/sections/ProposalSection";
 import SpotLengthSection from "@/components/features/sections/SpotLengthSection";
 import DaypartsSection from "@/components/features/sections/DaypartsSection";
+import ContentGenreSection from "@/components/features/sections/ContentGenreSection";
+import LanguageSection from "@/components/features/sections/LanguageSection";
+import FluiditySection from "@/components/features/sections/FluiditySection";
+import ProgramExclusionSection from "@/components/features/sections/ProgramExclusionSection";
 import SectionWrapper from "@/components/ui/SectionWrapper";
 import { validateSpotLengthMix, scrollToFirstError } from '@/utils/validation';
 import { useAppSelector } from '@/hooks/useRedux';
@@ -140,6 +144,38 @@ export default function GenerateProposalPage() {
                 title="Dayparts"
               >
                 <DaypartsSection />
+              </SectionWrapper>
+
+              {/* Content Genre Section */}
+              <SectionWrapper 
+                id="content-genre" 
+                title="Content Genre"
+              >
+                <ContentGenreSection />
+              </SectionWrapper>
+
+              {/* Language Section */}
+              <SectionWrapper 
+                id="language" 
+                title="Language"
+              >
+                <LanguageSection />
+              </SectionWrapper>
+
+              {/* Fluidity Section */}
+              <SectionWrapper 
+                id="fluidity" 
+                title="Fluidity"
+              >
+                <FluiditySection />
+              </SectionWrapper>
+
+              {/* Program Exclusion Section */}
+              <SectionWrapper 
+                id="program-exclusion" 
+                title="Exclude Specific Programs"
+              >
+                <ProgramExclusionSection />
               </SectionWrapper>
 
               {/* Program Selector is hidden - uncomment to enable */}

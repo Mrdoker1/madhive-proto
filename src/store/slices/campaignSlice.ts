@@ -7,6 +7,11 @@ export interface SpotLengthMix {
   sixty: number;   // Percentage for :60
 }
 
+export interface ContentGenreData {
+  mode: 'include' | 'exclude';
+  genres: string[];
+}
+
 export interface CampaignGeneralData {
   campaignName: string;
   advertiser: string;
@@ -18,6 +23,10 @@ export interface CampaignGeneralData {
   campaignApprover: string;
   spotLength: string[]; // Array of selected durations: ['15', '30', '60']
   spotLengthMix: SpotLengthMix; // Percentage mix for each spot length
+  contentGenre?: ContentGenreData; // Content genre targeting
+  language?: string; // Target language: 'english' or 'spanish'
+  fluidityPercentage?: number; // Allowed % for CTV/OTT fluidity (0-5%)
+  excludedPrograms?: string[]; // List of program titles to exclude
 }
 
 export interface CampaignBudgetData {
