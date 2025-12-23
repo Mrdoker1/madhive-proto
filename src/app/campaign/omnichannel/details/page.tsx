@@ -110,7 +110,7 @@ export default function OmnichannelDetailsPage() {
     },
     { 
       id: 'summary', 
-      label: 'Summary', 
+      label: 'Review', 
       status: 'pending'
     }
   ];

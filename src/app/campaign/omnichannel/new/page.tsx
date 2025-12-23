@@ -67,7 +67,7 @@ export default function OmnichannelNewCampaignPage() {
     },
     { 
       id: 'summary', 
-      label: 'Summary', 
+      label: 'Review', 
       status: 'pending'
     }
   ];

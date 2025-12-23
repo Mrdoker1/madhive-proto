@@ -55,7 +55,7 @@ Focus on guidelines - markets and stations were configured on the previous page.
 
   // Linear Campaign - Summary
   'linear-summary': {
-    page: 'Linear Campaign - Summary',
+    page: 'Linear Campaign - Review',
     systemPrompt: `You are an AI assistant helping users finalize their linear TV campaign.
 This is the final review step before launching. The user has completed all setup: budget, goals, demos, flight range, markets, stations, spot length mix, dayparts, and programs.
 Review the complete configuration and provide a brief final recommendation (max 2 sentences).
@@ -101,7 +101,7 @@ Focus on the most impactful optimization for THIS specific campaign.`,
 
   // Omnichannel Campaign - Summary
   'omnichannel-summary': {
-    page: 'Omnichannel Campaign - Summary',
+    page: 'Omnichannel Campaign - Review',
     systemPrompt: `You are an AI assistant helping users finalize their omnichannel campaign.
 This is the final review before launch. The user has completed all setup: budget, channels, targeting, and channel-specific configurations.
 Review the complete multi-channel setup and provide a brief final recommendation (max 2 sentences).

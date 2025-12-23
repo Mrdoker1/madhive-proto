@@ -39,13 +39,13 @@ export default function SummaryPage() {
     },
     { 
       id: 'summary', 
-      label: 'Summary', 
+      label: 'Review', 
       status: 'current' // current step
     }
   ];
 
-  const handleNextClick = () => {
-    console.log('Campaign creation completed!');
+  const handleSubmitClick = () => {
+    console.log('Campaign submitted to approver!');
     // Save campaign to Redux
     dispatch(saveCampaign());
     // Navigate to campaigns list page
@@ -61,12 +61,12 @@ export default function SummaryPage() {
     <>
       <PageLayout 
         breadcrumbs={breadcrumbSteps} 
-        title="Summary"
+        title="Review"
         footerContent={
           <NextButton 
             active={true}
-            onClick={handleNextClick}
-            text="Create Campaign"
+            onClick={handleSubmitClick}
+            text="Submit to Approver"
             showBack={true}
             onBackClick={handleBackClick}
             backText="Back"
@@ -79,13 +79,8 @@ export default function SummaryPage() {
             <div style={{ width: '100%', maxWidth: '960px' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '40px' }}>
               
-              {/* Campaign Review Section */}
-              <SectionWrapper 
-                id="campaign-review" 
-                title="Almost done. Please carefully review campaign information."
-              >
-                <CampaignSummarySection />
-              </SectionWrapper>
+              {/* Campaign Summary */}
+              <CampaignSummarySection />
               
               </div>
             </div>

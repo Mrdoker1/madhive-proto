@@ -47,7 +47,7 @@ export default function ChannelDetailsPage() {
     },
     { 
       id: 'summary', 
-      label: 'Summary', 
+      label: 'Review', 
       status: 'pending' // pending
     }
   ];

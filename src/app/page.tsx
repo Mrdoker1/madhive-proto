@@ -90,7 +90,7 @@ export default function Home() {
                     omnichannelHref: null
                   },
                   {
-                    title: 'Summary',
+                    title: 'Review',
                     description: 'Final review of all campaign settings before creation and launch',
                     linearHref: '/campaign/linear/summary',
                     omnichannelHref: '/campaign/omnichannel/summary'

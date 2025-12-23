@@ -38,7 +38,7 @@ export default function OmnichannelSummaryPage() {
     },
     { 
       id: 'summary', 
-      label: 'Summary', 
+      label: 'Review', 
       status: 'current'
     }
   ];
@@ -60,7 +60,7 @@ export default function OmnichannelSummaryPage() {
     <>
       <PageLayout 
         breadcrumbs={breadcrumbSteps} 
-        title="Summary"
+        title="Review"
         showRightSidebar={false}
         footerContent={
           <NextButton 
