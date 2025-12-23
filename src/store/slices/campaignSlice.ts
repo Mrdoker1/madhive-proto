@@ -102,6 +102,19 @@ export interface CampaignDaypartsData {
   daypartPercentages?: DaypartPercentages; // Percentage allocation per daypart per day
 }
 
+// Helper function to generate default selectedSlots with all days and hours selected
+const generateDefaultSelectedSlots = (): Record<string, Record<number, boolean>> => {
+  const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  const slots: Record<string, Record<number, boolean>> = {};
+  days.forEach(day => {
+    slots[day] = {};
+    for (let hour = 0; hour < 24; hour++) {
+      slots[day][hour] = true;
+    }
+  });
+  return slots;
+};
+
 export interface CampaignChannelsData {
   selectedChannels: string[];
   budgetAllocation?: Record<string, number>; // Budget allocation by channels
@@ -213,7 +226,7 @@ const initialState: CampaignState = {
     mode: 'include'
   },
   dayparts: {
-    selectedSlots: {}
+    selectedSlots: generateDefaultSelectedSlots()
   },
   channels: {
     selectedChannels: []
@@ -310,7 +323,7 @@ const campaignSlice = createSlice({
             targetNationally: true
           },
           dayparts: {
-            selectedSlots: {}
+            selectedSlots: generateDefaultSelectedSlots()
           },
           interests: [],
           keywords: [],
@@ -352,7 +365,7 @@ const campaignSlice = createSlice({
               targetNationally: true
             },
             dayparts: {
-              selectedSlots: {}
+              selectedSlots: generateDefaultSelectedSlots()
             },
             interests: [],
             keywords: [],

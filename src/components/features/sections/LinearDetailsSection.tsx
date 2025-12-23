@@ -13,12 +13,10 @@ const LinearDetailsSection = () => {
   return (
     <div>
       <Select
-        label="Measurement Providers"
         placeholder="Select measurement provider"
         data={['Nielsen HH C3', 'Comscore HH C3', 'Videoamp HH C3']}
         value={linearData.measurementProvider}
         onChange={handleMeasurementProviderChange}
-        required
       />
     </div>
   );

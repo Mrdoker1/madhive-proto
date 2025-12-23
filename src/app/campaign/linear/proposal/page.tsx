@@ -10,7 +10,7 @@ import ProposalSection from "@/components/features/sections/ProposalSection";
 import SpotLengthSection from "@/components/features/sections/SpotLengthSection";
 import DaypartsSection from "@/components/features/sections/DaypartsSection";
 import SectionWrapper from "@/components/ui/SectionWrapper";
-import { validateProgramSelection, validateProgramBudget, validateSpotLengthMix, scrollToFirstError } from '@/utils/validation';
+import { validateSpotLengthMix, scrollToFirstError } from '@/utils/validation';
 import { useAppSelector } from '@/hooks/useRedux';
 
 export default function GenerateProposalPage() {
@@ -20,10 +20,10 @@ export default function GenerateProposalPage() {
   // Get spot length mix from Redux for validation
   const spotLengthMix = useAppSelector((state) => state.campaign.general.spotLengthMix);
   
-  // State for validation data
-  const [programSelections, setProgramSelections] = useState<any>({});
-  const [stationPrograms, setStationPrograms] = useState<any>({});
-  const [stationBudgets, setStationBudgets] = useState<Record<string, number>>({});
+  // State for validation data (kept for future use when Program Selector is enabled)
+  // const [programSelections, setProgramSelections] = useState<any>({});
+  // const [stationPrograms, setStationPrograms] = useState<any>({});
+  // const [stationBudgets, setStationBudgets] = useState<Record<string, number>>({});
   
   // Breadcrumbs for Guidelines page
   const breadcrumbSteps: BreadcrumbStep[] = [
@@ -55,26 +55,27 @@ export default function GenerateProposalPage() {
     }
   ];
 
-  // Callback to get validation data from ProposalSection
-  const handleValidationChange = useCallback((
-    isValid: boolean, 
-    selections: any, 
-    programs: any, 
-    budgets: Record<string, number>
-  ) => {
-    setProgramSelections(selections);
-    setStationPrograms(programs);
-    setStationBudgets(budgets);
-  }, []);
+  // Callback to get validation data from ProposalSection (kept for future use)
+  // const handleValidationChange = useCallback((
+  //   isValid: boolean, 
+  //   selections: any, 
+  //   programs: any, 
+  //   budgets: Record<string, number>
+  // ) => {
+  //   setProgramSelections(selections);
+  //   setStationPrograms(programs);
+  //   setStationBudgets(budgets);
+  // }, []);
 
   // Get all validation errors
   const validationErrors = useMemo(() => {
     return [
-      ...validateSpotLengthMix(spotLengthMix),
-      ...validateProgramSelection(programSelections),
-      ...validateProgramBudget(programSelections, stationPrograms, stationBudgets)
+      ...validateSpotLengthMix(spotLengthMix)
+      // Program validation disabled while Program Selector is hidden
+      // ...validateProgramSelection(programSelections),
+      // ...validateProgramBudget(programSelections, stationPrograms, stationBudgets)
     ];
-  }, [spotLengthMix, programSelections, stationPrograms, stationBudgets]);
+  }, [spotLengthMix]);
 
   // Check form validity
   const isFormValid = validationErrors.length === 0;
@@ -141,7 +142,8 @@ export default function GenerateProposalPage() {
                 <DaypartsSection />
               </SectionWrapper>
 
-              <ProposalSection onValidationChange={handleValidationChange} />
+              {/* Program Selector is hidden - uncomment to enable */}
+              {/* <ProposalSection onValidationChange={handleValidationChange} /> */}
             </div>
           </div>
         </div>

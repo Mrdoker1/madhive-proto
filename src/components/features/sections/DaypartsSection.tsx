@@ -1,4 +1,4 @@
-import { Text, Button, Group, TextInput } from '@mantine/core';
+import { Text, Button, Group, NumberInput, Checkbox } from '@mantine/core';
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
 import { updateDaypartsData, updateChannelSectionData, setCarryOverMode, DaypartPercentages } from '@/store/slices/campaignSlice';
@@ -54,6 +54,7 @@ const DaypartsSection = ({ channel, isFirstChannel = true }: DaypartsSectionProp
   const carryOverMode = useAppSelector((state) => state.campaign.omnichannel.carryOverMode);
   const channelData = useAppSelector((state) => state.campaign.omnichannel.channelData);
   const linearDaypartsData = useAppSelector((state) => state.campaign.dayparts);
+  const showDaypartsSelector = useAppSelector((state) => state.uiSettings.showDaypartsSelector);
   
   // Get data for current channel or use common data for linear
   const daypartsData = channel 
@@ -64,6 +65,10 @@ const DaypartsSection = ({ channel, isFirstChannel = true }: DaypartsSectionProp
   const [selectionStart, setSelectionStart] = useState<{ day: string; hour: number } | null>(null);
   const [selectionEnd, setSelectionEnd] = useState<{ day: string; hour: number } | null>(null);
   const [originalCellState, setOriginalCellState] = useState<boolean | null>(null);
+  
+  // State for disabled days and dayparts in the allocation table
+  const [disabledDays, setDisabledDays] = useState<Set<string>>(new Set());
+  const [disabledDayparts, setDisabledDayparts] = useState<Set<string>>(new Set());
 
   const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
   const hoursData = createHoursData();
@@ -330,14 +335,15 @@ const DaypartsSection = ({ channel, isFirstChannel = true }: DaypartsSectionProp
   }, [daypartPercentages, selectedDayparts]);
 
   // Update percentage for a daypart/day
-  const updatePercentage = useCallback((daypartName: string, day: string, value: string) => {
-    const numValue = Math.max(0, Math.min(100, parseInt(value) || 0));
+  const updatePercentage = useCallback((daypartName: string, day: string, value: string | number) => {
+    const numValue = typeof value === 'number' ? value : (parseInt(value) || 0);
+    const clampedValue = Math.max(0, Math.min(100, numValue));
     
     const newPercentages: DaypartPercentages = { ...daypartPercentages };
     if (!newPercentages[daypartName]) {
       newPercentages[daypartName] = {};
     }
-    newPercentages[daypartName] = { ...newPercentages[daypartName], [day]: numValue };
+    newPercentages[daypartName] = { ...newPercentages[daypartName], [day]: clampedValue };
     
     if (channel) {
       dispatch(updateChannelSectionData({
@@ -356,20 +362,43 @@ const DaypartsSection = ({ channel, isFirstChannel = true }: DaypartsSectionProp
     }
   }, [daypartPercentages, daypartsData.selectedSlots, channel, dispatch]);
 
-  // Auto-distribute percentages equally
+  // Auto-distribute percentages equally (considering disabled days and dayparts)
   const autoDistribute = useCallback(() => {
     if (selectedDayparts.length === 0) return;
     
-    const equalPct = Math.floor(100 / selectedDayparts.length);
-    const remainder = 100 - (equalPct * selectedDayparts.length);
+    // Filter out disabled dayparts
+    const enabledDayparts = selectedDayparts.filter(dp => !disabledDayparts.has(dp));
     
     const newPercentages: DaypartPercentages = {};
-    selectedDayparts.forEach((daypartName, index) => {
-      newPercentages[daypartName] = {};
-      days.forEach(day => {
-        // Add remainder to first daypart
-        newPercentages[daypartName][day] = equalPct + (index === 0 ? remainder : 0);
-      });
+    
+    // For each day, distribute among enabled dayparts
+    days.forEach(day => {
+      const isDayDisabled = disabledDays.has(day);
+      
+      if (isDayDisabled) {
+        // Set all dayparts to 0 for disabled days
+        selectedDayparts.forEach(daypartName => {
+          if (!newPercentages[daypartName]) newPercentages[daypartName] = {};
+          newPercentages[daypartName][day] = 0;
+        });
+      } else {
+        // Distribute among enabled dayparts only
+        const daypartsForThisDay = enabledDayparts.length;
+        const equalPct = daypartsForThisDay > 0 ? Math.floor(100 / daypartsForThisDay) : 0;
+        const remainder = daypartsForThisDay > 0 ? 100 - (equalPct * daypartsForThisDay) : 0;
+        
+        let enabledIndex = 0;
+        selectedDayparts.forEach(daypartName => {
+          if (!newPercentages[daypartName]) newPercentages[daypartName] = {};
+          
+          if (disabledDayparts.has(daypartName)) {
+            newPercentages[daypartName][day] = 0;
+          } else {
+            newPercentages[daypartName][day] = equalPct + (enabledIndex === 0 ? remainder : 0);
+            enabledIndex++;
+          }
+        });
+      }
     });
     
     if (channel) {
@@ -387,60 +416,95 @@ const DaypartsSection = ({ channel, isFirstChannel = true }: DaypartsSectionProp
         daypartPercentages: newPercentages 
       }));
     }
-  }, [selectedDayparts, daypartsData.selectedSlots, channel, dispatch]);
+  }, [selectedDayparts, daypartsData.selectedSlots, channel, dispatch, disabledDays, disabledDayparts]);
+
+  // Toggle day enabled/disabled
+  const toggleDay = useCallback((day: string) => {
+    setDisabledDays(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(day)) {
+        newSet.delete(day);
+      } else {
+        newSet.add(day);
+      }
+      return newSet;
+    });
+  }, []);
+
+  // Toggle daypart enabled/disabled
+  const toggleDaypart = useCallback((daypartName: string) => {
+    setDisabledDayparts(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(daypartName)) {
+        newSet.delete(daypartName);
+      } else {
+        newSet.add(daypartName);
+      }
+      return newSet;
+    });
+  }, []);
+
+  // Auto-redistribute when days or dayparts are toggled
+  useEffect(() => {
+    if (selectedDayparts.length > 0) {
+      autoDistribute();
+    }
+  }, [disabledDays, disabledDayparts]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div>
-      {/* Description and control buttons */}
-      <Group justify="space-between" align="flex-start" mb="lg" wrap="nowrap">
-        <Text size="sm" c="dimmed" style={{ flex: 1 }}>
-          Choose ad delivery by <strong>hour</strong> across the week. Drag to select a range. Click daypart names to select entire dayparts.
-        </Text>
-        <Group gap="xs" wrap="nowrap" style={{ flexShrink: 0 }}>
-          <Button size="xs" variant="outline" onClick={selectAll}>
-            Select All
-          </Button>
-          <Button size="xs" variant="subtle" onClick={reset}>
-            Reset
-          </Button>
-        </Group>
-      </Group>
+      {/* Description and control buttons - only show when selector is enabled */}
+      {showDaypartsSelector && (
+        <>
+          <Group justify="space-between" align="flex-start" mb="lg" wrap="nowrap">
+            <Text size="sm" c="dimmed" style={{ flex: 1 }}>
+              Choose ad delivery by <strong>hour</strong> across the week. Drag to select a range. Click daypart names to select entire dayparts.
+            </Text>
+            <Group gap="xs" wrap="nowrap" style={{ flexShrink: 0 }}>
+              <Button size="xs" variant="outline" onClick={selectAll}>
+                Select All
+              </Button>
+              <Button size="xs" variant="subtle" onClick={reset}>
+                Reset
+              </Button>
+            </Group>
+          </Group>
 
-      {/* Time table */}
-      <div 
-        style={{ 
-          userSelect: 'none', 
-          width: '100%',
-          overflowX: 'auto'
-        }}
-      >
-        {/* Header with days */}
-        <div style={{ 
-          display: 'flex', 
-          marginBottom: '8px', 
-          gap: '4px'
-        }}>
-          <div style={{ width: '220px', flexShrink: 0 }}></div>
-          {days.map(day => (
-            <div
-              key={day}
-              style={{
-                width: '28px',
-                height: '24px',
-                fontSize: '11px',
-                fontWeight: '500',
-                textAlign: 'center',
-                color: '#333',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0
-              }}
-            >
-              {day}
+          {/* Time table */}
+          <div 
+            style={{ 
+              userSelect: 'none', 
+              width: '100%',
+              overflowX: 'auto'
+            }}
+          >
+            {/* Header with days */}
+            <div style={{ 
+              display: 'flex', 
+              marginBottom: '8px', 
+              gap: '4px'
+            }}>
+              <div style={{ width: '220px', flexShrink: 0 }}></div>
+              {days.map(day => (
+                <div
+                  key={day}
+                  style={{
+                    width: '28px',
+                    height: '24px',
+                    fontSize: '11px',
+                    fontWeight: '500',
+                    textAlign: 'center',
+                    color: '#333',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0
+                  }}
+                >
+                  {day}
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
 
         {/* Hour rows */}
         {hoursData.map((hourData, index) => {
@@ -573,7 +637,9 @@ const DaypartsSection = ({ channel, isFirstChannel = true }: DaypartsSectionProp
             </div>
           );
         })}
-      </div>
+          </div>
+        </>
+      )}
 
       {/* Percentage allocation table - appears when dayparts are selected */}
       {selectedDayparts.length > 0 && (
@@ -597,60 +663,87 @@ const DaypartsSection = ({ channel, isFirstChannel = true }: DaypartsSectionProp
                     textAlign: 'left', 
                     padding: '8px 12px',
                     fontWeight: 500,
-                    width: '140px'
+                    width: '160px'
                   }}>Daypart</th>
                   {days.map(day => (
                     <th key={day} style={{ 
-                      textAlign: 'left', 
-                      padding: '8px 8px',
+                      textAlign: 'center', 
+                      padding: '8px 4px',
                       fontWeight: 500,
-                      width: '80px'
-                    }}>{day}</th>
+                      width: '75px'
+                    }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+                        <Checkbox
+                          checked={!disabledDays.has(day)}
+                          onChange={() => toggleDay(day)}
+                          size="xs"
+                          styles={{ input: { cursor: 'pointer' } }}
+                        />
+                        <span style={{ opacity: disabledDays.has(day) ? 0.4 : 1 }}>{day}</span>
+                      </div>
+                    </th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {selectedDayparts.map(daypartName => {
                   const daypart = daypartDefinitions.find(dp => dp.name === daypartName);
+                  const isDaypartDisabled = disabledDayparts.has(daypartName);
+                  const daypartColor = daypart?.color || '#999';
                   return (
-                    <tr key={daypartName} style={{ borderBottom: '1px solid #F0F0F0' }}>
+                    <tr key={daypartName} style={{ borderBottom: '1px solid #F0F0F0', opacity: isDaypartDisabled ? 0.4 : 1 }}>
                       <td style={{ 
                         textAlign: 'left', 
                         padding: '6px 12px'
                       }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          <div
-                            style={{
-                              width: '8px',
-                              height: '8px',
-                              backgroundColor: daypart?.color || '#999',
-                              borderRadius: '2px'
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <Checkbox
+                            checked={!isDaypartDisabled}
+                            onChange={() => toggleDaypart(daypartName)}
+                            size="xs"
+                            color={daypartColor}
+                            styles={{ 
+                              input: { 
+                                cursor: 'pointer',
+                                backgroundColor: isDaypartDisabled ? undefined : daypartColor,
+                                borderColor: daypartColor
+                              } 
                             }}
                           />
                           <span>{daypartName}</span>
                         </div>
                       </td>
-                      {days.map(day => (
-                        <td key={day} style={{ padding: '4px 8px', textAlign: 'left' }}>
-                          <TextInput
-                            value={daypartPercentages[daypartName]?.[day]?.toString() || '0'}
-                            onChange={(e) => updatePercentage(daypartName, day, e.currentTarget.value)}
-                            type="number"
-                            min={0}
-                            max={100}
-                            size="xs"
-                            rightSection={<Text size="xs" c="dimmed">%</Text>}
-                            styles={{
-                              root: { width: '65px' },
-                              input: {
-                                textAlign: 'center',
-                                paddingRight: '24px',
-                                fontSize: '13px'
-                              }
-                            }}
-                          />
-                        </td>
-                      ))}
+                      {days.map(day => {
+                        const isDayDisabled = disabledDays.has(day);
+                        const isDisabled = isDaypartDisabled || isDayDisabled;
+                        return (
+                          <td key={day} style={{ padding: '4px 4px', textAlign: 'center' }}>
+                            <NumberInput
+                              value={daypartPercentages[daypartName]?.[day] || 0}
+                              onChange={(value) => updatePercentage(daypartName, day, value)}
+                              placeholder="0"
+                              min={0}
+                              max={100}
+                              step={1}
+                              size="xs"
+                              disabled={isDisabled}
+                              suffix="%"
+                              allowNegative={false}
+                              allowDecimal={false}
+                              clampBehavior="strict"
+                              hideControls
+                              styles={{
+                                root: { width: '55px', margin: '0 auto' },
+                                input: {
+                                  textAlign: 'center',
+                                  fontSize: '13px',
+                                  backgroundColor: isDisabled ? '#f5f5f5' : undefined
+                                }
+                              }}
+                            />
+                          </td>
+                        );
+                      })}
                     </tr>
                   );
                 })}
@@ -663,10 +756,12 @@ const DaypartsSection = ({ channel, isFirstChannel = true }: DaypartsSectionProp
                   }}>Total</td>
                   {days.map(day => {
                     const total = dayTotals[day];
+                    const isDayDisabled = disabledDays.has(day);
                     return (
                       <td key={day} style={{ 
-                        padding: '8px', 
-                        textAlign: 'left'
+                        padding: '8px 4px', 
+                        textAlign: 'center',
+                        opacity: isDayDisabled ? 0.4 : 1
                       }}>
                         <span>{total}%</span>
                       </td>

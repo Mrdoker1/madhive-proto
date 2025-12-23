@@ -7,19 +7,17 @@ import NavigationAnchors, { AnchorItem } from "@/components/ui/NavigationAnchors
 import SectionWrapper from "@/components/ui/SectionWrapper";
 import { BreadcrumbStep } from "@/components/ui/Breadcrumbs";
 import NextButton from "@/components/ui/NextButton";
-import LinearDetailsSection from "@/components/features/sections/LinearDetailsSection";
 import MarketsSection from "@/components/features/sections/markets";
 import MarketStationsSection from "@/components/features/sections/MarketStationsSection";
 import { useAppSelector } from '@/hooks/useRedux';
 import { RootState } from '@/store/store';
-import { validateLinearDetails, validateMarkets, validateBroadcastersAndPrograms, scrollToFirstError } from '@/utils/validation';
+import { validateMarkets, validateBroadcastersAndPrograms, scrollToFirstError } from '@/utils/validation';
 
 export default function ChannelDetailsPage() {
   const router = useRouter();
   const [showErrors, setShowErrors] = useState(false);
   
   // Get data from Redux for validation
-  const measurementProvider = useAppSelector((state) => state.campaign.linear.measurementProvider);
   const selectedMarkets = useAppSelector((state) => state.campaign.markets.selectedMarkets);
   const broadcasters = useAppSelector((state) => state.campaign.linear.broadcasters);
   const broadcastersWithStations = useAppSelector((state) => state.campaign.linear.broadcastersWithStations);
@@ -56,7 +54,6 @@ export default function ChannelDetailsPage() {
 
   // Anchors for page navigation
   const anchorItems: AnchorItem[] = [
-    { id: 'linear-details', label: 'Linear Details', anchor: '#linear-details' },
     { id: 'markets', label: 'Market/Weight', anchor: '#markets' },
     { id: 'broadcasters', label: 'Market Stations', anchor: '#broadcasters' }
   ];
@@ -64,11 +61,10 @@ export default function ChannelDetailsPage() {
   // Get all validation errors
   const validationErrors = useMemo(() => {
     return [
-      ...validateLinearDetails(measurementProvider),
       ...validateMarkets(selectedMarkets),
       ...validateBroadcastersAndPrograms(broadcasters, broadcastersWithStations)
     ];
-  }, [measurementProvider, selectedMarkets, broadcasters, broadcastersWithStations]);
+  }, [selectedMarkets, broadcasters, broadcastersWithStations]);
 
   // Check form validity
   const isFormValid = validationErrors.length === 0;
@@ -133,15 +129,6 @@ export default function ChannelDetailsPage() {
             <div style={{ paddingLeft: showNavigationAnchors ? '20px' : '0', width: '100%', maxWidth: '800px' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '40px' }}>
               
-              {/* Linear Details Section */}
-              <SectionWrapper 
-                id="linear-details" 
-                title="Linear Details"
-                required
-              >
-                <LinearDetailsSection />
-              </SectionWrapper>
-
               {/* Markets Section */}
               <SectionWrapper 
                 id="markets" 

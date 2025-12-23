@@ -6,12 +6,13 @@ import PageLayout from "@/components/layout/PageLayout";
 import MapSettingsSection from '@/components/features/settings/MapSettingsSection';
 import AISettingsSection from '@/components/features/settings/AISettingsSection';
 import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
-import { setShowNavigationAnchors, setShowFlightByDay } from '@/store/slices/uiSettingsSlice';
+import { setShowNavigationAnchors, setShowFlightByDay, setShowDaypartsSelector } from '@/store/slices/uiSettingsSlice';
 
 export default function Home() {
   const dispatch = useAppDispatch();
   const showNavigationAnchors = useAppSelector((state) => state.uiSettings.showNavigationAnchors);
   const showFlightByDay = useAppSelector((state) => state.uiSettings.showFlightByDay);
+  const showDaypartsSelector = useAppSelector((state) => state.uiSettings.showDaypartsSelector);
 
   const handleNavigationToggle = (event: React.ChangeEvent<HTMLInputElement>) => {
     dispatch(setShowNavigationAnchors(event.currentTarget.checked));
@@ -19,6 +20,10 @@ export default function Home() {
 
   const handleFlightByDayToggle = (event: React.ChangeEvent<HTMLInputElement>) => {
     dispatch(setShowFlightByDay(event.currentTarget.checked));
+  };
+
+  const handleDaypartsSelectorToggle = (event: React.ChangeEvent<HTMLInputElement>) => {
+    dispatch(setShowDaypartsSelector(event.currentTarget.checked));
   };
 
   return (
@@ -189,6 +194,27 @@ export default function Home() {
                   size="sm"
                 />
               </div>
+            </div>
+          </div>
+
+          {/* Dayparts Settings */}
+          <div className="w-full max-w-6xl flex justify-center" style={{ paddingBottom: '40px' }}>
+            <div style={{ 
+              width: '100%', 
+              maxWidth: '800px', 
+              padding: '20px', 
+              backgroundColor: 'white', 
+              borderRadius: '8px',
+              border: '1px solid #E5E7EB'
+            }}>
+              <Text size="sm" fw={600} mb="md" c="black">Dayparts Settings</Text>
+              <Checkbox
+                label="Show dayparts hour selector"
+                description="Display the hour-by-hour selection grid in the Dayparts section (advanced mode)"
+                checked={showDaypartsSelector}
+                onChange={handleDaypartsSelectorToggle}
+                size="sm"
+              />
             </div>
           </div>
         </div>

@@ -14,12 +14,14 @@ import TotalBudgetSection from "@/components/features/sections/TotalBudgetSectio
 import GoalSection from "@/components/features/sections/GoalSection";
 import FlightRangeSection from "@/components/features/sections/FlightRangeSection";
 import AudiencesSection from "@/components/features/sections/AudiencesSection";
+import LinearDetailsSection from "@/components/features/sections/LinearDetailsSection";
 import NextButton from "@/components/ui/NextButton";
 import { 
   validateGeneralDetails, 
   validateTotalBudget, 
   validateGoal, 
   validateFlightRange,
+  validateLinearDetails,
   scrollToFirstError
 } from '@/utils/validation';
 
@@ -34,6 +36,7 @@ export default function NewCampaignPage() {
   const budgetData = useAppSelector((state) => state.campaign.budget);
   const goalData = useAppSelector((state) => state.campaign.goal);
   const flightData = useAppSelector((state) => state.campaign.flight);
+  const measurementProvider = useAppSelector((state) => state.campaign.linear.measurementProvider);
   const showNavigationAnchors = useAppSelector((state: RootState) => state.uiSettings.showNavigationAnchors);
   
   // Breadcrumbs for New Campaign page - status indication only
@@ -72,6 +75,7 @@ export default function NewCampaignPage() {
     { id: 'total-budget', label: 'Total Budget', anchor: '#total-budget' },
     { id: 'goal', label: 'Goal', anchor: '#goal' },
     { id: 'flight-range', label: 'Flight Range', anchor: '#flight-range' },
+    { id: 'measurement', label: 'Measurement', anchor: '#measurement' },
     { id: 'demos', label: 'Demos', anchor: '#demos' }
   ];
 
@@ -81,9 +85,10 @@ export default function NewCampaignPage() {
       ...validateGeneralDetails(generalData),
       ...validateTotalBudget(budgetData),
       ...validateGoal(goalData),
-      ...validateFlightRange(flightData)
+      ...validateFlightRange(flightData),
+      ...validateLinearDetails(measurementProvider)
     ];
-  }, [generalData, budgetData, goalData, flightData]);
+  }, [generalData, budgetData, goalData, flightData, measurementProvider]);
 
   // Check form validity
   const isFormValid = validationErrors.length === 0;
@@ -175,6 +180,15 @@ export default function NewCampaignPage() {
               required
             >
               <FlightRangeSection totalBudget={totalBudget} />
+            </SectionWrapper>
+
+            {/* Measurement Providers Section */}
+            <SectionWrapper 
+              id="measurement" 
+              title="Measurement Providers"
+              required
+            >
+              <LinearDetailsSection />
             </SectionWrapper>
 
             {/* Demos Section */}

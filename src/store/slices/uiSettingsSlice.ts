@@ -3,11 +3,13 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 export interface UISettingsState {
   showNavigationAnchors: boolean;
   showFlightByDay: boolean;
+  showDaypartsSelector: boolean;
 }
 
 const initialState: UISettingsState = {
   showNavigationAnchors: false, // Hidden by default
   showFlightByDay: false, // Hidden by default
+  showDaypartsSelector: false, // Hidden by default
 };
 
 const uiSettingsSlice = createSlice({
@@ -26,6 +28,9 @@ const uiSettingsSlice = createSlice({
     toggleFlightByDay: (state) => {
       state.showFlightByDay = !state.showFlightByDay;
     },
+    setShowDaypartsSelector: (state, action: PayloadAction<boolean>) => {
+      state.showDaypartsSelector = action.payload;
+    },
   },
 });
 
@@ -33,7 +38,8 @@ export const {
   setShowNavigationAnchors, 
   toggleNavigationAnchors,
   setShowFlightByDay,
-  toggleFlightByDay
+  toggleFlightByDay,
+  setShowDaypartsSelector
 } = uiSettingsSlice.actions;
 
 export default uiSettingsSlice.reducer;
