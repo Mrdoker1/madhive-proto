@@ -117,42 +117,42 @@ const MarketStationsSection = () => {
         s.marketId === marketId && selectedBroadcasterIds.includes(s.broadcasterId)
       );
       
-      // Calculate equal weighting for stations
+      // Get market budget from marketsDetails
       const marketBudget = market.budget || 0;
-      const stationsCount = marketStationsData.length;
-      const equalPercentage = stationsCount > 0 ? Math.round(100 / stationsCount) : 0;
-      const equalBudget = stationsCount > 0 ? marketBudget / stationsCount : 0;
+      
+      // First pass: determine which stations are selected
+      const stationsWithSelection: { station: typeof marketStationsData[0]; isSelected: boolean; broadcasterName: string }[] = 
+        marketStationsData.map(station => {
+          const broadcaster = getBroadcasterById(station.broadcasterId);
+          const broadcasterName = broadcaster?.name || station.broadcasterId;
+          
+          // Default to selected = true
+          let isSelected = true;
+          
+          // Check if station was saved in Redux (for persistence of selection state only)
+          if (savedStations.length > 0) {
+            savedStations.forEach(savedBroadcaster => {
+              const savedStation = savedBroadcaster.stations.find(s => s.id === station.id);
+              if (savedStation) {
+                isSelected = savedStation.selected;
+              }
+            });
+          }
+          
+          return { station, isSelected, broadcasterName };
+        });
+      
+      // Calculate equal weighting based on SELECTED stations only
+      const selectedStationsCount = stationsWithSelection.filter(s => s.isSelected).length;
+      const equalPercentage = selectedStationsCount > 0 ? Math.round(100 / selectedStationsCount) : 0;
+      const equalBudget = selectedStationsCount > 0 ? marketBudget / selectedStationsCount : 0;
 
-      const stations: StationWithData[] = marketStationsData.map(station => {
-        // Get broadcaster name
-        const broadcaster = getBroadcasterById(station.broadcasterId);
-        const broadcasterName = broadcaster?.name || station.broadcasterId;
-
-        // Default to selected = true (all stations checked by default)
-        let isSelected = true;
-        let savedPercentage = equalPercentage;
-        let savedBudget = equalBudget;
-
-        // Check if station was saved in Redux (for persistence)
-        if (savedStations.length > 0) {
-          // Try to find this station in saved data
-          savedStations.forEach(savedBroadcaster => {
-            const savedStation = savedBroadcaster.stations.find(s => s.id === station.id);
-            if (savedStation) {
-              // Only use saved values if found
-              isSelected = savedStation.selected;
-              savedPercentage = savedStation.percentage;
-              savedBudget = savedStation.budget;
-            }
-          });
-          // If not found in saved data, keep default (selected = true with equal distribution)
-        }
-
+      const stations: StationWithData[] = stationsWithSelection.map(({ station, isSelected, broadcasterName }) => {
         return {
           ...station,
           selected: isSelected,
-          percentage: savedPercentage,
-          budget: savedBudget,
+          percentage: isSelected ? equalPercentage : 0,
+          budget: isSelected ? equalBudget : 0,
           broadcasterName
         };
       });
@@ -358,7 +358,7 @@ const MarketStationsSection = () => {
     });
   };
 
-  // Handle percentage change
+  // Handle percentage change (legacy - keeping for compatibility)
   const handleStationPercentageChange = (marketId: string, stationId: string, value: string | number) => {
     const numericValue = typeof value === 'number' ? value : (parseFloat(value) || 0);
     
@@ -382,7 +382,79 @@ const MarketStationsSection = () => {
     });
   };
 
-  // Handle percentage blur (validation)
+  // Handle budget change (new - input in dollars)
+  const handleStationBudgetChange = (marketId: string, stationId: string, value: string | number) => {
+    const numericValue = typeof value === 'number' ? value : (parseFloat(value) || 0);
+    
+    setMarketStations(prev => {
+      const updated = prev.map(market => {
+        if (market.id !== marketId) return market;
+        
+        return {
+          ...market,
+          stations: market.stations.map(station => {
+            if (station.id === stationId) {
+              const newPercentage = market.budget > 0 ? (numericValue / market.budget) * 100 : 0;
+              return { ...station, budget: numericValue, percentage: newPercentage };
+            }
+            return station;
+          })
+        };
+      });
+      
+      return updated;
+    });
+  };
+
+  // Handle budget blur (validation)
+  const handleStationBudgetBlur = (marketId: string, stationId: string, value: string | number) => {
+    const numericValue = typeof value === 'number' ? value : (parseFloat(value) || 0);
+    
+    const market = marketStations.find(m => m.id === marketId);
+    if (!market) return;
+    
+    const currentStation = market.stations.find(s => s.id === stationId);
+    if (!currentStation) return;
+    
+    // Calculate total budget for this market
+    const otherStationsTotal = market.stations.reduce((total, station) => {
+      if (station.id === stationId || !station.selected) return total;
+      return total + station.budget;
+    }, 0);
+    
+    const wouldBeTotal = otherStationsTotal + numericValue;
+    
+    // If exceeds market budget, show error and revert
+    if (wouldBeTotal > market.budget) {
+      setStationErrorTooltips(prev => ({
+        ...prev,
+        [stationId]: true
+      }));
+      
+      const previousValue = previousStationValues[stationId] || currentStation.budget;
+      handleStationBudgetChange(marketId, stationId, previousValue);
+      
+      setTimeout(() => {
+        setStationErrorTooltips(prev => ({
+          ...prev,
+          [stationId]: false
+        }));
+      }, 3000);
+    } else {
+      setStationErrorTooltips(prev => ({
+        ...prev,
+        [stationId]: false
+      }));
+      
+      // Mark that we should save to Redux
+      shouldSaveToRedux.current = true;
+      
+      // Trigger re-render to activate the save useEffect
+      setMarketStations(prev => [...prev]);
+    }
+  };
+
+  // Handle percentage blur (legacy - keeping for compatibility)
   const handleStationPercentageBlur = (marketId: string, stationId: string, value: string | number) => {
     const numericValue = typeof value === 'number' ? value : (parseFloat(value) || 0);
     
@@ -624,7 +696,7 @@ const MarketStationsSection = () => {
                         <Text size="xs" fw={500}>Media Owner</Text>
                       </Table.Th>
                       <Table.Th style={{ width: '120px', textAlign: 'center', paddingRight: '16px' }}>
-                        <Text size="xs" fw={500}>% of Budget</Text>
+                        <Text size="xs" fw={500}>Budget</Text>
                       </Table.Th>
                     </Table.Tr>
                   </Table.Thead>
@@ -654,21 +726,21 @@ const MarketStationsSection = () => {
                             withArrow
                           >
                             <NumberInput
-                              value={station.selected ? Math.round(station.percentage) : undefined}
-                              onChange={(value) => handleStationPercentageChange(market.id, station.id, value)}
-                              onFocus={() => handleStationPercentageFocus(station.id, station.percentage)}
-                              onBlur={() => handleStationPercentageBlur(market.id, station.id, station.percentage)}
+                              value={station.selected ? Math.round(station.budget) : undefined}
+                              onChange={(value) => handleStationBudgetChange(market.id, station.id, value)}
+                              onFocus={() => handleStationPercentageFocus(station.id, station.budget)}
+                              onBlur={() => handleStationBudgetBlur(market.id, station.id, station.budget)}
                               placeholder="0"
                               size="xs"
                               min={0}
-                              max={100}
-                              step={1}
-                              suffix="%"
+                              step={100}
+                              prefix="$"
+                              thousandSeparator=","
                               allowNegative={false}
                               allowDecimal={false}
                               disabled={!station.selected}
                               styles={{
-                                root: { width: '90px' },
+                                root: { width: '110px' },
                                 input: {
                                   textAlign: 'center',
                                   fontSize: '13px',
