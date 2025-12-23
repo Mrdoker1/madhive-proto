@@ -3,8 +3,17 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import { useAppSelector } from '@/hooks/useRedux';
-import { Text, Group, Badge, ActionIcon, Tooltip, SimpleGrid, Box } from '@mantine/core';
-import { IconEdit, IconCalendar, IconUsers, IconClock, IconMovie, IconLanguage, IconDeviceTv, IconBan } from '@tabler/icons-react';
+import { Text, Group, Badge, ActionIcon, Tooltip, SimpleGrid } from '@mantine/core';
+import { IconEdit } from '@tabler/icons-react';
+import { 
+  LineChart, 
+  Line, 
+  XAxis, 
+  YAxis, 
+  ReferenceLine, 
+  ResponsiveContainer,
+  Legend
+} from 'recharts';
 
 // Daypart definitions for display
 const daypartDefinitions = [
@@ -83,7 +92,7 @@ const SummaryItem: React.FC<SummaryItemProps> = ({ label, value, isEmpty }) => (
     {isEmpty ? (
       <Text size="sm" c="dimmed" fs="italic">Not specified</Text>
     ) : (
-      <Text size="sm">{value}</Text>
+      <Text component="div" size="sm">{value}</Text>
     )}
   </div>
 );
@@ -238,7 +247,7 @@ const CampaignSummarySection: React.FC = () => {
   const estimatedImpressions = Math.round((campaign.budget.totalBudget / 17) * 1000);
   const avgCPM = campaign.budget.totalBudget > 0 ? 17.2 : 0;
 
-  // Pacing chart component
+  // Pacing chart component using Recharts
   const PacingChart: React.FC<{ 
     title: string; 
     maxValue: number; 
@@ -249,135 +258,120 @@ const CampaignSummarySection: React.FC = () => {
     const totalPoints = 10;
     const todayIndex = 6; // "Today" is ~60% through
     
-    const plannedData: number[] = [];
-    const actualData: number[] = [];
+    // Build chart data for Recharts with some variation for realistic curves
+    const chartData = [];
+    // Add small variations to make the curves look more natural
+    const variations = [0, 0.02, -0.03, 0.04, -0.02, 0.03, -0.01, 0.02, -0.02, 0.01, 0];
     
     for (let i = 0; i <= totalPoints; i++) {
       const progress = i / totalPoints;
-      // Planned: smooth curve from 0 to max
-      plannedData.push(progress * maxValue);
-      // Actual: slightly behind planned (for demo)
-      if (i <= todayIndex) {
-        const actualProgress = progress * 0.85;
-        actualData.push(actualProgress * maxValue);
+      const variation = variations[i] || 0;
+      const planned = (progress + variation * 0.5) * maxValue;
+      const actual = i <= todayIndex ? (progress * 0.85 + variation) * maxValue : undefined;
+      
+      // Calculate date for this point
+      let dateLabel = '';
+      if (i === 0) {
+        dateLabel = formatDate(campaign.flight.startDate) || 'Start';
+      } else if (i === totalPoints) {
+        dateLabel = formatDate(campaign.flight.endDate) || 'End';
       }
+      
+      chartData.push({
+        index: i,
+        planned: Math.max(0, planned),
+        actual: actual !== undefined ? Math.max(0, actual) : undefined,
+        dateLabel
+      });
     }
 
-    const chartHeight = 220;
-    const chartWidth = 360;
-    const padding = { top: 40, right: 45, bottom: 45, left: 15 };
-    
-    const scaleX = (i: number) => padding.left + (i / totalPoints) * (chartWidth - padding.left - padding.right);
-    const scaleY = (v: number) => chartHeight - padding.bottom - ((v / maxValue) * (chartHeight - padding.top - padding.bottom));
-
-    // Build path strings
-    const plannedPath = plannedData
-      .map((v, i) => `${i === 0 ? 'M' : 'L'} ${scaleX(i)} ${scaleY(v)}`)
-      .join(' ');
-    
-    const actualPath = actualData
-      .map((v, i) => `${i === 0 ? 'M' : 'L'} ${scaleX(i)} ${scaleY(v)}`)
-      .join(' ');
-
-    const todayX = scaleX(todayIndex);
+    // Calculate the x position for "today" line (60% through)
+    const todayPosition = `${(todayIndex / totalPoints) * 100}%`;
 
     return (
       <div style={{ 
-        padding: '20px', 
+        padding: '16px', 
         backgroundColor: 'white', 
         borderRadius: '8px',
         border: '1px solid #E5E7EB',
         marginBottom: '16px',
         flex: 1
       }}>
-        <Text size="sm" fw={600} mb="sm">{title}</Text>
-        <svg width={chartWidth} height={chartHeight} style={{ display: 'block', maxWidth: '100%' }}>
-          {/* Grid lines */}
-          <line 
-            x1={padding.left} 
-            y1={chartHeight - padding.bottom} 
-            x2={chartWidth - padding.right} 
-            y2={chartHeight - padding.bottom} 
-            stroke="#E5E7EB" 
-            strokeWidth={1} 
-          />
-          
-          {/* Planned line (gray) */}
-          <path 
-            d={plannedPath} 
-            fill="none" 
-            stroke="#666" 
-            strokeWidth={2} 
-          />
-          
-          {/* Actual line (magenta) */}
-          <path 
-            d={actualPath} 
-            fill="none" 
-            stroke="#E91E8A" 
-            strokeWidth={2} 
-          />
-          
-          {/* Today vertical dashed line */}
-          <line 
-            x1={todayX} 
-            y1={padding.top} 
-            x2={todayX} 
-            y2={chartHeight - padding.bottom} 
-            stroke="#999" 
-            strokeWidth={1} 
-            strokeDasharray="4,4" 
-          />
-          
-          {/* Y-axis labels - 0/$0 on the left side of the chart */}
-          <text 
-            x={padding.left} 
-            y={chartHeight - padding.bottom - 10} 
-            fontSize={12} 
-            fill="#666"
-          >
-            {unit === '$' ? '$0' : '0'}
-          </text>
-          {/* Max value label on top right */}
-          <text 
-            x={chartWidth - padding.right} 
-            y={padding.top - 5} 
-            fontSize={12} 
-            fill="#666"
-            textAnchor="end"
-          >
+        <Text size="sm" fw={600} mb="xs">{title}</Text>
+        <div style={{ position: 'relative' }}>
+          {/* Y-axis labels positioned manually */}
+          <div style={{ 
+            position: 'absolute', 
+            top: 0, 
+            right: 8, 
+            fontSize: '11px', 
+            color: '#666' 
+          }}>
             {formatValue(maxValue)}
-          </text>
+          </div>
+          <div style={{ 
+            position: 'absolute', 
+            bottom: 75, 
+            left: 0, 
+            fontSize: '11px', 
+            color: '#666' 
+          }}>
+            {unit === '$' ? '$0' : '0'}
+          </div>
           
-          {/* X-axis labels - dates at the bottom */}
-          <text 
-            x={padding.left} 
-            y={chartHeight - 12} 
-            fontSize={12} 
-            fill="#666"
-          >
-            {formatDate(campaign.flight.startDate) || 'x/x/x'}
-          </text>
-          <text 
-            x={chartWidth - padding.right} 
-            y={chartHeight - 12} 
-            fontSize={12} 
-            fill="#666"
-            textAnchor="end"
-          >
-            {formatDate(campaign.flight.endDate) || 'x/x/x'}
-          </text>
-        </svg>
-        <Group gap="lg" mt="sm">
-          <Group gap={6}>
-            <Box w={16} h={2} bg="#666" />
-            <Text size="sm" c="dimmed">Planned</Text>
-          </Group>
-          <Group gap={6}>
-            <Box w={16} h={2} bg="#E91E8A" />
-            <Text size="sm" c="dimmed">Actual</Text>
-          </Group>
-        </Group>
+          <ResponsiveContainer width="100%" height={190}>
+            <LineChart 
+              data={chartData} 
+              margin={{ top: 15, right: 10, left: 5, bottom: 5 }}
+            >
+              <XAxis 
+                dataKey="index"
+                axisLine={{ stroke: '#E5E7EB' }}
+                tickLine={false}
+                tick={{ fontSize: 11, fill: '#666' }}
+                ticks={[0, totalPoints]}
+                tickFormatter={(value) => {
+                  if (value === 0) return formatDate(campaign.flight.startDate) || 'x/x/x';
+                  if (value === totalPoints) return formatDate(campaign.flight.endDate) || 'x/x/x';
+                  return '';
+                }}
+              />
+              <YAxis 
+                domain={[0, maxValue]}
+                hide={true}
+              />
+              <ReferenceLine 
+                x={todayIndex} 
+                stroke="#999" 
+                strokeDasharray="4 4" 
+              />
+              <Line 
+                type="monotone" 
+                dataKey="planned" 
+                stroke="#666" 
+                strokeWidth={2} 
+                dot={false}
+                name="Planned"
+              />
+              <Line 
+                type="monotone" 
+                dataKey="actual" 
+                stroke="#E91E8A" 
+                strokeWidth={2} 
+                dot={false}
+                name="Actual"
+                connectNulls={false}
+              />
+              <Legend 
+                verticalAlign="bottom"
+                height={24}
+                iconType="plainline"
+                wrapperStyle={{ paddingTop: '4px' }}
+                formatter={(value) => <span style={{ color: '#666', fontSize: '11px' }}>{value}</span>}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
       </div>
     );
   };
