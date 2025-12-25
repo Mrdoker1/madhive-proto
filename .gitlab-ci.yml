@@ -47,6 +47,9 @@ init:
 build:
   stage: build
   image: docker:27
+  needs:
+    - job: init
+      artifacts: true
   variables:
     GIT_CLEAN_FLAGS: none
     CACHE_IMAGE: "${HARBOR_HOST}/${HARBOR_PROJECT}/madhive:cache"
