@@ -36,6 +36,8 @@ init:
     - mkdir -p deploy/nginx && cp .secure_files/.htpasswd deploy/nginx/.htpasswd
     - echo WEB_IMAGE=${HARBOR_HOST}/${HARBOR_PROJECT}/madhive:${CI_COMMIT_REF_SLUG}-$(date +'%d-%m-%Y-%H-%M') >> build.env
   artifacts:
+    paths:
+      - deploy/
     reports:
       dotenv: build.env
   rules:
