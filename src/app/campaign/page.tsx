@@ -28,6 +28,7 @@ function convertToCampaignSummary(saved: SavedCampaign): CampaignSummary {
   return {
     id: saved.id,
     name: saved.general.campaignName || 'Untitled Campaign',
+    advertiser: saved.general.advertiser || 'Unknown Advertiser',
     status: 'Not Started' as const,
     sparkline: Array.from({ length: 24 }, () => 0),
     channels: channels.length > 0 ? channels : ['Linear TV'],

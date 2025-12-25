@@ -3,6 +3,7 @@ export type CampaignStatus = 'On Target' | 'Way Under Pace' | 'Over Pace' | 'Way
 export interface CampaignSummary {
   id: string;
   name: string;
+  advertiser: string; // Advertiser name
   status: CampaignStatus;
   channels: string[]; // ['CTV','Social','Audio','Display','Linear TV']
   progressPercent: number; // 0..100
@@ -65,8 +66,19 @@ function makeCampaign(i: number): CampaignSummary {
     ['Email', 'Search', 'Display', 'Audio'],
     ['CTV', 'Display'],
   ];
+  const advertisers = [
+    'Ford Motor Company',
+    'Toyota USA',
+    'Chevrolet',
+    'Honda America',
+    'Hyundai Motors',
+    'Nissan USA',
+    'BMW North America',
+    'Mercedes-Benz USA'
+  ];
   const status = statuses[i % statuses.length];
   const channels = channelsPool[i % channelsPool.length];
+  const advertiser = advertisers[i % advertisers.length];
   const goal = 1500000 + (i % 5) * 250000;
   const delivered = Math.floor(goal * (0.4 + (i % 10) * 0.05));
   const progressPercent = Math.min(100, +(delivered / goal * 100).toFixed(2));
@@ -81,6 +93,7 @@ function makeCampaign(i: number): CampaignSummary {
   return {
     id: `c${i}`,
     name: `Campaign_${i.toString().padStart(2, '0')} 08.01 - 08.${(i % 28) + 1}`,
+    advertiser,
     status,
     channels,
     progressPercent,
@@ -102,6 +115,7 @@ const realMockCampaigns: CampaignSummary[] = [
   {
     id: 'real-1',
     name: 'Q4 25 HSP WEAT',
+    advertiser: 'Home Shopping Plus',
     status: 'Not Started',
     channels: ['Linear TV', 'CTV'],
     progressPercent: 0,
@@ -119,6 +133,7 @@ const realMockCampaigns: CampaignSummary[] = [
   {
     id: 'real-2',
     name: 'JGC HOLIDAY SALE Q425',
+    advertiser: 'JGC Retail',
     status: 'Not Started',
     channels: ['Social', 'Display', 'CTV'],
     progressPercent: 0,
@@ -136,6 +151,7 @@ const realMockCampaigns: CampaignSummary[] = [
   {
     id: 'jgc-holiday-pre',
     name: 'JGC Holiday Pre-Launch',
+    advertiser: 'JGC Retail',
     status: 'Over Pace',
     channels: ['Social', 'Display', 'Audio'],
     progressPercent: 20,
@@ -153,6 +169,7 @@ const realMockCampaigns: CampaignSummary[] = [
   {
     id: 'ford-mach-e-ev',
     name: 'Ford Mach-E EV Intro',
+    advertiser: 'Ford Motor Company',
     status: 'Under Pace',
     channels: ['Linear TV', 'CTV', 'Display'],
     progressPercent: 88.22,
@@ -170,6 +187,7 @@ const realMockCampaigns: CampaignSummary[] = [
   {
     id: 'toyota-q3-brand',
     name: 'Toyota Q3 Brand Push',
+    advertiser: 'Toyota USA',
     status: 'Way Over Pace',
     channels: ['Linear TV', 'CTV', 'Social', 'Display'],
     progressPercent: 90.74,
@@ -187,6 +205,7 @@ const realMockCampaigns: CampaignSummary[] = [
   {
     id: 'chevy-silverado',
     name: 'Chevy Silverado Summer Sale',
+    advertiser: 'Chevrolet',
     status: 'Way Under Pace',
     channels: ['Linear TV', 'Display'],
     progressPercent: 50,
@@ -204,6 +223,7 @@ const realMockCampaigns: CampaignSummary[] = [
   {
     id: 'q3-ford-f150',
     name: 'Q3 25 Ford F150 TRISTATE',
+    advertiser: 'Ford Motor Company',
     status: 'On Target',
     channels: ['Linear TV', 'CTV'],
     progressPercent: 68.32,
@@ -221,6 +241,7 @@ const realMockCampaigns: CampaignSummary[] = [
   {
     id: 'hyundai-sonata-sept',
     name: 'Hyundai Sonata Sept Event',
+    advertiser: 'Hyundai Motors',
     status: 'On Target',
     channels: ['Linear TV', 'Display', 'Social'],
     progressPercent: 68.32,
@@ -238,6 +259,7 @@ const realMockCampaigns: CampaignSummary[] = [
   {
     id: 'lincoln-aviator-luxury',
     name: 'Lincoln Aviator Luxury',
+    advertiser: 'Lincoln Motors',
     status: 'On Target',
     channels: ['Linear TV', 'CTV', 'Social'],
     progressPercent: 88.22,
@@ -255,6 +277,7 @@ const realMockCampaigns: CampaignSummary[] = [
   {
     id: 'dodge-charger-national',
     name: 'Dodge Charger National',
+    advertiser: 'Dodge',
     status: 'On Target',
     channels: ['Linear TV', 'CTV', 'Display', 'Social'],
     progressPercent: 50.16,
@@ -272,6 +295,7 @@ const realMockCampaigns: CampaignSummary[] = [
   {
     id: 'chrysler-pacifica-family',
     name: 'Chrysler Pacifica Family',
+    advertiser: 'Chrysler',
     status: 'On Target',
     channels: ['CTV', 'Display', 'Social'],
     progressPercent: 80.16,
@@ -289,6 +313,7 @@ const realMockCampaigns: CampaignSummary[] = [
   {
     id: 'august-ram-truck',
     name: 'August Ram Truck Month',
+    advertiser: 'RAM Trucks',
     status: 'Completed',
     channels: ['Linear TV', 'CTV', 'Display'],
     progressPercent: 100,

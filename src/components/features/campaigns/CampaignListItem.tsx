@@ -171,7 +171,7 @@ export default function CampaignListItem({ c, onDeleteCampaign, onCancelCampaign
       <div
         className="grid items-center"
         style={{
-          gridTemplateColumns: '48px 220px 160px 160px 240px 300px 220px 160px 160px 160px 160px',
+          gridTemplateColumns: '48px 160px 220px 160px 160px 240px 300px 220px 160px 160px 160px 160px',
           paddingLeft: 0,
           paddingRight: 0,
           paddingTop: 0,
@@ -272,15 +272,22 @@ export default function CampaignListItem({ c, onDeleteCampaign, onCancelCampaign
           </Menu>
         </div>
 
-        {/* Name */}
+        {/* Advertiser */}
         <div style={{ position: 'sticky', left: '48px', zIndex: 1, background: 'var(--page-background)', paddingLeft: '16px', paddingRight: '16px', paddingTop: '20px', paddingBottom: '20px' }}>
+          <span style={{ color: '#374151', fontWeight: 500, fontSize: '12px' }}>
+            {c.advertiser}
+          </span>
+        </div>
+
+        {/* Name */}
+        <div style={{ position: 'sticky', left: '208px', zIndex: 1, background: 'var(--page-background)', paddingLeft: '16px', paddingRight: '16px', paddingTop: '20px', paddingBottom: '20px' }}>
           <span style={{ color: '#2563eb', textDecoration: 'none', fontWeight: 500, fontSize: '12px' }}>
             {c.name}
           </span>
         </div>
 
         {/* Pacing Status */}
-        <div style={{ position: 'sticky', left: '268px', zIndex: 1, background: 'var(--page-background)', paddingLeft: '16px', paddingRight: '12px', paddingTop: '20px', paddingBottom: '20px', borderRight: '1px solid var(--border-color)' }}>
+        <div style={{ position: 'sticky', left: '428px', zIndex: 1, background: 'var(--page-background)', paddingLeft: '16px', paddingRight: '12px', paddingTop: '20px', paddingBottom: '20px', borderRight: '1px solid var(--border-color)' }}>
           <CampaignStatusBadge status={c.status} />
         </div>
 

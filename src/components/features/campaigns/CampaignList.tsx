@@ -16,6 +16,7 @@ const ALL_STATUSES = ['Not Started', 'On Target', 'Over Pace', 'Way Over Pace', 
 const ALL_CHANNELS = ['Linear TV', 'CTV', 'Social', 'Display', 'Audio', 'Email', 'Search', 'Preroll'] as const;
 
 interface Filters {
+  advertiser: string;
   name: string;
   statuses: string[];
   channels: string[];
@@ -34,6 +35,7 @@ interface Filters {
 }
 
 const defaultFilters: Filters = {
+  advertiser: '',
   name: '',
   statuses: [],
   channels: [],
@@ -70,6 +72,11 @@ export default function CampaignList({ items, sortField, sortDirection, onSort, 
   // Apply filters to items
   const filteredItems = useMemo(() => {
     return items.filter(item => {
+      // Advertiser filter (text search)
+      if (filters.advertiser && !item.advertiser.toLowerCase().includes(filters.advertiser.toLowerCase())) {
+        return false;
+      }
+      
       // Name filter (text search)
       if (filters.name && !item.name.toLowerCase().includes(filters.name.toLowerCase())) {
         return false;
@@ -115,8 +122,9 @@ export default function CampaignList({ items, sortField, sortDirection, onSort, 
   }, [items, filters]);
 
   // Check if a filter is active
-  const isFilterActive = (field: SortField | 'channels'): boolean => {
+  const isFilterActive = (field: SortField | 'channels' | 'advertiser'): boolean => {
     switch (field) {
+      case 'advertiser': return filters.advertiser !== '';
       case 'name': return filters.name !== '';
       case 'status': return filters.statuses.length > 0;
       case 'channels': return filters.channels.length > 0;
@@ -128,6 +136,58 @@ export default function CampaignList({ items, sortField, sortDirection, onSort, 
       case 'remainingBudget': return filters.remainingBudgetMin !== null || filters.remainingBudgetMax !== null;
       default: return false;
     }
+  };
+
+  // Advertiser filter component with Apply button
+  const AdvertiserFilterHeader = ({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) => {
+    const active = isFilterActive('advertiser');
+    const [opened, setOpened] = useState(false);
+    const [localValue, setLocalValue] = useState(filters.advertiser);
+    
+    const handleOpen = () => {
+      setLocalValue(filters.advertiser);
+      setOpened(true);
+    };
+    
+    const handleApply = () => {
+      setFilters(prev => ({ ...prev, advertiser: localValue }));
+      setOpened(false);
+    };
+    
+    const handleClear = () => {
+      setLocalValue('');
+      setFilters(prev => ({ ...prev, advertiser: '' }));
+      setOpened(false);
+    };
+    
+    return (
+      <Popover width={220} position="bottom-start" shadow="md" opened={opened} onChange={setOpened}>
+        <Popover.Target>
+          <div 
+            style={{ ...style, cursor: 'pointer', userSelect: 'none', display: 'flex', alignItems: 'center' }}
+            onClick={handleOpen}
+          >
+            {children}
+            <IconFilter size={12} style={{ marginLeft: '4px', opacity: active ? 1 : 0.4, color: active ? 'var(--primary-color)' : 'currentColor' }} />
+          </div>
+        </Popover.Target>
+        <Popover.Dropdown onClick={(e) => e.stopPropagation()}>
+          <Stack gap="xs">
+            <TextInput
+              placeholder="Search advertiser..."
+              size="xs"
+              value={localValue}
+              onChange={(e) => setLocalValue(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleApply()}
+            />
+            <Group grow gap="xs">
+              <Button size="xs" variant="light" onClick={handleClear}>Clear</Button>
+              <Button size="xs" onClick={handleApply}>Apply</Button>
+            </Group>
+          </Stack>
+        </Popover.Dropdown>
+      </Popover>
+    );
   };
 
   // Text filter component with Apply button
@@ -418,7 +478,7 @@ export default function CampaignList({ items, sortField, sortDirection, onSort, 
       <div
         className="grid items-center"
         style={{
-          gridTemplateColumns: `${actionsColWidth}px ${nameColWidth}px ${statusColWidth}px 160px 240px 300px 220px 160px 160px 160px 160px`,
+          gridTemplateColumns: `${actionsColWidth}px 160px ${nameColWidth}px ${statusColWidth}px 160px 240px 300px 220px 160px 160px 160px 160px`,
           paddingLeft: 0,
           paddingRight: 0,
           paddingTop: 0,
@@ -433,10 +493,15 @@ export default function CampaignList({ items, sortField, sortDirection, onSort, 
         <div style={{ position: 'sticky', left: '0', zIndex: 1, background: 'var(--header-background)', paddingLeft: '8px', paddingRight: '8px', paddingTop: '8px', paddingBottom: '8px' }}>
           {/* Empty header for actions */}
         </div>
+        {/* Advertiser column */}
         <div style={{ position: 'sticky', left: `${actionsColWidth}px`, zIndex: 1, background: 'var(--header-background)', paddingLeft: '16px', paddingRight: '16px', paddingTop: '8px', paddingBottom: '8px' }}>
+          <AdvertiserFilterHeader>Advertiser</AdvertiserFilterHeader>
+        </div>
+        {/* Campaign name column */}
+        <div style={{ position: 'sticky', left: `${actionsColWidth + 160}px`, zIndex: 1, background: 'var(--header-background)', paddingLeft: '16px', paddingRight: '16px', paddingTop: '8px', paddingBottom: '8px' }}>
           <TextFilterHeader field="name">Campaign</TextFilterHeader>
         </div>
-        <div style={{ position: 'sticky', left: `${actionsColWidth + nameColWidth}px`, zIndex: 1, background: 'var(--header-background)', paddingLeft: '16px', paddingRight: '12px', paddingTop: '8px', paddingBottom: '8px', borderRight: '1px solid var(--border-color)' }}>
+        <div style={{ position: 'sticky', left: `${actionsColWidth + 160 + nameColWidth}px`, zIndex: 1, background: 'var(--header-background)', paddingLeft: '16px', paddingRight: '12px', paddingTop: '8px', paddingBottom: '8px', borderRight: '1px solid var(--border-color)' }}>
           <StatusFilterHeader>Pacing Status</StatusFilterHeader>
         </div>
         <div style={{ paddingLeft: '20px' }}>Delivered in Last 7 days</div>
