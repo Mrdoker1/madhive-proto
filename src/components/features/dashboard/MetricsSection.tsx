@@ -96,15 +96,12 @@ const MetricsSection: React.FC = () => {
         baseMetrics.push({ title: 'Incremental Reach', value: '0', data: [], color: '#8B5CF6' });
       }
       
-      baseMetrics.push({ title: 'Unique Reach', value: '0', data: [], color: '#8B5CF6' });
-      
       return baseMetrics;
     }
 
     const totalImpressions = filteredData.reduce((sum, row) => sum + row.impressions, 0);
     const totalReach = filteredData.reduce((sum, row) => sum + row.reach, 0);
     const totalIncrementalReach = filteredData.reduce((sum, row) => sum + row.incrementalReach, 0);
-    const totalUniqueReach = filteredData.reduce((sum, row) => sum + row.uniqueReach, 0);
     const avgFrequency = filteredData.reduce((sum, row) => sum + row.frequency, 0) / filteredData.length;
 
     // Sum trends across filtered campaigns
@@ -152,13 +149,6 @@ const MetricsSection: React.FC = () => {
         color: '#8B5CF6'
       });
     }
-    
-    baseMetrics.push({
-      title: 'Unique Reach',
-      value: totalUniqueReach.toLocaleString('en-US'),
-      data: sumTrends('uniqueReachTrend'),
-      color: '#8B5CF6'
-    });
     
     return baseMetrics;
   }, [advertiser, campaign, campaignType]);

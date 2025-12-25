@@ -1,11 +1,13 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Progress } from '@mantine/core';
+import { Progress, Menu, ActionIcon, Modal, Button, Text, Group } from '@mantine/core';
 import { Line, ResponsiveContainer, ComposedChart, Area } from 'recharts';
 import type { CampaignSummary } from '@/data/campaignsData';
 import { CampaignStatusBadge } from './CampaignStatusBadge';
+import { IconDotsVertical, IconTrash, IconX, IconEdit, IconFileText, IconFileDownload } from '@tabler/icons-react';
+import CampaignDetailModal from './CampaignDetailModal';
 
 function formatNumber(n: number): string {
   return n.toLocaleString('en-US');
@@ -33,42 +35,254 @@ function formatChannelName(channel: string): string {
   return channelNames[channel] || channel.charAt(0).toUpperCase() + channel.slice(1);
 }
 
-export default function CampaignListItem({ c }: { c: CampaignSummary }) {
+interface CampaignListItemProps {
+  c: CampaignSummary;
+  onDeleteCampaign?: (campaignId: string) => void;
+  onCancelCampaign?: (campaignId: string) => void;
+}
+
+export default function CampaignListItem({ c, onDeleteCampaign, onCancelCampaign }: CampaignListItemProps) {
   const router = useRouter();
   const data = c.sparkline.map((v, i) => ({ i, v }));
   
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [cancelModalOpen, setCancelModalOpen] = useState(false);
+  const [reviseModalOpen, setReviseModalOpen] = useState(false);
+  const [detailModalOpen, setDetailModalOpen] = useState(false);
+  
+  // Check if campaign can be deleted (not booked yet = Not Started status)
+  const canDelete = c.status === 'Not Started';
+  
+  // Check if campaign can be cancelled (at least 2 days from starting - for prototype, allow if not completed)
+  const canCancel = c.status !== 'Completed' && c.status !== 'Not Started';
+  
+  // Check if campaign can be revised (after flight has begun)
+  const canRevise = c.status !== 'Not Started' && c.status !== 'Completed';
+  
   const handleClick = () => {
-    // Navigate to dashboard for this campaign
-    router.push(`/dashboard?campaignId=${c.id}`);
+    // Open campaign detail modal
+    setDetailModalOpen(true);
+  };
+  
+  const handleDeleteConfirm = () => {
+    onDeleteCampaign?.(c.id);
+    setDeleteModalOpen(false);
+  };
+  
+  const handleCancelConfirm = () => {
+    onCancelCampaign?.(c.id);
+    setCancelModalOpen(false);
+  };
+  
+  const handleReviseConfirm = () => {
+    // Navigate to edit campaign
+    router.push(`/campaign/linear/new?edit=${c.id}`);
+    setReviseModalOpen(false);
+  };
+  
+  const handleViewAgencyOrder = () => {
+    // Simulate download
+    alert(`Downloading Agency Order for campaign: ${c.name}`);
+  };
+  
+  const handleViewBroadcasterOrders = () => {
+    // Simulate download
+    alert(`Downloading Broadcaster Orders for campaign: ${c.name}`);
   };
   
   return (
-    <div
-      className="grid items-center"
-      style={{
-        gridTemplateColumns: '220px 160px 160px 240px 300px 220px 160px 160px 160px 160px',
-        paddingLeft: 0,
-        paddingRight: 0,
-        paddingTop: 0,
-        paddingBottom: 0,
-        borderTop: '1px solid var(--border-color)',
-        width: 'fit-content',
-        fontSize: '12px',
-        cursor: 'pointer'
-      }}
-      onClick={handleClick}
-    >
-      {/* Name */}
-      <div style={{ position: 'sticky', left: '0', zIndex: 1, background: 'var(--page-background)', paddingLeft: '16px', paddingRight: '16px', paddingTop: '20px', paddingBottom: '20px' }}>
-        <span style={{ color: '#2563eb', textDecoration: 'none', fontWeight: 500, fontSize: '12px' }}>
-          {c.name}
-        </span>
-      </div>
+    <>
+      {/* Campaign Detail Modal */}
+      <CampaignDetailModal
+        campaign={c}
+        opened={detailModalOpen}
+        onClose={() => setDetailModalOpen(false)}
+      />
 
-      {/* Pacing Status */}
-      <div style={{ position: 'sticky', left: '220px', zIndex: 1, background: 'var(--page-background)', paddingLeft: '16px', paddingRight: '12px', paddingTop: '20px', paddingBottom: '20px', borderRight: '1px solid var(--border-color)' }}>
-        <CampaignStatusBadge status={c.status} />
-      </div>
+      {/* Delete Confirmation Modal */}
+      <Modal 
+        opened={deleteModalOpen} 
+        onClose={() => setDeleteModalOpen(false)} 
+        title="Delete Campaign"
+        centered
+      >
+        <Text size="sm" mb="lg">
+          Are you sure you want to delete this campaign? This action cannot be undone.
+        </Text>
+        <Text size="sm" fw={500} mb="lg" c="dimmed">
+          Campaign: {c.name}
+        </Text>
+        <Group justify="flex-end" gap="sm">
+          <Button variant="default" onClick={() => setDeleteModalOpen(false)}>
+            Cancel
+          </Button>
+          <Button color="red" onClick={handleDeleteConfirm}>
+            Delete Campaign
+          </Button>
+        </Group>
+      </Modal>
+
+      {/* Cancel Confirmation Modal */}
+      <Modal 
+        opened={cancelModalOpen} 
+        onClose={() => setCancelModalOpen(false)} 
+        title="Cancel Campaign"
+        centered
+      >
+        <Text size="sm" mb="lg">
+          Are you sure you want to cancel this campaign? The campaign will be stopped and cannot be resumed.
+        </Text>
+        <Text size="sm" fw={500} mb="lg" c="dimmed">
+          Campaign: {c.name}
+        </Text>
+        <Group justify="flex-end" gap="sm">
+          <Button variant="default" onClick={() => setCancelModalOpen(false)}>
+            Go Back
+          </Button>
+          <Button color="orange" onClick={handleCancelConfirm}>
+            Cancel Campaign
+          </Button>
+        </Group>
+      </Modal>
+
+      {/* Revise Confirmation Modal */}
+      <Modal 
+        opened={reviseModalOpen} 
+        onClose={() => setReviseModalOpen(false)} 
+        title="Revise Campaign"
+        centered
+      >
+        <Text size="sm" mb="lg">
+          Are you sure you want to revise this campaign? Media outlets will use their best efforts to implement your changes made after the campaign flight has begun.
+        </Text>
+        <Text size="sm" fw={500} mb="lg" c="dimmed">
+          Campaign: {c.name}
+        </Text>
+        <Group justify="flex-end" gap="sm">
+          <Button variant="default" onClick={() => setReviseModalOpen(false)}>
+            Cancel
+          </Button>
+          <Button color="blue" onClick={handleReviseConfirm}>
+            Revise Campaign
+          </Button>
+        </Group>
+      </Modal>
+
+      <div
+        className="grid items-center"
+        style={{
+          gridTemplateColumns: '48px 220px 160px 160px 240px 300px 220px 160px 160px 160px 160px',
+          paddingLeft: 0,
+          paddingRight: 0,
+          paddingTop: 0,
+          paddingBottom: 0,
+          borderTop: '1px solid var(--border-color)',
+          width: 'fit-content',
+          fontSize: '12px',
+          cursor: 'pointer'
+        }}
+        onClick={handleClick}
+      >
+        {/* Actions Menu (Waffle) */}
+        <div 
+          style={{ 
+            position: 'sticky', 
+            left: '0', 
+            zIndex: 1, 
+            background: 'var(--page-background)', 
+            paddingLeft: '8px', 
+            paddingRight: '8px', 
+            paddingTop: '20px', 
+            paddingBottom: '20px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <Menu shadow="md" width={240} position="bottom-start">
+            <Menu.Target>
+              <ActionIcon variant="subtle" size="sm" color="gray">
+                <IconDotsVertical size={16} />
+              </ActionIcon>
+            </Menu.Target>
+
+            <Menu.Dropdown>
+              <Menu.Label>Campaign Actions</Menu.Label>
+              
+              <Menu.Item
+                leftSection={<IconTrash size={14} />}
+                color="red"
+                disabled={!canDelete}
+                onClick={() => setDeleteModalOpen(true)}
+              >
+                Delete Campaign
+                {!canDelete && (
+                  <Text size="xs" c="dimmed" mt={2}>
+                    Only available for unbooked campaigns
+                  </Text>
+                )}
+              </Menu.Item>
+              
+              <Menu.Item
+                leftSection={<IconX size={14} />}
+                color="orange"
+                disabled={!canCancel}
+                onClick={() => setCancelModalOpen(true)}
+              >
+                Cancel Campaign
+                {!canCancel && (
+                  <Text size="xs" c="dimmed" mt={2}>
+                    Not available for this campaign
+                  </Text>
+                )}
+              </Menu.Item>
+              
+              <Menu.Item
+                leftSection={<IconEdit size={14} />}
+                disabled={!canRevise}
+                onClick={() => setReviseModalOpen(true)}
+              >
+                Revise Campaign
+                {!canRevise && (
+                  <Text size="xs" c="dimmed" mt={2}>
+                    Only for in-flight campaigns
+                  </Text>
+                )}
+              </Menu.Item>
+              
+              <Menu.Divider />
+              
+              <Menu.Label>Downloads</Menu.Label>
+              
+              <Menu.Item
+                leftSection={<IconFileText size={14} />}
+                onClick={handleViewAgencyOrder}
+              >
+                View Agency Order
+              </Menu.Item>
+              
+              <Menu.Item
+                leftSection={<IconFileDownload size={14} />}
+                onClick={handleViewBroadcasterOrders}
+              >
+                View Broadcaster Orders
+              </Menu.Item>
+            </Menu.Dropdown>
+          </Menu>
+        </div>
+
+        {/* Name */}
+        <div style={{ position: 'sticky', left: '48px', zIndex: 1, background: 'var(--page-background)', paddingLeft: '16px', paddingRight: '16px', paddingTop: '20px', paddingBottom: '20px' }}>
+          <span style={{ color: '#2563eb', textDecoration: 'none', fontWeight: 500, fontSize: '12px' }}>
+            {c.name}
+          </span>
+        </div>
+
+        {/* Pacing Status */}
+        <div style={{ position: 'sticky', left: '268px', zIndex: 1, background: 'var(--page-background)', paddingLeft: '16px', paddingRight: '12px', paddingTop: '20px', paddingBottom: '20px', borderRight: '1px solid var(--border-color)' }}>
+          <CampaignStatusBadge status={c.status} />
+        </div>
 
       {/* Delivered by Days */}
       <div style={{ width: '150px', height: '60px', paddingLeft: '20px', paddingTop: '8px', paddingBottom: '8px' }}>
@@ -148,6 +362,7 @@ export default function CampaignListItem({ c }: { c: CampaignSummary }) {
 
       {/* Remaining Budget */}
       <div style={{ textAlign: 'right', fontSize: '12px', paddingTop: '8px', paddingBottom: '8px', paddingRight: '16px' }}>{formatCurrency(c.remainingBudget)}</div>
-    </div>
+      </div>
+    </>
   );
 }

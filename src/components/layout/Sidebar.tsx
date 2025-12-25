@@ -27,16 +27,10 @@ const Sidebar: React.FC<SidebarProps> = ({
   // Default sidebar items
   const defaultItems: SidebarItem[] = [
     {
-      id: 'dashboard',
+      id: 'linear-dashboard',
       icon: '/assets/icons/sidebar/dashboard.svg',
-      alt: 'Dashboard',
-      href: '/dashboard'
-    },
-    {
-      id: 'campaign',
-      icon: '/assets/icons/sidebar/horn.svg',
-      alt: 'Campaigns',
-      href: '/campaign'
+      alt: 'Linear Dashboard',
+      href: '/linear-dashboard'
     }
   ];
 

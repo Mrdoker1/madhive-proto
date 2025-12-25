@@ -178,13 +178,13 @@ const GeoPerformanceMap: React.FC = () => {
     // Get maximum impressions value for color scale
     const maxImpressions = Math.max(...zones.map(z => z.impressions));
 
-    // Function to get zone color
+    // Function to get zone color (pink/magenta gradient)
     const getZoneColor = (impressions: number): string => {
       const percentage = (impressions / maxImpressions) * 100;
-      if (percentage >= 75) return '#059669';
-      if (percentage >= 50) return '#10b981';
-      if (percentage >= 25) return '#6ee7b7';
-      return '#d1fae5';
+      if (percentage >= 75) return '#BE185D';  // Dark pink
+      if (percentage >= 50) return '#DB2777';  // Medium pink
+      if (percentage >= 25) return '#EC4899';  // Light pink
+      return '#F9A8D4';                         // Very light pink
     };
 
     // Create GeoJSON for DMA zones (points)
@@ -292,7 +292,7 @@ const GeoPerformanceMap: React.FC = () => {
       {/* Header */}
       <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border-color)' }}>
         <h3 style={{ fontSize: '18px', fontWeight: 600, color: '#111827', margin: 0 }}>
-          {campaignData ? `Geographic Performance - ${campaignData.campaignName}` : 'Geographic Performance'}
+          {campaignData ? `Geographic Delivery - ${campaignData.campaignName}` : 'Geographic Delivery'}
         </h3>
       </div>
 
@@ -386,10 +386,11 @@ const GeoPerformanceMap: React.FC = () => {
                 const maxImpressions = Math.max(...campaignData.zones.map(z => z.impressions));
                 const percentage = (zone.impressions / maxImpressions) * 100;
                 
-                let color = '#d1fae5';
-                if (percentage >= 75) color = '#059669';
-                else if (percentage >= 50) color = '#10b981';
-                else if (percentage >= 25) color = '#6ee7b7';
+                // Pink/magenta gradient for bubbles
+                let color = '#F9A8D4';
+                if (percentage >= 75) color = '#BE185D';
+                else if (percentage >= 50) color = '#DB2777';
+                else if (percentage >= 25) color = '#EC4899';
 
                 // Function to zoom to zone
                 const handleZoomToZone = () => {
@@ -467,26 +468,41 @@ const GeoPerformanceMap: React.FC = () => {
       >
         <span style={{ fontSize: '12px', color: '#6B7280', fontWeight: 500 }}>Impressions:</span>
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          {[
-            { color: '#d1fae5', label: 'Low (0-25%)' },
-            { color: '#6ee7b7', label: 'Medium (25-50%)' },
-            { color: '#10b981', label: 'High (50-75%)' },
-            { color: '#059669', label: 'Very High (75-100%)' }
-          ].map((item, index) => (
-            <div key={index} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <div
-                style={{
-                  width: '20px',
-                  height: '20px',
-                  borderRadius: '50%',
-                  backgroundColor: item.color,
-                  border: '2px solid #ffffff',
-                  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
-                }}
-              />
-              <span style={{ fontSize: '12px', color: '#6B7280' }}>{item.label}</span>
-            </div>
-          ))}
+          {(() => {
+            // Calculate dynamic legend values based on campaign data
+            const maxImp = campaignData 
+              ? Math.max(...campaignData.zones.map(z => z.impressions))
+              : 100000;
+            
+            const formatImpressions = (val: number) => {
+              if (val >= 1000000) return `${(val / 1000000).toFixed(1)}M`;
+              if (val >= 1000) return `${(val / 1000).toFixed(0)}K`;
+              return val.toString();
+            };
+
+            const legendItems = [
+              { color: '#F9A8D4', label: `0 - ${formatImpressions(Math.round(maxImp * 0.25))}` },
+              { color: '#EC4899', label: `${formatImpressions(Math.round(maxImp * 0.25))} - ${formatImpressions(Math.round(maxImp * 0.5))}` },
+              { color: '#DB2777', label: `${formatImpressions(Math.round(maxImp * 0.5))} - ${formatImpressions(Math.round(maxImp * 0.75))}` },
+              { color: '#BE185D', label: `${formatImpressions(Math.round(maxImp * 0.75))} - ${formatImpressions(maxImp)}` }
+            ];
+
+            return legendItems.map((item, index) => (
+              <div key={index} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div
+                  style={{
+                    width: '20px',
+                    height: '20px',
+                    borderRadius: '50%',
+                    backgroundColor: item.color,
+                    border: '2px solid #ffffff',
+                    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
+                  }}
+                />
+                <span style={{ fontSize: '12px', color: '#6B7280' }}>{item.label}</span>
+              </div>
+            ));
+          })()}
         </div>
       </div>
     </div>

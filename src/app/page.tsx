@@ -60,16 +60,10 @@ export default function Home() {
                     omnichannelHref: '/login'
                   },
                   {
-                    title: 'Dashboard',
-                    description: 'Main dashboard with metrics, charts, and campaign overview',
-                    linearHref: '/dashboard',
-                    omnichannelHref: '/dashboard'
-                  },
-                  {
-                    title: 'Campaign List',
-                    description: 'View all campaigns with filtering and pagination',
-                    linearHref: '/campaign',
-                    omnichannelHref: '/campaign'
+                    title: 'Linear Dashboard',
+                    description: 'Campaign performance dashboard with metrics and insights',
+                    linearHref: '/linear-dashboard',
+                    omnichannelHref: null
                   },
                   {
                     title: 'New Campaign',
