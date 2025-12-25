@@ -30,7 +30,7 @@ export default function LoginPage() {
     
     // For prototype, accept any credentials
     setIsLoading(false);
-    router.push('/');
+    router.push('/linear-dashboard');
   };
 
   return (

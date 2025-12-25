@@ -32,6 +32,21 @@ const Header: React.FC = () => {
         {/* Center - MadHive Logo */}
         <div className="absolute left-1/2 transform -translate-x-1/2 flex items-center">
           <div style={{ position: 'relative' }}>
+            <span style={{ 
+              position: 'absolute', 
+              top: '-4px', 
+              right: '-38px', 
+              fontSize: '11px', 
+              color: '#291036', 
+              fontWeight: 600, 
+              letterSpacing: '0.5px',
+              backgroundColor: '#F3F2EB',
+              padding: '2px 6px',
+              borderRadius: '4px',
+              zIndex: 1
+            }}>
+              Proto
+            </span>
             <Image
               src="/assets/icons/header/logo.svg"
               alt="MadHive Logo"
@@ -39,18 +54,8 @@ const Header: React.FC = () => {
               height={32}
               className="h-8 w-auto max-w-[120px]"
               priority
+              style={{ position: 'relative', zIndex: 2 }}
             />
-            <span style={{ 
-              position: 'absolute', 
-              top: '-2px', 
-              right: '-32px', 
-              fontSize: '10px', 
-              color: '#000', 
-              fontWeight: 500, 
-              letterSpacing: '0.5px' 
-            }}>
-              Proto
-            </span>
           </div>
         </div>
 
