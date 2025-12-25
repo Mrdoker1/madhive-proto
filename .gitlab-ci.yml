@@ -33,7 +33,7 @@ init:
     - curl --silent "https://gitlab.com/gitlab-org/incubation-engineering/mobile-devops/download-secure-files/-/raw/main/installer" | bash
     # Copy SSL certificate and key required for nginx https
     - cp .secure_files/oxagile* deploy/ssl
-    - cp .secure_files/.htpasswd /etc/nginx/
+    - mkdir -p deploy/nginx && cp .secure_files/.htpasswd deploy/nginx/.htpasswd
     - echo WEB_IMAGE=${HARBOR_HOST}/${HARBOR_PROJECT}/madhive:${CI_COMMIT_REF_SLUG}-$(date +'%d-%m-%Y-%H-%M') >> build.env
   artifacts:
     reports:
