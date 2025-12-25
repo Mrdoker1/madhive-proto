@@ -54,6 +54,12 @@ export default function Home() {
               <TableTbody>
                 {[
                   {
+                    title: 'Login',
+                    description: 'User authentication screen with username and password',
+                    linearHref: '/login',
+                    omnichannelHref: '/login'
+                  },
+                  {
                     title: 'Dashboard',
                     description: 'Main dashboard with metrics, charts, and campaign overview',
                     linearHref: '/dashboard',
