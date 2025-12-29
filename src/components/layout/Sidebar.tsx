@@ -31,6 +31,12 @@ const Sidebar: React.FC<SidebarProps> = ({
       icon: '/assets/icons/sidebar/dashboard.svg',
       alt: 'Linear Dashboard',
       href: '/linear-dashboard'
+    },
+    {
+      id: 'team-management',
+      icon: '/assets/icons/sidebar/admin.svg',
+      alt: 'Team Management',
+      href: '/team-management'
     }
   ];
 

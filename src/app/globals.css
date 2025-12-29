@@ -167,3 +167,9 @@ button.rdrDay.rdrDayWeekend .rdrDayNumber span {
 ::-webkit-scrollbar-thumb:hover {
   background: #9CA3AF;
 }
+
+/* Team Management Tabs */
+.team-management-tab[data-active="true"] {
+  color: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
+}
