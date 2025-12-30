@@ -34,7 +34,7 @@ const ProgramExclusionSection: React.FC<ProgramExclusionSectionProps> = ({ class
     <div className={className}>
       <Group gap="xs" mb="md">
         <Text size="sm" c="dimmed">
-          Exclude programs containing this text from your campaign.
+          Excluded program titles containing the following text:
         </Text>
         <Tooltip 
           label="Type a program title and press Enter to add it. Click the × to remove."
@@ -48,7 +48,7 @@ const ProgramExclusionSection: React.FC<ProgramExclusionSectionProps> = ({ class
       </Group>
 
       <TagsInput
-        placeholder="Type program name and press Enter..."
+        placeholder="Type the program name and hit enter."
         value={programs}
         onChange={handleProgramsChange}
         clearable

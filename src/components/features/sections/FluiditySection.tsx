@@ -26,7 +26,7 @@ const FluiditySection: React.FC<FluiditySectionProps> = ({ className = '' }) => 
   // Save to Redux when value changes
   const handlePercentageChange = (value: number | string) => {
     const numValue = typeof value === 'number' ? value : (parseFloat(value) || 0);
-    const clampedValue = Math.max(0, Math.min(5, numValue));
+    const clampedValue = Math.max(0, Math.min(10, numValue));
     setPercentage(clampedValue);
     dispatch(updateGeneralData({ fluidityPercentage: clampedValue }));
   };
@@ -38,21 +38,21 @@ const FluiditySection: React.FC<FluiditySectionProps> = ({ className = '' }) => 
       </Text>
 
       <Group align="flex-end" gap="xl">
-        <div style={{ flex: 1, maxWidth: '300px' }}>
+        <div style={{ flex: 1, maxWidth: '400px' }}>
           <Text size="sm" fw={500} mb={8}>Allowed Fluidity Percentage</Text>
           <Slider
             value={percentage}
             onChange={handlePercentageChange}
             min={0}
-            max={5}
+            max={10}
             step={0.5}
             marks={[
               { value: 0, label: '0%' },
-              { value: 1, label: '1%' },
               { value: 2, label: '2%' },
-              { value: 3, label: '3%' },
               { value: 4, label: '4%' },
-              { value: 5, label: '5%' },
+              { value: 6, label: '6%' },
+              { value: 8, label: '8%' },
+              { value: 10, label: '10%' },
             ]}
             label={(value) => `${value}%`}
             color="var(--primary-color)"
@@ -69,7 +69,7 @@ const FluiditySection: React.FC<FluiditySectionProps> = ({ className = '' }) => 
           value={percentage}
           onChange={handlePercentageChange}
           min={0}
-          max={5}
+          max={10}
           step={0.5}
           suffix="%"
           allowNegative={false}

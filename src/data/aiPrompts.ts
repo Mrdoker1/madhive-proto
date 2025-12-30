@@ -43,7 +43,7 @@ On this page users configure:
 - Dayparts: Time slot allocation with budget percentages per daypart/day.
 - Content Genre: Include/exclude specific genres (Action, Comedy, Documentary, Drama, News, Reality TV, Sci-fi, Sports).
 - Language: English (default) or Spanish for Hispanic market targeting.
-- Fluidity: % of budget (0-5%) allowed for premium CTV/OTT inventory that meets linear guidelines.
+- Fluidity: % of budget (0-10%) allowed for premium CTV/OTT inventory that meets linear guidelines.
 - Program Exclusions: Specific program titles to exclude from the buy.
 
 Analyze current configuration, then give ONE specific, actionable suggestion (max 2 sentences).
