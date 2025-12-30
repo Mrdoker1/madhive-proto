@@ -236,8 +236,8 @@ const CampaignDetailModal: React.FC<CampaignDetailModalProps> = ({ campaign, ope
         body: { padding: '24px' }
       }}
     >
-      {/* Top Row - Campaign Details, Goals/Budget, Status */}
-      <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="md" mb="lg">
+      {/* Top Row - Campaign Details, Goals/Budget, Status, Markets */}
+      <SimpleGrid cols={{ base: 1, sm: 2, md: 4 }} spacing="md" mb="lg">
         {/* Campaign Details */}
         <div style={{ padding: '16px', backgroundColor: 'white', borderRadius: '8px', border: '1px solid #E5E7EB' }}>
           <Text size="xs" fw={600} c="dimmed" mb="sm">CAMPAIGN DETAILS</Text>
@@ -284,9 +284,25 @@ const CampaignDetailModal: React.FC<CampaignDetailModalProps> = ({ campaign, ope
             } 
           />
         </div>
+
+        {/* Markets & Stations */}
+        <div style={{ padding: '16px', backgroundColor: 'white', borderRadius: '8px', border: '1px solid #E5E7EB' }}>
+          <Text size="xs" fw={600} c="dimmed" mb="sm">MARKETS & STATIONS</Text>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            {extData.markets.map((market, idx) => (
+              <div key={idx}>
+                <Group justify="space-between">
+                  <Text size="sm" fw={500} style={{ textDecoration: 'underline' }}>{market.name}</Text>
+                  <Text size="sm" c="dimmed">{formatCurrency(market.budget)}</Text>
+                </Group>
+                <Text size="xs" c="dimmed" ml="md">{market.stations.join(', ')}</Text>
+              </div>
+            ))}
+          </div>
+        </div>
       </SimpleGrid>
 
-      {/* Second Row - Pacing Charts | Markets & Guidelines */}
+      {/* Second Row - Pacing Charts | Guidelines & Delivery Metrics */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: '16px', marginBottom: '16px' }}>
         {/* Left - Pacing Charts */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -307,24 +323,8 @@ const CampaignDetailModal: React.FC<CampaignDetailModalProps> = ({ campaign, ope
           />
         </div>
 
-        {/* Right - Markets & Guidelines stacked */}
+        {/* Right - Guidelines & Delivery Metrics stacked */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          {/* Markets & Stations */}
-          <div style={{ padding: '16px', backgroundColor: 'white', borderRadius: '8px', border: '1px solid #E5E7EB' }}>
-            <Text size="xs" fw={600} c="dimmed" mb="sm">MARKETS & STATIONS</Text>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              {extData.markets.map((market, idx) => (
-                <div key={idx}>
-                  <Group justify="space-between">
-                    <Text size="sm" fw={500} style={{ textDecoration: 'underline' }}>{market.name}</Text>
-                    <Text size="sm" c="dimmed">{formatCurrency(market.budget)}</Text>
-                  </Group>
-                  <Text size="xs" c="dimmed" ml="md">{market.stations.join(', ')}</Text>
-                </div>
-              ))}
-            </div>
-          </div>
-
           {/* Guidelines */}
           <div style={{ padding: '16px', backgroundColor: 'white', borderRadius: '8px', border: '1px solid #E5E7EB' }}>
             <Text size="xs" fw={600} c="dimmed" mb="sm">GUIDELINES</Text>
@@ -363,23 +363,23 @@ const CampaignDetailModal: React.FC<CampaignDetailModalProps> = ({ campaign, ope
               </div>
             </div>
           </div>
-        </div>
-      </div>
 
-      {/* Delivered Metrics Row */}
-      <div style={{ padding: '16px', backgroundColor: 'white', borderRadius: '8px', border: '1px solid #E5E7EB', marginBottom: '16px' }}>
-        <Group justify="space-between" mb="sm">
-          <Text size="xs" fw={600} c="dimmed">DELIVERY METRICS</Text>
-          <div style={{ width: '200px' }}>
-            <DeliverySparkline data={campaign.sparkline.slice(-7)} />
+          {/* Delivery Metrics */}
+          <div style={{ padding: '16px', backgroundColor: 'white', borderRadius: '8px', border: '1px solid #E5E7EB' }}>
+            <Group justify="space-between" mb="sm">
+              <Text size="xs" fw={600} c="dimmed">DELIVERY METRICS</Text>
+              <div style={{ width: '200px' }}>
+                <DeliverySparkline data={campaign.sparkline.slice(-7)} />
+              </div>
+            </Group>
+            <SimpleGrid cols={4} spacing="md">
+              <SummaryItem label="Delivered Impressions" value={formatNumber(campaign.deliveredImpressions)} />
+              <SummaryItem label="Delivered Spend" value={formatCurrency(campaign.deliveredSpend)} />
+              <SummaryItem label="Remaining Impressions" value={formatNumber(campaign.remainingImpression)} />
+              <SummaryItem label="Remaining Budget" value={formatCurrency(campaign.remainingBudget)} />
+            </SimpleGrid>
           </div>
-        </Group>
-        <SimpleGrid cols={4} spacing="md">
-          <SummaryItem label="Delivered Impressions" value={formatNumber(campaign.deliveredImpressions)} />
-          <SummaryItem label="Delivered Spend" value={formatCurrency(campaign.deliveredSpend)} />
-          <SummaryItem label="Remaining Impressions" value={formatNumber(campaign.remainingImpression)} />
-          <SummaryItem label="Remaining Budget" value={formatCurrency(campaign.remainingBudget)} />
-        </SimpleGrid>
+        </div>
       </div>
 
       {/* Bottom Section - Actions */}
