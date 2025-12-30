@@ -34,6 +34,7 @@ function convertToCampaignSummary(saved: SavedCampaign): CampaignSummary {
     name: saved.general.campaignName || 'Untitled Campaign',
     advertiser: saved.general.advertiser || 'Unknown Advertiser',
     status: 'Not Started' as const,
+    approvalStatus: 'Pending' as const,
     sparkline: Array.from({ length: 24 }, () => 0),
     channels: channels.length > 0 ? channels : ['Linear TV'],
     progressPercent: 0,
@@ -73,6 +74,23 @@ function LinearDashboardContent() {
   const handleNewOmnichannelCampaign = () => {
     dispatch(resetCampaign());
     router.push('/campaign/omnichannel/new');
+  };
+
+  const handleDeleteCampaign = (campaignId: string) => {
+    // In real app, this would call an API
+    console.log('Delete campaign:', campaignId);
+    // For prototype, we could remove from Redux store if it's a saved campaign
+  };
+
+  const handleCancelCampaign = (campaignId: string) => {
+    // In real app, this would call an API
+    console.log('Cancel campaign:', campaignId);
+  };
+
+  const handleApproveCampaign = (campaignId: string) => {
+    // In real app, this would call an API to approve the campaign
+    console.log('Approve campaign:', campaignId);
+    alert(`Campaign ${campaignId} has been approved!`);
   };
 
   // Function to determine status priority (for sorting)
@@ -237,6 +255,9 @@ function LinearDashboardContent() {
                 sortField={sortField}
                 sortDirection={sortDirection}
                 onSort={handleSort}
+                onDeleteCampaign={handleDeleteCampaign}
+                onCancelCampaign={handleCancelCampaign}
+                onApproveCampaign={handleApproveCampaign}
               />
 
               {/* Pagination Footer */}

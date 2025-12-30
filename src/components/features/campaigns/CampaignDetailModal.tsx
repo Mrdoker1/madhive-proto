@@ -1,8 +1,8 @@
 'use client';
 
 import React from 'react';
-import { Modal, Text, Group, Badge, Progress, SimpleGrid, Divider, ActionIcon, Tooltip } from '@mantine/core';
-import { IconX, IconEdit, IconDownload } from '@tabler/icons-react';
+import { Modal, Text, Group, Badge, Progress, SimpleGrid, Divider, Button, Tooltip } from '@mantine/core';
+import { IconDownload, IconPrinter, IconCheck } from '@tabler/icons-react';
 import { 
   LineChart, 
   Line, 
@@ -16,6 +16,7 @@ import {
 } from 'recharts';
 import type { CampaignSummary } from '@/data/campaignsData';
 import { CampaignStatusBadge } from './CampaignStatusBadge';
+import { ApprovalStatusBadge } from './ApprovalStatusBadge';
 
 // Mock extended data for campaigns (since CampaignSummary doesn't have all fields)
 // In real app, this would come from API/store
@@ -77,6 +78,7 @@ interface CampaignDetailModalProps {
   campaign: CampaignSummary | null;
   opened: boolean;
   onClose: () => void;
+  onApproveCampaign?: (campaignId: string) => void;
 }
 
 // Format helpers
@@ -188,11 +190,14 @@ const DeliverySparkline: React.FC<{ data: number[] }> = ({ data }) => {
   );
 };
 
-const CampaignDetailModal: React.FC<CampaignDetailModalProps> = ({ campaign, opened, onClose }) => {
+const CampaignDetailModal: React.FC<CampaignDetailModalProps> = ({ campaign, opened, onClose, onApproveCampaign }) => {
   if (!campaign) return null;
 
   // Get extended mock data for this campaign
   const extData = getExtendedData(campaign.id);
+  
+  // Check if campaign can be approved (Not Started status)
+  const canApprove = campaign.status === 'Not Started' && campaign.approvalStatus === 'Pending';
 
   // Calculate flight dates (mock based on campaign name)
   const getFlightDates = () => {
@@ -222,6 +227,7 @@ const CampaignDetailModal: React.FC<CampaignDetailModalProps> = ({ campaign, ope
       title={
         <Group gap="md">
           <Text size="lg" fw={600}>{campaign.name}</Text>
+          <ApprovalStatusBadge status={campaign.approvalStatus} />
           <CampaignStatusBadge status={campaign.status} />
         </Group>
       }
@@ -255,12 +261,16 @@ const CampaignDetailModal: React.FC<CampaignDetailModalProps> = ({ campaign, ope
         <div style={{ padding: '16px', backgroundColor: 'white', borderRadius: '8px', border: '1px solid #E5E7EB' }}>
           <Text size="xs" fw={600} c="dimmed" mb="sm">CAMPAIGN STATUS</Text>
           <SummaryItem 
-            label="Status" 
+            label="Approval Status" 
+            value={<ApprovalStatusBadge status={campaign.approvalStatus} />} 
+          />
+          <SummaryItem 
+            label="Pacing Status" 
             value={<CampaignStatusBadge status={campaign.status} />} 
           />
           <SummaryItem label="Progress" value={`${campaign.progressPercent.toFixed(1)}%`} />
           <SummaryItem 
-            label="Pacing" 
+            label="Pacing %" 
             value={campaign.pacingPercent !== null ? `${campaign.pacingPercent.toFixed(1)}%` : '—'} 
           />
           <SummaryItem 
@@ -375,25 +385,42 @@ const CampaignDetailModal: React.FC<CampaignDetailModalProps> = ({ campaign, ope
       {/* Bottom Section - Actions */}
       <Divider mb="md" />
       <Group justify="space-between">
-        <Group gap="md">
-          <Tooltip label="Download Agency Order">
-            <ActionIcon variant="light" size="lg">
-              <IconDownload size={18} />
-            </ActionIcon>
-          </Tooltip>
-          <Tooltip label="Download Broadcaster Orders">
-            <ActionIcon variant="light" size="lg">
-              <IconDownload size={18} />
-            </ActionIcon>
-          </Tooltip>
-          <Text size="xs" c="dimmed">Download reports</Text>
-        </Group>
+        <Button 
+          variant="light" 
+          leftSection={<IconDownload size={18} />}
+          onClick={() => {
+            // Simulate download
+            alert(`Downloading reports for campaign: ${campaign.name}`);
+          }}
+        >
+          Download Reports
+        </Button>
         
-        <Tooltip label="Edit Campaign">
-          <ActionIcon variant="light" size="lg" color="blue">
-            <IconEdit size={18} />
-          </ActionIcon>
-        </Tooltip>
+        <Group gap="sm">
+          <Button 
+            variant="light" 
+            leftSection={<IconPrinter size={18} />}
+            onClick={() => {
+              // Simulate print
+              window.print();
+            }}
+          >
+            Print
+          </Button>
+          
+          {canApprove && (
+            <Button 
+              color="green"
+              leftSection={<IconCheck size={18} />}
+              onClick={() => {
+                onApproveCampaign?.(campaign.id);
+                onClose();
+              }}
+            >
+              Approve Campaign
+            </Button>
+          )}
+        </Group>
       </Group>
     </Modal>
   );

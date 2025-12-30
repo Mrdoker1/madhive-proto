@@ -38,7 +38,7 @@ const LanguageSection: React.FC<LanguageSectionProps> = ({ className = '' }) => 
   return (
     <div className={className}>
       <Text size="sm" c="dimmed" mb="md">
-        Select the primary language for your ad content to target the appropriate audience demographic.
+        Select creative language for ad targeting.
       </Text>
 
       <Radio.Group

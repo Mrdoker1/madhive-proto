@@ -695,63 +695,76 @@ const MarketStationsSection = () => {
                       <Table.Th>
                         <Text size="xs" fw={500}>Media Owner</Text>
                       </Table.Th>
-                      <Table.Th style={{ width: '120px', textAlign: 'center', paddingRight: '16px' }}>
+                      <Table.Th style={{ width: '120px', textAlign: 'center' }}>
                         <Text size="xs" fw={500}>Budget</Text>
+                      </Table.Th>
+                      <Table.Th style={{ width: '100px', textAlign: 'center', paddingRight: '16px' }}>
+                        <Text size="xs" fw={500}>Budget%</Text>
                       </Table.Th>
                     </Table.Tr>
                   </Table.Thead>
                   
                   <Table.Tbody>
-                    {paginatedStations.map((station) => (
-                      <Table.Tr key={station.id} style={{ height: '48px' }}>
-                        <Table.Td style={{ paddingLeft: '16px' }}>
-                          <Checkbox
-                            checked={station.selected}
-                            onChange={(e) => handleStationSelect(market.id, station.id, e.currentTarget.checked)}
-                            color="var(--primary-color)"
-                          />
-                        </Table.Td>
-                        <Table.Td>
-                          <Text size="xs">{station.name}</Text>
-                        </Table.Td>
-                        <Table.Td>
-                          <Text size="xs">{station.broadcasterName}</Text>
-                        </Table.Td>
-                        <Table.Td style={{ paddingRight: '16px' }}>
-                          <Tooltip
-                            label="You have exceeded the maximum budget value"
-                            opened={stationErrorTooltips[station.id] || false}
-                            color="red"
-                            position="top"
-                            withArrow
-                          >
-                            <NumberInput
-                              value={station.selected ? Math.round(station.budget) : undefined}
-                              onChange={(value) => handleStationBudgetChange(market.id, station.id, value)}
-                              onFocus={() => handleStationPercentageFocus(station.id, station.budget)}
-                              onBlur={() => handleStationBudgetBlur(market.id, station.id, station.budget)}
-                              placeholder="0"
-                              size="xs"
-                              min={0}
-                              step={100}
-                              prefix="$"
-                              thousandSeparator=","
-                              allowNegative={false}
-                              allowDecimal={false}
-                              disabled={!station.selected}
-                              styles={{
-                                root: { width: '110px' },
-                                input: {
-                                  textAlign: 'center',
-                                  fontSize: '13px',
-                                  backgroundColor: !station.selected ? '#f0f0f0' : 'white'
-                                }
-                              }}
+                    {paginatedStations.map((station) => {
+                      // Calculate budget percentage relative to market budget
+                      const budgetPercentage = marketBudget > 0 ? (station.budget / marketBudget) * 100 : 0;
+                      
+                      return (
+                        <Table.Tr key={station.id} style={{ height: '48px' }}>
+                          <Table.Td style={{ paddingLeft: '16px' }}>
+                            <Checkbox
+                              checked={station.selected}
+                              onChange={(e) => handleStationSelect(market.id, station.id, e.currentTarget.checked)}
+                              color="var(--primary-color)"
                             />
-                          </Tooltip>
-                        </Table.Td>
-                      </Table.Tr>
-                    ))}
+                          </Table.Td>
+                          <Table.Td>
+                            <Text size="xs">{station.name}</Text>
+                          </Table.Td>
+                          <Table.Td>
+                            <Text size="xs">{station.broadcasterName}</Text>
+                          </Table.Td>
+                          <Table.Td>
+                            <Tooltip
+                              label="You have exceeded the maximum budget value"
+                              opened={stationErrorTooltips[station.id] || false}
+                              color="red"
+                              position="top"
+                              withArrow
+                            >
+                              <NumberInput
+                                value={station.selected ? Math.round(station.budget) : undefined}
+                                onChange={(value) => handleStationBudgetChange(market.id, station.id, value)}
+                                onFocus={() => handleStationPercentageFocus(station.id, station.budget)}
+                                onBlur={() => handleStationBudgetBlur(market.id, station.id, station.budget)}
+                                placeholder="0"
+                                size="xs"
+                                min={0}
+                                step={100}
+                                prefix="$"
+                                thousandSeparator=","
+                                allowNegative={false}
+                                allowDecimal={false}
+                                disabled={!station.selected}
+                                styles={{
+                                  root: { width: '110px' },
+                                  input: {
+                                    textAlign: 'center',
+                                    fontSize: '13px',
+                                    backgroundColor: !station.selected ? '#f0f0f0' : 'white'
+                                  }
+                                }}
+                              />
+                            </Tooltip>
+                          </Table.Td>
+                          <Table.Td style={{ textAlign: 'center', paddingRight: '16px' }}>
+                            <Text size="xs" c={!station.selected ? 'dimmed' : undefined}>
+                              {station.selected && station.budget > 0 ? `${budgetPercentage.toFixed(1)}%` : '0.0%'}
+                            </Text>
+                          </Table.Td>
+                        </Table.Tr>
+                      );
+                    })}
                   </Table.Tbody>
                 </Table>
 

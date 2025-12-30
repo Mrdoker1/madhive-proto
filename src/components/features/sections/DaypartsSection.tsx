@@ -13,16 +13,17 @@ interface DaypartsSectionProps {
 }
 
 // Dayparts definition with colors
-// Colors follow the natural progression of the day to avoid confusion
+// Ordered as requested: Early Morning -> Daytime -> Early Fringe -> Early News -> Prime Access -> Prime Time -> Late News -> Late Fringe -> Overnight
 const daypartDefinitions = [
-  { name: 'Late Fringe', color: '#5C6BC0', hours: [0, 1] },        // Indigo - late night
-  { name: 'Overnight', color: '#3F51B5', hours: [2, 3, 4, 5] },    // Deep blue - night
   { name: 'Early Morning', color: '#FFB74D', hours: [6, 7, 8, 9] }, // Warm orange - sunrise
   { name: 'Daytime', color: '#4FC3F7', hours: [10, 11, 12, 13, 14, 15] }, // Sky blue - daytime
-  { name: 'Early Fringe', color: '#FFD54F', hours: [16, 17, 18] }, // Golden yellow - afternoon
+  { name: 'Early Fringe', color: '#FFD54F', hours: [16, 17] },     // Golden yellow - afternoon
+  { name: 'Early News', color: '#FFA726', hours: [18] },           // Orange - early evening news
   { name: 'Prime Access', color: '#9575CD', hours: [19] },         // Purple - prime start
   { name: 'Prime Time', color: '#7E57C2', hours: [20, 21, 22] },   // Deeper purple - prime
-  { name: 'Late News', color: '#5C6BC0', hours: [23] }             // Indigo - late night
+  { name: 'Late News', color: '#5C6BC0', hours: [23] },            // Indigo - late night
+  { name: 'Late Fringe', color: '#5C6BC0', hours: [0, 1] },        // Indigo - late night
+  { name: 'Overnight', color: '#3F51B5', hours: [2, 3, 4, 5] }     // Deep blue - night
 ];
 
 // Get daypart info for a specific hour
@@ -382,20 +383,17 @@ const DaypartsSection = ({ channel, isFirstChannel = true }: DaypartsSectionProp
           newPercentages[daypartName][day] = 0;
         });
       } else {
-        // Distribute among enabled dayparts only
+        // Distribute among enabled dayparts only - use decimal precision
         const daypartsForThisDay = enabledDayparts.length;
-        const equalPct = daypartsForThisDay > 0 ? Math.floor(100 / daypartsForThisDay) : 0;
-        const remainder = daypartsForThisDay > 0 ? 100 - (equalPct * daypartsForThisDay) : 0;
+        const equalPct = daypartsForThisDay > 0 ? parseFloat((100 / daypartsForThisDay).toFixed(2)) : 0;
         
-        let enabledIndex = 0;
         selectedDayparts.forEach(daypartName => {
           if (!newPercentages[daypartName]) newPercentages[daypartName] = {};
           
           if (disabledDayparts.has(daypartName)) {
             newPercentages[daypartName][day] = 0;
           } else {
-            newPercentages[daypartName][day] = equalPct + (enabledIndex === 0 ? remainder : 0);
-            enabledIndex++;
+            newPercentages[daypartName][day] = equalPct;
           }
         });
       }
@@ -644,12 +642,17 @@ const DaypartsSection = ({ channel, isFirstChannel = true }: DaypartsSectionProp
       {/* Percentage allocation table - appears when dayparts are selected */}
       {selectedDayparts.length > 0 && (
         <div style={{ marginTop: '32px' }}>
-          <Group justify="space-between" align="center" mb="md">
+          <Group justify="space-between" align="center" mb="xs">
             <Text size="sm" fw={500}>Daypart Budget Allocation</Text>
             <Button size="xs" variant="subtle" onClick={autoDistribute}>
               Auto-distribute
             </Button>
           </Group>
+          
+          {/* Subtitle */}
+          <Text size="sm" c="dimmed" mb="md">
+            Allocate budget across days of week and standard local dayparts.
+          </Text>
           
           <div style={{ overflowX: 'auto' }}>
             <table style={{ 
@@ -724,16 +727,18 @@ const DaypartsSection = ({ channel, isFirstChannel = true }: DaypartsSectionProp
                               placeholder="0"
                               min={0}
                               max={100}
-                              step={1}
+                              step={0.01}
                               size="xs"
                               disabled={isDisabled}
                               suffix="%"
                               allowNegative={false}
-                              allowDecimal={false}
+                              allowDecimal={true}
+                              decimalScale={2}
+                              fixedDecimalScale={true}
                               clampBehavior="strict"
                               hideControls
                               styles={{
-                                root: { width: '55px', margin: '0 auto' },
+                                root: { width: '65px', margin: '0 auto' },
                                 input: {
                                   textAlign: 'center',
                                   fontSize: '13px',
@@ -763,7 +768,7 @@ const DaypartsSection = ({ channel, isFirstChannel = true }: DaypartsSectionProp
                         textAlign: 'center',
                         opacity: isDayDisabled ? 0.4 : 1
                       }}>
-                        <span>{total}%</span>
+                        <span>{Math.round(total)}%</span>
                       </td>
                     );
                   })}

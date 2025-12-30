@@ -31,7 +31,7 @@ export default function GenerateProposalPage() {
   const anchorItems: AnchorItem[] = [
     { id: 'spot-length', label: 'Spot Length', anchor: '#spot-length' },
     { id: 'dayparts', label: 'Dayparts', anchor: '#dayparts' },
-    { id: 'content-genre', label: 'Content Genre', anchor: '#content-genre' },
+    { id: 'content-genre', label: 'Programming Categories', anchor: '#content-genre' },
     { id: 'language', label: 'Language', anchor: '#language' },
     { id: 'fluidity', label: 'Fluidity', anchor: '#fluidity' },
     { id: 'program-exclusion', label: 'Program Exclusion', anchor: '#program-exclusion' }
@@ -176,7 +176,7 @@ export default function GenerateProposalPage() {
               {/* Content Genre Section */}
               <SectionWrapper 
                 id="content-genre" 
-                title="Content Genre"
+                title="Programming Categories"
               >
                 <ContentGenreSection />
               </SectionWrapper>

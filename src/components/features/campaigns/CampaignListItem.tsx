@@ -6,6 +6,7 @@ import { Progress, Menu, ActionIcon, Modal, Button, Text, Group } from '@mantine
 import { Line, ResponsiveContainer, ComposedChart, Area } from 'recharts';
 import type { CampaignSummary } from '@/data/campaignsData';
 import { CampaignStatusBadge } from './CampaignStatusBadge';
+import { ApprovalStatusBadge } from './ApprovalStatusBadge';
 import { IconDotsVertical, IconTrash, IconX, IconEdit, IconFileText, IconFileDownload } from '@tabler/icons-react';
 import CampaignDetailModal from './CampaignDetailModal';
 
@@ -39,9 +40,10 @@ interface CampaignListItemProps {
   c: CampaignSummary;
   onDeleteCampaign?: (campaignId: string) => void;
   onCancelCampaign?: (campaignId: string) => void;
+  onApproveCampaign?: (campaignId: string) => void;
 }
 
-export default function CampaignListItem({ c, onDeleteCampaign, onCancelCampaign }: CampaignListItemProps) {
+export default function CampaignListItem({ c, onDeleteCampaign, onCancelCampaign, onApproveCampaign }: CampaignListItemProps) {
   const router = useRouter();
   const data = c.sparkline.map((v, i) => ({ i, v }));
   
@@ -97,6 +99,7 @@ export default function CampaignListItem({ c, onDeleteCampaign, onCancelCampaign
         campaign={c}
         opened={detailModalOpen}
         onClose={() => setDetailModalOpen(false)}
+        onApproveCampaign={onApproveCampaign}
       />
 
       {/* Delete Confirmation Modal */}
@@ -171,7 +174,7 @@ export default function CampaignListItem({ c, onDeleteCampaign, onCancelCampaign
       <div
         className="grid items-center"
         style={{
-          gridTemplateColumns: '48px 160px 220px 160px 160px 240px 300px 220px 160px 160px 160px 160px',
+          gridTemplateColumns: '48px 160px 220px 140px 160px 160px 240px 300px 220px 160px 160px 160px 160px',
           paddingLeft: 0,
           paddingRight: 0,
           paddingTop: 0,
@@ -286,8 +289,13 @@ export default function CampaignListItem({ c, onDeleteCampaign, onCancelCampaign
           </span>
         </div>
 
+        {/* Approval Status */}
+        <div style={{ position: 'sticky', left: '428px', zIndex: 1, background: 'var(--page-background)', paddingLeft: '16px', paddingRight: '16px', paddingTop: '20px', paddingBottom: '20px' }}>
+          <ApprovalStatusBadge status={c.approvalStatus} />
+        </div>
+
         {/* Pacing Status */}
-        <div style={{ position: 'sticky', left: '428px', zIndex: 1, background: 'var(--page-background)', paddingLeft: '16px', paddingRight: '12px', paddingTop: '20px', paddingBottom: '20px', borderRight: '1px solid var(--border-color)' }}>
+        <div style={{ position: 'sticky', left: '568px', zIndex: 1, background: 'var(--page-background)', paddingLeft: '16px', paddingRight: '12px', paddingTop: '20px', paddingBottom: '20px', borderRight: '1px solid var(--border-color)' }}>
           <CampaignStatusBadge status={c.status} />
         </div>
 
@@ -350,8 +358,27 @@ export default function CampaignListItem({ c, onDeleteCampaign, onCancelCampaign
       <div style={{ paddingTop: '8px', paddingBottom: '8px' }}>
         {c.pacingPercent !== null ? (
           <>
-            <div style={{ fontWeight: 600, fontSize: '12px' }}>{c.pacingPercent.toFixed(2)}%</div>
-            <div style={{ fontSize: '12px', color: '#6b7280' }}>({formatNumber(c.pacingDelivered)} / {formatNumber(c.pacingTarget)})</div>
+            <div style={{ width: '180px' }}>
+              <Progress 
+                value={c.pacingPercent} 
+                size="lg" 
+                radius="xl" 
+                color={
+                  c.pacingPercent < 95 ? '#ef4444' : // Red: behind by >5%
+                  c.pacingPercent < 98 ? '#f59e0b' : // Yellow: behind 2-5%
+                  '#22c55e' // Green: behind <2%
+                }
+                styles={{ 
+                  root: { background: '#E5E7EB' },
+                }} 
+              />
+            </div>
+            <div style={{ fontSize: '12px', textAlign: 'left', marginTop: '6px' }}>
+              <span style={{ color: '#000000', fontWeight: 700 }}>
+                {c.pacingPercent.toFixed(2)}%
+              </span>
+              <span style={{ color: '#5C6370', fontWeight: 500 }}> ({formatNumber(c.pacingDelivered)} / {formatNumber(c.pacingTarget)})</span>
+            </div>
           </>
         ) : (
           <div style={{ fontSize: '12px', color: '#6b7280' }}>--</div>

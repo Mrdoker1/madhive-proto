@@ -201,8 +201,8 @@ const initialState: CampaignState = {
     cpeCode: '',
     campaignOwner: '',
     campaignApprover: '',
-    spotLength: ['60'], // Default selected :60
-    spotLengthMix: { fifteen: 0, thirty: 0, sixty: 100 } // Default 100% on :60
+    spotLength: ['30'], // Default selected :30
+    spotLengthMix: { fifteen: 0, thirty: 100, sixty: 0 } // Default 100% on :30
   },
   budget: {
     totalBudget: 0,

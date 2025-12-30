@@ -1,10 +1,12 @@
 export type CampaignStatus = 'On Target' | 'Way Under Pace' | 'Over Pace' | 'Way Over Pace' | 'Under Pace' | 'Not Started' | 'Completed';
+export type ApprovalStatus = 'Pending' | 'Approved';
 
 export interface CampaignSummary {
   id: string;
   name: string;
   advertiser: string; // Advertiser name
   status: CampaignStatus;
+  approvalStatus: ApprovalStatus;
   channels: string[]; // ['CTV','Social','Audio','Display','Linear TV']
   progressPercent: number; // 0..100
   progressDelivered: number;
@@ -27,6 +29,11 @@ export const statusColor: Record<CampaignStatus, string> = {
   'Under Pace': '#f59e0b',
   'Not Started': '#9ca3af',
   'Completed': '#10b981',
+};
+
+export const approvalStatusColor: Record<ApprovalStatus, string> = {
+  'Pending': '#f59e0b',
+  'Approved': '#22c55e',
 };
 
 // Simple helper to generate pseudo sparkline data
@@ -77,6 +84,8 @@ function makeCampaign(i: number): CampaignSummary {
     'Mercedes-Benz USA'
   ];
   const status = statuses[i % statuses.length];
+  // If campaign is running (not "Not Started"), it must be approved
+  const approvalStatus: ApprovalStatus = 'Approved';
   const channels = channelsPool[i % channelsPool.length];
   const advertiser = advertisers[i % advertisers.length];
   const goal = 1500000 + (i % 5) * 250000;
@@ -95,6 +104,7 @@ function makeCampaign(i: number): CampaignSummary {
     name: `Campaign_${i.toString().padStart(2, '0')} 08.01 - 08.${(i % 28) + 1}`,
     advertiser,
     status,
+    approvalStatus,
     channels,
     progressPercent,
     progressDelivered: delivered,
@@ -117,6 +127,7 @@ const realMockCampaigns: CampaignSummary[] = [
     name: 'Q4 25 HSP WEAT',
     advertiser: 'Home Shopping Plus',
     status: 'Not Started',
+    approvalStatus: 'Pending',
     channels: ['Linear TV', 'CTV'],
     progressPercent: 0,
     progressDelivered: 0,
@@ -135,6 +146,7 @@ const realMockCampaigns: CampaignSummary[] = [
     name: 'JGC HOLIDAY SALE Q425',
     advertiser: 'JGC Retail',
     status: 'Not Started',
+    approvalStatus: 'Pending',
     channels: ['Social', 'Display', 'CTV'],
     progressPercent: 0,
     progressDelivered: 0,
@@ -153,13 +165,14 @@ const realMockCampaigns: CampaignSummary[] = [
     name: 'JGC Holiday Pre-Launch',
     advertiser: 'JGC Retail',
     status: 'Over Pace',
+    approvalStatus: 'Approved',
     channels: ['Social', 'Display', 'Audio'],
     progressPercent: 20,
     progressDelivered: 400000,
     progressGoal: 2000000,
-    pacingPercent: 118.52,
+    pacingPercent: 102.5,
     pacingDelivered: 400000,
-    pacingTarget: 337500,
+    pacingTarget: 390244,
     deliveredImpressions: 400000,
     deliveredSpend: 11200,
     remainingImpression: 1600000,
@@ -171,13 +184,14 @@ const realMockCampaigns: CampaignSummary[] = [
     name: 'Ford Mach-E EV Intro',
     advertiser: 'Ford Motor Company',
     status: 'Under Pace',
+    approvalStatus: 'Approved',
     channels: ['Linear TV', 'CTV', 'Display'],
     progressPercent: 88.22,
     progressDelivered: 1764400,
     progressGoal: 2000000,
-    pacingPercent: 90.16,
+    pacingPercent: 88.5,
     pacingDelivered: 1764400,
-    pacingTarget: 1957143,
+    pacingTarget: 1993672,
     deliveredImpressions: 1764400,
     deliveredSpend: 47638.8,
     remainingImpression: 235600,
@@ -189,13 +203,14 @@ const realMockCampaigns: CampaignSummary[] = [
     name: 'Toyota Q3 Brand Push',
     advertiser: 'Toyota USA',
     status: 'Way Over Pace',
+    approvalStatus: 'Approved',
     channels: ['Linear TV', 'CTV', 'Social', 'Display'],
     progressPercent: 90.74,
     progressDelivered: 3175900,
     progressGoal: 3500000,
-    pacingPercent: 132.5,
+    pacingPercent: 96.8,
     pacingDelivered: 3175900,
-    pacingTarget: 2395833,
+    pacingTarget: 3280062,
     deliveredImpressions: 3175900,
     deliveredSpend: 79397.5,
     remainingImpression: 324100,
@@ -207,6 +222,7 @@ const realMockCampaigns: CampaignSummary[] = [
     name: 'Chevy Silverado Summer Sale',
     advertiser: 'Chevrolet',
     status: 'Way Under Pace',
+    approvalStatus: 'Approved',
     channels: ['Linear TV', 'Display'],
     progressPercent: 50,
     progressDelivered: 1250000,
@@ -225,13 +241,14 @@ const realMockCampaigns: CampaignSummary[] = [
     name: 'Q3 25 Ford F150 TRISTATE',
     advertiser: 'Ford Motor Company',
     status: 'On Target',
+    approvalStatus: 'Approved',
     channels: ['Linear TV', 'CTV'],
     progressPercent: 68.32,
     progressDelivered: 2049600,
     progressGoal: 3000000,
-    pacingPercent: 101.16,
+    pacingPercent: 99.2,
     pacingDelivered: 2049600,
-    pacingTarget: 2026667,
+    pacingTarget: 2066129,
     deliveredImpressions: 2049600,
     deliveredSpend: 51240,
     remainingImpression: 950400,
@@ -243,13 +260,14 @@ const realMockCampaigns: CampaignSummary[] = [
     name: 'Hyundai Sonata Sept Event',
     advertiser: 'Hyundai Motors',
     status: 'On Target',
+    approvalStatus: 'Approved',
     channels: ['Linear TV', 'Display', 'Social'],
     progressPercent: 68.32,
     progressDelivered: 1024800,
     progressGoal: 1500000,
-    pacingPercent: 101.16,
+    pacingPercent: 92.3,
     pacingDelivered: 1024800,
-    pacingTarget: 1013333,
+    pacingTarget: 1110336,
     deliveredImpressions: 1024800,
     deliveredSpend: 22545.6,
     remainingImpression: 475200,
@@ -261,13 +279,14 @@ const realMockCampaigns: CampaignSummary[] = [
     name: 'Lincoln Aviator Luxury',
     advertiser: 'Lincoln Motors',
     status: 'On Target',
+    approvalStatus: 'Approved',
     channels: ['Linear TV', 'CTV', 'Social'],
     progressPercent: 88.22,
     progressDelivered: 705760,
     progressGoal: 800000,
-    pacingPercent: 100.11,
+    pacingPercent: 98.5,
     pacingDelivered: 705760,
-    pacingTarget: 705000,
+    pacingTarget: 716396,
     deliveredImpressions: 705760,
     deliveredSpend: 21172.8,
     remainingImpression: 94240,
@@ -279,13 +298,14 @@ const realMockCampaigns: CampaignSummary[] = [
     name: 'Dodge Charger National',
     advertiser: 'Dodge',
     status: 'On Target',
+    approvalStatus: 'Approved',
     channels: ['Linear TV', 'CTV', 'Display', 'Social'],
     progressPercent: 50.16,
     progressDelivered: 3009600,
     progressGoal: 6000000,
-    pacingPercent: 99,
+    pacingPercent: 85.2,
     pacingDelivered: 3009600,
-    pacingTarget: 3040000,
+    pacingTarget: 3531690,
     deliveredImpressions: 3009600,
     deliveredSpend: 66211.2,
     remainingImpression: 2990400,
@@ -297,13 +317,14 @@ const realMockCampaigns: CampaignSummary[] = [
     name: 'Chrysler Pacifica Family',
     advertiser: 'Chrysler',
     status: 'On Target',
+    approvalStatus: 'Approved',
     channels: ['CTV', 'Display', 'Social'],
     progressPercent: 80.16,
     progressDelivered: 1202400,
     progressGoal: 1500000,
-    pacingPercent: 101.25,
+    pacingPercent: 96.2,
     pacingDelivered: 1202400,
-    pacingTarget: 1187500,
+    pacingTarget: 1249896,
     deliveredImpressions: 1202400,
     deliveredSpend: 26452.8,
     remainingImpression: 297600,
@@ -315,6 +336,7 @@ const realMockCampaigns: CampaignSummary[] = [
     name: 'August Ram Truck Month',
     advertiser: 'RAM Trucks',
     status: 'Completed',
+    approvalStatus: 'Approved',
     channels: ['Linear TV', 'CTV', 'Display'],
     progressPercent: 100,
     progressDelivered: 4500000,

@@ -60,10 +60,12 @@ interface CampaignListProps {
   onSort?: (field: SortField) => void;
   onDeleteCampaign?: (campaignId: string) => void;
   onCancelCampaign?: (campaignId: string) => void;
+  onApproveCampaign?: (campaignId: string) => void;
 }
 
-export default function CampaignList({ items, sortField, sortDirection, onSort, onDeleteCampaign, onCancelCampaign }: CampaignListProps) {
+export default function CampaignList({ items, sortField, sortDirection, onSort, onDeleteCampaign, onCancelCampaign, onApproveCampaign }: CampaignListProps) {
   const nameColWidth = 220; // px
+  const approvalStatusColWidth = 140; // px
   const statusColWidth = 160; // px
   const actionsColWidth = 48; // px for waffle menu
   
@@ -478,7 +480,7 @@ export default function CampaignList({ items, sortField, sortDirection, onSort, 
       <div
         className="grid items-center"
         style={{
-          gridTemplateColumns: `${actionsColWidth}px 160px ${nameColWidth}px ${statusColWidth}px 160px 240px 300px 220px 160px 160px 160px 160px`,
+          gridTemplateColumns: `${actionsColWidth}px 160px ${nameColWidth}px ${approvalStatusColWidth}px ${statusColWidth}px 160px 240px 300px 220px 160px 160px 160px 160px`,
           paddingLeft: 0,
           paddingRight: 0,
           paddingTop: 0,
@@ -501,7 +503,12 @@ export default function CampaignList({ items, sortField, sortDirection, onSort, 
         <div style={{ position: 'sticky', left: `${actionsColWidth + 160}px`, zIndex: 1, background: 'var(--header-background)', paddingLeft: '16px', paddingRight: '16px', paddingTop: '8px', paddingBottom: '8px' }}>
           <TextFilterHeader field="name">Campaign</TextFilterHeader>
         </div>
-        <div style={{ position: 'sticky', left: `${actionsColWidth + 160 + nameColWidth}px`, zIndex: 1, background: 'var(--header-background)', paddingLeft: '16px', paddingRight: '12px', paddingTop: '8px', paddingBottom: '8px', borderRight: '1px solid var(--border-color)' }}>
+        {/* Approval Status column */}
+        <div style={{ position: 'sticky', left: `${actionsColWidth + 160 + nameColWidth}px`, zIndex: 1, background: 'var(--header-background)', paddingLeft: '16px', paddingRight: '16px', paddingTop: '8px', paddingBottom: '8px' }}>
+          Approval Status
+        </div>
+        {/* Pacing Status column */}
+        <div style={{ position: 'sticky', left: `${actionsColWidth + 160 + nameColWidth + approvalStatusColWidth}px`, zIndex: 1, background: 'var(--header-background)', paddingLeft: '16px', paddingRight: '12px', paddingTop: '8px', paddingBottom: '8px', borderRight: '1px solid var(--border-color)' }}>
           <StatusFilterHeader>Pacing Status</StatusFilterHeader>
         </div>
         <div style={{ paddingLeft: '20px' }}>Delivered in Last 7 days</div>
@@ -547,6 +554,7 @@ export default function CampaignList({ items, sortField, sortDirection, onSort, 
           c={c} 
           onDeleteCampaign={onDeleteCampaign}
           onCancelCampaign={onCancelCampaign}
+          onApproveCampaign={onApproveCampaign}
         />
       ))}
 

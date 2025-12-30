@@ -23,10 +23,15 @@ interface DashboardFilterProviderProps {
 }
 
 export const DashboardFilterProvider: React.FC<DashboardFilterProviderProps> = ({ children, initialCampaignId }) => {
+  // Get first advertiser and campaign for default selection
+  const firstCampaign = campaignTableData[0];
+  const defaultAdvertiser = firstCampaign?.advertiser || null;
+  const defaultCampaign = firstCampaign?.id || null;
+
   const [campaignType, setCampaignType] = useState<string | null>('linear');
   const [dateRange, setDateRange] = useState<string | null>('last_30_days');
-  const [advertiser, setAdvertiser] = useState<string | null>(null);
-  const [campaign, setCampaign] = useState<string | null>(initialCampaignId || null);
+  const [advertiser, setAdvertiser] = useState<string | null>(initialCampaignId ? null : defaultAdvertiser);
+  const [campaign, setCampaign] = useState<string | null>(initialCampaignId || defaultCampaign);
 
   // Auto-select advertiser when initialCampaignId is provided
   useEffect(() => {
@@ -42,8 +47,8 @@ export const DashboardFilterProvider: React.FC<DashboardFilterProviderProps> = (
   const resetFilters = () => {
     setCampaignType('linear');
     setDateRange('last_30_days');
-    setAdvertiser(null);
-    setCampaign(null);
+    setAdvertiser(defaultAdvertiser);
+    setCampaign(defaultCampaign);
   };
 
   return (

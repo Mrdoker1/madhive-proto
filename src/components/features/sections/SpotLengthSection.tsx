@@ -17,8 +17,8 @@ const SpotLengthSection: React.FC<SpotLengthSectionProps> = ({
   
   const [values, setValues] = useState({
     fifteen: spotLengthMix?.fifteen || 0,
-    thirty: spotLengthMix?.thirty || 0,
-    sixty: spotLengthMix?.sixty || 100
+    thirty: spotLengthMix?.thirty || 100,
+    sixty: spotLengthMix?.sixty || 0
   });
 
   // Sync with Redux on mount
@@ -64,7 +64,7 @@ const SpotLengthSection: React.FC<SpotLengthSectionProps> = ({
     <div className={className}>
       {/* Description */}
       <Text size="sm" c="dimmed" mb="md">
-        Allocate budget across spot durations. :30 is the standard rate. :15 = 60%, :60 = 200% of :30 rate.
+      Allocate budget across spot durations.
       </Text>
 
       {/* Spot Length Inputs */}

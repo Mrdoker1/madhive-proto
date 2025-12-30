@@ -25,32 +25,35 @@ const ContentGenreSection: React.FC<ContentGenreSectionProps> = ({ className = '
   const dispatch = useAppDispatch();
   const contentGenreData = useAppSelector((state) => state.campaign.general.contentGenre);
   
-  // Local state
-  const [mode, setMode] = useState<'include' | 'exclude'>(contentGenreData?.mode || 'include');
-  const [selectedGenres, setSelectedGenres] = useState<string[]>(contentGenreData?.genres || []);
+  // Default to all genres selected
+  const allGenreValues = CONTENT_GENRES.map(g => g.value);
+  
+  // Local state - default to all genres included
+  const [selectedGenres, setSelectedGenres] = useState<string[]>(
+    contentGenreData?.genres && contentGenreData.genres.length > 0 
+      ? contentGenreData.genres 
+      : allGenreValues
+  );
 
   // Sync with Redux on mount
   useEffect(() => {
-    if (contentGenreData) {
-      setMode(contentGenreData.mode || 'include');
-      setSelectedGenres(contentGenreData.genres || []);
+    if (contentGenreData && contentGenreData.genres && contentGenreData.genres.length > 0) {
+      setSelectedGenres(contentGenreData.genres);
+    } else {
+      // If no data in Redux, initialize with all genres
+      setSelectedGenres(allGenreValues);
+      saveToRedux(allGenreValues);
     }
-  }, [contentGenreData]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Save to Redux when values change
-  const saveToRedux = (newMode: 'include' | 'exclude', newGenres: string[]) => {
+  // Save to Redux when values change - always in 'include' mode
+  const saveToRedux = (newGenres: string[]) => {
     dispatch(updateGeneralData({
       contentGenre: {
-        mode: newMode,
+        mode: 'include',
         genres: newGenres
       }
     }));
-  };
-
-  const handleModeChange = (value: string | null) => {
-    const newMode = (value as 'include' | 'exclude') || 'include';
-    setMode(newMode);
-    saveToRedux(newMode, selectedGenres);
   };
 
   const handleGenreToggle = (genreValue: string) => {
@@ -59,18 +62,17 @@ const ContentGenreSection: React.FC<ContentGenreSectionProps> = ({ className = '
       : [...selectedGenres, genreValue];
     
     setSelectedGenres(newGenres);
-    saveToRedux(mode, newGenres);
+    saveToRedux(newGenres);
   };
 
   const handleSelectAll = () => {
-    const allGenres = CONTENT_GENRES.map(g => g.value);
-    setSelectedGenres(allGenres);
-    saveToRedux(mode, allGenres);
+    setSelectedGenres(allGenreValues);
+    saveToRedux(allGenreValues);
   };
 
   const handleClearAll = () => {
     setSelectedGenres([]);
-    saveToRedux(mode, []);
+    saveToRedux([]);
   };
 
   const allSelected = selectedGenres.length === CONTENT_GENRES.length;
@@ -79,32 +81,8 @@ const ContentGenreSection: React.FC<ContentGenreSectionProps> = ({ className = '
   return (
     <div className={className}>
       <Text size="sm" c="dimmed" mb="md">
-        Target or exclude specific content genres to align your ads with appropriate programming content.
+        Included programming categories for audience targeting.
       </Text>
-
-      {/* Mode selector */}
-      <Group mb="lg" align="center">
-        <Select
-          value={mode}
-          onChange={handleModeChange}
-          data={[
-            { value: 'include', label: 'Include' },
-            { value: 'exclude', label: 'Exclude' }
-          ]}
-          w={120}
-          size="sm"
-          styles={{
-            input: {
-              fontWeight: 500
-            }
-          }}
-        />
-        <Text size="sm" c="dimmed">
-          {mode === 'include' 
-            ? 'Only show ads on selected genres' 
-            : 'Do not show ads on selected genres'}
-        </Text>
-      </Group>
 
       {/* Select All / Clear All controls */}
       <Group mb="md" gap="xs">
@@ -148,12 +126,14 @@ const ContentGenreSection: React.FC<ContentGenreSectionProps> = ({ className = '
       </div>
 
       {/* Summary message */}
-      {selectedGenres.length > 0 && (
+      {selectedGenres.length > 0 && selectedGenres.length < CONTENT_GENRES.length && (
         <Text size="xs" c="dimmed" mt="lg">
-          {mode === 'include' 
-            ? `Ads will only appear on ${selectedGenres.length} genre${selectedGenres.length > 1 ? 's' : ''}: ${selectedGenres.map(g => CONTENT_GENRES.find(cg => cg.value === g)?.label).join(', ')}`
-            : `Ads will be excluded from ${selectedGenres.length} genre${selectedGenres.length > 1 ? 's' : ''}: ${selectedGenres.map(g => CONTENT_GENRES.find(cg => cg.value === g)?.label).join(', ')}`
-          }
+          Ads will appear on {selectedGenres.length} categor{selectedGenres.length > 1 ? 'ies' : 'y'}: {selectedGenres.map(g => CONTENT_GENRES.find(cg => cg.value === g)?.label).join(', ')}
+        </Text>
+      )}
+      {selectedGenres.length === CONTENT_GENRES.length && (
+        <Text size="xs" c="dimmed" mt="lg">
+          Ads will appear on all programming categories
         </Text>
       )}
     </div>
