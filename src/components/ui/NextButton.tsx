@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Button, Group, Text } from '@mantine/core';
-import { IconAlertCircle } from '@tabler/icons-react';
+import { IconAlertCircle, IconPrinter } from '@tabler/icons-react';
 
 interface NextButtonProps {
   /**
@@ -42,6 +42,14 @@ interface NextButtonProps {
    * Error message to display (optional)
    */
   errorMessage?: string;
+  /**
+   * Whether to show the Print button on the left (defaults to false)
+   */
+  showPrint?: boolean;
+  /**
+   * Click handler for the Print button
+   */
+  onPrintClick?: () => void;
 }
 
 export const NextButton: React.FC<NextButtonProps> = ({
@@ -54,6 +62,8 @@ export const NextButton: React.FC<NextButtonProps> = ({
   backText = 'Back',
   backEnabled = true,
   errorMessage,
+  showPrint = false,
+  onPrintClick,
 }) => {
   return (
     <div style={{ 
@@ -73,16 +83,24 @@ export const NextButton: React.FC<NextButtonProps> = ({
         height: '64px'
       }}
       >
-        {/* Error message on the left */}
+        {/* Left side - Print button or Error message */}
         <div style={{ flex: 1 }}>
-          {errorMessage && (
+          {showPrint ? (
+            <Button
+              onClick={onPrintClick}
+              variant="light"
+              leftSection={<IconPrinter size={18} />}
+            >
+              Print
+            </Button>
+          ) : errorMessage ? (
             <Group gap={6}>
               <IconAlertCircle size={16} color="red" />
               <Text size="xs">
                 {errorMessage}
               </Text>
             </Group>
-          )}
+          ) : null}
         </div>
 
         {/* Container for buttons with gap */}

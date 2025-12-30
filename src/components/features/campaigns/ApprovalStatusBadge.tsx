@@ -1,28 +1,27 @@
 'use client';
 
 import React from 'react';
-import { Badge } from '@mantine/core';
+import { Text } from '@mantine/core';
 import type { ApprovalStatus } from '@/data/campaignsData';
 import { approvalStatusColor } from '@/data/campaignsData';
 
 export function ApprovalStatusBadge({ status }: { status: ApprovalStatus }) {
   const color = approvalStatusColor[status];
   return (
-    <Badge
-      variant="filled"
-      styles={{
-        root: {
-          backgroundColor: color,
-          color: '#FFFFFF',
-          borderRadius: '6px',
-          fontSize: '12px',
-          padding: '8px 6px',
-          fontWeight: 700,
-        },
+    <Text
+      component="span"
+      style={{
+        color: color,
+        fontSize: '12px',
+        fontWeight: 700,
+        padding: '4px 8px',
+        borderRadius: '4px',
+        backgroundColor: `${color}15`, // 15 = ~8% opacity
+        display: 'inline-block',
       }}
     >
       {status}
-    </Badge>
+    </Text>
   );
 }
 

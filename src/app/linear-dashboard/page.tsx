@@ -13,7 +13,7 @@ import CampaignList from '@/components/features/campaigns/CampaignList';
 import { DashboardFilterProvider } from '@/contexts/DashboardFilterContext';
 import { campaignsMock, CampaignSummary } from '@/data/campaignsData';
 import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
-import { resetCampaign } from '@/store/slices/campaignSlice';
+import { resetCampaign, deleteCampaign } from '@/store/slices/campaignSlice';
 import type { SavedCampaign } from '@/store/slices/campaignSlice';
 
 // Function to convert SavedCampaign to CampaignSummary
@@ -77,9 +77,16 @@ function LinearDashboardContent() {
   };
 
   const handleDeleteCampaign = (campaignId: string) => {
-    // In real app, this would call an API
-    console.log('Delete campaign:', campaignId);
-    // For prototype, we could remove from Redux store if it's a saved campaign
+    // Check if it's a saved campaign (starts with 'campaign_')
+    if (campaignId.startsWith('campaign_')) {
+      // Remove from Redux store
+      dispatch(deleteCampaign(campaignId));
+      console.log('Campaign deleted:', campaignId);
+    } else {
+      // For mock campaigns, just log (can't delete mock data)
+      console.log('Cannot delete mock campaign:', campaignId);
+      alert('Cannot delete demo campaigns. Only campaigns you create can be deleted.');
+    }
   };
 
   const handleCancelCampaign = (campaignId: string) => {
@@ -219,7 +226,7 @@ function LinearDashboardContent() {
             </div>
 
             {/* Campaign List Section */}
-            <div style={{ marginTop: '32px' }}>
+            <div id="campaigns-list" style={{ marginTop: '32px', scrollMarginTop: '80px' }}>
               {/* Section Header with New Campaign Button */}
               <div style={{ 
                 display: 'flex', 

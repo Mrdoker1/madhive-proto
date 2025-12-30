@@ -443,6 +443,12 @@ const campaignSlice = createSlice({
         createdAt: new Date().toISOString()
       };
       state.savedCampaigns.unshift(newCampaign); // Add to beginning of list
+    },
+
+    deleteCampaign: (state, action: PayloadAction<string>) => {
+      state.savedCampaigns = state.savedCampaigns.filter(
+        campaign => campaign.id !== action.payload
+      );
     }
   }
 });
@@ -452,6 +458,7 @@ export const {
   updateBudgetData,
   updateGoalData,
   updateFlightData,
+  deleteCampaign,
   updateLinearData,
   updateAudienceData,
   updateMarketsData,

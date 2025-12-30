@@ -1,22 +1,14 @@
 'use client';
 
-import React from 'react';
-import { Modal, Text, Group, Badge, Progress, SimpleGrid, Divider, Button, Tooltip } from '@mantine/core';
+import React, { useRef } from 'react';
+import { Modal, Text, Group, Button, Divider } from '@mantine/core';
 import { IconDownload, IconPrinter, IconCheck } from '@tabler/icons-react';
-import { 
-  LineChart, 
-  Line, 
-  XAxis, 
-  YAxis, 
-  ReferenceLine, 
-  ResponsiveContainer,
-  Legend,
-  ComposedChart,
-  Area
-} from 'recharts';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 import type { CampaignSummary } from '@/data/campaignsData';
 import { CampaignStatusBadge } from './CampaignStatusBadge';
 import { ApprovalStatusBadge } from './ApprovalStatusBadge';
+import CampaignDetailView, { type CampaignDetailData } from './CampaignDetailView';
 
 // Mock extended data for campaigns (since CampaignSummary doesn't have all fields)
 // In real app, this would come from API/store
@@ -81,120 +73,10 @@ interface CampaignDetailModalProps {
   onApproveCampaign?: (campaignId: string) => void;
 }
 
-// Format helpers
-const formatNumber = (n: number): string => {
-  if (n >= 1000000) return `${(n / 1000000).toFixed(1)}M`;
-  if (n >= 1000) return `${(n / 1000).toFixed(0)}K`;
-  return n.toLocaleString('en-US');
-};
-
-const formatCurrency = (n: number): string => {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(n);
-};
-
-// Summary item component
-const SummaryItem: React.FC<{ label: string; value: string | React.ReactNode }> = ({ label, value }) => (
-  <div style={{ marginBottom: '8px' }}>
-    <Text size="xs" c="dimmed" mb={2}>{label}</Text>
-    <Text component="div" size="sm" fw={500}>{value}</Text>
-  </div>
-);
-
-// Pacing Chart component
-const PacingChart: React.FC<{ 
-  title: string; 
-  maxValue: number; 
-  currentValue: number;
-  formatValue: (val: number) => string;
-  unit?: string;
-  progressPercent: number;
-}> = ({ title, maxValue, currentValue, formatValue, unit, progressPercent }) => {
-  // Generate chart data based on progress
-  const totalPoints = 10;
-  const currentPoint = Math.round(totalPoints * (progressPercent / 100));
-  
-  const chartData = [];
-  for (let i = 0; i <= totalPoints; i++) {
-    const progress = i / totalPoints;
-    const planned = progress * maxValue;
-    
-    // Add some variation to make it look realistic
-    const variation = Math.sin(i * 0.8) * 0.03;
-    const actual = i <= currentPoint 
-      ? (progress + variation) * (currentValue / (progressPercent / 100 || 1)) 
-      : undefined;
-    
-    chartData.push({
-      index: i,
-      planned: Math.max(0, planned),
-      actual: actual !== undefined ? Math.max(0, actual) : undefined,
-    });
-  }
-
-  return (
-    <div style={{ flex: 1 }}>
-      <div style={{ 
-        padding: '12px', 
-        backgroundColor: '#f9fafb', 
-        borderRadius: '8px',
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column'
-      }}>
-        <Text size="xs" fw={600} mb="xs">{title}</Text>
-        <ResponsiveContainer width="100%" height={120}>
-          <LineChart data={chartData} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
-            <XAxis hide />
-            <YAxis hide domain={[0, maxValue]} />
-            <ReferenceLine x={currentPoint} stroke="#999" strokeDasharray="3 3" />
-            <Line type="monotone" dataKey="planned" stroke="#666" strokeWidth={1.5} dot={false} name="Planned" />
-            <Line type="monotone" dataKey="actual" stroke="#E91E8A" strokeWidth={2} dot={false} name="Actual" connectNulls={false} />
-            <Legend 
-              verticalAlign="bottom"
-              height={20}
-              iconType="plainline"
-              iconSize={10}
-              formatter={(value) => <span style={{ color: '#666', fontSize: '10px' }}>{value}</span>}
-            />
-          </LineChart>
-        </ResponsiveContainer>
-        <Group justify="space-between" mt="xs">
-          <Text size="xs" c="dimmed">{unit === '$' ? '$0' : '0'}</Text>
-          <Text size="xs" c="dimmed">{formatValue(maxValue)}</Text>
-        </Group>
-      </div>
-    </div>
-  );
-};
-
-// Sparkline component for 7-day delivery
-const DeliverySparkline: React.FC<{ data: number[] }> = ({ data }) => {
-  const chartData = data.map((v, i) => ({ i, v }));
-  
-  return (
-    <div style={{ width: '100%', height: '60px' }}>
-      <ResponsiveContainer width="100%" height="100%">
-        <ComposedChart data={chartData} margin={{ top: 5, bottom: 0, left: 0, right: 0 }}>
-          <defs>
-            <linearGradient id="modalSparkGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#2563eb" stopOpacity={0.25} />
-              <stop offset="100%" stopColor="#2563eb" stopOpacity={0} />
-            </linearGradient>
-          </defs>
-          <Area type="monotone" dataKey="v" stroke="none" fill="url(#modalSparkGradient)" />
-          <Line type="monotone" dataKey="v" stroke="#2563eb" strokeWidth={2} dot={false} />
-        </ComposedChart>
-      </ResponsiveContainer>
-    </div>
-  );
-};
 
 const CampaignDetailModal: React.FC<CampaignDetailModalProps> = ({ campaign, opened, onClose, onApproveCampaign }) => {
+  const printRef = useRef<HTMLDivElement>(null);
+
   if (!campaign) return null;
 
   // Get extended mock data for this campaign
@@ -215,13 +97,101 @@ const CampaignDetailModal: React.FC<CampaignDetailModalProps> = ({ campaign, ope
 
   // Calculate budget info
   const totalBudget = campaign.remainingBudget + campaign.deliveredSpend;
-  const budgetProgress = totalBudget > 0 ? (campaign.deliveredSpend / totalBudget) * 100 : 0;
   const avgCPM = campaign.deliveredImpressions > 0 
     ? (campaign.deliveredSpend / campaign.deliveredImpressions) * 1000 
     : 17.2;
 
-  // Spot length display
-  const spotLengthDisplay = `:15 ${extData.spotLengthMix.fifteen}%  :30 ${extData.spotLengthMix.thirty}%  :60 ${extData.spotLengthMix.sixty}%`;
+  // Prepare data for CampaignDetailView
+  const detailData: CampaignDetailData = {
+    name: campaign.name,
+    approvalStatus: campaign.approvalStatus,
+    status: campaign.status,
+    advertiser: extData.advertiser,
+    brand: extData.brand,
+    cpeCode: extData.cpeCode,
+    contact: extData.contact,
+    approver: extData.approver,
+    goal: 'Maximum Impressions',
+    totalBudget,
+    estImpressions: campaign.progressGoal,
+    avgCPM,
+    progressPercent: campaign.progressPercent,
+    pacingPercent: campaign.pacingPercent,
+    channels: campaign.channels,
+    markets: extData.markets,
+    flight: getFlightDates(),
+    audience: extData.audience,
+    spotLengthMix: extData.spotLengthMix,
+    language: extData.language,
+    dayparts: extData.dayparts,
+    genres: extData.genres,
+    fluidity: extData.fluidity,
+    exclusions: extData.exclusions,
+    progressGoal: campaign.progressGoal,
+    deliveredImpressions: campaign.deliveredImpressions,
+    deliveredSpend: campaign.deliveredSpend,
+    remainingImpression: campaign.remainingImpression,
+    remainingBudget: campaign.remainingBudget,
+    sparkline: campaign.sparkline,
+  };
+
+  const handlePrintClick = async () => {
+    const element = printRef.current;
+    if (!element) return;
+
+    try {
+      // Create canvas from the element
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#ffffff',
+      });
+
+      const imgData = canvas.toDataURL('image/png');
+      
+      // A4 landscape dimensions in mm
+      const pdfWidth = 297;
+      const pdfHeight = 210;
+      
+      // Calculate image dimensions maintaining aspect ratio
+      const canvasAspectRatio = canvas.width / canvas.height;
+      const pdfAspectRatio = pdfWidth / pdfHeight;
+      
+      let imgWidth, imgHeight, xOffset, yOffset;
+      
+      if (canvasAspectRatio > pdfAspectRatio) {
+        // Image is wider - fit to width
+        imgWidth = pdfWidth;
+        imgHeight = pdfWidth / canvasAspectRatio;
+        xOffset = 0;
+        yOffset = (pdfHeight - imgHeight) / 2;
+      } else {
+        // Image is taller - fit to height
+        imgHeight = pdfHeight;
+        imgWidth = pdfHeight * canvasAspectRatio;
+        xOffset = (pdfWidth - imgWidth) / 2;
+        yOffset = 0;
+      }
+      
+      // Create PDF in landscape mode
+      const pdf = new jsPDF({
+        orientation: 'landscape',
+        unit: 'mm',
+        format: 'a4',
+      });
+
+      // Add image to PDF, centered with proper aspect ratio
+      pdf.addImage(imgData, 'PNG', xOffset, yOffset, imgWidth, imgHeight);
+      
+      // Open print dialog
+      pdf.autoPrint();
+      window.open(pdf.output('bloburl'), '_blank');
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      alert('Error generating PDF. Please try again.');
+    }
+  };
 
   return (
     <Modal
@@ -240,150 +210,12 @@ const CampaignDetailModal: React.FC<CampaignDetailModalProps> = ({ campaign, ope
         body: { padding: '24px' }
       }}
     >
-      {/* Top Row - Campaign Details, Goals/Budget, Status, Markets */}
-      <SimpleGrid cols={{ base: 1, sm: 2, md: 4 }} spacing={16} mb={16}>
-        {/* Campaign Details */}
-        <div style={{ padding: '16px', backgroundColor: 'white', borderRadius: '8px', border: '1px solid #E5E7EB' }}>
-          <Text size="xs" fw={600} c="dimmed" mb="sm">CAMPAIGN DETAILS</Text>
-          <SummaryItem label="Advertiser" value={extData.advertiser} />
-          <SummaryItem label="Brand" value={extData.brand} />
-          <SummaryItem label="CPE Code" value={extData.cpeCode} />
-          <SummaryItem label="Contact" value={extData.contact} />
-          <SummaryItem label="Approver" value={extData.approver} />
-        </div>
-
-        {/* Goals & Budget */}
-        <div style={{ padding: '16px', backgroundColor: 'white', borderRadius: '8px', border: '1px solid #E5E7EB' }}>
-          <Text size="xs" fw={600} c="dimmed" mb="sm">GOALS & BUDGET</Text>
-          <SummaryItem label="Goal" value="Maximum Impressions" />
-          <SummaryItem label="Total Budget" value={formatCurrency(totalBudget)} />
-          <SummaryItem label="Est. Impressions" value={formatNumber(campaign.progressGoal)} />
-          <SummaryItem label="Avg CPM" value={`$${avgCPM.toFixed(2)}`} />
-        </div>
-
-        {/* Campaign Status */}
-        <div style={{ padding: '16px', backgroundColor: 'white', borderRadius: '8px', border: '1px solid #E5E7EB' }}>
-          <Text size="xs" fw={600} c="dimmed" mb="sm">CAMPAIGN STATUS</Text>
-          <SummaryItem 
-            label="Approval Status" 
-            value={<ApprovalStatusBadge status={campaign.approvalStatus} />} 
-          />
-          <SummaryItem 
-            label="Pacing Status" 
-            value={<CampaignStatusBadge status={campaign.status} />} 
-          />
-          <SummaryItem label="Progress" value={`${campaign.progressPercent.toFixed(1)}%`} />
-          <SummaryItem 
-            label="Pacing %" 
-            value={campaign.pacingPercent !== null ? `${campaign.pacingPercent.toFixed(1)}%` : '—'} 
-          />
-          <SummaryItem 
-            label="Channels" 
-            value={
-              <Group gap={4} mt={2}>
-                {campaign.channels.map(ch => (
-                  <Badge key={ch} size="xs" variant="light" color="pink">{ch}</Badge>
-                ))}
-              </Group>
-            } 
-          />
-        </div>
-
-        {/* Markets & Stations */}
-        <div style={{ padding: '16px', backgroundColor: 'white', borderRadius: '8px', border: '1px solid #E5E7EB' }}>
-          <Text size="xs" fw={600} c="dimmed" mb="sm">MARKETS & STATIONS</Text>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            {extData.markets.map((market, idx) => (
-              <div key={idx}>
-                <Group justify="space-between">
-                  <Text size="sm" fw={500} style={{ textDecoration: 'underline' }}>{market.name}</Text>
-                  <Text size="sm" c="dimmed">{formatCurrency(market.budget)}</Text>
-                </Group>
-                <Text size="xs" c="dimmed" ml="md">{market.stations.join(', ')}</Text>
-              </div>
-            ))}
-          </div>
-        </div>
-      </SimpleGrid>
-
-      {/* Second Row - Pacing Charts | Guidelines & Delivery Metrics */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: '16px', marginBottom: '16px' }}>
-        {/* Left - Pacing Charts */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          <PacingChart 
-            title="Pacing: Impressions"
-            maxValue={campaign.progressGoal}
-            currentValue={campaign.deliveredImpressions}
-            formatValue={formatNumber}
-            progressPercent={campaign.progressPercent}
-          />
-          <PacingChart 
-            title="Pacing: Budget"
-            maxValue={totalBudget}
-            currentValue={campaign.deliveredSpend}
-            formatValue={formatCurrency}
-            unit="$"
-            progressPercent={budgetProgress}
-          />
-        </div>
-
-        {/* Right - Guidelines & Delivery Metrics stacked */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', height: '100%' }}>
-          {/* Guidelines */}
-          <div style={{ padding: '16px', backgroundColor: 'white', borderRadius: '8px', border: '1px solid #E5E7EB', flex: 1 }}>
-            <Text size="xs" fw={600} c="dimmed" mb="sm">GUIDELINES</Text>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px' }}>
-              <div>
-                <Text size="xs" c="dimmed">Flight</Text>
-                <Text size="sm">{getFlightDates()}</Text>
-              </div>
-              <div>
-                <Text size="xs" c="dimmed">Audience</Text>
-                <Text size="sm">{extData.audience}</Text>
-              </div>
-              <div>
-                <Text size="xs" c="dimmed">Spot Length</Text>
-                <Text size="sm">{spotLengthDisplay}</Text>
-              </div>
-              <div>
-                <Text size="xs" c="dimmed">Language</Text>
-                <Text size="sm">{extData.language}</Text>
-              </div>
-              <div>
-                <Text size="xs" c="dimmed">Dayparts</Text>
-                <Text size="sm">{extData.dayparts}</Text>
-              </div>
-              <div>
-                <Text size="xs" c="dimmed">Genres</Text>
-                <Text size="sm">{extData.genres}</Text>
-              </div>
-              <div>
-                <Text size="xs" c="dimmed">Fluidity</Text>
-                <Text size="sm">Max {extData.fluidity}%</Text>
-              </div>
-              <div>
-                <Text size="xs" c="dimmed">Exclusions</Text>
-                <Text size="sm">{extData.exclusions > 0 ? `${extData.exclusions} program(s)` : 'None'}</Text>
-              </div>
-            </div>
-          </div>
-
-          {/* Delivery Metrics */}
-          <div style={{ padding: '16px', backgroundColor: 'white', borderRadius: '8px', border: '1px solid #E5E7EB', flex: 1 }}>
-            <Group justify="space-between" mb="sm">
-              <Text size="xs" fw={600} c="dimmed">DELIVERY METRICS</Text>
-              <div style={{ width: '200px' }}>
-                <DeliverySparkline data={campaign.sparkline.slice(-7)} />
-              </div>
-            </Group>
-            <SimpleGrid cols={4} spacing="md">
-              <SummaryItem label="Delivered Impressions" value={formatNumber(campaign.deliveredImpressions)} />
-              <SummaryItem label="Delivered Spend" value={formatCurrency(campaign.deliveredSpend)} />
-              <SummaryItem label="Remaining Impressions" value={formatNumber(campaign.remainingImpression)} />
-              <SummaryItem label="Remaining Budget" value={formatCurrency(campaign.remainingBudget)} />
-            </SimpleGrid>
-          </div>
-        </div>
+      <div ref={printRef} style={{ padding: '40px' }}>
+        <CampaignDetailView 
+          data={detailData} 
+          showApprovalBadges={true}
+          showSparkline={true}
+        />
       </div>
 
       {/* Bottom Section - Actions */}
@@ -404,10 +236,7 @@ const CampaignDetailModal: React.FC<CampaignDetailModalProps> = ({ campaign, ope
           <Button 
             variant="light" 
             leftSection={<IconPrinter size={18} />}
-            onClick={() => {
-              // Simulate print
-              window.print();
-            }}
+            onClick={handlePrintClick}
           >
             Print
           </Button>
