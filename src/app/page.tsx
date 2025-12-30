@@ -1,224 +1,250 @@
 'use client';
 
-import Link from "next/link";
-import { Text, Table, TableThead, TableTbody, TableTr, TableTh, TableTd, Checkbox } from '@mantine/core';
-import PageLayout from "@/components/layout/PageLayout";
-import MapSettingsSection from '@/components/features/settings/MapSettingsSection';
-import AISettingsSection from '@/components/features/settings/AISettingsSection';
-import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
-import { setShowNavigationAnchors, setShowFlightByDay, setShowDaypartsSelector } from '@/store/slices/uiSettingsSlice';
+import React, { useState } from 'react';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { TextInput, PasswordInput, Button, Text, Paper, Group, Checkbox, Anchor, Divider } from '@mantine/core';
+import { IconMail, IconLock } from '@tabler/icons-react';
 
-export default function Home() {
-  const dispatch = useAppDispatch();
-  const showNavigationAnchors = useAppSelector((state) => state.uiSettings.showNavigationAnchors);
-  const showFlightByDay = useAppSelector((state) => state.uiSettings.showFlightByDay);
-  const showDaypartsSelector = useAppSelector((state) => state.uiSettings.showDaypartsSelector);
+export default function LoginPage() {
+  const router = useRouter();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleNavigationToggle = (event: React.ChangeEvent<HTMLInputElement>) => {
-    dispatch(setShowNavigationAnchors(event.currentTarget.checked));
-  };
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    
+    if (!email || !password) {
+      setError('Please enter both email and password');
+      return;
+    }
 
-  const handleFlightByDayToggle = (event: React.ChangeEvent<HTMLInputElement>) => {
-    dispatch(setShowFlightByDay(event.currentTarget.checked));
-  };
-
-  const handleDaypartsSelectorToggle = (event: React.ChangeEvent<HTMLInputElement>) => {
-    dispatch(setShowDaypartsSelector(event.currentTarget.checked));
+    setIsLoading(true);
+    
+    // Simulate login delay
+    await new Promise(resolve => setTimeout(resolve, 800));
+    
+    // For prototype, accept any credentials
+    setIsLoading(false);
+    router.push('/linear-dashboard');
   };
 
   return (
-    <PageLayout>
-      <div style={{ backgroundColor: 'var(--page-background)' }} className="h-full">
-        <div className="container mx-auto flex flex-col items-center justify-center min-h-full" style={{ paddingTop: '64px' }}>
-          <h2 style={{ color: 'black', paddingBottom: '8px'}} >Madhive Proto</h2>
-          <p style={{ color: 'black', paddingBottom: '32px', fontSize: '12px' }}>Campaign management prototype with linear and omnichannel advertising workflows</p>
-          
-          <div className="mt-8 w-full max-w-6xl flex justify-center">
-            <Table style={{ tableLayout: 'fixed', width: '100%', maxWidth: '800px' }}>
-              <TableThead>
-                <TableTr>
-                  <TableTh>
-                    <Text c="grey" size="xs" fw={500}>Page</Text>
-                  </TableTh>
-                  <TableTh>
-                    <Text c="grey" size="xs" fw={500}>Linear Campaign</Text>
-                  </TableTh>
-                  <TableTh>
-                    <Text c="grey" size="xs" fw={500}>Omnichannel Campaign</Text>
-                  </TableTh>
-                  <TableTh>
-                    <Text c="grey" size="xs" fw={500}>Description</Text>
-                  </TableTh>
-                </TableTr>
-              </TableThead>
-              <TableTbody>
-                {[
-                  {
-                    title: 'Login',
-                    description: 'User authentication screen with username and password',
-                    linearHref: '/login',
-                    omnichannelHref: '/login'
-                  },
-                  {
-                    title: 'Linear Dashboard',
-                    description: 'Campaign performance dashboard with metrics and insights',
-                    linearHref: '/linear-dashboard',
-                    omnichannelHref: null
-                  },
-                  {
-                    title: 'New Campaign',
-                    description: 'General campaign information, budget settings, goals, and flight range configuration',
-                    linearHref: '/campaign/linear/new',
-                    omnichannelHref: '/campaign/omnichannel/new'
-                  },
-                  {
-                    title: 'Channels',
-                    description: 'Select advertising channels for omnichannel campaigns',
-                    linearHref: null,
-                    omnichannelHref: '/campaign/omnichannel/channels'
-                  },
-                  {
-                    title: 'Media Outlets',
-                    description: 'Configure channel-specific settings, audience targeting, market selection, and dayparts',
-                    linearHref: '/campaign/linear/details',
-                    omnichannelHref: '/campaign/omnichannel/details'
-                  },
-                  {
-                    title: 'Guidelines',
-                    description: 'Generate and review campaign proposal',
-                    linearHref: '/campaign/linear/proposal',
-                    omnichannelHref: null
-                  },
-                  {
-                    title: 'Review',
-                    description: 'Final review of all campaign settings before creation and launch',
-                    linearHref: '/campaign/linear/summary',
-                    omnichannelHref: '/campaign/omnichannel/summary'
-                  }
-                ].map((page, index) => (
-                  <TableTr key={index}>
-                    <TableTd>
-                      <Text c="black" size="xs" fw={500}>
-                        {page.title}
-                      </Text>
-                    </TableTd>
-                    <TableTd>
-                      {page.linearHref ? (
-                        <Link href={page.linearHref}>
-                          <Text c="blue" size="xs" style={{ cursor: 'pointer', textDecoration: 'underline' }}>
-                            View Page
-                          </Text>
-                        </Link>
-                      ) : (
-                        <Text c="grey" size="xs">
-                          N/A
-                        </Text>
-                      )}
-                    </TableTd>
-                    <TableTd>
-                      {page.omnichannelHref ? (
-                        <Link href={page.omnichannelHref}>
-                          <Text c="blue" size="xs" style={{ cursor: 'pointer', textDecoration: 'underline' }}>
-                            View Page
-                          </Text>
-                        </Link>
-                      ) : (
-                        <Text c="grey" size="xs">
-                          N/A
-                        </Text>
-                      )}
-                    </TableTd>
-                    <TableTd>
-                      <Text c="black" size="xs">
-                        {page.description}
-                      </Text>
-                    </TableTd>
-                  </TableTr>
-                ))}
-              </TableTbody>
-            </Table>
-          </div>
+    <div style={{
+      minHeight: '100vh',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      background: 'linear-gradient(135deg, #FDFCFA 0%, #F3F2EB 50%, #E6E3E8 100%)',
+      position: 'relative',
+      overflow: 'hidden'
+    }}>
+      {/* Background decoration */}
+      <div style={{
+        position: 'absolute',
+        top: '-20%',
+        right: '-10%',
+        width: '600px',
+        height: '600px',
+        borderRadius: '50%',
+        background: 'radial-gradient(circle, rgba(41, 16, 54, 0.03) 0%, transparent 70%)',
+        pointerEvents: 'none'
+      }} />
+      <div style={{
+        position: 'absolute',
+        bottom: '-30%',
+        left: '-15%',
+        width: '800px',
+        height: '800px',
+        borderRadius: '50%',
+        background: 'radial-gradient(circle, rgba(255, 102, 188, 0.04) 0%, transparent 70%)',
+        pointerEvents: 'none'
+      }} />
 
-          {/* Divider */}
-          <div className="w-full max-w-6xl flex justify-center" style={{ marginTop: '32px', marginBottom: '32px' }}>
-            <div style={{ height: '1px', backgroundColor: '#E5E7EB', width: '100%', maxWidth: '800px' }} />
-          </div>
-
-          {/* Settings sections in one row */}
-          <div className="w-full max-w-6xl flex justify-center" style={{ paddingBottom: '40px' }}>
-            <div style={{ display: 'flex', gap: '32px', width: '100%', maxWidth: '800px' }}>
-              <div style={{ flex: 1 }}>
-                <MapSettingsSection />
-              </div>
-              <div style={{ flex: 1 }}>
-                <AISettingsSection />
-              </div>
-            </div>
-          </div>
-
-          {/* UI Settings */}
-          <div className="w-full max-w-6xl flex justify-center" style={{ paddingBottom: '40px' }}>
-            <div style={{ display: 'flex', gap: '32px', width: '100%', maxWidth: '800px' }}>
-              {/* Navigation Settings */}
-              <div style={{ 
-                flex: 1,
-                padding: '20px', 
-                backgroundColor: 'white', 
-                borderRadius: '8px',
-                border: '1px solid #E5E7EB'
-              }}>
-                <Text size="sm" fw={600} mb="md" c="black">Navigation Settings</Text>
-                <Checkbox
-                  label="Show page sections navigator"
-                  description="Display navigation anchors on the left side of campaign pages"
-                  checked={showNavigationAnchors}
-                  onChange={handleNavigationToggle}
-                  size="sm"
-                />
-              </div>
-
-              {/* Flight Settings */}
-              <div style={{ 
-                flex: 1,
-                padding: '20px', 
-                backgroundColor: 'white', 
-                borderRadius: '8px',
-                border: '1px solid #E5E7EB'
-              }}>
-                <Text size="sm" fw={600} mb="md" c="black">Flight Settings</Text>
-                <Checkbox
-                  label="Show Flight by Day chart"
-                  description="Display the visual day/week breakdown chart in the Flight Range section"
-                  checked={showFlightByDay}
-                  onChange={handleFlightByDayToggle}
-                  size="sm"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Dayparts Settings */}
-          <div className="w-full max-w-6xl flex justify-center" style={{ paddingBottom: '40px' }}>
-            <div style={{ 
-              width: '100%', 
-              maxWidth: '800px', 
-              padding: '20px', 
-              backgroundColor: 'white', 
-              borderRadius: '8px',
-              border: '1px solid #E5E7EB'
+      <Paper
+        radius="lg"
+        p={0}
+        style={{
+          width: '100%',
+          maxWidth: '420px',
+          margin: '24px',
+          position: 'relative',
+          zIndex: 1,
+          backgroundColor: 'white',
+          overflow: 'hidden'
+        }}
+      >
+        {/* Logo and Branding */}
+        <div style={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'space-between',
+          marginBottom: '16px',
+          padding: '24px 24px 0 24px'
+        }}>
+          <div style={{ 
+            position: 'relative',
+            display: 'flex',
+            alignItems: 'center'
+          }}>
+            <Image
+              src="/assets/icons/header/logo.svg"
+              alt="MadHive Logo"
+              width={120}
+              height={32}
+              priority
+              style={{ 
+                objectFit: 'contain', 
+                boxSizing: 'content-box',
+                height: 'fit-content',
+                width: '64px'
+              }}
+            />
+            <span style={{ 
+              position: 'absolute', 
+              top: '-6px', 
+              right: '-24px', 
+              fontSize: '10px', 
+              color: '#291036', 
+              fontWeight: 600, 
+              letterSpacing: '0.5px',
+              backgroundColor: '#F3F2EB',
+              padding: '2px 5px',
+              borderRadius: '3px'
             }}>
-              <Text size="sm" fw={600} mb="md" c="black">Dayparts Settings</Text>
-              <Checkbox
-                label="Show dayparts hour selector"
-                description="Display the hour-by-hour selection grid in the Dayparts section (advanced mode)"
-                checked={showDaypartsSelector}
-                onChange={handleDaypartsSelectorToggle}
-                size="sm"
-              />
-            </div>
+              Beta
+            </span>
           </div>
+          
+          <Image
+            src="/assets/icons/header/programmatic-tv-logo.png"
+            alt="Programmatic Television"
+            width={140}
+            height={56}
+            priority
+            style={{ 
+              objectFit: 'contain', 
+              marginLeft: '0px', 
+              marginRight: '0px',
+              boxSizing: 'content-box',
+              height: '40px',
+              width: '132px'
+            }}
+          />
         </div>
-      </div>
-    </PageLayout>
+
+        <Divider mb="lg" color="var(--border-color)" />
+
+        <form onSubmit={handleSubmit} style={{ padding: '0 24px' }}>
+          <TextInput
+            label="Email"
+            placeholder="your.email@company.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            leftSection={<IconMail size={18} stroke={1.5} />}
+            size="md"
+            styles={{
+              label: { marginBottom: '6px', fontWeight: 500, color: '#374151' },
+              input: { 
+                borderColor: 'var(--form-input-border)',
+                '&:focus': { borderColor: 'var(--primary-color)' }
+              }
+            }}
+          />
+
+          <PasswordInput
+            label="Password"
+            placeholder="Enter your password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            leftSection={<IconLock size={18} stroke={1.5} />}
+            size="md"
+            mt="md"
+            styles={{
+              label: { marginBottom: '6px', fontWeight: 500, color: '#374151' },
+              input: { 
+                borderColor: 'var(--form-input-border)',
+                '&:focus': { borderColor: 'var(--primary-color)' }
+              }
+            }}
+          />
+
+          <Group justify="space-between" mt="lg">
+            <Checkbox
+              label="Remember me"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.currentTarget.checked)}
+              size="sm"
+              styles={{
+                label: { color: '#666', fontSize: '13px' }
+              }}
+            />
+            <Anchor 
+              component="button" 
+              type="button" 
+              size="sm" 
+              c="#291036"
+              style={{ fontWeight: 500 }}
+            >
+              Forgot password?
+            </Anchor>
+          </Group>
+
+          {error && (
+            <Text size="sm" c="red" mt="md" ta="center">
+              {error}
+            </Text>
+          )}
+
+          <Button
+            type="submit"
+            fullWidth
+            size="md"
+            mt="xl"
+            loading={isLoading}
+            style={{
+              backgroundColor: 'var(--primary-color)',
+              height: '44px',
+              fontWeight: 600
+            }}
+          >
+            Sign In
+          </Button>
+        </form>
+
+        <Divider 
+          my="lg" 
+          label="or" 
+          labelPosition="center" 
+          color="var(--border-color)" 
+          style={{ margin: '0 24px' }}
+          styles={{
+            label: {
+              gap: '0px',
+              marginTop: '12px',
+              marginBottom: '12px'
+            }
+          }}
+        />
+
+        <Text size="xs" c="dimmed" ta="center" style={{ padding: '0 24px 24px 24px' }}>
+          Need an account?{' '}
+          <Anchor 
+            component="button" 
+            type="button" 
+            size="xs" 
+            c="#291036"
+            style={{ fontWeight: 600 }}
+          >
+            Contact your administrator
+          </Anchor>
+        </Text>
+      </Paper>
+    </div>
   );
 }
+

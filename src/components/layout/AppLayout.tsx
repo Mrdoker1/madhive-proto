@@ -15,8 +15,8 @@ const AUTH_PAGES = ['/login', '/signup', '/forgot-password', '/reset-password'];
 const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   const pathname = usePathname();
   
-  // Check if current page is an auth page
-  const isAuthPage = AUTH_PAGES.some(page => pathname?.startsWith(page));
+  // Check if current page is an auth page or root page
+  const isAuthPage = pathname === '/' || AUTH_PAGES.some(page => pathname?.startsWith(page));
 
   // For auth pages, render without header/sidebar
   if (isAuthPage) {

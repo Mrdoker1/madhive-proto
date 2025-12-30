@@ -37,6 +37,12 @@ const Sidebar: React.FC<SidebarProps> = ({
       icon: '/assets/icons/sidebar/admin.svg',
       alt: 'Team Management',
       href: '/team-management'
+    },
+    {
+      id: 'settings',
+      icon: '/assets/icons/sidebar/settings.svg',
+      alt: 'Settings',
+      href: '/settings'
     }
   ];
 

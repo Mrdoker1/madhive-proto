@@ -105,7 +105,7 @@ export default function LoginPage() {
               padding: '2px 6px',
               borderRadius: '4px'
             }}>
-              Proto
+              Beta
             </span>
           </div>
           
@@ -196,7 +196,19 @@ export default function LoginPage() {
           </Button>
         </form>
 
-        <Divider my="lg" label="or" labelPosition="center" color="var(--border-color)" />
+        <Divider 
+          my="lg" 
+          label="or" 
+          labelPosition="center" 
+          color="var(--border-color)"
+          styles={{
+            label: {
+              gap: '0px',
+              marginTop: '12px',
+              marginBottom: '12px'
+            }
+          }}
+        />
 
         <Text size="xs" c="dimmed" ta="center">
           Need an account?{' '}
