@@ -56,8 +56,8 @@ export default function Home() {
                   {
                     title: 'Login',
                     description: 'User authentication screen with username and password',
-                    linearHref: '/login',
-                    omnichannelHref: '/login'
+                    linearHref: '/',
+                    omnichannelHref: '/'
                   },
                   {
                     title: 'Linear Dashboard',
