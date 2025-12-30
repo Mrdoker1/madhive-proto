@@ -137,33 +137,37 @@ const PacingChart: React.FC<{
   }
 
   return (
-    <div style={{ 
-      padding: '12px', 
-      backgroundColor: '#f9fafb', 
-      borderRadius: '8px',
-      marginBottom: '12px'
-    }}>
-      <Text size="xs" fw={600} mb="xs">{title}</Text>
-      <ResponsiveContainer width="100%" height={120}>
-        <LineChart data={chartData} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
-          <XAxis hide />
-          <YAxis hide domain={[0, maxValue]} />
-          <ReferenceLine x={currentPoint} stroke="#999" strokeDasharray="3 3" />
-          <Line type="monotone" dataKey="planned" stroke="#666" strokeWidth={1.5} dot={false} name="Planned" />
-          <Line type="monotone" dataKey="actual" stroke="#E91E8A" strokeWidth={2} dot={false} name="Actual" connectNulls={false} />
-          <Legend 
-            verticalAlign="bottom"
-            height={20}
-            iconType="plainline"
-            iconSize={10}
-            formatter={(value) => <span style={{ color: '#666', fontSize: '10px' }}>{value}</span>}
-          />
-        </LineChart>
-      </ResponsiveContainer>
-      <Group justify="space-between" mt="xs">
-        <Text size="xs" c="dimmed">{unit === '$' ? '$0' : '0'}</Text>
-        <Text size="xs" c="dimmed">{formatValue(maxValue)}</Text>
-      </Group>
+    <div style={{ flex: 1 }}>
+      <div style={{ 
+        padding: '12px', 
+        backgroundColor: '#f9fafb', 
+        borderRadius: '8px',
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column'
+      }}>
+        <Text size="xs" fw={600} mb="xs">{title}</Text>
+        <ResponsiveContainer width="100%" height={120}>
+          <LineChart data={chartData} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
+            <XAxis hide />
+            <YAxis hide domain={[0, maxValue]} />
+            <ReferenceLine x={currentPoint} stroke="#999" strokeDasharray="3 3" />
+            <Line type="monotone" dataKey="planned" stroke="#666" strokeWidth={1.5} dot={false} name="Planned" />
+            <Line type="monotone" dataKey="actual" stroke="#E91E8A" strokeWidth={2} dot={false} name="Actual" connectNulls={false} />
+            <Legend 
+              verticalAlign="bottom"
+              height={20}
+              iconType="plainline"
+              iconSize={10}
+              formatter={(value) => <span style={{ color: '#666', fontSize: '10px' }}>{value}</span>}
+            />
+          </LineChart>
+        </ResponsiveContainer>
+        <Group justify="space-between" mt="xs">
+          <Text size="xs" c="dimmed">{unit === '$' ? '$0' : '0'}</Text>
+          <Text size="xs" c="dimmed">{formatValue(maxValue)}</Text>
+        </Group>
+      </div>
     </div>
   );
 };
@@ -237,7 +241,7 @@ const CampaignDetailModal: React.FC<CampaignDetailModalProps> = ({ campaign, ope
       }}
     >
       {/* Top Row - Campaign Details, Goals/Budget, Status, Markets */}
-      <SimpleGrid cols={{ base: 1, sm: 2, md: 4 }} spacing="md" mb="lg">
+      <SimpleGrid cols={{ base: 1, sm: 2, md: 4 }} spacing={16} mb={16}>
         {/* Campaign Details */}
         <div style={{ padding: '16px', backgroundColor: 'white', borderRadius: '8px', border: '1px solid #E5E7EB' }}>
           <Text size="xs" fw={600} c="dimmed" mb="sm">CAMPAIGN DETAILS</Text>
@@ -324,9 +328,9 @@ const CampaignDetailModal: React.FC<CampaignDetailModalProps> = ({ campaign, ope
         </div>
 
         {/* Right - Guidelines & Delivery Metrics stacked */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', height: '100%' }}>
           {/* Guidelines */}
-          <div style={{ padding: '16px', backgroundColor: 'white', borderRadius: '8px', border: '1px solid #E5E7EB' }}>
+          <div style={{ padding: '16px', backgroundColor: 'white', borderRadius: '8px', border: '1px solid #E5E7EB', flex: 1 }}>
             <Text size="xs" fw={600} c="dimmed" mb="sm">GUIDELINES</Text>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px' }}>
               <div>
@@ -365,7 +369,7 @@ const CampaignDetailModal: React.FC<CampaignDetailModalProps> = ({ campaign, ope
           </div>
 
           {/* Delivery Metrics */}
-          <div style={{ padding: '16px', backgroundColor: 'white', borderRadius: '8px', border: '1px solid #E5E7EB' }}>
+          <div style={{ padding: '16px', backgroundColor: 'white', borderRadius: '8px', border: '1px solid #E5E7EB', flex: 1 }}>
             <Group justify="space-between" mb="sm">
               <Text size="xs" fw={600} c="dimmed">DELIVERY METRICS</Text>
               <div style={{ width: '200px' }}>
