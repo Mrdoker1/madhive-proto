@@ -17,10 +17,10 @@ const GENRE_LABELS: Record<string, string> = {
  * Maps Redux campaign state to CampaignDetailData format
  */
 export function mapCampaignStateToDetailData(state: CampaignState): CampaignDetailData {
-  const { general, channelDetails } = state;
+  const { general, budget, goal, flight, markets, dayparts, audience } = state;
   
-  // Calculate total budget from markets
-  const totalBudget = channelDetails?.markets?.reduce((sum, market) => sum + market.budget, 0) || 0;
+  // Calculate total budget from markets or use budget.totalBudget
+  const totalBudget = markets?.marketsDetails?.reduce((sum, market) => sum + market.budget, 0) || budget.totalBudget || 0;
   
   // Format flight dates
   const formatDate = (date: string | null) => {
@@ -29,13 +29,17 @@ export function mapCampaignStateToDetailData(state: CampaignState): CampaignDeta
     return `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}/${String(d.getFullYear()).slice(-2)}`;
   };
   
-  const flight = general.startDate && general.endDate
-    ? `${formatDate(general.startDate)} - ${formatDate(general.endDate)}`
+  const flightDates = flight.startDate && flight.endDate
+    ? `${formatDate(flight.startDate)} - ${formatDate(flight.endDate)}`
     : 'Not specified';
   
-  // Format dayparts
-  const daypartsList = general.dayparts && general.dayparts.length > 0
-    ? general.dayparts.join(', ')
+  // Format dayparts - get selected dayparts from dayparts state
+  const selectedDayparts = Object.keys(dayparts.daypartPercentages || {}).filter(dp => {
+    const dayValues = dayparts.daypartPercentages?.[dp];
+    return dayValues && Object.values(dayValues).some(v => v > 0);
+  });
+  const daypartsList = selectedDayparts.length > 0
+    ? selectedDayparts.join(', ')
     : 'All dayparts';
   
   // Format genres
@@ -44,8 +48,8 @@ export function mapCampaignStateToDetailData(state: CampaignState): CampaignDeta
     : 'All genres';
   
   // Format markets with stations
-  const markets = channelDetails?.markets?.map(market => ({
-    name: market.name,
+  const marketsList = markets?.marketsDetails?.map(market => ({
+    name: market.displayName || market.name,
     budget: market.budget,
     stations: market.stations?.map(s => s.name) || []
   })) || [];
@@ -55,6 +59,20 @@ export function mapCampaignStateToDetailData(state: CampaignState): CampaignDeta
     Math.floor(Math.random() * 50000) + 30000
   );
   
+  // Calculate estimated impressions based on budget and average CPM
+  const avgCPM = 17.2; // Default CPM
+  const estImpressions = totalBudget > 0 ? Math.round((totalBudget / avgCPM) * 1000) : 0;
+
+  // Format audience from available fields
+  const audienceParts: string[] = [];
+  if (audience.gender && audience.gender.length > 0) {
+    audienceParts.push(`Gender: ${audience.gender.join(', ')}`);
+  }
+  if (audience.age && audience.age.length > 0) {
+    audienceParts.push(`Age: ${audience.age.join(', ')}`);
+  }
+  const audienceString = audienceParts.length > 0 ? audienceParts.join('; ') : 'All audiences';
+
   return {
     // Basic info
     name: general.campaignName || 'Untitled Campaign',
@@ -65,14 +83,14 @@ export function mapCampaignStateToDetailData(state: CampaignState): CampaignDeta
     advertiser: general.advertiser || 'Not specified',
     brand: general.brand || 'Not specified',
     cpeCode: general.cpeCode || 'Not assigned',
-    contact: general.contact || 'Not specified',
-    approver: general.approver || 'Not specified',
+    contact: general.campaignOwner || 'Not specified',
+    approver: general.campaignApprover || 'Not specified',
     
     // Goals & Budget
-    goal: general.goal || 'Maximum Impressions',
+    goal: goal.goalType || 'Maximum Impressions',
     totalBudget,
-    estImpressions: general.estImpressions || 0,
-    avgCPM: general.avgCPM || 17.2,
+    estImpressions,
+    avgCPM,
     
     // Campaign Status (mock for preview)
     progressPercent: 0,
@@ -80,23 +98,23 @@ export function mapCampaignStateToDetailData(state: CampaignState): CampaignDeta
     channels: ['Linear'],
     
     // Markets & Stations
-    markets,
+    markets: marketsList,
     
     // Guidelines
-    flight,
-    audience: general.audience || 'Not specified',
+    flight: flightDates,
+    audience: audienceString,
     spotLengthMix: general.spotLengthMix || { fifteen: 0, thirty: 100, sixty: 0 },
-    language: general.language || 'English',
+    language: general.language === 'spanish' ? 'Spanish' : 'English',
     dayparts: daypartsList,
     genres: genresList,
     fluidity: general.fluidityPercentage || 0,
     exclusions: general.excludedPrograms?.length || 0,
     
     // Pacing data (mock for preview)
-    progressGoal: general.estImpressions || 0,
+    progressGoal: estImpressions,
     deliveredImpressions: 0,
     deliveredSpend: 0,
-    remainingImpression: general.estImpressions || 0,
+    remainingImpression: estImpressions,
     remainingBudget: totalBudget,
     sparkline: mockSparkline,
   };

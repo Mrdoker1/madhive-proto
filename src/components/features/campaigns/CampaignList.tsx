@@ -12,12 +12,16 @@ type SortDirection = 'asc' | 'desc';
 // All possible statuses
 const ALL_STATUSES = ['Not Started', 'On Target', 'Over Pace', 'Way Over Pace', 'Under Pace', 'Way Under Pace', 'Completed'] as const;
 
+// All possible approval statuses
+const ALL_APPROVAL_STATUSES = ['Pending', 'Approved'] as const;
+
 // All possible channels
 const ALL_CHANNELS = ['Linear TV', 'CTV', 'Social', 'Display', 'Audio', 'Email', 'Search', 'Preroll'] as const;
 
 interface Filters {
   advertiser: string;
   name: string;
+  approvalStatuses: string[];
   statuses: string[];
   channels: string[];
   progressMin: number | null;
@@ -37,6 +41,7 @@ interface Filters {
 const defaultFilters: Filters = {
   advertiser: '',
   name: '',
+  approvalStatuses: [],
   statuses: [],
   channels: [],
   progressMin: null,
@@ -84,6 +89,11 @@ export default function CampaignList({ items, sortField, sortDirection, onSort, 
         return false;
       }
       
+      // Approval Status filter (checkboxes)
+      if (filters.approvalStatuses.length > 0 && !filters.approvalStatuses.includes(item.approvalStatus)) {
+        return false;
+      }
+      
       // Status filter (checkboxes)
       if (filters.statuses.length > 0 && !filters.statuses.includes(item.status)) {
         return false;
@@ -124,10 +134,11 @@ export default function CampaignList({ items, sortField, sortDirection, onSort, 
   }, [items, filters]);
 
   // Check if a filter is active
-  const isFilterActive = (field: SortField | 'channels' | 'advertiser'): boolean => {
+  const isFilterActive = (field: SortField | 'channels' | 'advertiser' | 'approvalStatus'): boolean => {
     switch (field) {
       case 'advertiser': return filters.advertiser !== '';
       case 'name': return filters.name !== '';
+      case 'approvalStatus': return filters.approvalStatuses.length > 0;
       case 'status': return filters.statuses.length > 0;
       case 'channels': return filters.channels.length > 0;
       case 'progressPercent': return filters.progressMin !== null || filters.progressMax !== null;
@@ -235,6 +246,67 @@ export default function CampaignList({ items, sortField, sortDirection, onSort, 
               onKeyDown={(e) => e.key === 'Enter' && handleApply()}
             />
             <Group grow gap="xs">
+              <Button size="xs" variant="light" onClick={handleClear}>Clear</Button>
+              <Button size="xs" onClick={handleApply}>Apply</Button>
+            </Group>
+          </Stack>
+        </Popover.Dropdown>
+      </Popover>
+    );
+  };
+
+  // Approval Status filter component (checkboxes) with Apply button
+  const ApprovalStatusFilterHeader = ({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) => {
+    const active = isFilterActive('approvalStatus');
+    const [opened, setOpened] = useState(false);
+    const [localStatuses, setLocalStatuses] = useState<string[]>(filters.approvalStatuses);
+    
+    const handleOpen = () => {
+      setLocalStatuses(filters.approvalStatuses);
+      setOpened(true);
+    };
+    
+    const toggleStatus = (status: string) => {
+      setLocalStatuses(prev => 
+        prev.includes(status) ? prev.filter(s => s !== status) : [...prev, status]
+      );
+    };
+    
+    const handleApply = () => {
+      setFilters(prev => ({ ...prev, approvalStatuses: localStatuses }));
+      setOpened(false);
+    };
+    
+    const handleClear = () => {
+      setLocalStatuses([]);
+      setFilters(prev => ({ ...prev, approvalStatuses: [] }));
+      setOpened(false);
+    };
+    
+    return (
+      <Popover width={200} position="bottom-start" shadow="md" opened={opened} onChange={setOpened}>
+        <Popover.Target>
+          <div 
+            style={{ ...style, cursor: 'pointer', userSelect: 'none', display: 'flex', alignItems: 'center' }}
+            onClick={handleOpen}
+          >
+            {children}
+            <IconFilter size={12} style={{ marginLeft: '4px', opacity: active ? 1 : 0.4, color: active ? 'var(--primary-color)' : 'currentColor' }} />
+          </div>
+        </Popover.Target>
+        <Popover.Dropdown onClick={(e) => e.stopPropagation()}>
+          <Stack gap="xs">
+            <Text size="xs" fw={500} c="dimmed">Filter by approval status</Text>
+            {ALL_APPROVAL_STATUSES.map(status => (
+              <Checkbox
+                key={status}
+                label={status}
+                size="xs"
+                checked={localStatuses.includes(status)}
+                onChange={() => toggleStatus(status)}
+              />
+            ))}
+            <Group grow gap="xs" mt="xs">
               <Button size="xs" variant="light" onClick={handleClear}>Clear</Button>
               <Button size="xs" onClick={handleApply}>Apply</Button>
             </Group>
@@ -480,7 +552,7 @@ export default function CampaignList({ items, sortField, sortDirection, onSort, 
       <div
         className="grid items-center"
         style={{
-          gridTemplateColumns: `${actionsColWidth}px 160px ${nameColWidth}px ${approvalStatusColWidth}px ${statusColWidth}px 160px 240px 300px 220px 160px 160px 160px 160px`,
+          gridTemplateColumns: `${actionsColWidth}px 160px ${nameColWidth}px ${approvalStatusColWidth}px ${statusColWidth}px 160px 300px 220px 160px 160px 160px 160px`,
           paddingLeft: 0,
           paddingRight: 0,
           paddingTop: 0,
@@ -505,16 +577,13 @@ export default function CampaignList({ items, sortField, sortDirection, onSort, 
         </div>
         {/* Approval Status column */}
         <div style={{ position: 'sticky', left: `${actionsColWidth + 160 + nameColWidth}px`, zIndex: 1, background: 'var(--header-background)', paddingLeft: '16px', paddingRight: '16px', paddingTop: '8px', paddingBottom: '8px' }}>
-          Approval Status
+          <ApprovalStatusFilterHeader>Approval Status</ApprovalStatusFilterHeader>
         </div>
         {/* Pacing Status column */}
         <div style={{ position: 'sticky', left: `${actionsColWidth + 160 + nameColWidth + approvalStatusColWidth}px`, zIndex: 1, background: 'var(--header-background)', paddingLeft: '16px', paddingRight: '12px', paddingTop: '8px', paddingBottom: '8px', borderRight: '1px solid var(--border-color)' }}>
           <StatusFilterHeader>Pacing Status</StatusFilterHeader>
         </div>
         <div style={{ paddingLeft: '20px' }}>Delivered in Last 7 days</div>
-        <div style={{ paddingLeft: '20px' }}>
-          <ChannelsFilterHeader>Channels</ChannelsFilterHeader>
-        </div>
         <div style={{ paddingLeft: '20px' }}>
           <RangeFilterHeader field="progressPercent" minKey="progressMin" maxKey="progressMax" suffix="%">
             Progress (Delivered/Goal)

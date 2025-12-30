@@ -174,7 +174,7 @@ export default function CampaignListItem({ c, onDeleteCampaign, onCancelCampaign
       <div
         className="grid items-center"
         style={{
-          gridTemplateColumns: '48px 160px 220px 140px 160px 160px 240px 300px 220px 160px 160px 160px 160px',
+          gridTemplateColumns: '48px 160px 220px 140px 160px 160px 300px 220px 160px 160px 160px 160px',
           paddingLeft: 0,
           paddingRight: 0,
           paddingTop: 0,
@@ -313,24 +313,6 @@ export default function CampaignListItem({ c, onDeleteCampaign, onCancelCampaign
             <Line type="monotone" dataKey="v" stroke="#2563eb" strokeWidth={2} dot={false} />
           </ComposedChart>
         </ResponsiveContainer>
-      </div>
-
-      {/* Channels */}
-      <div className="flex flex-wrap items-center" style={{ gap: '6px', paddingLeft: '20px', paddingTop: '8px', paddingBottom: '8px' }}>
-        {c.channels.map((ch) => (
-          <span
-            key={ch}
-            style={{
-              background: '#F8E9F3',
-              padding: '2px 6px',
-              borderRadius: '8px',
-              fontSize: '12px',
-              fontWeight: 600,
-            }}
-          >
-            {formatChannelName(ch)}
-          </span>
-        ))}
       </div>
 
       {/* Progress (bar + label below) */}
