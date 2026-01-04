@@ -2,9 +2,9 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Text, Card, Tooltip } from '@mantine/core';
-import { IconCurrencyDollar, IconInfoCircle } from '@tabler/icons-react';
+import { IconInfoCircle } from '@tabler/icons-react';
 import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
-import { updateBudgetData, updateEstimations } from '@/store/slices/campaignSlice';
+import { updateEstimations } from '@/store/slices/campaignSlice';
 import AISuggestionCard from '@/components/ui/AISuggestionCard';
 
 interface RightSidebarProps {
@@ -124,24 +124,6 @@ const RightSidebar: React.FC<RightSidebarProps> = ({ className = '', isOmnichann
       averageCPM
     };
   }, [isOmnichannel, marketsDetails, broadcasters, broadcastersWithStations]);
-  
-  // Local state for budget editing
-  const [budgetInput, setBudgetInput] = useState('');
-
-  // Function to format number with separators
-  const formatNumber = (value: string): string => {
-    const cleanValue = value.replace(/[^\d.]/g, '');
-    const parts = cleanValue.split('.');
-    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-    return parts.join('.');
-  };
-
-  // Synchronize local state with global state on load
-  useEffect(() => {
-    if (totalBudget > 0) {
-      setBudgetInput(formatNumber(totalBudget.toString()));
-    }
-  }, [totalBudget]);
 
   // Format budget for display
   const formatCurrency = (amount: number) => {
@@ -242,22 +224,6 @@ const RightSidebar: React.FC<RightSidebarProps> = ({ className = '', isOmnichann
     }
   }, [audienceData, linearAudienceEstimation, linearMarketEstimation, dispatch, calculateAudienceEstimation, isOmnichannel]);
 
-  // Budget change handler
-  const handleBudgetChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const value = event.target.value;
-    // Remove commas for validation
-    const cleanValue = value.replace(/,/g, '');
-    
-    // Allow only digits and dot for decimal numbers
-    if (/^\d*\.?\d*$/.test(cleanValue)) {
-      setBudgetInput(formatNumber(cleanValue));
-      
-      // Update global state
-      const numericValue = parseFloat(cleanValue) || 0;
-      dispatch(updateBudgetData({ totalBudget: numericValue }));
-    }
-  };
-
   return (
     <div 
       className={`w-80 flex-shrink-0 h-full overflow-auto ${className}`}
@@ -283,24 +249,9 @@ const RightSidebar: React.FC<RightSidebarProps> = ({ className = '', isOmnichann
             padding: '12px 16px',
             marginBottom: '16px'
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <IconCurrencyDollar size={18} color="#666" />
-              <input
-                type="text"
-                value={budgetInput}
-                onChange={handleBudgetChange}
-                placeholder="Enter budget"
-                style={{
-                  border: 'none',
-                  outline: 'none',
-                  fontSize: '16px',
-                  fontWeight: 600,
-                  textAlign: 'left',
-                  backgroundColor: 'transparent',
-                  width: '100%'
-                }}
-              />
-            </div>
+            <Text size="md" fw={600} ta="left">
+              {totalBudget > 0 ? formatCurrency(totalBudget) : '--'}
+            </Text>
           </div>
         </div>
 

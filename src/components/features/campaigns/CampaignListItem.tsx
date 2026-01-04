@@ -174,7 +174,7 @@ export default function CampaignListItem({ c, onDeleteCampaign, onCancelCampaign
       <div
         className="grid items-center"
         style={{
-          gridTemplateColumns: '48px 160px 220px 140px 160px 160px 300px 220px 160px 160px 160px 160px',
+          gridTemplateColumns: '48px 160px 220px 140px 160px 160px 300px 220px 160px 160px',
           paddingLeft: 0,
           paddingRight: 0,
           paddingTop: 0,
@@ -367,14 +367,8 @@ export default function CampaignListItem({ c, onDeleteCampaign, onCancelCampaign
         )}
       </div>
 
-      {/* Delivered Impression */}
-      <div style={{ textAlign: 'right', fontSize: '12px', paddingTop: '8px', paddingBottom: '8px' }}>{formatNumber(c.deliveredImpressions)}</div>
-
       {/* Delivered Spend */}
       <div style={{ textAlign: 'right', fontSize: '12px', paddingTop: '8px', paddingBottom: '8px' }}>{formatCurrency(c.deliveredSpend)}</div>
-
-      {/* Remaining Impression */}
-      <div style={{ textAlign: 'right', fontSize: '12px', paddingTop: '8px', paddingBottom: '8px' }}>{formatNumber(c.remainingImpression)}</div>
 
       {/* Remaining Budget */}
       <div style={{ textAlign: 'right', fontSize: '12px', paddingTop: '8px', paddingBottom: '8px', paddingRight: '16px' }}>{formatCurrency(c.remainingBudget)}</div>

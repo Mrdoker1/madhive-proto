@@ -65,7 +65,7 @@ const genSparkByIndex = (index: number): number[] => {
 };
 
 function makeCampaign(i: number): CampaignSummary {
-  const statuses: CampaignStatus[] = ['On Target', 'Way Under Pace', 'Over Pace', 'Way Over Pace', 'Under Pace'];
+  const statuses: CampaignStatus[] = ['On Target', 'Way Under Pace', 'On Target', 'Way Over Pace', 'Under Pace'];
   const channelsPool = [
     ['CTV', 'Social', 'Audio', 'Display'],
     ['Social', 'CTV', 'Audio'],
@@ -164,7 +164,7 @@ const realMockCampaigns: CampaignSummary[] = [
     id: 'jgc-holiday-pre',
     name: 'JGC Holiday Pre-Launch',
     advertiser: 'JGC Retail',
-    status: 'Over Pace',
+    status: 'On Target',
     approvalStatus: 'Approved',
     channels: ['Social', 'Display', 'Audio'],
     progressPercent: 20,

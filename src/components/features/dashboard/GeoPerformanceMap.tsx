@@ -175,17 +175,11 @@ const GeoPerformanceMap: React.FC = () => {
     
     console.log('Processing zones:', zones.length);
 
-    // Get maximum impressions value for color scale
+    // Get maximum impressions value for size scale
     const maxImpressions = Math.max(...zones.map(z => z.impressions));
 
-    // Function to get zone color (pink/magenta gradient)
-    const getZoneColor = (impressions: number): string => {
-      const percentage = (impressions / maxImpressions) * 100;
-      if (percentage >= 75) return '#BE185D';  // Dark pink
-      if (percentage >= 50) return '#DB2777';  // Medium pink
-      if (percentage >= 25) return '#EC4899';  // Light pink
-      return '#F9A8D4';                         // Very light pink
-    };
+    // Use single color for all bubbles (pink/magenta)
+    const bubbleColor = '#EC4899'; // Single pink color
 
     // Create GeoJSON for DMA zones (points)
     const geojsonFeatures = zones.map((zone) => {
@@ -195,8 +189,7 @@ const GeoPerformanceMap: React.FC = () => {
           name: zone.dmaName,
           city: zone.city,
           state: zone.state,
-          impressions: zone.impressions,
-          color: getZoneColor(zone.impressions)
+          impressions: zone.impressions
         },
         geometry: {
           type: 'Point',
@@ -214,10 +207,11 @@ const GeoPerformanceMap: React.FC = () => {
       }
     });
 
-    // Calculate circle radius based on impressions
+    // Calculate circle radius based on impressions (quintiles)
     const minImpressions = Math.min(...zones.map(z => z.impressions));
     
     // Add layer with circles for DMA zones
+    // Size varies based on impressions, but color is constant
     map.current.addLayer({
       id: 'dma-fills',
       type: 'circle',
@@ -230,10 +224,10 @@ const GeoPerformanceMap: React.FC = () => {
           minImpressions, 30,
           maxImpressions, 80
         ],
-        'circle-color': ['get', 'color'],
+        'circle-color': bubbleColor,
         'circle-opacity': 0.3,
         'circle-stroke-width': 3,
-        'circle-stroke-color': ['get', 'color'],
+        'circle-stroke-color': bubbleColor,
         'circle-stroke-opacity': 0.7
       }
     });
@@ -383,14 +377,8 @@ const GeoPerformanceMap: React.FC = () => {
               {/* Table */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 {campaignData.zones.map((zone, index) => {
-                const maxImpressions = Math.max(...campaignData.zones.map(z => z.impressions));
-                const percentage = (zone.impressions / maxImpressions) * 100;
-                
-                // Pink/magenta gradient for bubbles
-                let color = '#F9A8D4';
-                if (percentage >= 75) color = '#BE185D';
-                else if (percentage >= 50) color = '#DB2777';
-                else if (percentage >= 25) color = '#EC4899';
+                // Use single color for all bubbles
+                const color = '#EC4899';
 
                 // Function to zoom to zone
                 const handleZoomToZone = () => {
@@ -480,21 +468,22 @@ const GeoPerformanceMap: React.FC = () => {
               return val.toString();
             };
 
+            // Show size variations with same color (quintiles)
             const legendItems = [
-              { color: '#F9A8D4', label: `0 - ${formatImpressions(Math.round(maxImp * 0.25))}` },
-              { color: '#EC4899', label: `${formatImpressions(Math.round(maxImp * 0.25))} - ${formatImpressions(Math.round(maxImp * 0.5))}` },
-              { color: '#DB2777', label: `${formatImpressions(Math.round(maxImp * 0.5))} - ${formatImpressions(Math.round(maxImp * 0.75))}` },
-              { color: '#BE185D', label: `${formatImpressions(Math.round(maxImp * 0.75))} - ${formatImpressions(maxImp)}` }
+              { size: 12, label: `0 - ${formatImpressions(Math.round(maxImp * 0.25))}` },
+              { size: 16, label: `${formatImpressions(Math.round(maxImp * 0.25))} - ${formatImpressions(Math.round(maxImp * 0.5))}` },
+              { size: 20, label: `${formatImpressions(Math.round(maxImp * 0.5))} - ${formatImpressions(Math.round(maxImp * 0.75))}` },
+              { size: 24, label: `${formatImpressions(Math.round(maxImp * 0.75))} - ${formatImpressions(maxImp)}` }
             ];
 
             return legendItems.map((item, index) => (
               <div key={index} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <div
                   style={{
-                    width: '20px',
-                    height: '20px',
+                    width: `${item.size}px`,
+                    height: `${item.size}px`,
                     borderRadius: '50%',
-                    backgroundColor: item.color,
+                    backgroundColor: '#EC4899',
                     border: '2px solid #ffffff',
                     boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
                   }}

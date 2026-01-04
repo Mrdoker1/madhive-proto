@@ -552,7 +552,7 @@ export default function CampaignList({ items, sortField, sortDirection, onSort, 
       <div
         className="grid items-center"
         style={{
-          gridTemplateColumns: `${actionsColWidth}px 160px ${nameColWidth}px ${approvalStatusColWidth}px ${statusColWidth}px 160px 300px 220px 160px 160px 160px 160px`,
+          gridTemplateColumns: `${actionsColWidth}px 160px ${nameColWidth}px ${approvalStatusColWidth}px ${statusColWidth}px 160px 300px 220px 160px 160px`,
           paddingLeft: 0,
           paddingRight: 0,
           paddingTop: 0,
@@ -595,18 +595,8 @@ export default function CampaignList({ items, sortField, sortDirection, onSort, 
           </RangeFilterHeader>
         </div>
         <div style={{ textAlign: 'right' }}>
-          <RangeFilterHeader field="deliveredImpressions" minKey="deliveredImpressionsMin" maxKey="deliveredImpressionsMax" style={{ justifyContent: 'flex-end' }}>
-            Delivered Impression
-          </RangeFilterHeader>
-        </div>
-        <div style={{ textAlign: 'right' }}>
           <RangeFilterHeader field="deliveredSpend" minKey="deliveredSpendMin" maxKey="deliveredSpendMax" prefix="$" style={{ justifyContent: 'flex-end' }}>
             Delivered Spend($)
-          </RangeFilterHeader>
-        </div>
-        <div style={{ textAlign: 'right' }}>
-          <RangeFilterHeader field="remainingImpression" minKey="remainingImpressionMin" maxKey="remainingImpressionMax" style={{ justifyContent: 'flex-end' }}>
-            Remaining Impression
           </RangeFilterHeader>
         </div>
         <div style={{ textAlign: 'right', paddingRight: '16px' }}>
