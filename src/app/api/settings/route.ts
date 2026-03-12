@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
 
+export const dynamic = 'force-static';
+
 const SETTINGS_FILE = path.join(process.cwd(), 'settings.json');
 
 // Default settings
