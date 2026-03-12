@@ -8,11 +8,11 @@ const SETTINGS_FILE = path.join(process.cwd(), 'settings.json');
 
 // Default settings
 const DEFAULT_SETTINGS = {
-  mapboxApiKey: 'pk.eyJ1IjoibXJkb2tlcjEiLCJhIjoiY2szNGlvZHcxMDFweTNjcG4xeXRicng5ZSJ9.PAdeoloR2kVbvXM7LFO-zg',
+  mapboxApiKey: process.env.NEXT_PUBLIC_MAPBOX_TOKEN || '',
   aiProvider: 'deepseek', // 'deepseek', 'openai', or 'gemini'
-  deepseekApiKey: 'sk-7aaa4dc884794c649de202fc2ae31a94',
-  openaiApiKey: '',
-  geminiApiKey: ''
+  deepseekApiKey: process.env.DEEPSEEK_API_KEY || '',
+  openaiApiKey: process.env.OPENAI_API_KEY || '',
+  geminiApiKey: process.env.GEMINI_API_KEY || ''
 };
 
 // Get settings

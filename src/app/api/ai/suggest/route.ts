@@ -8,9 +8,9 @@ const SETTINGS_FILE = path.join(process.cwd(), 'settings.json');
 
 const DEFAULT_SETTINGS = {
   aiProvider: 'deepseek',
-  deepseekApiKey: 'sk-7aaa4dc884794c649de202fc2ae31a94',
-  openaiApiKey: '',
-  geminiApiKey: ''
+  deepseekApiKey: process.env.DEEPSEEK_API_KEY || '',
+  openaiApiKey: process.env.OPENAI_API_KEY || '',
+  geminiApiKey: process.env.GEMINI_API_KEY || ''
 };
 
 // Get AI settings

@@ -22,12 +22,12 @@ const GeoPerformanceMap: React.FC = () => {
       try {
         const response = await fetch('/api/settings');
         const data = await response.json();
-        mapboxgl.accessToken = data.mapboxApiKey || 'pk.eyJ1IjoibXJkb2tlcjEiLCJhIjoiY2szNGlvZHcxMDFweTNjcG4xeXRicng5ZSJ9.PAdeoloR2kVbvXM7LFO-zg';
+        mapboxgl.accessToken = data.mapboxApiKey || process.env.NEXT_PUBLIC_MAPBOX_TOKEN || '';
         setApiKeyLoaded(true);
       } catch (error) {
         console.error('Failed to load API key:', error);
         // Use default key
-        mapboxgl.accessToken = 'pk.eyJ1IjoibXJkb2tlcjEiLCJhIjoiY2szNGlvZHcxMDFweTNjcG4xeXRicng5ZSJ9.PAdeoloR2kVbvXM7LFO-zg';
+        mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || '';
         setApiKeyLoaded(true);
       }
     };
