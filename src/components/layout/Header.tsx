@@ -16,7 +16,6 @@ const Header: React.FC = () => {
             height={48}
             className="h-12 w-auto"
             priority
-            unoptimized
           />
         </div>
 
@@ -59,7 +58,6 @@ const Header: React.FC = () => {
               width={24}
               height={24}
               className="w-6 h-6"
-              unoptimized
             />
           </div>
 
