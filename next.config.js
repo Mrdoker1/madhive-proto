@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const isStaticExport = process.env.STATIC_EXPORT === 'true';
+const basePath = isStaticExport ? '/madhive-proto' : '';
 
 const nextConfig = {
   experimental: {
@@ -7,11 +8,17 @@ const nextConfig = {
   },
   outputFileTracingRoot: __dirname,
   output: isStaticExport ? "export" : "standalone",
+  env: {
+    NEXT_PUBLIC_BASE_PATH: basePath,
+  },
   ...(isStaticExport && {
-    basePath: "/madhive-proto",
-    assetPrefix: "/madhive-proto/",
-    images: { unoptimized: true },
+    basePath,
+    assetPrefix: basePath,
     trailingSlash: true,
+    images: {
+      loader: 'custom',
+      loaderFile: './src/lib/imageLoader.ts',
+    },
   }),
 }
 
